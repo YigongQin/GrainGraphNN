@@ -1,0 +1,9 @@
+#Python 3.7
+#Cuda 10.1
+#pip install torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cu102.html
+#pip install torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cu102.html
+
+torch==1.10.0
+pytorch-lightning==1.7.5
+torch-geometric==2.1.0
+tqdm

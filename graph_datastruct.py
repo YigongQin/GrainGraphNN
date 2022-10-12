@@ -24,9 +24,9 @@ from shapely.geometry.polygon import Polygon
 from shapely.geometry import Point
 from collections import defaultdict
 import h5py
-import glob, re, math
+import glob, re, math, os
 from termcolor import colored
-import pickle, dill
+import dill
 
 def angle_norm(angular):
 
@@ -129,9 +129,10 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
 
         
 class graph:
-    def __init__(self, lxd, seed: int = 1, BC: str = 'periodic', randInit = True):
+    def __init__(self, lxd: float = 10, seed: int = 1, BC: str = 'periodic', randInit: bool = True):
         mesh_size, grain_size = 0.08, 2
         self.lxd = lxd
+        self.seed = seed
         s = int(lxd/mesh_size)+1
         self.imagesize = (s, s)
         self.vertices = defaultdict(list) ## vertices coordinates
@@ -154,6 +155,8 @@ class graph:
         if randInit:
             np.random.seed(seed)
             self.random_voronoi()
+            self.num_regions = len(self.regions)
+            self.num_vertices = len(self.vertices)
             self.plot_polygons()
             self.alpha_pde = self.alpha_field
             self.color_choices = np.zeros(2*self.num_regions+1)
@@ -236,8 +239,7 @@ class graph:
             self.vertex_neighbor[i].add(j)
 
        # self.vertices = np.array(self.vertices)
-        self.num_regions = len(self.regions)
-        self.num_vertices = len(self.vertices)
+
             
     
       #  vor.filtered_points = seeds
@@ -399,46 +401,113 @@ class graph:
 
 
 class graph_trajectory(graph):
-    def __init__(self, seed, rawdat_dir:str = './'):
-        self.seed = seed
+    def __init__(self, lxd: float = 10, seed: int = 1, frames: int = 1, physical_params = {}):   
+        super().__init__(lxd = lxd, seed = seed)
+        
+        self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+        self.frames = frames
+        self.joint_traj = []
+        self.events = np.zeros((2, self.frames), dtype=int)
+        
+        self.show = False
+        self.states = []
+        self.physical_params = physical_params
+
+    def load_trajectory(self, rawdat_dir: str = './'):
+       
+        
         self.data_file = (glob.glob(rawdat_dir + '*seed'+str(seed)+'*'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])
         self.z = np.asarray(f['z_coordinates']) 
 
-        self.lxd = int(self.x[-2])
-        self.x/=self.lxd; self.y/=self.lxd; self.z/=self.lxd
-        fnx, fny = len(self.x), len(self.y)
-        number_list=re.findall(r"[-+]?\d*\.\d+|\d+", self.data_file)
-        self.frames = int(number_list[2])+1
-        self.G = float(number_list[3])
-        self.R = float(number_list[4])
-        self.alpha_pde_frames = np.asarray(f['cross_sec'])
-        self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, self.frames),order='F')[1:-1,1:-1,:]
-
+        assert int(self.lxd) == int(self.x[-2])
         
-        super().__init__(lxd = self.lxd, seed = seed)
+        self.x /= self.lxd; self.y /= self.lxd; self.z /= self.lxd
+        fnx, fny = len(self.x), len(self.y)
+
         assert len(self.x) -2 == self.imagesize[0]
-        assert len(self.y) -2 == self.imagesize[1]        
+        assert len(self.y) -2 == self.imagesize[1]  
+        
+        number_list=re.findall(r"[-+]?\d*\.\d+|\d+", self.data_file)
+        data_frames = int(number_list[2])+1
+        
+        self.physical_params = {'G':float(number_list[3]), 'R':float(number_list[4])}
+        self.alpha_pde_frames = np.asarray(f['cross_sec'])
+        self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,:]        
+        
+        self.extraV_frames = np.asarray(f['extra_area'])
+        self.extraV_frames = self.extraV_frames.reshape((self.num_regions, data_frames), order='F')        
+     
         self.num_vertex_features = 7  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         self.active_args = self.active_args.\
-            reshape((self.num_vertex_features, 5*len(self.vertices), self.frames ), order='F')
+            reshape((self.num_vertex_features, 5*len(self.vertices), data_frames ), order='F')
         self.active_coors = self.active_args[:2,:,:]
         self.active_args = self.active_args[2:,:,:]
-        self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         
-        self.extraV_frames = np.asarray(f['extra_area'])
-        self.extraV_frames = self.extraV_frames.reshape((self.num_regions, self.frames), order='F')
         
+ 
 
-        self.joint_traj = []
-        
-        self.events = np.zeros((2, self.frames), dtype=int)
-        self.show = False
-        self.states = []
 
+        
+        for frame in range(self.frames):
+           
+            cur_joint = defaultdict(list)
+            quadraples = []
+            for vertex in range(self.active_args.shape[1]): 
+                args = set(self.active_args[:,vertex,frame])
+                xp, yp = self.x[self.active_coors[0,vertex,frame]], self.y[self.active_coors[1,vertex,frame]]
+                if -1 in args: args.remove(-1)
+                if not args: continue
+                if len(args)>3: 
+                    quadraples.append([set(args),(xp, yp)])
+                    continue
+                
+                args = tuple(sorted(args))
+                cur_joint[args].append((xp,yp))
+
+                      
+            ## deal with quadraples here
+            
+            for q, coors in quadraples:
+              #  print('qudraple: ', q)
+                for k in self.joint2vertex.keys():
+                    if set(k).issubset(q):
+                   #     print('classified to triple', k)
+                        cur_joint[k].append(coors)
+                for k in cur_joint.keys():
+                    if set(k).issubset(q):
+                   #     print('classified to triple', k)
+                        cur_joint[k].append(coors) 
+                        
+            self.joint_traj.append(cur_joint)
+            
+            
+            # check loaded information
+            
+            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+            cur_grain = set(np.unique(self.alpha_pde))
+            cur_covered_grain = set()
+            for i in cur_joint.keys():
+                cur_covered_grain.update(set(i))
+            count = 0
+            for k1, v1 in cur_joint.items():
+                for k2, v2 in cur_joint.items(): 
+                    if k1!=k2 and len( set(k1).intersection(set(k2)) ) >= 2:
+                        count += 1
+            
+            print('====================================')
+            print('load frame %d'%frame)
+            print('number of grains %d'%len(cur_grain))
+            print('number of region junctions covered %d'%len(cur_covered_grain))
+            print('number of junctions %d'%len(cur_joint))
+            print('number of links %d'%count)
+            
+            
+        self.vertex_matching()
+        
         
     def vertex_matching(self):
         
@@ -604,62 +673,7 @@ class graph_trajectory(graph):
             if self.show == True:
                 self.show_data_struct()
             
-    def load_joint(self):
-       
-        
-     
-        for frame in range(self.frames):
-           
-            cur_joint = defaultdict(list)
-            quadraples = []
-            for vertex in range(self.active_args.shape[1]): 
-                args = set(self.active_args[:,vertex,frame])
-                xp, yp = self.x[self.active_coors[0,vertex,frame]], self.y[self.active_coors[1,vertex,frame]]
-                if -1 in args: args.remove(-1)
-                if not args: continue
-                if len(args)>3: 
-                    quadraples.append([set(args),(xp, yp)])
-                    continue
-                
-                args = tuple(sorted(args))
-                cur_joint[args].append((xp,yp))
 
-                      
-            ## deal with quadraples here
-            
-            for q, coors in quadraples:
-              #  print('qudraple: ', q)
-                for k in self.joint2vertex.keys():
-                    if set(k).issubset(q):
-                   #     print('classified to triple', k)
-                        cur_joint[k].append(coors)
-                for k in cur_joint.keys():
-                    if set(k).issubset(q):
-                   #     print('classified to triple', k)
-                        cur_joint[k].append(coors) 
-                        
-            self.joint_traj.append(cur_joint)
-            
-            
-            # check loaded information
-            
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-            cur_grain = set(np.unique(self.alpha_pde))
-            cur_covered_grain = set()
-            for i in cur_joint.keys():
-                cur_covered_grain.update(set(i))
-            count = 0
-            for k1, v1 in cur_joint.items():
-                for k2, v2 in cur_joint.items(): 
-                    if k1!=k2 and len( set(k1).intersection(set(k2)) ) >= 2:
-                        count += 1
-            
-            print('====================================')
-            print('load frame %d'%frame)
-            print('number of grains %d'%len(cur_grain))
-            print('number of region junctions covered %d'%len(cur_covered_grain))
-            print('number of junctions %d'%len(cur_joint))
-            print('number of links %d'%count)
 
 
     def show_events(self):
@@ -673,7 +687,7 @@ class graph_trajectory(graph):
         
     def form_states_tensor(self, frame):
         
-        hg = heterograph()
+        hg = GrainHeterograph()
         grain_state = np.zeros((self.num_regions, len(hg.features['grain'])))
         joint_state = np.zeros((self.num_vertices, len(hg.features['joint'])))
         
@@ -698,8 +712,8 @@ class graph_trajectory(graph):
             joint_state[joint, 1] = coor[1]
         
         joint_state[:, 2] = frame/self.frames
-        joint_state[:, 3] = 1 - np.log10(self.G)/2
-        joint_state[:, 4] = self.R/2
+        joint_state[:, 3] = 1 - np.log10(self.physical_params['G'])/2
+        joint_state[:, 4] = self.physical_params['R']/2
         
         
         gj_edge = []
@@ -716,14 +730,14 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[1]:np.array(jg_edge).T})
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
-        hg.physical_params.update({'G':self.G, 'R':self.R})
+        hg.physical_params = self.physical_params
         
         self.states.append(hg)
 
 
         
                 
-class heterograph:
+class GrainHeterograph:
     def __init__(self):
         self.features = {'grain':['area', 'extraV', 'x', 'y', 'z', 'theta_x', 'theta_z'],
                          'joint':[ 'x', 'y', 'z', 'G', 'R']}
@@ -750,13 +764,15 @@ class heterograph:
     def form_gradient(self, prev, nxt):
         
         
+        if nxt is not None:
+
         
-        darea = nxt.feature_dicts['grain'][:,:1] - self.feature_dicts['grain'][:,:1]
-        
-        self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,1:2]))
-                                     
-        self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
-                                     self.feature_dicts['joint'][:,:2]
+            darea = nxt.feature_dicts['grain'][:,:1] - self.feature_dicts['grain'][:,:1]
+            
+            self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,1:2]))
+                                         
+            self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
+                                         self.feature_dicts['joint'][:,:2]
                                      
                                      
         if prev is None:
@@ -783,14 +799,22 @@ if __name__ == '__main__':
 
     
     #g1 = graph(lxd = 10, seed=1)  
-    #g1.show_data_struct()     
+    #g1.show_data_struct()  
+    
+    train_folder = './data/'
+    test_folder = './test/'
+    if not os.path.exists(train_folder):
+        os.makedirs(train_folder)
+    if not os.path.exists(test_folder):
+        os.makedirs(test_folder)   
+    
     for seed in [1]:
-        traj = graph_trajectory(seed = seed)
+        traj = graph_trajectory(seed = seed, frames = 5)
        # traj.update()
        # traj.show_data_struct()
-        traj.frames = 5
-        traj.load_joint()
-        traj.vertex_matching()
+  
+        traj.load_trajectory()
+       # traj.vertex_matching()
         #traj.show_data_struct()
         #print(traj.vertex_xtraj[:,0], traj.vertex_ytraj[:,0])
         
@@ -798,22 +822,29 @@ if __name__ == '__main__':
         # set gradient as output and add to features
         
         hg0 = traj.states[0]
-        hg4 = traj.states[4]
+        hg4 = traj.states[traj.frames - 1]
       #  print(hg0.feature_dicts['grain'][:,:1])
         hg0.form_gradient(prev = None, nxt = hg4)
         
         samples = [hg0]
     
    
-        with open('./data/case' + str(seed) + '.pkl', 'wb') as outp:
+        with open(train_folder + 'case' + str(seed) + '.pkl', 'wb') as outp:
             dill.dump(samples, outp)
 
-        with open('./data/case' + str(seed) + '.pkl', 'rb') as inp:  
-            try:
-                print(dill.load(inp))
-               # data_list = data_list + pickle.load(inp)
-            except:
-                raise EOFError    
+        
+    # creating testing dataset
+    for seed in [1]:
+        traj = graph_trajectory(seed = seed, frames = 1)
+        traj.form_states_tensor(0)
+        hg0 = traj.states[0]
+        hg0.form_gradient(prev = None, nxt = None)
+        
+        with open(test_folder + 'case' + str(seed) + '.pkl', 'wb') as outp:
+            dill.dump(hg0, outp)
+        
+        
+    
     # TODO:
     # 4) node matching and iteration for different time frames
     # 5) equi-spaced QoI sampling, change tip_y to tip_nz

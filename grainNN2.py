@@ -7,22 +7,19 @@ Created on Fri Sep 30 15:35:27 2022
 """
 import argparse
 import time
-import torch
-import torch.nn as nn
-import torch.optim as optim
+import glob, dill
+import random
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
-import glob, dill
-import random
 from models import GrainNN2
-from torch_geometric.loader import DataLoader
-#from plot_funcs import plot_IO
-
-
-#from input_data import assemb_data, device, todevice, tohost
 from parameters import hyperparam
+#from graph_datastruct import graph
 
 
 def criterion(data, pred):
@@ -114,6 +111,7 @@ if __name__=='__main__':
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
     parser.add_argument("--data_dir", type=str, default='./data/')
+    parser.add_argument("--test_dir", type=str, default='./test/')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
@@ -150,6 +148,8 @@ if __name__=='__main__':
     
 
     print('************ setup data ***********')
+    num_train, num_valid, num_test = 0, 0, 0 
+    
     datasets = sorted(glob.glob(args.data_dir + 'case*'))
     
     data_list = []
@@ -157,14 +157,27 @@ if __name__=='__main__':
     for case in range(len(datasets)):
         with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
             try:
-
                 data_list = data_list + dill.load(inp)
             except:
                 raise EOFError
+
+    
+    datasets = sorted(glob.glob(args.test_dir + 'case*'))
+    
+    test_list = []
+    
+    for case in range(len(datasets)):
+        with open(args.test_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+            try:
+                test_list = test_list + dill.load(inp)
+            except:
+                raise EOFError
+                
     
    # random.shuffle(data_list)
     num_train = int(args.train_ratio*len(data_list))
-    num_test = len(data_list) - num_train
+    num_valid = len(data_list) - num_train
+    num_test = len(test_list)
    # train_list = data_list[:num_train]
    # test_list = data_list[num_train:]                 
     
@@ -177,7 +190,7 @@ if __name__=='__main__':
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')
-    print('number of train, test runs', num_train, num_test)
+    print('number of train, validation, test runs', num_train, num_valid, num_test)
     print('data frames: ', hp.all_frames, '; GrainNN frames: ', hp.frames, \
           '; ratio: ', int((hp.all_frames-1)/(hp.frames-1)))
     print('features: ', [(k, v) for k, v in hp.features.items()])

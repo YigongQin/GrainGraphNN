@@ -26,7 +26,7 @@ from collections import defaultdict
 import h5py
 import glob, re, math
 from termcolor import colored
-import pickle
+import pickle, dill
 
 def angle_norm(angular):
 
@@ -399,9 +399,9 @@ class graph:
 
 
 class graph_trajectory(graph):
-    def __init__(self, seed):
+    def __init__(self, seed, rawdat_dir:str = './'):
         self.seed = seed
-        self.data_file = (glob.glob('*seed'+str(seed)+'*'))[0]
+        self.data_file = (glob.glob(rawdat_dir + '*seed'+str(seed)+'*'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])
@@ -674,8 +674,8 @@ class graph_trajectory(graph):
     def form_states_tensor(self, frame):
         
         hg = heterograph()
-        grain_state = np.zeros((self.num_regions, len(hg.features_grain)))
-        joint_state = np.zeros((self.num_vertices, len(hg.features_joint)))
+        grain_state = np.zeros((self.num_regions, len(hg.features['grain'])))
+        joint_state = np.zeros((self.num_vertices, len(hg.features['joint'])))
         
         
         s = self.imagesize[0]
@@ -705,16 +705,18 @@ class graph_trajectory(graph):
         gj_edge = []
         for grains, joint in self.joint2vertex.items():
             for grain in grains:
-                gj_edge.append([grain, joint])
+                gj_edge.append([grain-1, joint])
         
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[src, dst] for src, dst in self.edges]
         
         hg.feature_dicts.update({'grain':grain_state})
         hg.feature_dicts.update({'joint':joint_state})
-        hg.edge_index_dicts.update({hg.edge_type[0]:np.array(gj_edge)})
-        hg.edge_index_dicts.update({hg.edge_type[1]:np.array(jg_edge)})
-        hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge)})
+        hg.edge_index_dicts.update({hg.edge_type[0]:np.array(gj_edge).T})
+        hg.edge_index_dicts.update({hg.edge_type[1]:np.array(jg_edge).T})
+        hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
+        
+        hg.physical_params.update({'G':self.G, 'R':self.R})
         
         self.states.append(hg)
 
@@ -723,33 +725,58 @@ class graph_trajectory(graph):
                 
 class heterograph:
     def __init__(self):
-        self.features_grain = ['area', 'extraV', 'x', 'y', 'z', 'theta_x', 'theta_z']
-        self.features_grain_grad = ['darea']
-        self.features_joint = [ 'x', 'y', 'z', 'G', 'R']
-        self.features_joint_grad = ['dx', 'dy']
-        self.features_edge = ['len']
+        self.features = {'grain':['area', 'extraV', 'x', 'y', 'z', 'theta_x', 'theta_z'],
+                         'joint':[ 'x', 'y', 'z', 'G', 'R']}
+      #  self.features_edge = ['len']
+        
+        
+        self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
+        
     
-        self.target_grain = ['darea', 'extraV']
-        self.target_joint = ['dx', 'dy']    
+        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
         
         self.edge_type = [('grain', 'push', 'joint'), \
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
+            
         self.feature_dicts = {}
         self.target_dicts = {}
         self.edge_index_dicts = {}
+        self.edge_weight_dicts = {}
+        self.additional_feature_keys = {}
+        
+        self.physical_params = {}
 
-    def form_gradient(self, end):
+    def form_gradient(self, prev, nxt):
         
-        cur_g = self.feature_dicts['grain']
-        end_g = end.feature_dicts['grain']
-        cur_j = self.feature_dicts['joint']
-        end_j = end.feature_dicts['joint']
         
-        self.feature_dicts['grain'] = np.hstack((end_g[:,:1] - cur_g[:,:1], cur_g))
-        self.feature_dicts['joint'] = np.hstack((end_j[:,:2] - cur_j[:,:2], cur_j)) 
-        self.target_dicts['grain'] = end_g[:,:1] - cur_g[:,:1]
-        self.target_dicts['joint'] = end_j[:,:2] - cur_j[:,:2]
+        
+        darea = nxt.feature_dicts['grain'][:,:1] - self.feature_dicts['grain'][:,:1]
+        
+        self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,1:2]))
+                                     
+        self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
+                                     self.feature_dicts['joint'][:,:2]
+                                     
+                                     
+        if prev is None:
+            prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
+            prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
+                    
+        else:
+            prev_grad_grain = self.feature_dicts['grain'][:,:1] - prev.feature_dicts['grain'][:,:1] 
+            prev_grad_joint = self.feature_dicts['joint'][:,:2] - prev.feature_dicts['grain'][:,:2]             
+        
+        self.feature_dicts['grain'] = np.hstack((prev_grad_grain, self.feature_dicts['grain']))
+
+        self.feature_dicts['joint'] = np.hstack((prev_grad_joint, self.feature_dicts['joint'])) 
+        
+        
+
+        
+        for nodes, features in self.features.items():
+            self.features[nodes] = self.features_grad[nodes] + self.features[nodes]
+            assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
         
         
 if __name__ == '__main__':
@@ -772,20 +799,21 @@ if __name__ == '__main__':
         
         hg0 = traj.states[0]
         hg4 = traj.states[4]
-        hg0.form_gradient(hg4)
+      #  print(hg0.feature_dicts['grain'][:,:1])
+        hg0.form_gradient(prev = None, nxt = hg4)
         
         samples = [hg0]
     
-        with open('case' + str(seed) + '.pkl', 'wb') as outp:
-            pickle.dump(samples, outp, pickle.HIGHEST_PROTOCOL)
-               # del g1
-        
-        with open('case' + str(seed) + '.pkl', 'rb') as inp:  
+   
+        with open('./data/case' + str(seed) + '.pkl', 'wb') as outp:
+            dill.dump(samples, outp)
+
+        with open('./data/case' + str(seed) + '.pkl', 'rb') as inp:  
             try:
-                load_dat = pickle.load(inp)
+                print(dill.load(inp))
+               # data_list = data_list + pickle.load(inp)
             except:
-                raise EOFError
-    
+                raise EOFError    
     # TODO:
     # 4) node matching and iteration for different time frames
     # 5) equi-spaced QoI sampling, change tip_y to tip_nz

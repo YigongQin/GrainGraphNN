@@ -246,6 +246,13 @@ class graph:
       #  vor.filtered_regions = regions
         
     def plot_polygons(self):
+        """
+        Input: region_coors
+        Output: alpha_field
+
+        """
+        
+        
         s = self.imagesize[0]
         image = Image.new("RGB", (2*s, 2*s))       
         draw = ImageDraw.Draw(image)
@@ -353,7 +360,10 @@ class graph:
        
     def update(self):
         
-        # input is joint2vertex and self.vertices
+        """
+        Input: joint2vertex, vertices
+        Output: edges, region_coors
+        """
         
         # form edge
         self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
@@ -810,8 +820,8 @@ if __name__ == '__main__':
     
     for seed in [1]:
         traj = graph_trajectory(seed = seed, frames = 5)
-       # traj.update()
-       # traj.show_data_struct()
+        traj.update()
+        traj.show_data_struct()
   
         traj.load_trajectory()
        # traj.vertex_matching()

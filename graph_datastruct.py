@@ -24,7 +24,7 @@ from shapely.geometry.polygon import Polygon
 from shapely.geometry import Point
 from collections import defaultdict
 import h5py
-import glob, re, math, os
+import glob, re, math, os, argparse
 from termcolor import colored
 import dill
 
@@ -808,48 +808,60 @@ if __name__ == '__main__':
     
     #g1 = graph(lxd = 10, seed=1)  
     #g1.show_data_struct()  
+    parser = argparse.ArgumentParser("TGenerate heterograph data")
+    parser.add_argument("--mode", type=str, default = 'train')
+    parser.add_argument("--train_dir", type=str, default = './data/')
+    parser.add_argument("--test_dir", type=str, default = './test/')
+    args = parser.parse_args()
     
-    train_folder = './data/'
-    test_folder = './test/'
-    if not os.path.exists(train_folder):
-        os.makedirs(train_folder)
-    if not os.path.exists(test_folder):
-        os.makedirs(test_folder)   
     
-    for seed in [1]:
-        traj = graph_trajectory(seed = seed, frames = 5)
-      #  traj.update()
-        traj.show_data_struct()
+    if args.mode == 'train':
+    
+        train_samples = []
+        
+        
+        if not os.path.exists(args.train_dir):
+            os.makedirs(args.train_dir)
   
-        traj.load_trajectory()
-       # traj.vertex_matching()
-        #traj.show_data_struct()
-        #print(traj.vertex_xtraj[:,0], traj.vertex_ytraj[:,0])
         
+        for seed in [1]:
+            traj = graph_trajectory(seed = seed, frames = 5)
+          #  traj.update()
+            traj.show_data_struct()
+      
+            traj.load_trajectory()
+           # traj.vertex_matching()
+            #traj.show_data_struct()
+            #print(traj.vertex_xtraj[:,0], traj.vertex_ytraj[:,0])
+            
+            
+            # set gradient as output and add to features
+            
+            hg0 = traj.states[0]
+            hg4 = traj.states[traj.frames - 1]
+          #  print(hg0.feature_dicts['grain'][:,:1])
+            hg0.form_gradient(prev = None, nxt = hg4)
+            
+            train_samples.append(hg0)
         
-        # set gradient as output and add to features
-        
-        hg0 = traj.states[0]
-        hg4 = traj.states[traj.frames - 1]
-      #  print(hg0.feature_dicts['grain'][:,:1])
-        hg0.form_gradient(prev = None, nxt = hg4)
-        
-        samples = [hg0]
-    
-   
-        with open(train_folder + 'case' + str(seed) + '.pkl', 'wb') as outp:
-            dill.dump(samples, outp)
+       
+        with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
+            dill.dump(train_samples, outp)
 
-        
+    if args.mode == 'test':   
+        if not os.path.exists(args.test_dir):
+            os.makedirs(args.test_dir) 
+        test_samples = []
     # creating testing dataset
-    for seed in [1]:
-        traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
-        traj.load_trajectory()
-        hg0 = traj.states[0]
-        hg0.form_gradient(prev = None, nxt = None)
-      #  hg0.graph = graph(seed = seed)
-        with open(test_folder + 'case' + str(seed) + '.pkl', 'wb') as outp:
-            dill.dump([hg0], outp)
+        for seed in [1]:
+            traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
+            traj.load_trajectory()
+            hg0 = traj.states[0]
+            hg0.form_gradient(prev = None, nxt = None)
+            test_samples.append(hg0)
+          #  hg0.graph = graph(seed = seed)
+            with open(args.test_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
+                dill.dump(test_samples, outp)
      
         
     

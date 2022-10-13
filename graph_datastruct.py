@@ -424,7 +424,7 @@ class graph_trajectory(graph):
     def load_trajectory(self, rawdat_dir: str = './'):
        
         
-        self.data_file = (glob.glob(rawdat_dir + '*seed'+str(seed)+'*'))[0]
+        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(seed)+'*'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])
@@ -818,14 +818,13 @@ if __name__ == '__main__':
     
     if args.mode == 'train':
     
-        train_samples = []
-        
-        
         if not os.path.exists(args.train_dir):
             os.makedirs(args.train_dir)
   
-        
         for seed in [1]:
+            
+            train_samples = []
+            
             traj = graph_trajectory(seed = seed, frames = 5)
           #  traj.update()
             traj.show_data_struct()
@@ -846,15 +845,18 @@ if __name__ == '__main__':
             train_samples.append(hg0)
         
        
-        with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
-            dill.dump(train_samples, outp)
+            with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
+                dill.dump(train_samples, outp)
 
     if args.mode == 'test':   
         if not os.path.exists(args.test_dir):
             os.makedirs(args.test_dir) 
-        test_samples = []
+        
     # creating testing dataset
         for seed in [1]:
+            
+            test_samples = []
+            
             traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]

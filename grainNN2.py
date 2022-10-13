@@ -102,7 +102,7 @@ if __name__=='__main__':
 
     
     parser = argparse.ArgumentParser("Train the model.")
-    parser.add_argument("--mode", type=str, default="test")
+    parser.add_argument("--mode", type=str, default="train")
     parser.add_argument("--all_id", type=int, default=1)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
@@ -156,7 +156,7 @@ if __name__=='__main__':
         data_list = []
         
         for case in range(len(datasets)):
-            with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+            with open(args.data_dir + 'case' + str(case) + '.pkl', 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
@@ -272,7 +272,7 @@ if __name__=='__main__':
         sio.savemat('loss_curve_mode'+mode+'.mat',{'train':train_list,'test':test_list})
 
 
-    if args.mode == 'train':
+    if args.mode == 'test':
         
         model.load_state_dict(torch.load(args.model_dir + args.model_name + str(all_id)))
         model.eval() 
@@ -284,7 +284,7 @@ if __name__=='__main__':
             pred = model(data.x_dict, data.edge_index_dict)
           #  print(pred['joint'], y['joint'])
             g.GNN_update(data.x_dict['joint'][:,2:4] + y['joint'].detach().numpy())
-            g.show_data_struct()
+          #  g.show_data_struct()
 
 
 '''

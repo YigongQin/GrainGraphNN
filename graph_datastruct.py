@@ -424,7 +424,7 @@ class graph_trajectory(graph):
     def load_trajectory(self, rawdat_dir: str = './'):
        
         
-        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(seed)+'*'))[0]
+        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(seed)+'_*'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])
@@ -813,6 +813,7 @@ if __name__ == '__main__':
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--train_dir", type=str, default = './data/')
     parser.add_argument("--test_dir", type=str, default = './test/')
+    parser.add_argument("--seed", type=int, default = 1)
     args = parser.parse_args()
     
     
@@ -821,13 +822,13 @@ if __name__ == '__main__':
         if not os.path.exists(args.train_dir):
             os.makedirs(args.train_dir)
   
-        for seed in [1]:
+        for seed in [args.seed]:
             
             train_samples = []
             
-            traj = graph_trajectory(seed = seed, frames = 5)
+            traj = graph_trajectory(seed = seed, frames = 4)
           #  traj.update()
-            traj.show_data_struct()
+          #  traj.show_data_struct()
       
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
            # traj.vertex_matching()

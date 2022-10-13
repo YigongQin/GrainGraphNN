@@ -808,8 +808,9 @@ if __name__ == '__main__':
     
     #g1 = graph(lxd = 10, seed=1)  
     #g1.show_data_struct()  
-    parser = argparse.ArgumentParser("TGenerate heterograph data")
+    parser = argparse.ArgumentParser("Generate heterograph data")
     parser.add_argument("--mode", type=str, default = 'train')
+    parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--train_dir", type=str, default = './data/')
     parser.add_argument("--test_dir", type=str, default = './test/')
     args = parser.parse_args()
@@ -829,7 +830,7 @@ if __name__ == '__main__':
           #  traj.update()
             traj.show_data_struct()
       
-            traj.load_trajectory()
+            traj.load_trajectory(rawdat_dir = args.rawdat_dir)
            # traj.vertex_matching()
             #traj.show_data_struct()
             #print(traj.vertex_xtraj[:,0], traj.vertex_ytraj[:,0])
@@ -855,7 +856,7 @@ if __name__ == '__main__':
     # creating testing dataset
         for seed in [1]:
             traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
-            traj.load_trajectory()
+            traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]
             hg0.form_gradient(prev = None, nxt = None)
             test_samples.append(hg0)

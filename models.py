@@ -184,8 +184,8 @@ class GrainNN2(nn.Module):
         self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
         self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
 
-        self.linear = {node_type: nn.Linear(self.out_channels, len(targets))
-                        for node_type, targets in hyper.targets.items()} 
+        self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
+                        for node_type, targets in hyper.targets.items()}) 
 
 
     def forward(self, x_dict, edge_index_dict):

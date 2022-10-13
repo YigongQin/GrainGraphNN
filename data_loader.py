@@ -30,10 +30,9 @@ class DynamicHeteroGraphTemporalSignal(object):
          of node types and their additional attributes.
     """
 
-    def __init__(self, data_list, device):
+    def __init__(self, data_list):
 
         self.data_list = data_list
-        self.device = device
         self.additional_feature_keys = []
       #  self._check_temporal_consistency()
       #  self._set_snapshot_count()
@@ -122,21 +121,21 @@ class DynamicHeteroGraphTemporalSignal(object):
         snapshot = HeteroData()
         if x_dict:
             for key, value in x_dict.items():
-                snapshot[key].x = value.to(self.device)
+                snapshot[key].x = value
         if edge_index_dict:
             for key, value in edge_index_dict.items():
-                snapshot[key].edge_index = value.to(self.device)
+                snapshot[key].edge_index = value
         if edge_weight_dict:
             for key, value in edge_weight_dict.items():
-                snapshot[key].edge_attr = value.to(self.device)
+                snapshot[key].edge_attr = value
         if y_dict:
             for key, value in y_dict.items():
-                snapshot[key].y = value.to(self.device)
+                snapshot[key].y = value
         if additional_features:
             for feature_name, feature_dict in additional_features.items():
                 if feature_dict:
                     for key, value in feature_dict.items():
-                        snapshot[key][feature_name] = value.to(self.device)
+                        snapshot[key][feature_name] = value
         snapshot.physical_params = data.physical_params
         return snapshot
 

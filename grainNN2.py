@@ -42,6 +42,7 @@ def train(model, num_epochs, train_loader, test_loader):
         train.edge = data.edge_index_dict
         train.y = data.y_dict
         count += 1 #data.batch
+        data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
         train_loss += float(criterion(data.y_dict, pred)) 
     train_loss/=count
@@ -49,6 +50,7 @@ def train(model, num_epochs, train_loader, test_loader):
     test_loss, count = 0, 0
     for data in test_loader:      
         count += 1
+        data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
         test_loss += float(criterion(data.y_dict, pred))  
     test_loss/=count
@@ -65,6 +67,7 @@ def train(model, num_epochs, train_loader, test_loader):
         train_loss, count = 0, 0
         for data in train_loader:   
             count += 1
+            data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
          
             loss = criterion(data.y_dict, pred)
@@ -82,6 +85,7 @@ def train(model, num_epochs, train_loader, test_loader):
         for data in test_loader:  
         
             count += 1
+            data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred)) 
             
@@ -192,7 +196,7 @@ if __name__=='__main__':
     hp.features = sample.features
     hp.targets = sample.targets
 
-    data_tensor = DynamicHeteroGraphTemporalSignal(data_list, args.device)
+    data_tensor = DynamicHeteroGraphTemporalSignal(data_list)
     heteroData = data_tensor[0]
     hp.metadata = heteroData.metadata()
     

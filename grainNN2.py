@@ -192,7 +192,7 @@ if __name__=='__main__':
     hp.features = sample.features
     hp.targets = sample.targets
 
-    data_tensor = DynamicHeteroGraphTemporalSignal(data_list)
+    data_tensor = DynamicHeteroGraphTemporalSignal(data_list, args.device)
     heteroData = data_tensor[0]
     hp.metadata = heteroData.metadata()
     

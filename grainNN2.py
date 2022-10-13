@@ -5,27 +5,24 @@ Created on Fri Sep 30 15:35:27 2022
 
 @author: yigongqin
 """
-import argparse
-import time
-import glob, dill
-import random
+import argparse, time, glob, dill, random
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN2
 from parameters import hyperparam
-#from graph_datastruct import graph
+from graph_datastruct import graph
 
 
 def criterion(data, pred):
     
-    return torch.mean((data['grain'] - pred['grain'])**2) \
-         + torch.mean((data['joint'] - pred['joint'])**2)
+    return torch.mean((data['joint'] - pred['joint'])**2) \
+         + torch.mean((data['grain'] - pred['grain'])**2)
+           
     
 
 def train(model, num_epochs, train_loader, test_loader):
@@ -112,6 +109,7 @@ if __name__=='__main__':
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
     parser.add_argument("--data_dir", type=str, default='./data/')
     parser.add_argument("--test_dir", type=str, default='./test/')
+    parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
@@ -150,43 +148,52 @@ if __name__=='__main__':
     print('************ setup data ***********')
     num_train, num_valid, num_test = 0, 0, 0 
     
-    datasets = sorted(glob.glob(args.data_dir + 'case*'))
     
-    data_list = []
+    if mode == 'train':
     
-    for case in range(len(datasets)):
-        with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
-            try:
-                data_list = data_list + dill.load(inp)
-            except:
-                raise EOFError
+        datasets = sorted(glob.glob(args.data_dir + 'case*'))
+        
+        data_list = []
+        
+        for case in range(len(datasets)):
+            with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+                try:
+                    data_list = data_list + dill.load(inp)
+                except:
+                    raise EOFError
+
+        num_train = int(args.train_ratio*len(data_list))
+        num_valid = len(data_list) - num_train
+        sample = data_list[0]
+        
+    if mode == 'test':
+        
+        datasets = sorted(glob.glob(args.test_dir + 'case*'))
+        
+        data_list = []
+        
+        for case in range(len(datasets)):
+            with open(args.test_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+                try:
+                    data_list = data_list + dill.load(inp)
+                except:
+                    raise EOFError
+                
+        num_test = len(data_list)
+        sample = data_list[0]
+        
+   # random.shuffle(data_list)
 
     
-    datasets = sorted(glob.glob(args.test_dir + 'case*'))
-    
-    test_list = []
-    
-    for case in range(len(datasets)):
-        with open(args.test_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
-            try:
-                test_list = test_list + dill.load(inp)
-            except:
-                raise EOFError
-                
-    
-   # random.shuffle(data_list)
-    num_train = int(args.train_ratio*len(data_list))
-    num_valid = len(data_list) - num_train
-    num_test = len(test_list)
    # train_list = data_list[:num_train]
    # test_list = data_list[num_train:]                 
     
     hp = hyperparam(mode, all_id)
-    hp.features = data_list[0].features
-    hp.targets = data_list[0].targets
+    hp.features = sample.features
+    hp.targets = sample.targets
 
-    dataset = DynamicHeteroGraphTemporalSignal(data_list)
-    heteroData = dataset[0]
+    data_tensor = DynamicHeteroGraphTemporalSignal(data_list)
+    heteroData = data_tensor[0]
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')
@@ -196,7 +203,7 @@ if __name__=='__main__':
     print('features: ', [(k, v) for k, v in hp.features.items()])
     print('targets: ', [(k, v) for k, v in hp.targets.items()])
     print('heteroData metadata', heteroData.metadata())
-    print('nodes in samples', [(k, v.shape[0]) for k, v in data_list[0].feature_dicts.items()])
+    print('nodes in samples', [(k, v.shape[0]) for k, v in sample.feature_dicts.items()])
     print('\n')
     
     
@@ -207,10 +214,10 @@ if __name__=='__main__':
     
     print('input window', hp.window,'; output window', hp.out_win)
     print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
-    print('input feature dimension: ', hp.feature_dim)
+    print('input feature dimension: ', [(k, len(v)) for k, v in hp.features.items()])
     print('hidden dim (layer size): ', hp.layer_size, \
           '; number of layers (for both encoder and decoder): ', hp.layers)
-    
+    print('\n')
     
     
     
@@ -232,10 +239,10 @@ if __name__=='__main__':
    # print('\n')
     
 
-    if args.model_exist==False: 
+    if args.mode == 'train': 
         ## train the model
-        train_loader = dataset #DataLoader(dataset, batch_size=1, shuffle=True)
-        test_loader = dataset #DataLoader(dataset, batch_size=1, shuffle=True)
+        train_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
+        test_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
         train_list=[]
         test_list=[]
         
@@ -248,8 +255,8 @@ if __name__=='__main__':
         end = time.time()
         print('training time', end - start)
         
-        if mode == 'train': torch.save(model.state_dict(), './lstmmodel'+str(all_id))
-        if mode == 'ini': torch.save(model.state_dict(), './ini_lstmmodel'+str(all_id))
+        if mode == 'train': torch.save(model.state_dict(), args.model_dir + args.model_name + str(all_id))
+      #  if mode == 'ini': torch.save(model.state_dict(), './ini_lstmmodel'+str(all_id))
         
         fig, ax = plt.subplots() 
         ax.semilogy(train_list)
@@ -264,6 +271,20 @@ if __name__=='__main__':
 
         sio.savemat('loss_curve_mode'+mode+'.mat',{'train':train_list,'test':test_list})
 
+
+    if args.mode == 'train':
+        
+        model.load_state_dict(torch.load(args.model_dir + args.model_name + str(all_id)))
+        model.eval() 
+              
+        
+        for data in data_tensor:
+            g = graph(seed = data.physical_params['seed'])
+            g.GNN_update(data.x_dict['joint'][:,2:4])
+            pred = model(data.x_dict, data.edge_index_dict)
+          #  print(pred['joint'], y['joint'])
+            g.GNN_update(data.x_dict['joint'][:,2:4] + y['joint'].detach().numpy())
+            g.show_data_struct()
 
 
 '''

@@ -136,6 +136,7 @@ class DynamicHeteroGraphTemporalSignal(object):
                 if feature_dict:
                     for key, value in feature_dict.items():
                         snapshot[key][feature_name] = value
+        snapshot.physical_params = data.physical_params
         return snapshot
 
     def __next__(self):

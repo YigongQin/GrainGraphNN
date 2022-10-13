@@ -218,7 +218,7 @@ class GrainNN2(nn.Module):
             
             """
             
-            y_dict['joint'] = F.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
+            y_dict['joint'] = torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
             
             y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1])
             

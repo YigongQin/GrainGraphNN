@@ -150,18 +150,24 @@ class graph:
         self.BC = BC
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
-        
+        self.error_layer = 0
         
         if randInit:
             np.random.seed(seed)
             self.random_voronoi()
+            self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+            self.update()
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
-            self.plot_polygons()
             self.alpha_pde = self.alpha_field
+            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+            self.area_counts = dict(zip(cur_grain, counts))
             self.color_choices = np.zeros(2*self.num_regions+1)
             self.color_choices[1:] = -pi/2*np.random.random_sample(2*self.num_regions)
-        
+    
+    def compute_error_layer(self):
+        self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
+    
     def random_voronoi(self):
 
         mirrored_seeds, seeds = hexagonal_lattice(dx=self.density, noise = self.noise, BC = self.BC)
@@ -221,24 +227,8 @@ class graph:
                                           
                     
                 for i in range(len(reordered_region)):
-                    cur = self.vertices[reordered_region[i]]
-                    nxt = self.vertices[reordered_region[i+1]] if i<len(reordered_region)-1 else self.vertices[reordered_region[0]]
-                    cur, nxt = np.round(cur, 4), np.round(nxt, 4)
-                    if (vert_map[tuple(cur)], vert_map[tuple(nxt)]) in self.edges:
-                        self.edges.add((vert_map[tuple(nxt)], vert_map[tuple(cur)]))
-                    else:
-                        self.edges.add((vert_map[tuple(cur)], vert_map[tuple(nxt)]))
-                    self.edge_in_region.append(alpha)
-                    self.vertex2joint[reordered_region[i]].add(alpha)  
-                self.regions.update({alpha: reordered_region})
-                self.region_coors.update({alpha: list(np.array(vor.vertices)[region])})
-                
-                 
-        for i, j in self.edges:
-            
-            self.vertex_neighbor[i].add(j)
 
-       # self.vertices = np.array(self.vertices)
+                    self.vertex2joint[reordered_region[i]].add(alpha)  
 
             
     
@@ -248,7 +238,7 @@ class graph:
     def plot_polygons(self):
         """
         Input: region_coors
-        Output: alpha_field
+        Output: alpha_field, just index
 
         """
         
@@ -301,6 +291,8 @@ class graph:
             for j in range(2*s):
                 alpha = img[i,j,0]*255*255+img[i,j,1]*255+img[i,j,2]   
                 self.alpha_field_dummy[i,j] = alpha 
+                
+        
      
     def show_data_struct(self):
         
@@ -350,11 +342,11 @@ class graph:
         ax[1,1].set_yticks([])
         ax[1,1].set_title('pde')         
         
-        error = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
+        
         ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
         ax[1,2].set_xticks([])
         ax[1,2].set_yticks([])
-        ax[1,2].set_title('error'+'%d'%(error*100)+'%')                 
+        ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')                 
                
         plt.savefig('./voronoi.png', dpi=400)
        
@@ -407,8 +399,14 @@ class graph:
                 key = lambda x: counterclock(x, self.region_center[region]))        
                      
         
+        self.plot_polygons()
 
-
+    def GNN_update(self, X: np.ndarray):
+        
+        for joint, coors in self.vertices.items():
+            self.vertices[joint] = X[joint]
+            
+        self.update()
 
 class graph_trajectory(graph):
     def __init__(self, lxd: float = 10, seed: int = 1, frames: int = 1, physical_params = {}):   
@@ -678,7 +676,6 @@ class graph_trajectory(graph):
             self.events[0,frame] = len(eliminated_grains)
             self.events[1,frame] = len(switching_event)
             self.update()
-            self.plot_polygons()
             self.form_states_tensor(frame)
             if self.show == True:
                 self.show_data_struct()
@@ -741,6 +738,7 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
         hg.physical_params = self.physical_params
+        hg.physical_params.update({'seed':self.seed})
         
         self.states.append(hg)
 
@@ -820,7 +818,7 @@ if __name__ == '__main__':
     
     for seed in [1]:
         traj = graph_trajectory(seed = seed, frames = 5)
-        traj.update()
+      #  traj.update()
         traj.show_data_struct()
   
         traj.load_trajectory()
@@ -845,14 +843,14 @@ if __name__ == '__main__':
         
     # creating testing dataset
     for seed in [1]:
-        traj = graph_trajectory(seed = seed, frames = 1)
-        traj.form_states_tensor(0)
+        traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
+        traj.load_trajectory()
         hg0 = traj.states[0]
         hg0.form_gradient(prev = None, nxt = None)
-        
+      #  hg0.graph = graph(seed = seed)
         with open(test_folder + 'case' + str(seed) + '.pkl', 'wb') as outp:
-            dill.dump(hg0, outp)
-        
+            dill.dump([hg0], outp)
+     
         
     
     # TODO:

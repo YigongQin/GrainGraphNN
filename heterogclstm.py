@@ -29,7 +29,8 @@ class HeteroGCLSTM(torch.nn.Module):
             in_channels_dict: dict,
             out_channels: int,
             metadata: tuple,
-            bias: bool = True
+            bias: bool = True,
+            device: str = 'cpu'
     ):
         super(HeteroGCLSTM, self).__init__()
 
@@ -37,6 +38,7 @@ class HeteroGCLSTM(torch.nn.Module):
         self.out_channels = out_channels
         self.metadata = metadata
         self.bias = bias
+        self.device = device
         self._create_parameters_and_layers()
         self._set_parameters()
 
@@ -106,12 +108,12 @@ class HeteroGCLSTM(torch.nn.Module):
 
     def _set_hidden_state(self, x_dict, h_dict):
         if h_dict is None:
-            h_dict = {node_type: torch.zeros(X.shape[0], self.out_channels) for node_type, X in x_dict.items()}
+            h_dict = {node_type: torch.zeros(X.shape[0], self.out_channels, device = self.device) for node_type, X in x_dict.items()}
         return h_dict
 
     def _set_cell_state(self, x_dict, c_dict):
         if c_dict is None:
-            c_dict = {node_type: torch.zeros(X.shape[0], self.out_channels) for node_type, X in x_dict.items()}
+            c_dict = {node_type: torch.zeros(X.shape[0], self.out_channels, device = self.device) for node_type, X in x_dict.items()}
         return c_dict
 
     def _calculate_input_gate(self, x_dict, edge_index_dict, h_dict, c_dict):

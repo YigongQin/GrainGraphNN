@@ -38,7 +38,7 @@ class SeqGCLSTM(nn.Module):
         >> h = last_states[0][0]  # 0 for layer index, 0 for h index
     """
 
-    def __init__(self, in_channels_dict, out_channels, num_layers, metadata,
+    def __init__(self, in_channels_dict, out_channels, num_layers, metadata, device,
                  bias=True, return_all_layers=True):
         super().__init__()
 
@@ -54,6 +54,7 @@ class SeqGCLSTM(nn.Module):
         self.out_channels = out_channels
         self.num_layers = num_layers
         self.metadata = metadata
+        self.device = device
         self.bias = bias
         self.return_all_layers = return_all_layers
        # self.device = device
@@ -71,7 +72,8 @@ class SeqGCLSTM(nn.Module):
             cell_list.append(HeteroGCLSTM(in_channels_dict = cur_in_channel,
                                           out_channels = self.out_channels[i],
                                           metadata = self.metadata,
-                                          bias = self.bias))
+                                          bias = self.bias,
+                                          device = self.device))
                                          # device=self.device))
 
         self.cell_list = nn.ModuleList(cell_list)
@@ -175,12 +177,12 @@ class GrainNN2(nn.Module):
         self.out_win = hyper.out_win
         
       #  self.bias = hyper.bias
-      #  self.device = device
+        self.device = hyper.device
        # self.dt = hyper.dt
 
         ## networks
-        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata)
-        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata)
+        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
+        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
 
         self.linear = {node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()} 

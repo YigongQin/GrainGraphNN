@@ -15,7 +15,7 @@ import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN2
 from parameters import hyperparam
-from graph_datastruct import graph
+from graph_datastruct import graph_trajectory
 
 
 def criterion(data, pred):
@@ -160,7 +160,7 @@ if __name__=='__main__':
         data_list = []
         
         for case in range(len(datasets)):
-            with open(args.data_dir + 'case' + str(case) + '.pkl', 'rb') as inp:  
+            with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
@@ -195,6 +195,7 @@ if __name__=='__main__':
     hp = hyperparam(mode, all_id)
     hp.features = sample.features
     hp.targets = sample.targets
+    hp.device = device
 
     data_tensor = DynamicHeteroGraphTemporalSignal(data_list)
     heteroData = data_tensor[0]
@@ -283,12 +284,14 @@ if __name__=='__main__':
               
         
         for data in data_tensor:
-            g = graph(seed = data.physical_params['seed'])
-            g.GNN_update(data.x_dict['joint'][:,2:4])
+            traj = graph_trajectory(seed = data.physical_params['seed'], frames = 4)
+            traj.load_trajectory(rawdat_dir = '.')
+            traj.GNN_update(data.x_dict['joint'][:,2:4])
             pred = model(data.x_dict, data.edge_index_dict)
           #  print(pred['joint'], y['joint'])
-            g.GNN_update(data.x_dict['joint'][:,2:4] + y['joint'].detach().numpy())
-          #  g.show_data_struct()
+            traj.GNN_update(data.x_dict['joint'][:,2:4] + pred['joint'].detach().numpy())
+            traj.compute_error_layer()
+            traj.show_data_struct()
 
 
 '''

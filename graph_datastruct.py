@@ -424,7 +424,7 @@ class graph_trajectory(graph):
     def load_trajectory(self, rawdat_dir: str = './'):
        
         
-        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(seed)+'_*'))[0]
+        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])

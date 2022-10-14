@@ -1,4 +1,4 @@
-# GrainNN2: A dynamic heterogeneous graph neural network for large scale 3D grain microstructure evolution.
+# GrainNN2: A dynamic heterogeneous graph neural network for large-scale 3D grain microstructure evolution.
 
 ## Build
 

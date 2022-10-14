@@ -1,0 +1,1 @@
+for i in {0..299}; do echo "python3 graph_datastruct.py --rawdat_dir=../sameGR --seed=${i}"; done > cmdfile

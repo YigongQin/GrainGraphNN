@@ -3,6 +3,8 @@
 ## Build
 
 ```
+export TORCH=torch_version
+export CUDA=cuda_version # eg. 113 for cuda/11.3
 pip install -r requirements.txt
 ```
 

@@ -1,7 +1,7 @@
 torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
 torch-scatter -f https://data.pyg.org/whl/torch-${TORCH}.html
 torch-sparse -f https://data.pyg.org/whl/torch-${TORCH}.html
-torch_geometeric
+torch_geometric
 torch-cluster -f https://data.pyg.org/whl/torch-${TORCH}.html
 dill
 matplotlib

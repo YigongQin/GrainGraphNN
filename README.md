@@ -5,7 +5,7 @@ use the local CUDA version
 ```
 export TORCH=1.12.1+cu102
 export CUDA=cu102
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ## Usage

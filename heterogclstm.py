@@ -8,10 +8,9 @@ Created on Mon Oct 10 20:10:17 2022
 
 import torch
 from torch.nn import Parameter
-from torch_geometric.nn import HeteroConv
+from torch_geometric.nn import HeteroConv, SAGEConv
 from torch_geometric.nn.inits import glorot
 import torch.nn as nn
-from periodconv import PeriodConv
 
 class HeteroGCLSTM(torch.nn.Module):
     r"""An implementation similar to the Integrated Graph Convolutional Long Short Term
@@ -44,7 +43,7 @@ class HeteroGCLSTM(torch.nn.Module):
         self._set_parameters()
 
     def _create_input_gate_parameters_and_layers(self):
-        self.conv_i = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
+        self.conv_i = HeteroConv({edge_type: SAGEConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
@@ -54,7 +53,7 @@ class HeteroGCLSTM(torch.nn.Module):
                     for node_type in self.in_channels_dict})
 
     def _create_forget_gate_parameters_and_layers(self):
-        self.conv_f = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
+        self.conv_f = HeteroConv({edge_type: SAGEConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
@@ -64,7 +63,7 @@ class HeteroGCLSTM(torch.nn.Module):
                     for node_type in self.in_channels_dict})
 
     def _create_cell_state_parameters_and_layers(self):
-        self.conv_c = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
+        self.conv_c = HeteroConv({edge_type: SAGEConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
@@ -74,7 +73,7 @@ class HeteroGCLSTM(torch.nn.Module):
                     for node_type in self.in_channels_dict})
 
     def _create_output_gate_parameters_and_layers(self):
-        self.conv_o = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
+        self.conv_o = HeteroConv({edge_type: SAGEConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 

@@ -701,15 +701,19 @@ class graph_trajectory(graph):
         
         s = self.imagesize[0]
         
-        grain_state[:, 0] = np.array(list(self.area_counts.values())) /s**2
-        if frame>0:
-            grain_state[:, 1] = self.extraV_frames[:, frame]/s**3
+
         
         for grain, coor in self.region_center.items():
-            grain_state[grain-1, 2] = coor[0]
-            grain_state[grain-1, 3] = coor[1]
+            grain_state[grain-1, 0] = coor[0]
+            grain_state[grain-1, 1] = coor[1]
+
+        grain_state[:, 2] = frame/self.frames
+
+        grain_state[:, 3] = np.array(list(self.area_counts.values())) /s**2
+        if frame>0:
+            grain_state[:, 4] = self.extraV_frames[:, frame]/s**3
         
-        grain_state[:, 4] = frame/self.frames
+        
         grain_state[:, 5] = np.cos(self.color_choices[1:self.num_regions+1])
         grain_state[:, 6] = np.sin(self.color_choices[1:self.num_regions+1])
         grain_state[:, 7] = np.cos(self.color_choices[self.num_regions+1:2*self.num_regions+1])
@@ -749,8 +753,8 @@ class graph_trajectory(graph):
                 
 class GrainHeterograph:
     def __init__(self):
-        self.features = {'grain':['area', 'extraV', 'x', 'y', 'z', 'cosx', 'sinx', 'cosz', 'sinz'],
-                         'joint':[ 'x', 'y', 'z', 'G', 'R']}
+        self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
+                         'joint':['x', 'y', 'z', 'G', 'R']}
       #  self.features_edge = ['len']
         
         
@@ -777,9 +781,9 @@ class GrainHeterograph:
         if nxt is not None:
 
         
-            darea = nxt.feature_dicts['grain'][:,:1] - self.feature_dicts['grain'][:,:1]
+            darea = nxt.feature_dicts['grain'][:,3:4] - self.feature_dicts['grain'][:,3:4]
             
-            self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,1:2]))
+            self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
                                          
             self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
                                          self.feature_dicts['joint'][:,:2]
@@ -790,18 +794,18 @@ class GrainHeterograph:
             prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
                     
         else:
-            prev_grad_grain = self.feature_dicts['grain'][:,:1] - prev.feature_dicts['grain'][:,:1] 
-            prev_grad_joint = self.feature_dicts['joint'][:,:2] - prev.feature_dicts['grain'][:,:2]             
+            prev_grad_grain = self.feature_dicts['grain'][:,3:4] - prev.feature_dicts['grain'][:,3:4] 
+            prev_grad_joint = self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2]             
         
-        self.feature_dicts['grain'] = np.hstack((prev_grad_grain, self.feature_dicts['grain']))
+        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
 
-        self.feature_dicts['joint'] = np.hstack((prev_grad_joint, self.feature_dicts['joint'])) 
+        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint)) 
         
         
 
         
         for nodes, features in self.features.items():
-            self.features[nodes] = self.features_grad[nodes] + self.features[nodes]
+            self.features[nodes] = self.features[nodes] + self.features_grad[nodes]  
             assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
         
         

@@ -1,8 +1,8 @@
-torch==1.11.0+cu102 --extra-index-url https://download.pytorch.org/whl/cu102
-torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu102.html
-torch-sparse -f https://data.pyg.org/whl/torch-1.11.0+cu102.html
-torch_geometeric
-torch-cluster -f https://data.pyg.org/whl/torch-1.11.0+cu102.html
+torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
+torch-scatter -f https://data.pyg.org/whl/torch-${TORCH}.html
+torch-sparse -f https://data.pyg.org/whl/torch-${TORCH}.html
+torch_geometric
+torch-cluster -f https://data.pyg.org/whl/torch-${TORCH}.html
 dill
 matplotlib
 shapely

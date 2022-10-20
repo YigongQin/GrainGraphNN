@@ -710,8 +710,10 @@ class graph_trajectory(graph):
             grain_state[grain-1, 3] = coor[1]
         
         grain_state[:, 4] = frame/self.frames
-        grain_state[:, 5] = angle_norm(self.color_choices[1:self.num_regions+1])
-        grain_state[:, 6] = angle_norm(self.color_choices[self.num_regions+1:2*self.num_regions+1])
+        grain_state[:, 5] = np.cos(self.color_choices[1:self.num_regions+1])
+        grain_state[:, 6] = np.sin(self.color_choices[1:self.num_regions+1])
+        grain_state[:, 7] = np.cos(self.color_choices[self.num_regions+1:2*self.num_regions+1])
+        grain_state[:, 8] = np.sin(self.color_choices[self.num_regions+1:2*self.num_regions+1])
         
         
         for joint, coor in self.vertices.items():
@@ -747,7 +749,7 @@ class graph_trajectory(graph):
                 
 class GrainHeterograph:
     def __init__(self):
-        self.features = {'grain':['area', 'extraV', 'x', 'y', 'z', 'theta_x', 'theta_z'],
+        self.features = {'grain':['area', 'extraV', 'x', 'y', 'z', 'cosx', 'sinx', 'cosz', 'sinz'],
                          'joint':[ 'x', 'y', 'z', 'G', 'R']}
       #  self.features_edge = ['len']
         

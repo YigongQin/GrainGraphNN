@@ -9,6 +9,7 @@ Created on Thu Oct 20 14:47:33 2022
 from typing import List, Optional, Tuple, Union
 
 import torch.nn.functional as F
+import torch
 from torch import Tensor
 from torch.nn import LSTM
 from torch_sparse import SparseTensor, matmul
@@ -72,7 +73,7 @@ class PeriodConv(MessagePassing):
         out_channels: int,
         aggr: Optional[Union[str, List[str], Aggregation]] = "mean",
         normalize: bool = False,
-        root_weight: bool = False,
+        root_weight: bool = True,
         project: bool = False,
         bias: bool = True,
         **kwargs,
@@ -123,7 +124,7 @@ class PeriodConv(MessagePassing):
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 size: Size = None) -> Tensor:
         """"""
-      #  print('tuple', x[0].shape, x[1].shape)
+       # print('tuple', x[0].shape, x[1].shape)
         if isinstance(x, Tensor):
        #     print(x.shape)
             x: OptPairTensor = (x, x)
@@ -146,7 +147,13 @@ class PeriodConv(MessagePassing):
 
     def message(self, x_i: Tensor, x_j: Tensor) -> Tensor:
         
-        return x_i - x_j
+        rel_loc = x_j[:,:3] - x_i[:,:3]
+      #  print(-1*(rel_loc>0.5))
+        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+        
+      #  print(reloc)
+        
+        return torch.cat([reloc, x_j[:,3:]], dim=1)
     
     
     

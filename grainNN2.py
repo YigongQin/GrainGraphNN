@@ -21,7 +21,7 @@ from graph_datastruct import graph_trajectory
 def criterion(data, pred):
     
     return torch.mean((data['joint'] - pred['joint'])**2) \
-         + torch.mean((data['grain'] - pred['grain'])**2)
+        # + torch.mean((data['grain'] - pred['grain'])**2)
            
     
 
@@ -106,12 +106,12 @@ if __name__=='__main__':
 
     
     parser = argparse.ArgumentParser("Train the model.")
-    parser.add_argument("--mode", type=str, default="train")
+    parser.add_argument("--mode", type=str, default="test")
     parser.add_argument("--all_id", type=int, default=1)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
-    parser.add_argument("--data_dir", type=str, default='./data/')
+    parser.add_argument("--data_dir", type=str, default='./1data/')
     parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
@@ -228,7 +228,7 @@ if __name__=='__main__':
     
 
     model = GrainNN2(hp)
-   # print(model)
+    print(model)
    # for model_id, (name, param) in enumerate(model.named_parameters()):
    #            print(name, model_id)
    # if mode=='train' or mode == 'test': model = ConvLSTM_seq(hp, device)
@@ -284,12 +284,13 @@ if __name__=='__main__':
               
         
         for data in data_tensor:
+ 
+            pred = model(data.x_dict, data.edge_index_dict)
+            print(pred['joint'])
             traj = graph_trajectory(seed = data.physical_params['seed'], frames = 4)
             traj.load_trajectory(rawdat_dir = '.')
-            traj.GNN_update(data.x_dict['joint'][:,2:4])
-            pred = model(data.x_dict, data.edge_index_dict)
-          #  print(pred['joint'], y['joint'])
-            traj.GNN_update(data.x_dict['joint'][:,2:4] + pred['joint'].detach().numpy())
+           # traj.GNN_update(data.x_dict['joint'][:,:2])
+            traj.GNN_update(data.x_dict['joint'][:,:2] + pred['joint'].detach().numpy())
             traj.compute_error_layer()
             traj.show_data_struct()
 

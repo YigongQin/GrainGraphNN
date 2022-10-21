@@ -62,7 +62,7 @@ def hyperparam(mode, all_id):
 
 
 	param_dict = {'all_frames':all_frames, 'frames':frames, 'window':window, 'out_win':1, 'pred_frames':pred_frames, 'dt':dt, \
-	             'layers':layers, 'layer_size':hidden_dim, 'kernel_size':(3,), 'lr':0.01, 'epoch':60, 'bias':True, 'model_list':[0]}
+	             'layers':1, 'layer_size':32, 'kernel_size':(3,), 'lr':0.01, 'epoch':60, 'bias':True, 'model_list':[0]}
 
 
 	return Param(param_dict)

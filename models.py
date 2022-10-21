@@ -224,10 +224,10 @@ class GrainNN2(nn.Module):
             
             y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1])
             
-            area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 1]) # darea + area_old is positive       
+            area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 3]) # darea + area_old is positive       
             area = F.normalize(area, p=1, dim=-1)  # normalize the area
             
-            y_dict['grain'][:, 0] = area - x_dict['grain'][:, 1]
+            y_dict['grain'][:, 0] = area - x_dict['grain'][:, 3]
  
             
             ## assemble with new time-dependent variables for time t+dt: FRAC, Y, T  [b,c,w]

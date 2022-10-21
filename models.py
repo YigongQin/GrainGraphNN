@@ -198,15 +198,6 @@ class GrainNN2(nn.Module):
 
     def forward(self, x_dict, edge_index_dict):
         
-
-        ## step 1 remap the input to the channel with gridDdim G
-        ## b,t, input_len -> b,t,c,w 
-      #  b, t, c, w  = input_seq.size()
-        
-      #  output_seq = torch.zeros(b, self.out_win, 2*self.w+1, dtype=torch.float64).to(self.device)
-       # frac_seq = torch.zeros(b, self.out_win, self.w,   dtype=torch.float64).to(self.device)
-       
-     #   seq_1 = input_seq[:,-1,:,:]    # the last frame
         
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
@@ -238,11 +229,6 @@ class GrainNN2(nn.Module):
             y_dict['grain'][:, 0] = area - x_dict['grain'][:, 3]
  
             
-            ## assemble with new time-dependent variables for time t+dt: FRAC, Y, T  [b,c,w]
-            
-          #  seq_1 = torch.cat([frac.unsqueeze(dim=1), dfrac.unsqueeze(dim=1), darea.unsqueeze(dim=1), \
-          #          dy.expand(-1,self.w).view(b,1,self.w), seq_1[:,4:-1,:], seq_1[:,-1:,:] + self.dt ],dim=1)
-
                         
         return y_dict
 

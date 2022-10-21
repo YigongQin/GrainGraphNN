@@ -6,10 +6,10 @@ Created on Mon Sep 27 11:34:53 2021
 @author: yigongqin
 """
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from heteropgclstm import HeteroGCLSTM
+from heteropgclstm import HeteroPGCLSTM
+from heterogclstm import HeteroGCLSTM
 # citation
 # https://github.com/benedekrozemberczki/pytorch_geometric_temporal/blob/master/torch_geometric_temporal/nn/hetero/heterogclstm.py
 
@@ -64,17 +64,23 @@ class SeqGCLSTM(nn.Module):
             
             if i == 0: 
                 cur_in_channel = self.in_channels_dict  
+                
+                cell_list.append(HeteroPGCLSTM(in_channels_dict = cur_in_channel,
+                                              out_channels = self.out_channels[i],
+                                              metadata = self.metadata,
+                                              bias = self.bias,
+                                              device = self.device))                
             else:
                 
                 cur_in_channel = {node_type: self.out_channels[i - 1]
                                    for node_type in self.in_channels_dict}
 
-            cell_list.append(HeteroGCLSTM(in_channels_dict = cur_in_channel,
-                                          out_channels = self.out_channels[i],
-                                          metadata = self.metadata,
-                                          bias = self.bias,
-                                          device = self.device))
-                                         # device=self.device))
+                cell_list.append(HeteroGCLSTM(in_channels_dict = cur_in_channel,
+                                              out_channels = self.out_channels[i],
+                                              metadata = self.metadata,
+                                              bias = self.bias,
+                                              device = self.device))
+                                     
 
         self.cell_list = nn.ModuleList(cell_list)
 
@@ -181,8 +187,10 @@ class GrainNN2(nn.Module):
        # self.dt = hyper.dt
 
         ## networks
-        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
-        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.metadata, self.device)
+        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
+                                        self.num_layer, self.metadata, self.device)
+        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
+                                        self.num_layer, self.metadata, self.device)
 
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 

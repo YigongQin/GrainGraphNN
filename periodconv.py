@@ -108,6 +108,7 @@ class PeriodConv(MessagePassing):
             aggr_out_channels = in_channels[0]
 
         self.lin_l = Linear(aggr_out_channels, out_channels, bias=bias)
+        self.lin_l2 = Linear(out_channels, out_channels, bias=bias)
         if self.root_weight:
             self.lin_r = Linear(in_channels[1], out_channels, bias=False)
 
@@ -134,7 +135,7 @@ class PeriodConv(MessagePassing):
 
         # propagate_type: (x: OptPairTensor)
         out = self.propagate(edge_index, x=x, size=size)
-        out = self.lin_l(out)
+     #   out = self.lin_l(out)
 
         x_r = x[1]
         if self.root_weight and x_r is not None:
@@ -153,7 +154,7 @@ class PeriodConv(MessagePassing):
         
       #  print(reloc)
         
-        return torch.cat([reloc, x_j[:,3:]], dim=1)
+        return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
     
     
     

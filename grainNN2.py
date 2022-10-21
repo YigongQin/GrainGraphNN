@@ -111,7 +111,7 @@ if __name__=='__main__':
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
-    parser.add_argument("--data_dir", type=str, default='./1data/')
+    parser.add_argument("--data_dir", type=str, default='./data/')
     parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
@@ -160,7 +160,7 @@ if __name__=='__main__':
         data_list = []
         
         for case in range(len(datasets)):
-            with open(args.data_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+            with open(args.data_dir + 'case' + str(case) + '.pkl', 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
@@ -228,7 +228,7 @@ if __name__=='__main__':
     
 
     model = GrainNN2(hp)
-    print(model)
+   # print(model)
    # for model_id, (name, param) in enumerate(model.named_parameters()):
    #            print(name, model_id)
    # if mode=='train' or mode == 'test': model = ConvLSTM_seq(hp, device)

@@ -13,7 +13,7 @@ from torch_geometric.nn.inits import glorot
 import torch.nn as nn
 from periodconv import PeriodConv
 
-class HeteroGCLSTM(torch.nn.Module):
+class HeteroPGCLSTM(torch.nn.Module):
     r"""An implementation similar to the Integrated Graph Convolutional Long Short Term
         Memory Cell for heterogeneous Graphs.
         Args:
@@ -33,7 +33,7 @@ class HeteroGCLSTM(torch.nn.Module):
             bias: bool = True,
             device: str = 'cpu'
     ):
-        super(HeteroGCLSTM, self).__init__()
+        super(HeteroPGCLSTM, self).__init__()
 
         self.in_channels_dict = in_channels_dict
         self.out_channels = out_channels

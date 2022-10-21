@@ -7,7 +7,6 @@ Created on Fri Sep 30 15:35:27 2022
 """
 import argparse, time, glob, dill, random
 import numpy as np
-import scipy.io as sio
 import matplotlib.pyplot as plt
 
 import torch
@@ -272,9 +271,12 @@ if __name__=='__main__':
         plt.ylabel('loss')
         plt.legend(['training loss','validation loss'])
         plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
-        plt.savefig('mul_batch_loss.png')
+        plt.savefig('loss.png')
 
-        sio.savemat('loss_curve_mode'+mode+'.mat',{'train':train_list,'test':test_list})
+        with open('loss.txt', 'w') as f:
+            f.write('epoch, training loss, validation loss\n' )
+            for i in range(len(train_list)):
+                f.write("%d  %f  %f\n"%(i, train_list[i], test_list[i]))
 
 
     if args.mode == 'test':

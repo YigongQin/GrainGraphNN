@@ -5,7 +5,7 @@ Created on Mon Sep 27 11:34:53 2021
 
 @author: yigongqin
 """
-
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from heteropgclstm import HeteroPGCLSTM
@@ -228,7 +228,7 @@ class GrainNN2(nn.Module):
             
             """
             
-            y_dict['joint'] = F.sigmoid(y_dict['joint']) - 0.5 # dx, dy are in the range [-1, 1]
+            y_dict['joint'] = torch.sigmoid(y_dict['joint']) - 0.5 # dx, dy are in the range [-1, 1]
             
             y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1])
             

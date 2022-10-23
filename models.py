@@ -10,9 +10,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from heteropgclstm import HeteroPGCLSTM
 from heterogclstm import HeteroGCLSTM
-# citation
-# https://github.com/benedekrozemberczki/pytorch_geometric_temporal/blob/master/torch_geometric_temporal/nn/hetero/heterogclstm.py
-
 
 
 
@@ -171,6 +168,11 @@ class SeqGCLSTM(nn.Module):
     
     
 class GrainNN2(nn.Module):
+    """ GrainNN in 3D
+        Args:
+            hyper: hyper-parameter class
+    """
+    
     def __init__(self, hyper):
         super().__init__()
   
@@ -179,12 +181,11 @@ class GrainNN2(nn.Module):
         
         self.out_channels = hyper.layer_size 
         self.num_layer = hyper.layers
-        self.metadata = hyper.metadata
+        self.metadata = hyper.metadata  # heterogeneous graph structure
         self.out_win = hyper.out_win
         
-      #  self.bias = hyper.bias
         self.device = hyper.device
-       # self.dt = hyper.dt
+      #  self.c = hyper.channel_table 
 
         ## networks
         self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
@@ -195,14 +196,25 @@ class GrainNN2(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
 
+        self.jj_edge = nn.Linear(2*self.out_channels, 1)
 
     def forward(self, x_dict, edge_index_dict):
         
-        
+        """
+        Making a forward pass.
+        Arg types:
+            * **x_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensors)* - Node features dicts. Can
+                be obtained via PyG method :obj:`snapshot.x_dict` where snapshot is a single HeteroData object.
+            * **edge_index_dict** *(Dictionary where keys=Tuples and values=PyTorch Long Tensors)* - Graph edge type
+                and index dicts. Can be obtained via PyG method :obj:`snapshot.edge_index_dict`.
+
+        Return types:
+            * **y_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor)* - Node type and
+                output channels.
+        """        
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
         
-       # last_snapshot = [x_dict][-1]
         
         
         for i in range(self.out_win):
@@ -215,29 +227,74 @@ class GrainNN2(nn.Module):
             
             """
             
-            GrainNN specific output 
+            GrainNN specific y output 
             
             """
             
             y_dict['joint'] = torch.sigmoid(y_dict['joint']) - 0.5 # dx, dy are in the range [-1, 1]
             
-            y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1])
+            area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 3]) # darea + area_old is positive    
             
-            area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 3]) # darea + area_old is positive       
             area = F.normalize(area, p=1, dim=-1)  # normalize the area
             
             y_dict['grain'][:, 0] = area - x_dict['grain'][:, 3]
  
+            y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
+            
+            
+            """
+            
+            GrainNN specific topological event
+            
+            """            
+            
+            event_dict = {}
+            event_dict.update({'grain': 1*(area<1e-6) })
+            event_dict.update({'edge': 1})
+            
+            """
+            
+            Online update for next snapshot input x
+            
+            """    
+            
+            x_dict = self.form_next_x(x_dict, y_dict)
+            edge_index_dict = self.from_next_edge_index(edge_index_dict, event_dict)
             
                         
         return y_dict
+    
+    @staticmethod
+    def form_next_x(x_dict, y_dict):
+        
+        # features
+        x_dict['joint'][:, :2]  += y_dict['joint']
+        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]
+        x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]
+        
+        # gradients
+        x_dict['joint'][:, -2:] =  y_dict['joint']
+        x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]
+        
+        return x_dict
+
+    @staticmethod
+    def from_next_edge_index(edge_index_dict, event_dict):
+        
+        return edge_index_dict
+        
 
 
+"""
 
+  self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
+                   'joint':['x', 'y', 'z', 'G', 'R']}
+#  self.features_edge = ['len']
+  
+  
+  self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
+  
+  
+  self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
 
-
-
-
-
-
-
+"""

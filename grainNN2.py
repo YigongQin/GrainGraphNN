@@ -19,7 +19,7 @@ from graph_datastruct import graph_trajectory
 
 def criterion(data, pred):
     
-    return torch.mean((data['joint'] - pred['joint'])**2) \
+    return 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
            
     
@@ -158,8 +158,8 @@ if __name__=='__main__':
         
         data_list = []
         
-        for case in range(len(datasets)):
-            with open(args.data_dir + 'case' + str(case) + '.pkl', 'rb') as inp:  
+        for case in datasets:
+            with open(case, 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
@@ -175,8 +175,8 @@ if __name__=='__main__':
         
         data_list = []
         
-        for case in range(len(datasets)):
-            with open(args.test_dir + 'case' + str(case+1) + '.pkl', 'rb') as inp:  
+        for case in datasets:
+            with open(case, 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
@@ -285,16 +285,17 @@ if __name__=='__main__':
         model.eval() 
               
         
-        for data in data_tensor:
+        for case, data in enumerate(data_tensor):
  
             pred = model(data.x_dict, data.edge_index_dict)
-            print(pred['joint'])
+         #   print(pred['joint'])
             traj = graph_trajectory(seed = data.physical_params['seed'], frames = 4)
             traj.load_trajectory(rawdat_dir = '.')
            # traj.GNN_update(data.x_dict['joint'][:,:2])
-            traj.GNN_update(data.x_dict['joint'][:,:2] + pred['joint'].detach().numpy())
+            traj.GNN_update( (data.x_dict['joint'][:,:2] + pred['joint']) .detach().numpy())
             traj.compute_error_layer()
-            traj.show_data_struct()
+            print('case %d the error at sampled height %d'%(case, 0))
+         #   traj.show_data_struct()
 
 
 '''

@@ -292,7 +292,7 @@ if __name__=='__main__':
             traj = graph_trajectory(seed = data.physical_params['seed'], frames = 4)
             traj.load_trajectory(rawdat_dir = '.')
            # traj.GNN_update(data.x_dict['joint'][:,:2])
-            traj.GNN_update( (data.x_dict['joint'][:,:2] + pred['joint']) .detach().numpy())
+            traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
             traj.compute_error_layer()
             print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
             traj.show_data_struct()

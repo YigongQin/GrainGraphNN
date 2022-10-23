@@ -55,8 +55,8 @@ def train(model, num_epochs, train_loader, test_loader):
     test_loss/=count
 
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
-    train_list.append(float(train_loss))
-    test_list.append(float(test_loss))  
+    train_loss_list.append(float(train_loss))
+    test_loss_list.append(float(test_loss))  
 
     for epoch in range(num_epochs):
 
@@ -91,8 +91,8 @@ def train(model, num_epochs, train_loader, test_loader):
         test_loss/=count
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
          
-        train_list.append(float(loss))
-        test_list.append(float(test_loss))       
+        train_loss_list.append(float(train_loss))
+        test_loss_list.append(float(test_loss))       
         scheduler.step()
 
     return model 
@@ -230,8 +230,7 @@ if __name__=='__main__':
    # print(model)
    # for model_id, (name, param) in enumerate(model.named_parameters()):
    #            print(name, model_id)
-   # if mode=='train' or mode == 'test': model = ConvLSTM_seq(hp, device)
-   # if mode=='ini': model = ConvLSTM_start(hp, device)
+
     
    # model = model.double()
     if device=='cuda':
@@ -247,8 +246,8 @@ if __name__=='__main__':
         ## train the model
         train_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
         test_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
-        train_list=[]
-        test_list=[]
+        train_loss_list=[]
+        test_loss_list=[]
         
         start = time.time()
         
@@ -263,10 +262,10 @@ if __name__=='__main__':
       #  if mode == 'ini': torch.save(model.state_dict(), './ini_lstmmodel'+str(all_id))
         
         fig, ax = plt.subplots() 
-        ax.semilogy(train_list)
-        ax.semilogy(test_list)
-        txt = 'final train loss '+str('%1.2e'%train_list[-1])+' validation loss '+ str('%1.2e'%test_list[-1]) 
-        fig.text(.5, .2, txt, ha='center')
+        ax.semilogy(train_loss_list)
+        ax.semilogy(test_loss_list)
+     #   txt = 'final train loss '+str('%1.2e'%train_loss_list[-1])+' validation loss '+ str('%1.2e'%test_loss_list[-1]) 
+     #   fig.text(.5, .2, txt, ha='center')
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.legend(['training loss','validation loss'])
@@ -275,8 +274,8 @@ if __name__=='__main__':
 
         with open('loss.txt', 'w') as f:
             f.write('epoch, training loss, validation loss\n' )
-            for i in range(len(train_list)):
-                f.write("%d  %f  %f\n"%(i, train_list[i], test_list[i]))
+            for i in range(len(train_loss_list)):
+                f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
 
 
     if args.mode == 'test':

@@ -210,6 +210,7 @@ class GrainNN2(nn.Module):
                         for node_type, targets in hyper.targets.items()}) 
 
       #  self.edge_decoder = EdgeDecodeer(self.out_channels)
+        self.jj_edge = nn.Linear(2*self.out_channels, 1)
 
     def forward(self, x_dict, edge_index_dict):
         

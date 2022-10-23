@@ -171,8 +171,8 @@ class EdgeDecodeer(torch.nn.Module):
         self.lin1 = nn.Linear(2*out_channels, out_channels)
         self.lin2 = nn.Linear(out_channels, 1)
     
-    def forward(self, joint, edge_label_index):
-        row, col = edge_label_index
+    def forward(self, joint, joint_edge_lindex):
+        row, col = joint_edge_lindex[0], joint_edge_lindex[1]
         z = torch.cat([joint[row], joint[col]], dim=-1)
         z = F.relu(self.lin1(z))
         z = self.lin2(z)
@@ -209,8 +209,8 @@ class GrainNN2(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
 
-      #  self.edge_decoder = EdgeDecodeer(self.out_channels)
-        self.jj_edge = nn.Linear(2*self.out_channels, 1)
+        self.edge_decoder = EdgeDecodeer(self.out_channels)
+      #  self.jj_edge = nn.Linear(2*self.out_channels, 1)
 
     def forward(self, x_dict, edge_index_dict):
         
@@ -264,7 +264,8 @@ class GrainNN2(nn.Module):
             
 
             y_dict.update({'grain_event': 1*(area<1e-6) })
-        #    y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], )})
+          #  y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], \
+          #                  edge_index_dict['joint', 'connect', 'joint'])})
             
             """
             
@@ -303,12 +304,13 @@ class GrainNN2(nn.Module):
 
   self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
                    'joint':['x', 'y', 'z', 'G', 'R']}
-#  self.features_edge = ['len']
-  
   
   self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
   
-  
   self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
 
+  self.edge_type = [('grain', 'push', 'joint'), \
+                      ('joint', 'pull', 'grain'), \
+                      ('joint', 'connect', 'joint')]
+            
 """

@@ -165,6 +165,19 @@ class SeqGCLSTM(nn.Module):
         return param
     
     
+class EdgeDecodeer(torch.nn.Module):
+    def __init__(self, out_channels):
+        super().__init__()
+        self.lin1 = nn.Linear(2*out_channels, out_channels)
+        self.lin2 = nn.Linear(out_channels, 1)
+    
+    def forward(self, joint, edge_label_index):
+        row, col = edge_label_index
+        z = torch.cat([joint[row], joint[col]], dim=-1)
+        z = F.relu(self.lin1(z))
+        z = self.lin2(z)
+        return z.view(-1)
+
     
     
 class GrainNN2(nn.Module):
@@ -196,7 +209,7 @@ class GrainNN2(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
 
-        self.jj_edge = nn.Linear(2*self.out_channels, 1)
+      #  self.edge_decoder = EdgeDecodeer(self.out_channels)
 
     def forward(self, x_dict, edge_index_dict):
         
@@ -248,9 +261,9 @@ class GrainNN2(nn.Module):
             
             """            
             
-            event_dict = {}
-            event_dict.update({'grain': 1*(area<1e-6) })
-            event_dict.update({'edge': 1})
+
+            y_dict.update({'grain_event': 1*(area<1e-6) })
+        #    y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], )})
             
             """
             
@@ -259,7 +272,7 @@ class GrainNN2(nn.Module):
             """    
             
             x_dict = self.form_next_x(x_dict, y_dict)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, event_dict)
+            edge_index_dict = self.from_next_edge_index(edge_index_dict, y_dict)
             
                         
         return y_dict
@@ -279,7 +292,7 @@ class GrainNN2(nn.Module):
         return x_dict
 
     @staticmethod
-    def from_next_edge_index(edge_index_dict, event_dict):
+    def from_next_edge_index(edge_index_dict, y_dict):
         
         return edge_index_dict
         

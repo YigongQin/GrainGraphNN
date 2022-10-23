@@ -294,8 +294,8 @@ if __name__=='__main__':
            # traj.GNN_update(data.x_dict['joint'][:,:2])
             traj.GNN_update( (data.x_dict['joint'][:,:2] + pred['joint']) .detach().numpy())
             traj.compute_error_layer()
-            print('case %d the error at sampled height %d'%(case, 0))
-         #   traj.show_data_struct()
+            print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+            traj.show_data_struct()
 
 
 '''

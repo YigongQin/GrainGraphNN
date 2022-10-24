@@ -162,8 +162,17 @@ class graph:
             self.alpha_pde = self.alpha_field
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
-            self.color_choices = np.zeros(2*self.num_regions+1)
-            self.color_choices[1:] = -pi/2*np.random.random_sample(2*self.num_regions)
+
+            
+            # sample orientations
+            ux = np.random.randn(self.num_regions)
+            uy = np.random.randn(self.num_regions)
+            uz = np.random.randn(self.num_regions)
+            self.theta_x = np.zeros(1 + self.num_regions)
+            self.theta_z = np.zeros(1 + self.num_regions)
+            self.theta_x[1:] = np.arctan2(uy, ux)%(pi/2)
+            self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
+
     
     def compute_error_layer(self):
         self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
@@ -327,17 +336,17 @@ class graph:
         
         view_size = int(0.6*self.alpha_field_dummy.shape[0])
         field = self.alpha_field_dummy[:view_size,:view_size]
-        field = self.color_choices[field+self.num_regions*(field>0)]
-        ax[0,2].imshow((field/pi*180 + 90 )*(field<0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        field = self.theta_z[field]
+        ax[0,2].imshow((field/pi*180)*(field>0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
         ax[0,2].set_xticks([])
         ax[0,2].set_yticks([])
         ax[0,2].set_title('Grains'+str(len(self.regions))) 
 
-        ax[1,0].imshow(self.color_choices[self.alpha_field+self.num_regions], origin='lower', cmap=newcmp, vmin=-pi/2, vmax=0)
+        ax[1,0].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
         ax[1,0].set_xticks([])
         ax[1,0].set_yticks([])
         ax[1,0].set_title('vertex model reconstructed') 
-        ax[1,1].imshow(self.color_choices[self.alpha_pde+self.num_regions], origin='lower', cmap=newcmp, vmin=-pi/2, vmax=0)
+        ax[1,1].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
         ax[1,1].set_xticks([])
         ax[1,1].set_yticks([])
         ax[1,1].set_title('pde')         
@@ -714,10 +723,10 @@ class graph_trajectory(graph):
             grain_state[:, 4] = self.extraV_frames[:, frame]/s**3
         
         
-        grain_state[:, 5] = np.cos(self.color_choices[1:self.num_regions+1])
-        grain_state[:, 6] = np.sin(self.color_choices[1:self.num_regions+1])
-        grain_state[:, 7] = np.cos(self.color_choices[self.num_regions+1:2*self.num_regions+1])
-        grain_state[:, 8] = np.sin(self.color_choices[self.num_regions+1:2*self.num_regions+1])
+        grain_state[:, 5] = np.cos(self.theta_x[1:])
+        grain_state[:, 6] = np.sin(self.theta_x[1:])
+        grain_state[:, 7] = np.cos(self.theta_z[1:])
+        grain_state[:, 8] = np.sin(self.theta_z[1:])
         
         
         for joint, coor in self.vertices.items():
@@ -755,13 +764,13 @@ class GrainHeterograph:
     def __init__(self):
         self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
                          'joint':['x', 'y', 'z', 'G', 'R']}
-      #  self.features_edge = ['len']
-        
+        self.mask = {'grain':None, 'joint':None}
         
         self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
         
     
-        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
+        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy'],}
+                    #    'grain_event':'elimination', 'edge_event':'rotation'}    
         
         self.edge_type = [('grain', 'push', 'joint'), \
                           ('joint', 'pull', 'grain'), \
@@ -778,6 +787,13 @@ class GrainHeterograph:
     def form_gradient(self, prev, nxt):
         
         
+        
+        """
+            
+        Gradients for next prediction
+            
+        """        
+        
         if nxt is not None:
 
         
@@ -787,7 +803,19 @@ class GrainHeterograph:
                                          
             self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
                                          self.feature_dicts['joint'][:,:2]
-                                     
+        
+        #    self.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
+        
+        #    self.target_dicts['edge_event'] = nxt.edge_rotation
+        
+                                        
+        """
+            
+        Gradients of history
+            
+        """
+        
+        
                                      
         if prev is None:
             prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
@@ -800,8 +828,7 @@ class GrainHeterograph:
         self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
 
         self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint)) 
-        
-        
+                
 
         
         for nodes, features in self.features.items():
@@ -815,7 +842,7 @@ if __name__ == '__main__':
     #g1 = graph(lxd = 10, seed=1)  
     #g1.show_data_struct()  
     parser = argparse.ArgumentParser("Generate heterograph data")
-    parser.add_argument("--mode", type=str, default = 'train')
+    parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--train_dir", type=str, default = './data/')
     parser.add_argument("--test_dir", type=str, default = './test/')
@@ -874,6 +901,13 @@ if __name__ == '__main__':
                 dill.dump(test_samples, outp)
      
         
+    if args.mode == 'check':
+        seed = 1
+        g1 = graph(lxd = 20, seed=1) 
+        g1.show_data_struct()
+       # traj = graph_trajectory(seed = seed, frames = 25)
+       # traj.load_trajectory(rawdat_dir = args.rawdat_dir)
+    
     
     # TODO:
     # 4) node matching and iteration for different time frames

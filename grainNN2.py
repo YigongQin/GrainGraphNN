@@ -21,7 +21,7 @@ def criterion(data, pred):
     
     return 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
-           
+        # +    
     
 
 def train(model, num_epochs, train_loader, test_loader):
@@ -106,7 +106,7 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser("Train the model.")
     parser.add_argument("--mode", type=str, default="test")
-    parser.add_argument("--all_id", type=int, default=1)
+    parser.add_argument("--model_id", type=int, default=1)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
@@ -122,7 +122,7 @@ if __name__=='__main__':
     
     
     mode = args.mode
-    all_id = args.all_id -1
+    model_id = args.model_id -1
     device = args.device
     
     if mode == 'test': args.model_exist = True
@@ -140,7 +140,7 @@ if __name__=='__main__':
     
     print('==========  GrainNN specification  =========')
     print('3D grain microstructure evolution')
-    print('the mode is: ', mode, ', the model id is: ', all_id)
+    print('the mode is: ', mode, ', the model id is: ', model_id)
     print('device: ', args.device)
     print('model already exists, no training required: ', args.model_exist)
     print('no PDE solver required, input is random: ', args.noPDE)
@@ -191,7 +191,7 @@ if __name__=='__main__':
    # train_list = data_list[:num_train]
    # test_list = data_list[num_train:]                 
     
-    hp = hyperparam(mode, all_id)
+    hp = hyperparam(mode, model_id)
     hp.features = sample.features
     hp.targets = sample.targets
     hp.device = device
@@ -258,7 +258,7 @@ if __name__=='__main__':
         end = time.time()
         print('training time', end - start)
         
-        if mode == 'train': torch.save(model.state_dict(), args.model_dir + args.model_name + str(all_id))
+        if mode == 'train': torch.save(model.state_dict(), args.model_dir + args.model_name + str(model_id))
       #  if mode == 'ini': torch.save(model.state_dict(), './ini_lstmmodel'+str(all_id))
         
         fig, ax = plt.subplots() 
@@ -280,7 +280,7 @@ if __name__=='__main__':
 
     if args.mode == 'test':
         
-        model.load_state_dict(torch.load(args.model_dir + args.model_name + str(all_id)))
+        model.load_state_dict(torch.load(args.model_dir + args.model_name + str(model_id)))
         model.eval() 
               
         

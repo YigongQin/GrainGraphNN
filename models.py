@@ -264,8 +264,8 @@ class GrainNN2(nn.Module):
             
 
             y_dict.update({'grain_event': 1*(area<1e-6) })
-          #  y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], \
-          #                  edge_index_dict['joint', 'connect', 'joint'])})
+            y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], \
+                            edge_index_dict['joint', 'connect', 'joint'])})
             
             """
             

@@ -27,6 +27,7 @@ import h5py
 import glob, re, math, os, argparse
 from termcolor import colored
 import dill
+import itertools
 
 def angle_norm(angular):
 
@@ -287,8 +288,8 @@ class graph:
                         ii += s
                         jj += s
                     else:
-                        #pass
-                        raise ValueError(i,j)
+                        pass
+                       # raise ValueError(i,j)
                 alpha = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]   
                 self.alpha_field[i,j] = alpha 
                 self.region_area[alpha] += 1
@@ -426,7 +427,7 @@ class graph_trajectory(graph):
         self.joint_traj = []
         self.events = np.zeros((2, self.frames), dtype=int)
         
-        self.show = False
+        self.show = True
         self.states = []
         self.physical_params = physical_params
 
@@ -457,71 +458,146 @@ class graph_trajectory(graph):
         self.extraV_frames = np.asarray(f['extra_area'])
         self.extraV_frames = self.extraV_frames.reshape((self.num_regions, data_frames), order='F')        
      
-        self.num_vertex_features = 7  ## first 2 are x,y coordinates, next 5 are possible phase
+        self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         self.active_args = self.active_args.\
             reshape((self.num_vertex_features, 5*len(self.vertices), data_frames ), order='F')
         self.active_coors = self.active_args[:2,:,:]
-        self.active_args = self.active_args[2:,:,:]
+        self.active_max = self.active_args[2,:,:]
+        self.active_args = self.active_args[3:,:,:]
         
-        
- 
 
-
+        prev_joint = {k:[0,0,100] for k, v in self.joint2vertex.items()}
         
         for frame in range(self.frames):
            
             cur_joint = defaultdict(list)
-            quadraples = []
+            quadraples = defaultdict(list)
             for vertex in range(self.active_args.shape[1]): 
+                max_neighbor = self.active_max[vertex, frame]
                 args = set(self.active_args[:,vertex,frame])
                 xp, yp = self.x[self.active_coors[0,vertex,frame]], self.y[self.active_coors[1,vertex,frame]]
                 if -1 in args: args.remove(-1)
                 if not args: continue
-                if len(args)>3: 
-                    quadraples.append([set(args),(xp, yp)])
-                    continue
-                
                 args = tuple(sorted(args))
-                cur_joint[args].append((xp,yp))
+                
+                if len(args)==4: 
+                    if args not in quadraples or max_neighbor<quadraples[args][2]:    
+                        quadraples[args] = [xp, yp, max_neighbor]
+                   # quadraples.append([list(args),[xp, yp, max_neighbor]])
+                    continue
+                if len(args)>4:
+                    print(colored('find more than qudraples', 'red'))
+                
+                if args not in cur_joint or max_neighbor<cur_joint[args][2]:    
+                    cur_joint[args] = [xp, yp, max_neighbor]
 
                       
             ## deal with quadraples here
             
-            for q, coors in quadraples:
-              #  print('qudraple: ', q)
-                for k in self.joint2vertex.keys():
-                    if set(k).issubset(q):
-                   #     print('classified to triple', k)
-                        cur_joint[k].append(coors)
-                for k in cur_joint.keys():
-                    if set(k).issubset(q):
-                   #     print('classified to triple', k)
-                        cur_joint[k].append(coors) 
+            for q, coors in quadraples.items():
+                q_list = list(q)
+              #  print(q_list)
+                for comb in [[0,1,2],[0,1,3],[0,2,3],[1,2,3]]:
+                    arg = tuple([q_list[i] for i in comb])
+
+                    if arg not in prev_joint and arg in cur_joint:
+                        del cur_joint[arg]
+
                         
-            self.joint_traj.append(cur_joint)
-            
+
             
             # check loaded information
             
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
             cur_grain = set(np.unique(self.alpha_pde))
-            cur_covered_grain = set()
-            for i in cur_joint.keys():
-                cur_covered_grain.update(set(i))
-            count = 0
-            for k1, v1 in cur_joint.items():
-                for k2, v2 in cur_joint.items(): 
-                    if k1!=k2 and len( set(k1).intersection(set(k2)) ) >= 2:
-                        count += 1
             
-            print('====================================')
+            
+            grain_set = set()
+            for k in cur_joint.keys():
+                grain_set.update(set(k))
+            
+            
+            missing = set()
+            miss_case = defaultdict(int)
+            
+            def clean_data():
+               # jj_link = 0
+                total_missing = 0
+                for k1 in cur_joint.keys():
+                    num_link = 0
+                    for k2 in cur_joint.keys(): 
+                        if k1!=k2 and len( set(k1).intersection(set(k2)) ) == 2:
+                            num_link += 1
+                #            jj_link += 1
+                          #  print(jj_link, k1, k2)
+                    if num_link <3:
+                        missing.update(set(k1))
+                        miss_case.update({k1:3-num_link})
+                        total_missing += 3-num_link
+                     #   print('find missing junction link', k1, 3-num_link)
+                return total_missing   
+            
+            total_missing = clean_data()
+      
+            #q_pool = []
+            for q, coor in quadraples.items():
+                if set(q).issubset(missing):
+                    possible = list(itertools.combinations(list(q), 3))
+                    miss_case_sum = 0
+                    max_case = 0
+                    
+                    for i, j in miss_case.items():
+                        if len(set(i).intersection(set(q)))>=2:
+                            miss_case_sum += j
+                            max_case = max(max_case, j)
+                    if miss_case_sum>2:
+                        print('using quadraples to find missing link', q)
+                        print('miss links', miss_case_sum)        
+                    if miss_case_sum == 3:
+                        for c in miss_case.keys():
+                            if c in possible:
+                                possible.remove(c)
+                        for ans in list(itertools.combinations(possible, max_case)):
+                            print('try ans', ans)
+                            for a in ans:
+                                cur_joint[a] = coor
+                            cur = clean_data()
+                            if cur == total_missing -3:
+                                print('fixed!')
+                                total_missing = cur
+                                break
+                            else:
+                                for a in ans:
+                                    del cur_joint[a]
+                                    
+                    if miss_case_sum == 4:
+                        for ans in list(itertools.combinations(possible, 2)):
+                            print('try ans', ans)
+                            for a in ans:
+                                cur_joint[a] = coor
+                            cur = clean_data()
+                            if cur == total_missing -4:
+                                print('fixed!')
+                                total_missing = cur
+                                break
+                            else:
+                                for a in ans:
+                                    del cur_joint[a]                        
+                    
+
+            self.joint_traj.append(cur_joint)
+            prev_joint = cur_joint
+            
+            
             print('load frame %d'%frame)
-            print('number of grains %d'%len(cur_grain))
-            print('number of region junctions covered %d'%len(cur_covered_grain))
+            print('number of grains pixel %d'%len(cur_grain))
+            print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
-            print('number of links %d'%count)
-            
+          #  print('estimated number of junction-junction links %d'%jj_link) 
+            # when it approaches the end, 3*junction is not accurate
+            print('====================================')
+            print('\n')
             
         self.vertex_matching()
         
@@ -539,6 +615,8 @@ class graph_trajectory(graph):
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
+
+            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
             cur_grain = set(cur_grain)
             #cur_grain = set()
             #for i in cur_joint.keys():
@@ -663,11 +741,12 @@ class graph_trajectory(graph):
                 if joint in cur_joint:
                     vert = self.joint2vertex[joint]
                     new_vert.add(vert)
-                    coors = cur_joint[joint]
-                    coors = [periodic_move(i, old_vertices[vert]) for i in coors]
-                    cluster_x, cluster_y = zip(*coors)
+                    coors = cur_joint[joint][:2]
+                   # coors = [periodic_move(i, old_vertices[vert]) for i in coors]
+                   # cluster_x, cluster_y = zip(*coors)
 
-                    self.vertices[vert] = (sum(cluster_x)/len(cluster_x), sum(cluster_y)/len(cluster_y))
+                    self.vertices[vert] = periodic_move(coors, old_vertices[vert])
+                    #(sum(cluster_x)/len(cluster_x), sum(cluster_y)/len(cluster_y))
 
                 else:
                     vert = self.joint2vertex[joint]
@@ -903,10 +982,10 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
         seed = 1
-        g1 = graph(lxd = 20, seed=1) 
-        g1.show_data_struct()
-       # traj = graph_trajectory(seed = seed, frames = 25)
-       # traj.load_trajectory(rawdat_dir = args.rawdat_dir)
+      #  g1 = graph(lxd = 10, seed=1) 
+       # g1.show_data_struct()
+        traj = graph_trajectory(seed = seed, frames = 14)
+        traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     
     # TODO:

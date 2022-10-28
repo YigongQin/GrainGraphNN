@@ -427,7 +427,7 @@ class graph_trajectory(graph):
         self.joint_traj = []
         self.events = np.zeros((2, self.frames), dtype=int)
         
-        self.show = True
+        self.show = False
         self.states = []
         self.physical_params = physical_params
 
@@ -648,28 +648,7 @@ class graph_trajectory(graph):
                         junction.update(set(k))
                         old_vert.append(self.joint2vertex[k])
                         todelete.add(k)
-                        
-
-                '''        
-                if len(junction) == 3:
-                    
-                    self.joint2vertex[tuple(sorted(junction))] = old_vert[-1]
-                    print('the new joint', tuple(sorted(junction)), 'inherit the vert', old_vert[-1])
-                    old_vert.pop()
-                
-                else:
-                
-                cur_junction = junction.copy()
-                for neighbor in cur_junction:
-                    if neighbor in eliminated_grains:
-                        visited.add(neighbor)
-                        for k, v in self.joint2vertex.items():
-                            if neighbor in set(k):
-                                junction.update(set(k))
-                                if self.joint2vertex[k] not in old_vert:
-                                    old_vert.append(self.joint2vertex[k])
-                                todelete.add(k)
-                 '''       
+      
                 junction.remove(elm_grain)        
                 print('%dth grain eliminated with no. of sides %d'%(elm_grain, len(todelete)), junction)
                 for k in todelete:
@@ -984,7 +963,7 @@ if __name__ == '__main__':
         seed = 1
       #  g1 = graph(lxd = 10, seed=1) 
        # g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 14)
+        traj = graph_trajectory(seed = seed, frames = 25)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     
@@ -1089,3 +1068,26 @@ if frame>0:
 return
 
 '''    
+
+                        
+
+'''        
+if len(junction) == 3:
+    
+    self.joint2vertex[tuple(sorted(junction))] = old_vert[-1]
+    print('the new joint', tuple(sorted(junction)), 'inherit the vert', old_vert[-1])
+    old_vert.pop()
+
+else:
+
+cur_junction = junction.copy()
+for neighbor in cur_junction:
+    if neighbor in eliminated_grains:
+        visited.add(neighbor)
+        for k, v in self.joint2vertex.items():
+            if neighbor in set(k):
+                junction.update(set(k))
+                if self.joint2vertex[k] not in old_vert:
+                    old_vert.append(self.joint2vertex[k])
+                todelete.add(k)
+ ''' 

@@ -367,18 +367,11 @@ class graph:
         Output: edges, region_coors
         """
         
-        # form edge
+        
         self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
-        self.vertex_neighbor.clear()
-        for k1, v1 in self.joint2vertex.items():
-            for k2, v2 in self.joint2vertex.items(): 
-                if k1!=k2 and len( set(k1).intersection(set(k2)) ) >= 2:
-                    self.vertex_neighbor[v1].add(v2) 
+
                     
-        self.edges.clear()
-        for k, v in self.vertex_neighbor.items():
-            for i in v:
-                self.edges.add((k, i))
+
         
         # form region
         self.regions.clear()
@@ -407,7 +400,23 @@ class graph:
             self.region_center[region] = [np.mean(x), np.mean(y)]
             self.region_coors[region] = sorted(moved_region, \
                 key = lambda x: counterclock(x, self.region_center[region]))        
-                     
+
+
+        # form edge             
+        self.vertex_neighbor.clear()
+        for k1, v1 in self.joint2vertex.items():
+            for k2, v2 in self.joint2vertex.items(): 
+                if k1!=k2 and len( set(k1).intersection(set(k2)) ) == 2:
+
+                    self.vertex_neighbor[v1].add(v2) 
+
+                    
+                    
+        self.edges.clear()
+        for k, v in self.vertex_neighbor.items():
+            for i in v:
+                self.edges.add((k, i))
+
         
         self.plot_polygons()
 
@@ -810,6 +819,14 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[1]:np.array(jg_edge).T})
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
+        
+        joint_joint_neighbor = np.array(list(self.joint2vertex.keys()))
+        joint_grain_neighbor = list(self.vertex_neighbor.values())
+        joint_grain_neighbor = np.array([list(i) for i in joint_grain_neighbor])
+        
+        hg.neighbor_dicts.update({('joint','joint'):joint_joint_neighbor})
+        hg.neighbor_dicts.update({('joint','grain'):joint_grain_neighbor})
+        
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed})
         
@@ -839,6 +856,7 @@ class GrainHeterograph:
         self.edge_index_dicts = {}
         self.edge_weight_dicts = {}
         self.additional_feature_keys = {}
+        self.neighbor_dicts = {}
         
         self.physical_params = {}
 

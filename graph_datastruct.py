@@ -157,10 +157,11 @@ class graph:
             np.random.seed(seed)
             self.random_voronoi()
             self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+            self.alpha_pde = self.alpha_field
             self.update()
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
-            self.alpha_pde = self.alpha_field
+            
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
 
@@ -177,6 +178,7 @@ class graph:
     
     def compute_error_layer(self):
         self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
+        print('error', self.error_layer)
     
     def random_voronoi(self):
 
@@ -352,7 +354,6 @@ class graph:
         ax[1,1].set_yticks([])
         ax[1,1].set_title('pde')         
         
-        
         ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
         ax[1,2].set_xticks([])
         ax[1,2].set_yticks([])
@@ -369,7 +370,8 @@ class graph:
         
         
         self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
-
+        self.vertex_neighbor.clear()                    
+        self.edges.clear()
                     
 
         
@@ -394,31 +396,36 @@ class graph:
             for vert in verts:
                 vert = [i + 1*(not j) for i, j in zip(vert, inbound)]
                 moved_region.append(vert)
-            self.region_coors[region] = moved_region
+        
             x, y = zip(*moved_region)
          
             self.region_center[region] = [np.mean(x), np.mean(y)]
-            self.region_coors[region] = sorted(moved_region, \
-                key = lambda x: counterclock(x, self.region_center[region]))        
-
-
+            
+            
+            vert_in_region = self.regions[region]
+            
+            sort_index = sorted(range(len(moved_region)), \
+                key = lambda x: counterclock(moved_region[x], self.region_center[region]))  
+            
+                
+            self.region_coors[region] = [moved_region[i] for i in sort_index]
+            
+            sorted_vert = [vert_in_region[i] for i in sort_index]
+            self.regions[region] = sorted_vert
+          #  print(sort_index, vert_in_region)
+            for i in range(len(sorted_vert)):
+                
+                link = (sorted_vert[i-1], sorted_vert[i]) if i >0 else (sorted_vert[len(sorted_vert)-1], sorted_vert[i])
+                self.edges.add(link)
+                
         # form edge             
-        self.vertex_neighbor.clear()
-        for k1, v1 in self.joint2vertex.items():
-            for k2, v2 in self.joint2vertex.items(): 
-                if k1!=k2 and len( set(k1).intersection(set(k2)) ) == 2:
 
-                    self.vertex_neighbor[v1].add(v2) 
-
-                    
-                    
-        self.edges.clear()
-        for k, v in self.vertex_neighbor.items():
-            for i in v:
-                self.edges.add((k, i))
+        for src, dst in self.edges:
+            self.vertex_neighbor[src].add(dst)
 
         
         self.plot_polygons()
+        self.compute_error_layer()
 
     def GNN_update(self, X: np.ndarray):
         
@@ -730,11 +737,7 @@ class graph_trajectory(graph):
                     vert = self.joint2vertex[joint]
                     new_vert.add(vert)
                     coors = cur_joint[joint][:2]
-                   # coors = [periodic_move(i, old_vertices[vert]) for i in coors]
-                   # cluster_x, cluster_y = zip(*coors)
-
                     self.vertices[vert] = periodic_move(coors, old_vertices[vert])
-                    #(sum(cluster_x)/len(cluster_x), sum(cluster_y)/len(cluster_y))
 
                 else:
                     vert = self.joint2vertex[joint]
@@ -757,7 +760,7 @@ class graph_trajectory(graph):
                 self.show_data_struct()
             
 
-
+            
 
     def show_events(self):
         
@@ -820,9 +823,14 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
         
-        joint_joint_neighbor = np.array(list(self.joint2vertex.keys()))
-        joint_grain_neighbor = list(self.vertex_neighbor.values())
-        joint_grain_neighbor = np.array([list(i) for i in joint_grain_neighbor])
+        joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
+        joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
+        for k, v in self.vertex_neighbor.items():
+            if len(v)<3: print(colored('find a junction not 3-3 type', 'red'))
+            joint_joint_neighbor[k][:len(v)] = np.array(list(v))
+        
+        for k, v in self.joint2vertex.items():
+            joint_grain_neighbor[v] = np.array(list(k))
         
         hg.neighbor_dicts.update({('joint','joint'):joint_joint_neighbor})
         hg.neighbor_dicts.update({('joint','grain'):joint_grain_neighbor})

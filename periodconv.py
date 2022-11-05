@@ -119,6 +119,7 @@ class PeriodConv(MessagePassing):
             self.lin.reset_parameters()
         self.aggr_module.reset_parameters()
         self.lin_l.reset_parameters()
+        self.lin_l2.reset_parameters()
         if self.root_weight:
             self.lin_r.reset_parameters()
 

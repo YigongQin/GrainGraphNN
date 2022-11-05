@@ -179,15 +179,24 @@ class EdgeDecoder(torch.nn.Module):
         z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
         z = torch.sigmoid(z)
         
-        elimed_arg = (z>0.5).nonzero(as_tuple=False)
+        
+        ## predict eliminated edge
+        elimed_arg = (z>0.5).nonzero(as_tuple=True)
         elimed_prob = z[elimed_arg]
-        elimed_index = joint_edge_index[:, elimed_arg]
+       
+      #  print(z, elimed_prob)
         
-        sorted_prob, sorted_index = torch.sort(elimed_prob)
-        sorted_index = elimed_index[:, sorted_index]
+        src = src[elimed_arg]
+        dst = dst[elimed_arg]
         
+        ## sort
+        sorted_prob, indices= torch.sort(elimed_prob, dim=0, descending=True)
+        src = src[indices]
+        dst = dst[indices]
         
-        return z, (sorted_prob, sorted_index)
+      #  print(sorted_prob, indices, src, dst)
+        
+        return z, (sorted_prob, src, dst)
 
     
     
@@ -273,7 +282,7 @@ class GrainNN2(nn.Module):
             
             """            
             
-            edge_prob, (elimed_prob, elimed_index) = self.edge_decoder(h_dict['joint'], \
+            edge_prob, edge_event_list = self.edge_decoder(h_dict['joint'], \
                             edge_index_dict['joint', 'connect', 'joint'])
                 
             y_dict.update({'grain_event': 1*(area<1e-6) })
@@ -286,7 +295,8 @@ class GrainNN2(nn.Module):
             """    
             
             x_dict = self.form_next_x(x_dict, y_dict)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, y_dict)
+            edge_index_dict = self.from_next_edge_index(edge_index_dict, y_dict,\
+                                                        edge_event_list)
             
                         
         return y_dict
@@ -306,7 +316,20 @@ class GrainNN2(nn.Module):
         return x_dict
 
     @staticmethod
-    def from_next_edge_index(edge_index_dict, y_dict):
+    def from_next_edge_index(edge_index_dict, y_dict, edge_event_list):
+        
+        
+        """
+        
+        Neighbor switching
+        
+        """          
+        
+        pob, src, dst = edge_event_list
+        for i in range(len(src)):
+            p1, p2 = src[i], dst[i]
+            
+        
         
         return edge_index_dict
         

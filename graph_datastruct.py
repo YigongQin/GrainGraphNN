@@ -416,12 +416,11 @@ class graph:
             for i in range(len(sorted_vert)):
                 
                 link = (sorted_vert[i-1], sorted_vert[i]) if i >0 else (sorted_vert[len(sorted_vert)-1], sorted_vert[i])
-                self.edges.add(link)
-                
-        # form edge             
+                if (link[1], link[0]) not in self.edges:
+                    self.edges.add(link)
+                self.vertex_neighbor[link[0]].add(link[1])
 
-        for src, dst in self.edges:
-            self.vertex_neighbor[src].add(dst)
+            
 
         
         self.plot_polygons()
@@ -852,8 +851,9 @@ class GrainHeterograph:
         self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
         
     
-        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy'],}
-                    #    'grain_event':'elimination', 'edge_event':'rotation'}    
+        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}
+        
+        self.events = {'grain':'elimination', 'edge':'rotation'}    
         
         self.edge_type = [('grain', 'push', 'joint'), \
                           ('joint', 'pull', 'grain'), \

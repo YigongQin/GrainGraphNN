@@ -173,8 +173,11 @@ class EdgeDecoder(torch.nn.Module):
     
     def forward(self, joint_feature, joint_edge_index):
         src, dst = joint_edge_index[0], joint_edge_index[1]
+
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
         z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
+        z_r = torch.cat([joint_feature[dst], joint_feature[src]], dim=-1) 
+        z = torch.cat([z, z_r], dim=0)
         z = F.relu(self.lin1(z))
         z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
         z = torch.sigmoid(z)

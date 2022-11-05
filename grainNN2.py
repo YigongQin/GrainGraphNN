@@ -20,8 +20,9 @@ from graph_datastruct import graph_trajectory
 def criterion(data, pred):
     
     return 1000*torch.mean((data['joint'] - pred['joint'])**2) \
+        # + torch.nn.NLLLoss(torch.log(pred['edge_event']), data['edge_event']) 
         # + torch.mean((data['grain'] - pred['grain'])**2)
-        # +    
+         
     
 
 def train(model, num_epochs, train_loader, test_loader):

@@ -165,18 +165,29 @@ class SeqGCLSTM(nn.Module):
         return param
     
     
-class EdgeDecodeer(torch.nn.Module):
+class EdgeDecoder(torch.nn.Module):
     def __init__(self, out_channels):
         super().__init__()
         self.lin1 = nn.Linear(2*out_channels, out_channels)
         self.lin2 = nn.Linear(out_channels, 1)
     
-    def forward(self, joint, joint_edge_lindex):
-        row, col = joint_edge_lindex[0], joint_edge_lindex[1]
-        z = torch.cat([joint[row], joint[col]], dim=-1)
+    def forward(self, joint_feature, joint_edge_index):
+        src, dst = joint_edge_index[0], joint_edge_index[1]
+        # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
+        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
         z = F.relu(self.lin1(z))
-        z = self.lin2(z)
-        return z.view(-1)
+        z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
+        z = torch.sigmoid(z)
+        
+        elimed_arg = (z>0.5).nonzero(as_tuple=False)
+        elimed_prob = z[elimed_arg]
+        elimed_index = joint_edge_index[:, elimed_arg]
+        
+        sorted_prob, sorted_index = torch.sort(elimed_prob)
+        sorted_index = elimed_index[:, sorted_index]
+        
+        
+        return z, (sorted_prob, sorted_index)
 
     
     
@@ -209,7 +220,7 @@ class GrainNN2(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
 
-        self.edge_decoder = EdgeDecodeer(self.out_channels)
+        self.edge_decoder = EdgeDecoder(self.out_channels)
       #  self.jj_edge = nn.Linear(2*self.out_channels, 1)
 
     def forward(self, x_dict, edge_index_dict):
@@ -262,10 +273,11 @@ class GrainNN2(nn.Module):
             
             """            
             
-
+            edge_prob, (elimed_prob, elimed_index) = self.edge_decoder(h_dict['joint'], \
+                            edge_index_dict['joint', 'connect', 'joint'])
+                
             y_dict.update({'grain_event': 1*(area<1e-6) })
-            y_dict.update({'edge_event': self.edge_decoder(h_dict['joint'], \
-                            edge_index_dict['joint', 'connect', 'joint'])})
+            y_dict.update({'edge_event': edge_prob})
             
             """
             

@@ -11,11 +11,11 @@ pip3 install -r requirements.txt
 ## Usage
 training
 ```
-python3 grainNN2.py train --mode=train
+python3 grainNN2.py --mode=train
 ```
 
 testing
 
 ```
-python3 grainNN2.py test --mode=test
+python3 grainNN2.py --mode=test
 ```

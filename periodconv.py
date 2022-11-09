@@ -18,7 +18,7 @@ from torch_geometric.nn.aggr import Aggregation, MultiAggregation
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import Adj, OptPairTensor, Size
-from torch_geometric.utils import add_self_loops
+
 
 class PeriodConv(MessagePassing):
     r"""The GraphSAGE operator from the `"Inductive Representation Learning on
@@ -129,8 +129,7 @@ class PeriodConv(MessagePassing):
        # print('tuple', x[0].shape, x[1].shape)
         if isinstance(x, Tensor):
        #     print(x.shape)
-            edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
-            x: OptPairTensor = (x, x)            
+            x: OptPairTensor = (x, x)
 
         if self.project and hasattr(self, 'lin'):
             x = (self.lin(x[0]).relu(), x[1])

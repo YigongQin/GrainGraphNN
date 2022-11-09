@@ -176,16 +176,16 @@ class EdgeDecoder(torch.nn.Module):
 
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
         z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
-        z_r = torch.cat([joint_feature[dst], joint_feature[src]], dim=-1) 
-        z = torch.cat([z, z_r], dim=0)
+
         z = F.relu(self.lin1(z))
         z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
         z = torch.sigmoid(z)
         
         
         ## predict eliminated edge
-        elimed_arg = (z>0.5).nonzero(as_tuple=True)
-        elimed_prob = z[elimed_arg]
+        half_z = z[:len(src)//2]
+        elimed_arg = (half_z>0.5).nonzero(as_tuple=True)
+        elimed_prob = half_z[elimed_arg]
        
       #  print(z, elimed_prob)
         
@@ -320,7 +320,7 @@ class GrainNN2(nn.Module):
 
     @staticmethod
     def from_next_edge_index(edge_index_dict, y_dict, edge_event_list):
-        
+    
         
         """
         
@@ -328,11 +328,27 @@ class GrainNN2(nn.Module):
         
         """          
         
-        pob, src, dst = edge_event_list
+        prob, src, dst = edge_event_list
+        E_pp = edge_index_dict['joint', 'connect', 'joint']
+        E_pq = edge_index_dict['joint', 'pull', 'grain']
+        E_qp = edge_index_dict['grain', 'push', 'joint']
         for i in range(len(src)):
             p1, p2 = src[i], dst[i]
             
-        
+            # grain neighbors
+            p1_qn_index = (E_pq[0]==p1).nonzero(as_tuple=True)
+            p1_qn = E_pq[1][ p1_qn_index ]
+            p2_qn_index = (E_pq[0]==p2).nonzero(as_tuple=True)
+            p2_qn = E_pq[1][ p2_qn_index ]
+            
+            # joint neighbors
+            p1_pn_index = (E_pp[0]==p1).nonzero(as_tuple=True)
+            p1_pn = E_pq[1][ p1_pn_index ]
+            p2_pn_index = (E_pp[0]==p2).nonzero(as_tuple=True)
+            p2_pn = E_pq[1][ p2_pn_index ]            
+            
+            
+            
         
         return edge_index_dict
         

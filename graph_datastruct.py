@@ -41,14 +41,6 @@ def in_bound(x, y):
     else:
         return False
     
-def translate_min_dist(s, t):
-    s0, s1 = s[0], t[0]
-    t0 ,t1 = s[1], t[1]
-    if s0 - s1 >0.5: s1 += 1
-    if s1 - s0 >0.5: s0 += 1
-    if t0 - t1 >0.5: t1 += 1
-    if t1 - t0 >0.5: t0 += 1  
-    return [s0 ,s1], [t0, t1]
 
 def periodic_move(p, pc):
     x,  y  = p
@@ -59,6 +51,13 @@ def periodic_move(p, pc):
     if y>yc+0.5: y-=1    
     
     return (x, y)
+
+def relative_angle(p1, p2):
+    
+    p1 = periodic_move(p1, p2)
+    
+    return np.arctan2(p2[1]-p1[1], p2[0]-p1[0])
+
 
 def linked_edge_by_junction(j1, j2):
     
@@ -723,6 +722,15 @@ class graph_trajectory(graph):
                     old_junction_i, old_junction_j = quadraples[e2]
                     new_junction_i, new_junction_j = quadraples_new[e2]
 
+                    old_i_x, old_j_x = self.vertices[self.joint2vertex[old_junction_i]], \
+                                        self.vertices[self.joint2vertex[old_junction_j]] 
+                    new_i_x, new_j_x = cur_joint[new_junction_i][:2], \
+                                        cur_joint[new_junction_j][:2]                   
+                    
+                   # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
+                    if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
+                    #    print(colored('switch junction for less rotation', 'green'), new_junction_i, new_junction_j)
+                        new_junction_i, new_junction_j = new_junction_j, new_junction_i
                     
                     self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
                     self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)

@@ -852,8 +852,8 @@ class GrainHeterograph:
         self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
         
     
-        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy'],}
-                    #    'grain_event':'elimination', 'edge_event':'rotation'}    
+        self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}
+        self.events = {'grain_event':'elimination', 'edge_event':'rotation'}    
         
         self.edge_type = [('grain', 'push', 'joint'), \
                           ('joint', 'pull', 'grain'), \

@@ -209,6 +209,7 @@ if __name__=='__main__':
     print('targets: ', [(k, v) for k, v in hp.targets.items()])
     print('heteroData metadata', heteroData.metadata())
     print('nodes in samples', [(k, v.shape[0]) for k, v in sample.feature_dicts.items()])
+    print('edges in samples', [(k, v.shape[1]) for k, v in sample.edge_index_dicts.items()])
     print('\n')
     
     

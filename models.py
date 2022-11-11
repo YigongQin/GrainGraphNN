@@ -183,9 +183,8 @@ class EdgeDecoder(torch.nn.Module):
         
         
         ## predict eliminated edge
-        half_z = z[:len(src)//2]
-        elimed_arg = (half_z>0.5).nonzero(as_tuple=True)
-        elimed_prob = half_z[elimed_arg]
+        elimed_arg = ((z>0.5)&(src<dst)).nonzero(as_tuple=True)
+        elimed_prob = z[elimed_arg]
        
       #  print(z, elimed_prob)
         
@@ -298,7 +297,7 @@ class GrainNN2(nn.Module):
             """    
             
             x_dict = self.form_next_x(x_dict, y_dict)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, y_dict,\
+            edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict,\
                                                         edge_event_list)
             
                         
@@ -319,8 +318,8 @@ class GrainNN2(nn.Module):
         return x_dict
 
     @staticmethod
-    def from_next_edge_index(edge_index_dict, y_dict, edge_event_list):
-    
+    def from_next_edge_index(edge_index_dict, x_dict, edge_event_list):
+        return
         
         """
         
@@ -332,23 +331,81 @@ class GrainNN2(nn.Module):
         E_pp = edge_index_dict['joint', 'connect', 'joint']
         E_pq = edge_index_dict['joint', 'pull', 'grain']
         E_qp = edge_index_dict['grain', 'push', 'joint']
-        for i in range(len(src)):
-            p1, p2 = src[i], dst[i]
+        
+        ## find distance between joints a and b
+        dist = lambda a, b: (x_dict['joint'][a,0]-x_dict['joint'][b,0])**2 + \
+                            (x_dict['joint'][a,1]-x_dict['joint'][b,1])**2
+        for vanish_edge_id in range(len(src)):
+            p1, p2 = src[vanish_edge_id], dst[vanish_edge_id]
             
             # grain neighbors
-            p1_qn_index = (E_pq[0]==p1).nonzero(as_tuple=True)
+            p1_qn_index = (E_pq[0]==p1).nonzero().view(-1)
             p1_qn = E_pq[1][ p1_qn_index ]
-            p2_qn_index = (E_pq[0]==p2).nonzero(as_tuple=True)
+            p2_qn_index = (E_pq[0]==p2).nonzero().view(-1)
             p2_qn = E_pq[1][ p2_qn_index ]
             
             # joint neighbors
-            p1_pn_index = (E_pp[0]==p1).nonzero(as_tuple=True)
+            p1_pn_index = ((E_pp[0]==p1)&(E_pp[1]!=p2)).nonzero().view(-1)
             p1_pn = E_pq[1][ p1_pn_index ]
-            p2_pn_index = (E_pp[0]==p2).nonzero(as_tuple=True)
+            p2_pn_index = ((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)
             p2_pn = E_pq[1][ p2_pn_index ]            
             
+            # find two expanding grains and two shrinking grains
+            expand_q1 = p1_qn[(1-sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)] # new neighbor for p2
+            expand_q2 = p2_qn[(1-sum(p2_qn==i for i in p1_qn)).nonzero(as_tuple=True)] # new neighbor for p1
+        
+            shrink_q1, shrink_q2 = p1_qn[(sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)]
+
+            # swap the order
+            p1_qn_index_sort = [i for i in range(3) if p1_qn_index[i]==shrink_q1 ] + \
+                               [i for i in range(3) if p1_qn_index[i]==shrink_q2 ]
+            p2_qn_index_sort = [i for i in range(3) if p2_qn_index[i]==shrink_q1 ] + \
+                               [i for i in range(3) if p2_qn_index[i]==shrink_q2 ]
+            
+            # find two joints for one grain, they should be a pair for one joint
+
+            if torch.tensor([p1_pn[0], shrink_q1]) not in E_pq.T:
+                p1_pn = [p1_pn[1], p1_pn[0]]
+                p1_pn_index = [p1_pn_index[1], p1_pn_index[0]]
+                
+            if torch.tensor([p2_pn[0], shrink_q1]) not in E_pq.T:
+                p2_pn = [p2_pn[1], p2_pn[0]]
+                p2_pn_index = [p2_pn_index[1], p2_pn_index[0]]           
+
+            sq1_p1, sq2_p1 = p1_pn
+            sq1_p2, sq2_p2 = p2_pn
+            # calculate two possible connectivity
+            len_path1 = dist(p1, sq1_p1) + dist(p1, sq1_p2) + dist(p2, sq2_p1) + dist(p2, sq2_p2)
+            len_path2 = dist(p2, sq1_p1) + dist(p2, sq1_p2) + dist(p1, sq2_p1) + dist(p1, sq2_p2)
+            
+            if len_path1 > len_path2:
+                
+                # swap
+                p1_qn_index_sort.reverse()
+                p2_qn_index_sort.reverse()
+                p1_pn_index.reverse()
+                p2_pn_index.reverse()
+                
+                sq1_p1, sq2_p1 = sq2_p1, sq1_p1
+                sq1_p2, sq2_p2 = sq2_p2, sq1_p2
+
+                
+            # replace joint-grain edges
+            E_pq[1, p1_qn_index_sort[1]] = expand_q2 # reject sq2
+            E_pq[1, p2_qn_index_sort[0]] = expand_q1
             
             
+            # replace joint-joint edges
+            E_pp[1, p1_pn_index[1]] = sq1_p2 # reject sq2_p1
+            E_pp[1, p2_pn_index[0]] = sq2_p1
+            
+            
+            E_pp[1][ ((E_pp[0]==sq1_p2)&(E_pp[1]==p2)).nonzero().view(-1) ] = p1
+            E_pp[1][ ((E_pp[0]==sq2_p1)&(E_pp[1]==p1)).nonzero().view(-1) ] = p2
+      
+            
+            
+        E_qp[0], E_qp[1] = E_pq[1], E_pq[0]       
         
         return edge_index_dict
         

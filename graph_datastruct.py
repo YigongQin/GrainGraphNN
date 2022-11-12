@@ -623,8 +623,11 @@ class graph_trajectory(graph):
         
      
         all_grain = set(np.arange(self.num_regions)+1)
+
         for frame in range(self.frames):
-            print('summary of frame %d'%frame)
+            print('\n')
+            print('====================================')
+            print('summary of frame %d to frame %d'%(frame-1, frame))
             cur_joint = self.joint_traj[frame]
           #  self.alpha_field = self.alpha_pde_frames[:,:,frame].T
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
@@ -758,7 +761,7 @@ class graph_trajectory(graph):
             
            
             print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_event)))
-            print('====================================')
+            
                     
             self.events[0,frame] = len(eliminated_grains)
             self.events[1,frame] = len(switching_event)
@@ -845,6 +848,12 @@ class graph_trajectory(graph):
         
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed})
+
+
+      #  hg.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
+        
+      #  hg.target_dicts['edge_event'] = nxt.edge_rotation
+
         
         self.states.append(hg)
 
@@ -896,9 +905,7 @@ class GrainHeterograph:
             self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
                                          self.feature_dicts['joint'][:,:2]
         
-        #    self.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
-        
-        #    self.target_dicts['edge_event'] = nxt.edge_rotation
+
         
                                         
         """
@@ -995,10 +1002,10 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
         seed = 1
-        g1 = graph(lxd = 20, seed=1) 
-        g1.show_data_struct()
-       # traj = graph_trajectory(seed = seed, frames = 25)
-       # traj.load_trajectory(rawdat_dir = args.rawdat_dir)
+      #  g1 = graph(lxd = 20, seed=1) 
+      #  g1.show_data_struct()
+        traj = graph_trajectory(seed = seed, frames = 4)
+        traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     
     # TODO:

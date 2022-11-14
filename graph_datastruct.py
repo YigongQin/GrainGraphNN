@@ -384,7 +384,7 @@ class graph:
                 self.regions[region].append(v)
                 
                 self.region_coors[region].append(self.vertices[v])
-
+        cnt = 0
         for region, verts in self.region_coors.items():
             if len(verts)<=1: continue
         #    assert len(verts)>1, ('one vertex is not a grain ', region, self.regions[region])
@@ -392,13 +392,13 @@ class graph:
             moved_region = []
 
             vert_in_region = self.regions[region]
-            
+            tent_edge = set()
             prev = 0
             for cur in range(1, len(vert_in_region)):
                 if linked_edge_by_junction(self.vertex2joint[vert_in_region[prev]], \
                                            self.vertex2joint[vert_in_region[cur]]):
                     break
-        
+            tent_edge.add((vert_in_region[prev], vert_in_region[cur]))
           #  for i in range(1, len(verts)):
             for i in range(len(vert_in_region)-1):   
                 for nxt in range(len(vert_in_region)):                        
@@ -406,7 +406,7 @@ class graph:
                                                self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
                         prev, cur = cur, nxt
                         break
-                        
+                tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
                 verts[cur] = periodic_move(verts[cur], verts[prev])                                
                                           
             inbound = [True, True]
@@ -432,41 +432,26 @@ class graph:
             sorted_vert = [vert_in_region[i] for i in sort_index]
             self.regions[region] = sorted_vert
           #  print(sort_index, vert_in_region)
-            region_edge = set()
+            counter_edge = set()
             for i in range(len(sorted_vert)):
                 link = (sorted_vert[i-1], sorted_vert[i]) if i >0 else (sorted_vert[len(sorted_vert)-1], sorted_vert[i])
                 
               #  if link in self.edges:
               #      print('already found one')
 
-                if linked_edge_by_junction(self.vertex2joint[link[0]],self.vertex2joint[link[1]]):
-                    region_edge.add(link)
-            if len(region_edge)<len(sorted_vert):
-                print('uncomplete region', len(region_edge), len(sorted_vert))
-                all_edges = set()
-                for i in sorted_vert:
-                    for j in sorted_vert:
-                        if i!=j and linked_edge_by_junction(self.vertex2joint[i], self.vertex2joint[j]):
-                            all_edges.add((i,j))
-             #   print('all possible edges', len(all_edges))
-                path1 = set()
-                first = list(all_edges)[0]
-                path1.add(first)
-                prev, cur = first
-                for i in range(len(sorted_vert)-1):
-                    for nxt in sorted_vert:                        
-                        if (cur, nxt) in all_edges and nxt!=prev:
-                            path1.add((cur, nxt))
-                            prev, cur = cur, nxt
-                path2 = all_edges-path1
-                print(path1, path2)                                        
-                if len(region_edge - path1)<len(region_edge - path2):
-                    region_edge = path1
-                else:
-                    region_edge = path2
-            self.edges.update(region_edge)
+                
+                counter_edge.add(link)
+                
+            if True: #len(counter_edge.intersection(tent_edge))<len(tent_edge)//2:
+                for pair in tent_edge:
+                  #  tent_edge.remove(pair)
+                  #  tent_edge.add((pair[1], pair[0]))
+                    self.edges.add((pair[1], pair[0]))
+                    self.edges.add(pair)
+            cnt += len(tent_edge)    
+           # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-
+        print(cnt)
         print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
         # form edge             
 

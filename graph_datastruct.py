@@ -451,7 +451,7 @@ class graph:
             cnt += len(tent_edge)    
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-        print(cnt)
+     #   print(cnt)
         print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
         # form edge             
 
@@ -476,9 +476,10 @@ class graph_trajectory(graph):
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames
         self.joint_traj = []
-        self.events = np.zeros((2, self.frames), dtype=int)
+        self.edge_events = []
+        self.grain_events = []
         
-        self.show = True
+        self.show = False
         self.states = []
         self.physical_params = physical_params
 
@@ -676,7 +677,7 @@ class graph_trajectory(graph):
             #for i in cur_joint.keys():
             #    cur_grain.update(set(i))
             eliminated_grains = all_grain - cur_grain
-            switching_event = set()
+            
             all_grain = cur_grain
             if len(eliminated_grains)>0:
                 print('E1 grain_elimination: ', eliminated_grains)
@@ -714,7 +715,8 @@ class graph_trajectory(graph):
                         self.joint2vertex[k] = old_vert[-1]
                         print('the new joint', k, 'inherit the vert', old_vert[-1])
                         old_vert.pop()
-                
+            
+            self.grain_events.append(eliminated_grains)
              #   assert len(old_vert) == 2
                         
             ###===================####
@@ -725,6 +727,11 @@ class graph_trajectory(graph):
             
             old = set(self.joint2vertex.keys())
             new = set(cur_joint.keys())
+            
+            switching_event = set()
+            switching_edges = set() 
+            
+            
             if old!= new:
                 pairs =  set()
                 quadraples = {}
@@ -756,8 +763,11 @@ class graph_trajectory(graph):
               #  print(quadraples_new)     
                 
                 switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
-              #  print(switching_event)                      
+              #  print(switching_event) 
+
+                                    
                 for e2 in switching_event:
+                    
                     old_junction_i, old_junction_j = quadraples[e2]
                     new_junction_i, new_junction_j = quadraples_new[e2]
 
@@ -765,6 +775,11 @@ class graph_trajectory(graph):
                                         self.vertices[self.joint2vertex[old_junction_j]] 
                     new_i_x, new_j_x = cur_joint[new_junction_i][:2], \
                                         cur_joint[new_junction_j][:2]                   
+
+                    switching_edges.add((self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]))
+                    switching_edges.add((self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i]))
+                    self.edge_labels[(self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j])] = 1
+                    self.edge_labels[(self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i])] = 1
                     
                    # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
                     if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
@@ -776,7 +791,12 @@ class graph_trajectory(graph):
                     
                     print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
                     
-                
+
+
+
+            
+            self.edge_events.append(switching_edges)    
+            
             old_vertices = self.vertices.copy()
             self.vertices.clear()
             for joint in self.joint2vertex.keys():
@@ -798,9 +818,7 @@ class graph_trajectory(graph):
            
             print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_event)))
             
-                    
-            self.events[0,frame] = len(eliminated_grains)
-            self.events[1,frame] = len(switching_event)
+  
             self.update()
             self.form_states_tensor(frame)
             if self.show == True:
@@ -814,9 +832,11 @@ class graph_trajectory(graph):
 
         
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        ax.plot(self.events[0])
-        ax.plot(self.events[1])
-        ax.legend('grain elimination', 'neighbor switching')
+        ax.plot([len(i) for i in self.grain_events])
+        ax.plot([len(i)//2 for i in self.edge_events])
+        ax.set_xlabel('snapshot')
+        ax.set_ylabel('# events')
+        ax.legend(['grain elimination', 'neighbor switching'])
         
     def form_states_tensor(self, frame):
         
@@ -863,6 +883,7 @@ class graph_trajectory(graph):
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[src, dst] for src, dst in self.edges]
         
+        
         hg.feature_dicts.update({'grain':grain_state})
         hg.feature_dicts.update({'joint':joint_state})
         hg.edge_index_dicts.update({hg.edge_type[0]:np.array(gj_edge).T})
@@ -885,14 +906,14 @@ class graph_trajectory(graph):
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed})
 
-
-      #  hg.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
-        
-      #  hg.target_dicts['edge_event'] = nxt.edge_rotation
+        if frame>0:
+            hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
         
-        self.states.append(hg)
+        self.states.append(hg) # states at current time
 
+        # reset the edge_labels, check event at next snapshot
+        self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
         
                 
@@ -942,7 +963,9 @@ class GrainHeterograph:
                                          self.feature_dicts['joint'][:,:2]
         
 
-        
+          #  self.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
+            
+            self.target_dicts['edge_event'] = nxt.edge_rotation        
                                         
         """
             
@@ -979,7 +1002,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Generate heterograph data")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
-    parser.add_argument("--train_dir", type=str, default = './data/')
+    parser.add_argument("--train_dir", type=str, default = './edge_data/')
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
     args = parser.parse_args()
@@ -994,24 +1017,27 @@ if __name__ == '__main__':
             
             train_samples = []
             
-            traj = graph_trajectory(seed = seed, frames = 4)
+            traj = graph_trajectory(seed = seed, frames = 5)
           #  traj.update()
           #  traj.show_data_struct()
       
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
            # traj.vertex_matching()
             #traj.show_data_struct()
-            #print(traj.vertex_xtraj[:,0], traj.vertex_ytraj[:,0])
             
             
             # set gradient as output and add to features
             
-            hg0 = traj.states[0]
-            hg4 = traj.states[traj.frames - 1]
+        #    hg0 = traj.states[0]
+        #    hg4 = traj.states[traj.frames - 1]
           #  print(hg0.feature_dicts['grain'][:,:1])
-            hg0.form_gradient(prev = None, nxt = hg4)
-            
-            train_samples.append(hg0)
+        #    hg0.form_gradient(prev = None, nxt = hg4)
+        #    train_samples.append(hg0)
+            for snapshot in range(3, 4):
+                hg = traj.states[snapshot]
+                hg.form_gradient(prev = None, nxt = traj.states[snapshot+1])
+                if len(traj.grain_events[snapshot+1])==0:
+                    train_samples.append(hg)
         
        
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
@@ -1040,7 +1066,7 @@ if __name__ == '__main__':
         seed = 1
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 25)
+        traj = graph_trajectory(seed = seed, frames = 5)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     
@@ -1074,97 +1100,3 @@ with open('graph_data.pkl', 'rb') as inp:
  
 '''
     
-    
-'''
-
-vi, vj = self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]
-neib_i = self.vertex_neighbor[vi] - set([vj])
-neib_j = self.vertex_neighbor[vj] - set([vi])
-
-neib_i0, neib_i1 = list(neib_i)[0], list(neib_i)[1]
-neib_j0, neib_j1 = list(neib_j)[0], list(neib_j)[1]
-if len(set(self.vertex2joint[neib_i0]).intersection(set(self.vertex2joint[neib_j0])))==0:
-    neib_j0, neib_j1 = neib_j1, neib_j0 
-
-if not linked_edge_by_junction(self.vertex2joint[neib_i0], new_junction_i):
-    new_junction_i, new_junction_j = new_junction_j, new_junction_i
-
-new_vi, new_vj = self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]   
-
-self.vertex_neighbor[new_vi].remove(neib_i1)
-
-self.vertex_neighbor[neib_i1].remove(new_vi)
-
-self.vertex_neighbor[new_vi].add(neib_j0)
-self.vertex_neighbor[neib_j0].add(new_vi)
-
-self.vertex_neighbor[neib_j0].remove(new_vj)
-self.vertex_neighbor[new_vj].remove(neib_j0)
-
-self.vertex_neighbor[new_vj].add(neib_i1)
-self.vertex_neighbor[neib_i1].add(new_vj)
-
-
-'''
-
-'''     
-def vertex_matching(self):
-active_vertices = set(np.arange(self.num_vertices))
-new_vertices = set()
-new_vertices.add(vert)
-print("time ", frame, "eliminated vertices ", active_vertices.difference(new_vertices))
-active_vertices = new_vertices
-print('current number of vertices %d'%len(active_vertices))
-
-            argset = set(args)
-                if args in self.joint2vertex:
-                vert = self.joint2vertex[args]
-            else:
-            
-                for k in self.joint2vertex.keys():
-                    if len(set(k).difference(argset))==1:
-                        old_vert = set(k)
-                union = argset.union(old_vert)
-                
-                for k in self.joint2vertex.keys():
-                    if set(k).issubset(union) and set(k)!=set(old_vert):
-                        touching_vert = set(k)
-                
-                joint = argset.intersection(old_vert, touching_vert)
-                new_touching_vert = union.copy()
-                new_touching_vert -= joint
-                print(argset, new_touching_vert,old_vert, touching_vert)
-                self.joint2vertex[args] = self.joint2vertex[tuple(sorted(old_vert))]
-                self.joint2vertex[tuple(sorted(new_touching_vert))] = self.joint2vertex[tuple(sorted(touching_vert))]                     
-            
-                
-if frame>0:
-    xp, yp = periodic_move(xp, yp, \
-    self.vertex_xtraj[vert, frame-1], self.vertex_ytraj[vert, frame-1])
-
-return
-
-'''    
-
-                        
-
-'''        
-if len(junction) == 3:
-    
-    self.joint2vertex[tuple(sorted(junction))] = old_vert[-1]
-    print('the new joint', tuple(sorted(junction)), 'inherit the vert', old_vert[-1])
-    old_vert.pop()
-
-else:
-
-cur_junction = junction.copy()
-for neighbor in cur_junction:
-    if neighbor in eliminated_grains:
-        visited.add(neighbor)
-        for k, v in self.joint2vertex.items():
-            if neighbor in set(k):
-                junction.update(set(k))
-                if self.joint2vertex[k] not in old_vert:
-                    old_vert.append(self.joint2vertex[k])
-                todelete.add(k)
- ''' 

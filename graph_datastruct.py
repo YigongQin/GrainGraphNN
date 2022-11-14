@@ -45,10 +45,10 @@ def in_bound(x, y):
 def periodic_move(p, pc):
     x,  y  = p
     xc, yc = pc
-    if x<xc-0.5: x+=1
-    if x>xc+0.5: x-=1
-    if y<yc-0.5: y+=1
-    if y>yc+0.5: y-=1    
+    if x<xc-0.5-eps: x+=1
+    if x>xc+0.5+eps: x-=1
+    if y<yc-0.5-eps: y+=1
+    if y>yc+0.5+eps: y-=1    
     
     return (x, y)
 
@@ -378,20 +378,41 @@ class graph:
         self.regions.clear()
         self.region_coors.clear()
         self.region_center.clear()
+        
         for k, v in self.joint2vertex.items():
             for region in set(k):
                 self.regions[region].append(v)
                 
                 self.region_coors[region].append(self.vertices[v])
-        
+
         for region, verts in self.region_coors.items():
+            if len(verts)<=1: continue
         #    assert len(verts)>1, ('one vertex is not a grain ', region, self.regions[region])
-            inbound = [verts[0][0]>-eps, verts[0][1]>-eps]
+            
             moved_region = []
-            for i in range(1, len(verts)):
-                
-                verts[i] = periodic_move(verts[i], verts[i-1])
-                inbound = [i and (j>-eps) for i, j in zip(inbound, verts[i])]
+
+            vert_in_region = self.regions[region]
+            
+            prev = 0
+            for cur in range(1, len(vert_in_region)):
+                if linked_edge_by_junction(self.vertex2joint[vert_in_region[prev]], \
+                                           self.vertex2joint[vert_in_region[cur]]):
+                    break
+        
+          #  for i in range(1, len(verts)):
+            for i in range(len(vert_in_region)-1):   
+                for nxt in range(len(vert_in_region)):                        
+                    if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
+                                               self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
+                        prev, cur = cur, nxt
+                        break
+                        
+                verts[cur] = periodic_move(verts[cur], verts[prev])                                
+                                          
+            inbound = [True, True]
+            
+            for vert in verts:
+                inbound = [i and (j>-eps) for i, j in zip(inbound, vert)]  
             for vert in verts:
                 vert = [i + 1*(not j) for i, j in zip(vert, inbound)]
                 moved_region.append(vert)
@@ -401,7 +422,6 @@ class graph:
             self.region_center[region] = [np.mean(x), np.mean(y)]
             
             
-            vert_in_region = self.regions[region]
             
             sort_index = sorted(range(len(moved_region)), \
                 key = lambda x: counterclock(moved_region[x], self.region_center[region]))  
@@ -412,11 +432,42 @@ class graph:
             sorted_vert = [vert_in_region[i] for i in sort_index]
             self.regions[region] = sorted_vert
           #  print(sort_index, vert_in_region)
+            region_edge = set()
             for i in range(len(sorted_vert)):
-                
                 link = (sorted_vert[i-1], sorted_vert[i]) if i >0 else (sorted_vert[len(sorted_vert)-1], sorted_vert[i])
-                self.edges.add(link)
                 
+              #  if link in self.edges:
+              #      print('already found one')
+
+                if linked_edge_by_junction(self.vertex2joint[link[0]],self.vertex2joint[link[1]]):
+                    region_edge.add(link)
+            if len(region_edge)<len(sorted_vert):
+                print('uncomplete region', len(region_edge), len(sorted_vert))
+                all_edges = set()
+                for i in sorted_vert:
+                    for j in sorted_vert:
+                        if i!=j and linked_edge_by_junction(self.vertex2joint[i], self.vertex2joint[j]):
+                            all_edges.add((i,j))
+             #   print('all possible edges', len(all_edges))
+                path1 = set()
+                first = list(all_edges)[0]
+                path1.add(first)
+                prev, cur = first
+                for i in range(len(sorted_vert)-1):
+                    for nxt in sorted_vert:                        
+                        if (cur, nxt) in all_edges and nxt!=prev:
+                            path1.add((cur, nxt))
+                            prev, cur = cur, nxt
+                path2 = all_edges-path1
+                print(path1, path2)                                        
+                if len(region_edge - path1)<len(region_edge - path2):
+                    region_edge = path1
+                else:
+                    region_edge = path2
+            self.edges.update(region_edge)
+              #  self.edges.add((link[1],link[0]))
+
+        print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
         # form edge             
 
         for src, dst in self.edges:
@@ -442,7 +493,7 @@ class graph_trajectory(graph):
         self.joint_traj = []
         self.events = np.zeros((2, self.frames), dtype=int)
         
-        self.show = False
+        self.show = True
         self.states = []
         self.physical_params = physical_params
 
@@ -536,7 +587,7 @@ class graph_trajectory(graph):
             missing = set()
             miss_case = defaultdict(int)
             
-            def clean_data():
+            def clean_data(cur_joint):
                # jj_link = 0
                 total_missing = 0
                 for k1 in cur_joint.keys():
@@ -546,15 +597,15 @@ class graph_trajectory(graph):
                             num_link += 1
                 #            jj_link += 1
                           #  print(jj_link, k1, k2)
-                    if num_link <3:
+                    if num_link !=3:
                         missing.update(set(k1))
                         miss_case.update({k1:3-num_link})
-                        total_missing += 3-num_link
+                        total_missing += abs(3-num_link)
                      #   print('find missing junction link', k1, 3-num_link)
                 return total_missing   
             
-            total_missing = clean_data()
-      
+            total_missing = clean_data(cur_joint)
+            print('total missing edges, ', total_missing)
             #q_pool = []
             for q, coor in quadraples.items():
                 if set(q).issubset(missing):
@@ -577,7 +628,7 @@ class graph_trajectory(graph):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur = clean_data()
+                            cur = clean_data(cur_joint)
                             if cur == total_missing -3:
                                 print('fixed!')
                                 total_missing = cur
@@ -591,7 +642,7 @@ class graph_trajectory(graph):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur = clean_data()
+                            cur = clean_data(cur_joint)
                             if cur == total_missing -4:
                                 print('fixed!')
                                 total_missing = cur
@@ -1004,7 +1055,7 @@ if __name__ == '__main__':
         seed = 1
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 4)
+        traj = graph_trajectory(seed = seed, frames = 25)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     

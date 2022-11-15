@@ -34,7 +34,7 @@ def edge_error_metric(data_edge_index, pred_edge_index):
     E_t_pp = unorder_edge(pred_edge_index['joint', 'connect', 'joint'].detach().numpy().T)
     E_t_pq = unorder_edge(pred_edge_index['joint', 'pull', 'grain'].detach().numpy().T) 
 
-
+    print(E_t_pp - E_pp)
     return 1-len(E_pp.intersection(E_t_pp))/len(E_pp), \
            1-len(E_pq.intersection(E_t_pq))/len(E_pq)
 
@@ -301,7 +301,7 @@ if __name__=='__main__':
               
         
         for case, data in enumerate(data_tensor):
- 
+            pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
             pred = model(data.x_dict, data.edge_index_dict)
             pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
       

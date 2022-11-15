@@ -22,8 +22,22 @@ def criterion(data, pred):
     return 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.nn.NLLLoss(torch.log(pred['edge_event']), data['edge_event']) 
         # + torch.mean((data['grain'] - pred['grain'])**2)
+
+def unorder_edge(a):
+    return set(map(tuple, a))
          
+def edge_error_metric(data_edge_index, pred_edge_index):
+
+    E_pp = unorder_edge(data_edge_index['joint', 'connect', 'joint'].detach().numpy().T)
+    E_pq = unorder_edge(data_edge_index['joint', 'pull', 'grain'].detach().numpy().T)
     
+    E_t_pp = unorder_edge(pred_edge_index['joint', 'connect', 'joint'].detach().numpy().T)
+    E_t_pq = unorder_edge(pred_edge_index['joint', 'pull', 'grain'].detach().numpy().T) 
+
+
+    return 1-len(E_pp.intersection(E_t_pp))/len(E_pp), \
+           1-len(E_pq.intersection(E_t_pq))/len(E_pq)
+
 
 def train(model, num_epochs, train_loader, test_loader):
 
@@ -112,7 +126,7 @@ if __name__=='__main__':
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
     parser.add_argument("--data_dir", type=str, default='./data/')
-    parser.add_argument("--test_dir", type=str, default='./test/')
+    parser.add_argument("--test_dir", type=str, default='./edge_data/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
@@ -289,10 +303,18 @@ if __name__=='__main__':
         for case, data in enumerate(data_tensor):
  
             pred = model(data.x_dict, data.edge_index_dict)
+            pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+      
+            print(pp_err, pq_err)
          #   print(pred['joint'])
-            traj = graph_trajectory(seed = data.physical_params['seed'], frames = 4)
-            traj.load_trajectory(rawdat_dir = '.')
-           # traj.GNN_update(data.x_dict['joint'][:,:2])
+          #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)
+           # traj.load_trajectory(rawdat_dir = '.')
+            with open('./edge_data/traj1.pkl', 'rb') as inp:  
+                try:
+                    traj = dill.load(inp)
+                except:
+                    raise EOFError
+      
             traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
             traj.compute_error_layer()
             print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))

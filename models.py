@@ -172,6 +172,9 @@ class EdgeDecoder(torch.nn.Module):
         self.lin2 = nn.Linear(out_channels, 1)
     
     def forward(self, joint_feature, joint_edge_index):
+        
+        print(joint_edge_index[:,[45,67,78,112,125,134]])
+        
         src, dst = joint_edge_index[0], joint_edge_index[1]
 
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)

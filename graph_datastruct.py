@@ -937,7 +937,7 @@ class GrainHeterograph:
         self.target_dicts = {}
         self.edge_index_dicts = {}
         self.edge_weight_dicts = {}
-        self.additional_feature_keys = {}
+        self.additional_features = {}
         self.neighbor_dicts = {}
         
         self.physical_params = {}
@@ -966,6 +966,8 @@ class GrainHeterograph:
           #  self.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
             
             self.target_dicts['edge_event'] = nxt.edge_rotation        
+            
+            self.additional_features['nxt'] = nxt.edge_index_dicts
                                         
         """
             
@@ -1042,6 +1044,9 @@ if __name__ == '__main__':
        
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
+
+            with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                dill.dump(traj, outp)
 
     if args.mode == 'test':   
         if not os.path.exists(args.test_dir):

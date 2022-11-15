@@ -33,7 +33,7 @@ class DynamicHeteroGraphTemporalSignal(object):
     def __init__(self, data_list):
 
         self.data_list = data_list
-        self.additional_feature_keys = []
+
       #  self._check_temporal_consistency()
       #  self._set_snapshot_count()
 
@@ -88,7 +88,7 @@ class DynamicHeteroGraphTemporalSignal(object):
                     if value is not None}
 
     def _get_additional_feature(self, feature_key: str):
-        feature = getattr(self, feature_key)
+        feature = self.add_feature[feature_key]
         if feature is None:
             return feature
         else:
@@ -99,7 +99,7 @@ class DynamicHeteroGraphTemporalSignal(object):
     def _get_additional_features(self):
         additional_features = {
             key: self._get_additional_feature(key)
-            for key in self.additional_feature_keys
+            for key in self.add_feature.keys()
         }
         return additional_features
 
@@ -110,14 +110,14 @@ class DynamicHeteroGraphTemporalSignal(object):
         self.edge_weight_dicts = data.edge_weight_dicts
         self.feature_dicts = data.feature_dicts
         self.target_dicts = data.target_dicts
-        self.add_feature_keys = data.additional_feature_keys
-        
+        self.add_feature = data.additional_features
+ 
         edge_index_dict = self._get_edge_index()
         edge_weight_dict = self._get_edge_weight()        
         x_dict = self._get_features()
         y_dict = self._get_target()
         additional_features = self._get_additional_features()
-
+   
         snapshot = HeteroData()
         if x_dict:
             for key, value in x_dict.items():
@@ -132,10 +132,13 @@ class DynamicHeteroGraphTemporalSignal(object):
             for key, value in y_dict.items():
                 snapshot[key].y = value
         if additional_features:
+     
             for feature_name, feature_dict in additional_features.items():
                 if feature_dict:
+             
                     for key, value in feature_dict.items():
-                        snapshot[key][feature_name] = value
+                        snapshot[feature_name][key] = value
+                
         snapshot.physical_params = data.physical_params
         return snapshot
 

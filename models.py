@@ -10,8 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from heteropgclstm import HeteroPGCLSTM
 from heterogclstm import HeteroGCLSTM
-
-
+from graph_datastruct import periodic_move_p
 
 class SeqGCLSTM(nn.Module):
 
@@ -173,8 +172,8 @@ class EdgeDecoder(torch.nn.Module):
     
     def forward(self, joint_feature, joint_edge_index):
         
-        check_arg = [134] #[45,67,78,112,125,134]
-        print(joint_edge_index[:,check_arg])
+        check_arg = [45,67,134] #[45,67,78,112,125,134]
+      #  print(joint_edge_index[:,check_arg])
         
         src, dst = joint_edge_index[0], joint_edge_index[1]
 
@@ -324,7 +323,7 @@ class GrainNN2(nn.Module):
     @staticmethod
     def from_next_edge_index(edge_index_dict, x_dict, edge_event_list):
 
-        print(edge_event_list)
+       # print(edge_event_list)
         """
         
         Neighbor switching
@@ -336,9 +335,6 @@ class GrainNN2(nn.Module):
         E_pq = edge_index_dict['joint', 'pull', 'grain']
         E_qp = edge_index_dict['grain', 'push', 'joint']
         
-        ## find distance between joints a and b
-        dist = lambda a, b: (x_dict['joint'][a,0]-x_dict['joint'][b,0])**2 + \
-                            (x_dict['joint'][a,1]-x_dict['joint'][b,1])**2
         for vanish_edge_id in range(len(src)):
             p1, p2 = src[vanish_edge_id], dst[vanish_edge_id]
             
@@ -366,7 +362,7 @@ class GrainNN2(nn.Module):
             p2_qn_index_sort = [p2_qn_index[i] for i in range(3) if p2_qn[i]==shrink_q1 ] + \
                                [p2_qn_index[i] for i in range(3) if p2_qn[i]==shrink_q2 ]
             
-            print(p1_qn, p2_qn)
+          #  print(p1_qn, p2_qn)
           #  print(expand_q1, expand_q2, shrink_q1, shrink_q2)
             # find two joints for one grain, they should be a pair for one joint
 
@@ -394,14 +390,13 @@ class GrainNN2(nn.Module):
             sq1_p2, sq2_p2 = p2_pn
             
             
-            print('\n',p1_pn, p2_pn)
+          #  print('\n',p1_pn, p2_pn)
           #  print(p1_pn_index, p2_pn_index)
-            # calculate two possible connectivity
-            len_path1 = dist(p1, sq1_p1) + dist(p1, sq1_p2) + dist(p2, sq2_p1) + dist(p2, sq2_p2)
-            len_path2 = dist(p2, sq1_p1) + dist(p2, sq1_p2) + dist(p1, sq2_p1) + dist(p1, sq2_p2)
-            
-            if len_path1 > len_path2:
-                print('swap')
+
+
+            if point_in_triangle(x_dict['joint'][p2,:2], x_dict['joint'][p1,:2], \
+                                 x_dict['joint'][sq1_p1,:2], x_dict['joint'][sq1_p2,:2]):  
+               # print('swap')
                 # swap
                 p1_qn_index_sort.reverse()
                 p2_qn_index_sort.reverse()
@@ -425,8 +420,8 @@ class GrainNN2(nn.Module):
             E_pp[1, p1_pn_index[1]] = sq1_p2 # reject sq2_p1
             E_pp[1, p2_pn_index[0]] = sq2_p1
             
-            print((sq1_p2, p2),'->', (sq1_p2, p1))
-            print((sq2_p1, p1),'->', (sq2_p1, p2))              
+           # print((sq1_p2, p2),'->', (sq1_p2, p1))
+           # print((sq2_p1, p1),'->', (sq2_p1, p2))              
             E_pp[1][ ((E_pp[0]==sq1_p2)&(E_pp[1]==p2)).nonzero().view(-1) ] = p1
             E_pp[1][ ((E_pp[0]==sq2_p1)&(E_pp[1]==p1)).nonzero().view(-1) ] = p2
       
@@ -437,6 +432,22 @@ class GrainNN2(nn.Module):
         return edge_index_dict
         
 
+def point_in_triangle(t, v1, v2, v3):
+    sign = lambda a, b, c: (a[0] - c[0])*(b[1] - c[1]) - \
+                           (b[0] - c[0])*(a[1] - c[1])
+   # print(v1, t)
+    periodic_move_p(v1, t)
+    periodic_move_p(v2, t)
+    periodic_move_p(v3, t)
+  #  print(t, v1, v2, v3)
+    d1 = sign(t, v1, v2)
+    d2 = sign(t, v2, v3)
+    d3 = sign(t, v3, v1)
+
+    has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+    has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+    
+    return not (has_neg & has_pos)
 
 """
 

@@ -52,6 +52,16 @@ def periodic_move(p, pc):
     
     return (x, y)
 
+
+def periodic_move_p(p, pc):
+
+    if p[0]<pc[0]-0.5-eps: p[0]+=1
+    if p[0]>pc[0]+0.5+eps: p[0]-=1
+    if p[1]<pc[1]-0.5-eps: p[1]+=1
+    if p[1]>pc[1]+0.5+eps: p[1]-=1    
+
+
+
 def relative_angle(p1, p2):
     
     p1 = periodic_move(p1, p2)
@@ -177,7 +187,7 @@ class graph:
     
     def compute_error_layer(self):
         self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
-        print('error', self.error_layer)
+        print('pointwise error at current layer: ', self.error_layer)
     
     def random_voronoi(self):
 

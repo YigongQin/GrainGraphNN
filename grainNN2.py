@@ -24,12 +24,12 @@ def criterion(data, pred):
     
     p = pred['edge_event']
     y = data['edge_event']
-    
-    return torch.mean(-y*torch.log(p) - (1-y)*torch.log(1-p))
+    weight_ratio = 1
+   # print(p)
+    return 1000*torch.mean((data['joint'] - pred['joint'])**2)
 
-        # classifier(torch.log(pred['edge_event']), data['edge_event']) 
+        # torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
-        # + torch.nn.NLLLoss(torch.log(pred['edge_event']), data['edge_event']) 
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
 def unorder_edge(a):
@@ -133,8 +133,8 @@ if __name__=='__main__':
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
-    parser.add_argument("--data_dir", type=str, default='./edge_data/')
-    parser.add_argument("--test_dir", type=str, default='./edge_data/')
+    parser.add_argument("--data_dir", type=str, default='./data/')
+    parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
     parser.add_argument("--plot_flag", type=bool, default=False)

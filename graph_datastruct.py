@@ -1016,6 +1016,7 @@ if __name__ == '__main__':
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
     parser.add_argument("--level", type=int, default = 0)
+    parser.add_argument("--frame", type=int, default = 25)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -1041,7 +1042,7 @@ if __name__ == '__main__':
             
             train_samples = []
             
-            traj = graph_trajectory(seed = seed, frames = 5)
+            traj = graph_trajectory(seed = seed, frames = args.frame)
           #  traj.update()
           #  traj.show_data_struct()
       
@@ -1058,7 +1059,7 @@ if __name__ == '__main__':
         #    hg0.form_gradient(prev = None, nxt = hg4)
         #    train_samples.append(hg0)
       
-            for snapshot in range(3, 4):
+            for snapshot in range(traj.frames-1):
                 hg = traj.states[snapshot]
                 hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
                                  nxt = traj.states[snapshot+1])

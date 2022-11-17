@@ -172,19 +172,19 @@ class EdgeDecoder(torch.nn.Module):
     
     def forward(self, joint_feature, joint_edge_index):
         
-        check_arg = [45,67,134] #[45,67,78,112,125,134]
+        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
       #  print(joint_edge_index[:,check_arg])
         
         src, dst = joint_edge_index[0], joint_edge_index[1]
 
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
-        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
-
+      #  z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
+        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
         z = F.relu(self.lin1(z))
         z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
         z = torch.sigmoid(z)
         
-        z[check_arg] = 0.9
+      #  z[check_arg] = 0.9
         ## predict eliminated edge
         elimed_arg = ((z>0.5)&(src<dst)).nonzero(as_tuple=True)
         elimed_prob = z[elimed_arg]
@@ -289,22 +289,31 @@ class GrainNN2(nn.Module):
             
             edge_prob, edge_event_list = self.edge_decoder(h_dict['joint'], \
                             edge_index_dict['joint', 'connect', 'joint'])
+            
+            
                 
             y_dict.update({'grain_event': 1*(area<1e-6) })
             y_dict.update({'edge_event': edge_prob})
+            y_dict.update({'edge_switch':edge_event_list})
             
-            """
+
+        return y_dict            
+
+
             
-            Online update for next snapshot input x
+    def update(self, x_dict, edge_index_dict, y_dict):            
             
-            """    
+        """
+        
+        Online update for next snapshot input x
+        
+        """    
             
-            x_dict = self.form_next_x(x_dict, y_dict)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict,\
-                                                        edge_event_list)
+        x_dict = self.form_next_x(x_dict, y_dict)
+        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, y_dict['edge_switch'])
             
                         
-        return y_dict
+        return x_dict, edge_index_dict
     
     @staticmethod
     def form_next_x(x_dict, y_dict):
@@ -323,7 +332,7 @@ class GrainNN2(nn.Module):
     @staticmethod
     def from_next_edge_index(edge_index_dict, x_dict, edge_event_list):
 
-       # print(edge_event_list)
+        print(edge_event_list)
         """
         
         Neighbor switching

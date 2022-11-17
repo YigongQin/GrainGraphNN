@@ -18,8 +18,17 @@ from graph_datastruct import graph_trajectory
 
 
 def criterion(data, pred):
+   # print(torch.log(pred['edge_event']))
+   # print(data['edge_event'])
+   # classifier = torch.nn.NLLLoss()
     
-    return 1000*torch.mean((data['joint'] - pred['joint'])**2) \
+    p = pred['edge_event']
+    y = data['edge_event']
+    
+    return torch.mean(-y*torch.log(p) - (1-y)*torch.log(1-p))
+
+        # classifier(torch.log(pred['edge_event']), data['edge_event']) 
+        # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.nn.NLLLoss(torch.log(pred['edge_event']), data['edge_event']) 
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
@@ -46,7 +55,7 @@ def train(model, num_epochs, train_loader, test_loader):
                                  #weight_decay=1e-5) # <--
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5, last_epoch=-1)
-
+  #  torch.autograd.set_detect_anomaly(True)
 
     train_loss, count = 0, 0
 
@@ -124,7 +133,7 @@ if __name__=='__main__':
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
-    parser.add_argument("--data_dir", type=str, default='./data/')
+    parser.add_argument("--data_dir", type=str, default='./edge_data/')
     parser.add_argument("--test_dir", type=str, default='./edge_data/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
@@ -312,11 +321,12 @@ if __name__=='__main__':
 
             
             pred = model(data.x_dict, data.edge_index_dict)
+            data.x_dict, data.edge_index_dict = model.update(data.x_dict, data.edge_index_dict, pred)
             pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
             
             
             traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
-            traj.show_data_struct()
+           # traj.show_data_struct()
             
             
             print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))

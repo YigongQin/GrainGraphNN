@@ -224,6 +224,8 @@ if __name__=='__main__':
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')
+    print('data dir', args.data_dir)
+    print('test dir', args.test_dir)
     print('number of train, validation, test runs', num_train, num_valid, num_test)
     print('data frames: ', hp.all_frames, '; GrainNN frames: ', hp.frames, \
           '; ratio: ', int((hp.all_frames-1)/(hp.frames-1)))

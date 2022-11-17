@@ -484,7 +484,7 @@ class graph_trajectory(graph):
         super().__init__(lxd = lxd, seed = seed)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-        self.frames = frames
+        self.frames = frames # note that frames include the initial condition
         self.joint_traj = []
         self.edge_events = []
         self.grain_events = []
@@ -1008,16 +1008,28 @@ class GrainHeterograph:
         
 if __name__ == '__main__':
 
-    
-    #g1 = graph(lxd = 10, seed=1)  
-    #g1.show_data_struct()  
+
     parser = argparse.ArgumentParser("Generate heterograph data")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
-    parser.add_argument("--train_dir", type=str, default = './edge_data/')
+    parser.add_argument("--train_dir", type=str, default = './sameGR/')
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
+    parser.add_argument("--level", type=int, default = 0)
     args = parser.parse_args()
+    args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
+    args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
+    """
+    this script generates graph trajectory objects and training/testing data 
+    the pde simulaion data is in rawdat_dir
+    train_dir: processed data for training
+    test_dir: processed data for testing
+    seed: realization seed, each graph trajectory relates to one pde simulation
+    level: 0: regression 
+           1: regression + classification 
+           2: regression + classification + mask 
+    """
+    
     
     
     if args.mode == 'train':
@@ -1045,10 +1057,18 @@ if __name__ == '__main__':
           #  print(hg0.feature_dicts['grain'][:,:1])
         #    hg0.form_gradient(prev = None, nxt = hg4)
         #    train_samples.append(hg0)
+      
             for snapshot in range(3, 4):
                 hg = traj.states[snapshot]
-                hg.form_gradient(prev = None, nxt = traj.states[snapshot+1])
-                if len(traj.grain_events[snapshot+1])==0:
+                hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
+                                 nxt = traj.states[snapshot+1])
+                
+                if ( args.level == 2 ) \
+                or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
+                or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
+                                         len(traj.edge_events[snapshot+1])==0 ):    
+                    
+               # if len(traj.grain_events[snapshot+1])==0:
                     train_samples.append(hg)
         
        

@@ -489,7 +489,7 @@ class graph_trajectory(graph):
         self.edge_events = []
         self.grain_events = []
         
-        self.show = False
+        self.show = True
         self.states = []
         self.physical_params = physical_params
 
@@ -530,9 +530,13 @@ class graph_trajectory(graph):
         
 
         prev_joint = {k:[0,0,100] for k, v in self.joint2vertex.items()}
+        all_grain = set(np.arange(self.num_regions)+1)
         
         for frame in range(self.frames):
            
+            
+            print('load frame %d'%frame)
+            
             cur_joint = defaultdict(list)
             quadraples = defaultdict(list)
             for vertex in range(self.active_args.shape[1]): 
@@ -554,8 +558,14 @@ class graph_trajectory(graph):
                 if args not in cur_joint or max_neighbor<cur_joint[args][2]:    
                     cur_joint[args] = [xp, yp, max_neighbor]
 
-                      
-            ## deal with quadraples here
+            
+            """
+            deal with quadruples 
+            
+            """
+
+            
+            ## delete undetermined junctions from quadruples, add right ones later
             
             for q, coors in quadraples.items():
                 q_list = list(q)
@@ -566,20 +576,7 @@ class graph_trajectory(graph):
                     if arg not in prev_joint and arg in cur_joint:
                         del cur_joint[arg]
 
-                        
-
-            
-            # check loaded information
-            
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-            cur_grain = set(np.unique(self.alpha_pde))
-            
-            
-            grain_set = set()
-            for k in cur_joint.keys():
-                grain_set.update(set(k))
-            
-            
+  
             missing = set()
             miss_case = defaultdict(int)
             
@@ -602,6 +599,7 @@ class graph_trajectory(graph):
             
             total_missing = clean_data(cur_joint)
             print('total missing edges, ', total_missing)
+            print('quadruples', len(quadraples))
             #q_pool = []
             for q, coor in quadraples.items():
                 if set(q).issubset(missing):
@@ -651,188 +649,192 @@ class graph_trajectory(graph):
             self.joint_traj.append(cur_joint)
             prev_joint = cur_joint
             
+
+
+            # check loaded information
             
-            print('load frame %d'%frame)
+            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+            self.area_counts = dict(zip(cur_grain, counts))
+            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
+            cur_grain = set(cur_grain)
+            
+            
+            grain_set = set()
+            for k in cur_joint.keys():
+                grain_set.update(set(k))
+
+
+
+            eliminated_grains = all_grain - cur_grain
+            
+            all_grain = cur_grain
+
+            
+
+            
             print('number of grains pixel %d'%len(cur_grain))
             print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
-            print('====================================')
-            print('\n')
             
-        self.vertex_matching()
+            
+            self.vertex_matching(frame, cur_joint, eliminated_grains)
         
-        
-    def vertex_matching(self):
-        
-        # compare the cur_joint with the laset joint 
-        
-     
-        all_grain = set(np.arange(self.num_regions)+1)
-
-        for frame in range(self.frames):
-            print('\n')
-            print('====================================')
-            print('summary of frame %d to frame %d'%(frame-1, frame))
-            cur_joint = self.joint_traj[frame]
-          #  self.alpha_field = self.alpha_pde_frames[:,:,frame].T
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
-            self.area_counts = dict(zip(cur_grain, counts))
-
-            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
-            cur_grain = set(cur_grain)
-            #cur_grain = set()
-            #for i in cur_joint.keys():
-            #    cur_grain.update(set(i))
-            eliminated_grains = all_grain - cur_grain
-            
-            all_grain = cur_grain
-            if len(eliminated_grains)>0:
-                print('E1 grain_elimination: ', eliminated_grains)
-            
-            
-            new_vert = set()
-            
-            
-            ###===================####
-            
-            # deal with eliminated grain
-            
-            ###==================###
-            visited = set()
-            for elm_grain in eliminated_grains:
-                if elm_grain in visited:
-                    continue
-                old_vert = []
-                todelete = set()
-                junction = set()
-                for k, v in self.joint2vertex.items():
-                    if elm_grain in set(k):
-                        junction.update(set(k))
-                        old_vert.append(self.joint2vertex[k])
-                        todelete.add(k)
-      
-                junction.remove(elm_grain)        
-                print('%dth grain eliminated with no. of sides %d'%(elm_grain, len(todelete)), junction)
-                for k in todelete:
-                    del self.joint2vertex[k]   
-                    
-                
-                for k, v in cur_joint.items():
-                    if set(k).issubset(junction) and k not in self.joint2vertex:
-                        self.joint2vertex[k] = old_vert[-1]
-                        print('the new joint', k, 'inherit the vert', old_vert[-1])
-                        old_vert.pop()
-            
-            self.grain_events.append(eliminated_grains)
-             #   assert len(old_vert) == 2
-                        
-            ###===================####
-            
-            # deal with neighbor switching
-            
-            ###==================###            
-            
-            old = set(self.joint2vertex.keys())
-            new = set(cur_joint.keys())
-            
-            switching_event = set()
-            switching_edges = set() 
-            
-            
-            if old!= new:
-                pairs =  set()
-                quadraples = {}
-                old_joint = list(old-new)
-                new_joint = list(new-old)
-               # print('dispearing joints ', len(old_joint), ';  ' , old_joint)
-              #  print('emerging joints', len(new_joint ), ';  ' , new_joint)
-                
-              #  assert len(old_joint) == len(new_joint), "lenght of old %d, new %d"%(len(old_joint), len(new_joint))
-                
-                for i in old_joint:
-                    for j in old_joint:
-                        if len( set(i).difference(set(j)) )==1:
-                            if (j, i) not in pairs:
-                                pairs.add((i,j))
-                                quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)
-             #   print(pairs, len(pairs))
-             #   print(quadraples)
-
-                pairs =  set()
-                quadraples_new = {}
-                for i in new_joint:
-                    for j in new_joint:
-                        if len( set(i).difference(set(j)) )==1:
-                            if (j, i) not in pairs:
-                                pairs.add((i,j))
-                                quadraples_new[tuple(sorted(set(i).union(set(j))))] = (i,j)
-              #  print(pairs, len(pairs))
-              #  print(quadraples_new)     
-                
-                switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
-              #  print(switching_event) 
-
-                                    
-                for e2 in switching_event:
-                    
-                    old_junction_i, old_junction_j = quadraples[e2]
-                    new_junction_i, new_junction_j = quadraples_new[e2]
-
-                    old_i_x, old_j_x = self.vertices[self.joint2vertex[old_junction_i]], \
-                                        self.vertices[self.joint2vertex[old_junction_j]] 
-                    new_i_x, new_j_x = cur_joint[new_junction_i][:2], \
-                                        cur_joint[new_junction_j][:2]                   
-
-                    switching_edges.add((self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]))
-                    switching_edges.add((self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i]))
-                    self.edge_labels[(self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j])] = 1
-                    self.edge_labels[(self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i])] = 1
-                    
-                   # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
-                    if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
-                    #    print(colored('switch junction for less rotation', 'green'), new_junction_i, new_junction_j)
-                        new_junction_i, new_junction_j = new_junction_j, new_junction_i
-                    
-                    self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
-                    self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
-                    
-                    print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
-                    
-
-
-
-            
-            self.edge_events.append(switching_edges)    
-            
-            old_vertices = self.vertices.copy()
-            self.vertices.clear()
-            for joint in self.joint2vertex.keys():
-                if joint in cur_joint:
-                    vert = self.joint2vertex[joint]
-                    new_vert.add(vert)
-                    coors = cur_joint[joint][:2]
-                    self.vertices[vert] = periodic_move(coors, old_vertices[vert])
-
-                else:
-                    vert = self.joint2vertex[joint]
-                    self.vertices[vert] = old_vertices[vert]
-                    print(colored('unmatched joint detected: ', 'red'), joint, self.joint2vertex[joint])
-            for joint in cur_joint.keys():
-                if joint not in self.joint2vertex:
-                    print(colored('unused joint detected: ', 'green'), joint)
-
-            
-           
-            print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_event)))
-            
-  
             self.update()
             self.form_states_tensor(frame)
             if self.show == True:
-                self.show_data_struct()
+                self.show_data_struct()   
+                
+            print('====================================')  
+            print('\n') 
+              
+                
+    def vertex_matching(self, frame, cur_joint, eliminated_grains):
+      
+      
+        print('\n')
+        print('summary of event from frame %d to frame %d'%(frame-1, frame))
+      #  cur_joint = self.joint_traj[frame]
+
+
+        if len(eliminated_grains)>0:
+            print('E1 grain_elimination: ', eliminated_grains)
+        
+        """
+        
+        E1: grain elimination
+        
+        """
+        visited = set()
+        for elm_grain in eliminated_grains:
+            if elm_grain in visited:
+                continue
+            old_vert = []
+            todelete = set()
+            junction = set()
+            for k, v in self.joint2vertex.items():
+                if elm_grain in set(k):
+                    junction.update(set(k))
+                    old_vert.append(self.joint2vertex[k])
+                    todelete.add(k)
+      
+            junction.remove(elm_grain)        
+            print('%dth grain eliminated with no. of sides %d'%(elm_grain, len(todelete)), junction)
+            for k in todelete:
+                del self.joint2vertex[k]   
+                
+            
+            for k, v in cur_joint.items():
+                if set(k).issubset(junction) and k not in self.joint2vertex:
+                    self.joint2vertex[k] = old_vert[-1]
+                    print('the new joint', k, 'inherit the vert', old_vert[-1])
+                    old_vert.pop()
+        
+        self.grain_events.append(eliminated_grains)
+         #   assert len(old_vert) == 2
+                    
+        """
+        
+        E2: neighbor switching
+        
+        """          
+        
+        old = set(self.joint2vertex.keys())
+        new = set(cur_joint.keys())
+        
+        switching_event = set()
+        switching_edges = set() 
+        
+        
+        if old!= new:
+            pairs =  set()
+            quadraples = {}
+            old_joint = list(old-new)
+            new_joint = list(new-old)
+           # print('dispearing joints ', len(old_joint), ';  ' , old_joint)
+          #  print('emerging joints', len(new_joint ), ';  ' , new_joint)
+            
+          #  assert len(old_joint) == len(new_joint), "lenght of old %d, new %d"%(len(old_joint), len(new_joint))
+            
+            for i in old_joint:
+                for j in old_joint:
+                    if len( set(i).difference(set(j)) )==1:
+                        if (j, i) not in pairs:
+                            pairs.add((i,j))
+                            quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)
+         #   print(pairs, len(pairs))
+         #   print(quadraples)
+      
+            pairs =  set()
+            quadraples_new = {}
+            for i in new_joint:
+                for j in new_joint:
+                    if len( set(i).difference(set(j)) )==1:
+                        if (j, i) not in pairs:
+                            pairs.add((i,j))
+                            quadraples_new[tuple(sorted(set(i).union(set(j))))] = (i,j)
+          #  print(pairs, len(pairs))
+          #  print(quadraples_new)     
+            
+            switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
+          #  print(switching_event) 
+      
+                                
+            for e2 in switching_event:
+                
+                old_junction_i, old_junction_j = quadraples[e2]
+                new_junction_i, new_junction_j = quadraples_new[e2]
+      
+                old_i_x, old_j_x = self.vertices[self.joint2vertex[old_junction_i]], \
+                                    self.vertices[self.joint2vertex[old_junction_j]] 
+                new_i_x, new_j_x = cur_joint[new_junction_i][:2], \
+                                    cur_joint[new_junction_j][:2]                   
+      
+                switching_edges.add((self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]))
+                switching_edges.add((self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i]))
+                self.edge_labels[(self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j])] = 1
+                self.edge_labels[(self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i])] = 1
+                
+               # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
+                if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
+                #    print(colored('switch junction for less rotation', 'green'), new_junction_i, new_junction_j)
+                    new_junction_i, new_junction_j = new_junction_j, new_junction_i
+                
+                self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
+                self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
+                
+                print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
+                
+      
+      
+      
+        
+        self.edge_events.append(switching_edges)    
+        
+        old_vertices = self.vertices.copy()
+        self.vertices.clear()
+        for joint in self.joint2vertex.keys():
+            if joint in cur_joint:
+                vert = self.joint2vertex[joint]
+                coors = cur_joint[joint][:2]
+                self.vertices[vert] = periodic_move(coors, old_vertices[vert])
+      
+            else:
+                vert = self.joint2vertex[joint]
+                self.vertices[vert] = old_vertices[vert]
+                print(colored('unmatched joint detected: ', 'red'), joint, self.joint2vertex[joint])
+        for joint in cur_joint.keys():
+            if joint not in self.joint2vertex:
+                print(colored('unused joint detected: ', 'green'), joint)
+      
+        
+       
+        print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_event)))
+        
+      
+
             
 
             
@@ -1099,10 +1101,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 1
+        seed = 2
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 5)
+        traj = graph_trajectory(seed = seed, frames = 7)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     

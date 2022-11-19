@@ -550,6 +550,7 @@ class graph:
         
         self.plot_polygons()
         self.compute_error_layer()
+        assert self.error_layer < 0.1
 
     def GNN_update(self, X: np.ndarray):
         
@@ -1011,17 +1012,18 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
         
-        joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
-        joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
-      #  for k, v in self.vertex_neighbor.items():
-      #      if len(v)<3: print(colored('find a junction not 3-3 type', 'red'))
+     #   joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
+      #  joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
+        for k, v in self.vertex_neighbor.items():
+            if len(v)<3: print(colored('junction with less than three junction neighbor', 'red'))
+            if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'))
       #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
-        for k, v in self.joint2vertex.items():
-            joint_grain_neighbor[v] = np.array(list(k))
+      #  for k, v in self.joint2vertex.items():
+      #      joint_grain_neighbor[v] = np.array(list(k))
         
-        hg.neighbor_dicts.update({('joint','joint'):joint_joint_neighbor})
-        hg.neighbor_dicts.update({('joint','grain'):joint_grain_neighbor})
+      #  hg.neighbor_dicts.update({('joint','joint'):joint_joint_neighbor})
+      #  hg.neighbor_dicts.update({('joint','grain'):joint_grain_neighbor})
         
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed})

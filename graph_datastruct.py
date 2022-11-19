@@ -45,11 +45,20 @@ def in_bound(x, y):
 def periodic_move(p, pc):
     x,  y  = p
     xc, yc = pc
+    """
     if x<xc-0.5-eps: x+=1
     if x>xc+0.5+eps: x-=1
     if y<yc-0.5-eps: y+=1
     if y>yc+0.5+eps: y-=1    
+    """
+    rel_x = x - xc
+    rel_y = y - yc
+    x += -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
+    y += -1*(rel_y>0.5) + 1*(rel_y<-0.5) 
     
+    
+    assert -0.5<x - xc<0.5
+    assert -0.5<y - yc<0.5
     return (x, y)
 
 
@@ -404,21 +413,91 @@ class graph:
             vert_in_region = self.regions[region]
             tent_edge = set()
             prev = 0
+            """
             for cur in range(1, len(vert_in_region)):
                 if linked_edge_by_junction(self.vertex2joint[vert_in_region[prev]], \
                                            self.vertex2joint[vert_in_region[cur]]):
                     break
             tent_edge.add((vert_in_region[prev], vert_in_region[cur]))
+            """
           #  for i in range(1, len(verts)):
-            for i in range(len(vert_in_region)-1):   
+            res = []
+            
+            
+            def periodic_dist(nxt, cur):
+                x,  y  = self.vertices[nxt]
+                xc, yc = self.vertices[cur]
+                
+                if x<xc-0.5-eps: x+=1
+                if x>xc+0.5+eps: x-=1
+                if y<yc-0.5-eps: y+=1
+                if y>yc+0.5+eps: y-=1                    
+                return (x-xc)**2 + (y-yc)**2
+                
+            
+            def backtrack(path, edges_visited, prev, cur):
+              #  print(path)
+               # nonlocal res
+                if len(set(path)) == len(vert_in_region):
+                    res.append(path.copy())
+                   # print('re',res)
+                    return 
+                
+                if edges_visited == len(vert_in_region):
+                    return
+                
+                nxt_candidates = []
                 for nxt in range(len(vert_in_region)):                        
                     if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
                                                self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
-                        prev, cur = cur, nxt
-                        break
+                        nxt_candidates.append(nxt)
+                """        
+                if edges_visited == 0: nxt_candidates = [nxt_candidates[0]]
+                for nxt in nxt_candidates:
+                    path.append(nxt)
+                    backtrack(path, edges_visited+1, cur, nxt)
+                    path.pop()
+                """
+                if len(nxt_candidates)>1:
+                    nxt_candidates = sorted(nxt_candidates, key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
+                nxt = nxt_candidates[0]
+                path.append(nxt)
+                backtrack(path, edges_visited+1, cur, nxt)
+                path.pop()
+                
+            backtrack([0], 0, 0, 0)
+            res = res[0]
+         #   print('ress',res)
+            for i in range(len(vert_in_region)-1):
+                prev = res[i]
+                cur = res[i+1]
+                tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
+                verts[cur] = periodic_move(verts[cur], verts[prev])                 
+            tent_edge.add((vert_in_region[res[len(vert_in_region)-1]], vert_in_region[res[0]]))    
+            """    
+              
+            for i in range(len(vert_in_region)-1):   
+                nxt_candidates = []
+                for nxt in range(len(vert_in_region)):                        
+                    if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
+                                               self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
+                        nxt_candidates.append(nxt)
+                
+                if len(nxt_candidates)==1:        
+                    prev, cur = cur, nxt_candidates[0]
+                        
                 tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
                 verts[cur] = periodic_move(verts[cur], verts[prev])                                
-                                          
+            
+            """
+            
+            
+            
+            
+            
+            if len(tent_edge)!=len(vert_in_region):
+                print('found anam', vert_in_region, tent_edge, res)
+                              
             inbound = [True, True]
             
             for vert in verts:
@@ -458,10 +537,10 @@ class graph:
                   #  tent_edge.add((pair[1], pair[0]))
                     self.edges.add((pair[1], pair[0]))
                     self.edges.add(pair)
-            cnt += len(tent_edge)    
+            cnt += len(vert_in_region)    
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-     #   print(cnt)
+        print(cnt)
         print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
         # form edge             
 
@@ -489,7 +568,7 @@ class graph_trajectory(graph):
         self.edge_events = []
         self.grain_events = []
         
-        self.show = True
+        self.show = False
         self.states = []
         self.physical_params = physical_params
 
@@ -707,21 +786,50 @@ class graph_trajectory(graph):
         E1: grain elimination
         
         """
-        visited = set()
+
+        grain_grain_neigh = {}
+        # step 1 merge grains to be eliminated
         for elm_grain in eliminated_grains:
-            if elm_grain in visited:
-                continue
-            old_vert = []
-            todelete = set()
             junction = set()
             for k, v in self.joint2vertex.items():
                 if elm_grain in set(k):
                     junction.update(set(k))
-                    old_vert.append(self.joint2vertex[k])
+            junction.remove(elm_grain) 
+            grain_grain_neigh[elm_grain] = junction
+      #  print(grain_grain_neigh)
+        
+        gg_merged = {}
+        visited = set()
+        for k1, v1 in grain_grain_neigh.items():
+            ks, vs = [k1], v1
+            for k2, v2 in grain_grain_neigh.items():
+                if k1 != k2 and k2 not in visited:
+                    if k1 in v2:
+                        ks.append(k2)
+                        vs.update(v2)
+                        
+                        visited.add(k2)
+            if k1 not in visited:
+                gg_merged[tuple(ks)] = vs
+            visited.add(k1)            
+            
+            
+     #   print(gg_merged)
+        
+        for elm_grain, junction in gg_merged.items():
+ 
+            old_vert = []
+            todelete = set()
+        #    junction = set()
+            for k, v in self.joint2vertex.items():
+                
+                if len(set(elm_grain).intersection(set(k)))>0:
+             #       junction.update(set(k))
+                    old_vert.append(v)
                     todelete.add(k)
       
-            junction.remove(elm_grain)        
-            print('%dth grain eliminated with no. of sides %d'%(elm_grain, len(todelete)), junction)
+           # junction.remove(elm_grain)        
+            print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
             for k in todelete:
                 del self.joint2vertex[k]   
                 
@@ -905,9 +1013,9 @@ class graph_trajectory(graph):
         
         joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
         joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
-        for k, v in self.vertex_neighbor.items():
-            if len(v)<3: print(colored('find a junction not 3-3 type', 'red'))
-            joint_joint_neighbor[k][:len(v)] = np.array(list(v))
+      #  for k, v in self.vertex_neighbor.items():
+      #      if len(v)<3: print(colored('find a junction not 3-3 type', 'red'))
+      #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
         for k, v in self.joint2vertex.items():
             joint_grain_neighbor[v] = np.array(list(k))
@@ -1104,7 +1212,7 @@ if __name__ == '__main__':
         seed = 2
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 7)
+        traj = graph_trajectory(seed = seed, frames = 25)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     

@@ -413,17 +413,7 @@ class graph:
             vert_in_region = self.regions[region]
             tent_edge = set()
             
-            """
-            for cur in range(1, len(vert_in_region)):
-                if linked_edge_by_junction(self.vertex2joint[vert_in_region[prev]], \
-                                           self.vertex2joint[vert_in_region[cur]]):
-                    break
-            tent_edge.add((vert_in_region[prev], vert_in_region[cur]))
-            """
-          #  for i in range(1, len(verts)):
-            res = []
-            
-            
+        
             def periodic_dist(nxt, cur):
                 x,  y  = self.vertices[nxt]
                 xc, yc = self.vertices[cur]
@@ -433,45 +423,7 @@ class graph:
                 if y<yc-0.5-eps: y+=1
                 if y>yc+0.5+eps: y-=1                    
                 return (x-xc)**2 + (y-yc)**2
-                
-            """
-            def backtrack(path, edges_visited, prev, cur):
-              #  print(path)
-               # nonlocal res
-                if len(set(path)) == len(vert_in_region):
-                    res.append(path.copy())
-                   # print('re',res)
-                    return 
-                
-                if edges_visited == len(vert_in_region):
-                    return
-                
-                nxt_candidates = []
-                for nxt in range(len(vert_in_region)):                        
-                    if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
-                                               self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
-                        nxt_candidates.append(nxt)
-           
 
-                if len(nxt_candidates)>1:
-                    nxt_candidates = sorted(nxt_candidates, key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
-                nxt = nxt_candidates[0]
-                path.append(nxt)
-                backtrack(path, edges_visited+1, cur, nxt)
-                path.pop()
-               
-            backtrack([0], 0, 0, 0)
-            res = res[0]
-            
-         #   print('ress',res)
-            for i in range(len(vert_in_region)-1):
-                prev = res[i]
-                cur = res[i+1]
-                tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
-                verts[cur] = periodic_move(verts[cur], verts[prev])                 
-            tent_edge.add((vert_in_region[res[len(vert_in_region)-1]], vert_in_region[res[0]]))   
-            
-            """ 
             
        
             prev, cur = 0, 0  
@@ -488,17 +440,16 @@ class graph:
                 if len(nxt_candidates)>1:
                     nxt_candidates = sorted(nxt_candidates, \
                                             key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
-                prev, cur = cur, nxt_candidates[0]             
+
+                nxt = nxt_candidates[0] if len(nxt_candidates)>0 else prev
+                prev, cur = cur, nxt            
                 
                 tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
                 verts[cur] = periodic_move(verts[cur], verts[prev])                                
-       
-            
-            
-            
+
             
             if len(tent_edge)!=len(vert_in_region):
-                print('found anam', vert_in_region, tent_edge, res)
+                print('found anam', vert_in_region, tent_edge)
                               
             inbound = [True, True]
             
@@ -574,7 +525,7 @@ class graph_trajectory(graph):
         self.show = False
         self.states = []
         self.physical_params = physical_params
-        self.save_frame = [False]*self.frames
+        self.save_frame = [True]*self.frames
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -767,7 +718,11 @@ class graph_trajectory(graph):
         
             self.update()
             self.form_states_tensor(frame)
-            self.save_frame[frame] = True if self.error_layer<0.1 else False
+            if self.error_layer>0.08:
+                self.save_frame[frame] = False
+            if len(self.edges)!=6*len(cur_grain):
+                self.save_frame[frame] = False
+                
             if self.show == True:
                 self.show_data_struct()   
                 
@@ -1187,7 +1142,8 @@ if __name__ == '__main__':
                                              len(traj.edge_events[snapshot+1])==0 ):    
                         print('save frame %d -> %d, event level %d'%(snapshot, snapshot+1, args.level))
                         train_samples.append(hg)
-        
+                else:
+                    print(colored('irregular data ignored, frame','red'), snapshot+1)
        
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)

@@ -920,16 +920,17 @@ class graph_trajectory(graph):
             quadraples_new = quadruple_(new_joint)
  
 
-            for q, joints in quadraples_new.items():
-                for i in old_joint:
-                    if set(i).issubset(set(q)):            
-                        add_vert = ns_last_vert(i, joints[0], joints[1], q)
-                        
-                        self.joint2vertex[add_vert] = left_over
-                        if i in old_joint: old_joint.remove(i)
-                        if joints[0] in new_joint: new_joint.remove(joints[0])
-                        if joints[1] in new_joint: new_joint.remove(joints[1])                           
-                        perform_switching(add_vert, i, joints[0], joints[1])
+            if left_over!= -1:
+                for q, joints in quadraples_new.items():
+                    for i in old_joint:
+                        if set(i).issubset(set(q)):            
+                            add_vert = ns_last_vert(i, joints[0], joints[1], q)
+                            
+                            self.joint2vertex[add_vert] = left_over
+                            if i in old_joint: old_joint.remove(i)
+                            if joints[0] in new_joint: new_joint.remove(joints[0])
+                            if joints[1] in new_joint: new_joint.remove(joints[1])                           
+                            perform_switching(add_vert, i, joints[0], joints[1])
 
                      
             case = 0 

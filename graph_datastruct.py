@@ -917,9 +917,19 @@ class graph_trajectory(graph):
                         old_joint.remove(i)
                         new_joint.remove(j)
                     
-        
-            single_map()
-            single_map()
+            
+            pairs =  set()
+            
+            for i in old_joint:
+                for j in old_joint:
+                    if len( set(i).difference(set(j)) )==1:
+                        if (j, i) not in pairs:
+                            pairs.add((i,j))
+                            add_event(i, j)
+            
+            for i in range(3):
+                single_map()
+                
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))
             

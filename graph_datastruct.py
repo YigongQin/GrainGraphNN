@@ -754,6 +754,50 @@ class graph_trajectory(graph):
       #  cur_joint = self.joint_traj[frame]
 
 
+        def add_edge_event(old_junction_i, old_junction_j):
+            vert_old_i = self.joint2vertex[old_junction_i]
+            vert_old_j = self.joint2vertex[old_junction_j]                
+            switching_edges.add((vert_old_i, vert_old_j))
+            switching_edges.add((vert_old_j, vert_old_i))
+            self.edge_labels[(vert_old_i, vert_old_j)] = 1
+            self.edge_labels[(vert_old_j, vert_old_i)] = 1  
+
+
+        def quadruple_(junctions):
+            quadraples = {}
+            pairs =  set()
+            for i in junctions:
+                for j in junctions:
+                    if len( set(i).difference(set(j)) )==1:
+                        if (j, i) not in pairs:
+                            pairs.add((i,j))
+                            quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)            
+            
+            return quadraples
+        
+        
+        def ns_last_vert(j1, i1, i2, q):
+
+            j2 = set(q) - set(j1)
+            j2.add(list(set(i1)-set(i2))[0])
+            j2.add(list(set(i2)-set(i1))[0])
+
+            return tuple(sorted(list(j2)))
+
+        def perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j):
+            
+            
+  
+            self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
+            self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
+            
+            print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
+            
+            if old_junction_i in old_joint: old_joint.remove(old_junction_i)
+            if old_junction_j in old_joint: old_joint.remove(old_junction_j)
+            if new_junction_i in new_joint: new_joint.remove(new_junction_i)
+            if new_junction_j in new_joint: new_joint.remove(new_junction_j)    
+
         if len(eliminated_grains)>0:
             print('E1 grain_elimination: ', eliminated_grains)
         
@@ -830,20 +874,11 @@ class graph_trajectory(graph):
         
         switching_edges = set() 
         
-        def add_event(old_junction_i, old_junction_j):
 
-            vert_old_i = self.joint2vertex[old_junction_i]
-            vert_old_j = self.joint2vertex[old_junction_j]                
-            switching_edges.add((vert_old_i, vert_old_j))
-            switching_edges.add((vert_old_j, vert_old_i))
-            self.edge_labels[(vert_old_i, vert_old_j)] = 1
-            self.edge_labels[(vert_old_j, vert_old_i)] = 1       
-            
-            
-            
+        
         if old!= new:
-            pairs =  set()
-            quadraples = {}
+            
+            
             old_joint = list(old-new)
             new_joint = list(new-old)
            # print('dispearing joints ', len(old_joint), ';  ' , old_joint)
@@ -851,26 +886,8 @@ class graph_trajectory(graph):
             
           #  assert len(old_joint) == len(new_joint), "lenght of old %d, new %d"%(len(old_joint), len(new_joint))
             
-            for i in old_joint:
-                for j in old_joint:
-                    if len( set(i).difference(set(j)) )==1:
-                        if (j, i) not in pairs:
-                            pairs.add((i,j))
-                            quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)
-                        #    add_event(i,j)
-         #   print(pairs, len(pairs))
-         #   print(quadraples)
-      
-            pairs =  set()
-            quadraples_new = {}
-            for i in new_joint:
-                for j in new_joint:
-                    if len( set(i).difference(set(j)) )==1:
-                        if (j, i) not in pairs:
-                            pairs.add((i,j))
-                            quadraples_new[tuple(sorted(set(i).union(set(j))))] = (i,j)
-          #  print(pairs, len(pairs))
-          #  print(quadraples_new)     
+            quadraples = quadruple_(old_joint)
+            quadraples_new = quadruple_(new_joint)
             
             switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
           #  print(switching_event) 
@@ -885,51 +902,54 @@ class graph_trajectory(graph):
                                    self.vertices[self.joint2vertex[old_junction_j]] 
                 new_i_x, new_j_x = cur_joint[new_junction_i][:2], cur_joint[new_junction_j][:2]                   
       
-                add_event(old_junction_i, old_junction_j)
+                
                 
                # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
                 if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
                 #    print(colored('switch junction for less rotation', 'green'), new_junction_i, new_junction_j)
                     new_junction_i, new_junction_j = new_junction_j, new_junction_i
-                
-                self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
-                self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
-                
-                print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
-                
-                old_joint.remove(old_junction_i)
-                old_joint.remove(old_junction_j)
-                new_joint.remove(new_junction_i)
-                new_joint.remove(new_junction_j)                
-            
-            def single_map():
-                old_joint_copy = old_joint.copy()
-                new_joint_copy = new_joint.copy()
-                for i in old_joint_copy:
-                    l = []
-                    for j in new_joint_copy:
-                        if linked_edge_by_junction(i, j):
-                            l.append(j)
-                    if len(l)==1:
-                        j = l[0]
-                        self.joint2vertex[j] = self.joint2vertex.pop(i)
-                        print('Single vert mapping: ', i, ' --> ', j)
-                        old_joint.remove(i)
-                        new_joint.remove(j)
                     
+                add_edge_event(old_junction_i, old_junction_j)
+                perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j)
             
-            pairs =  set()
             
-            for i in old_joint:
-                for j in old_joint:
-                    if len( set(i).difference(set(j)) )==1:
-                        if (j, i) not in pairs:
-                            pairs.add((i,j))
-                            add_event(i, j)
+            quadraples = quadruple_(old_joint)
+            quadraples_new = quadruple_(new_joint)
+                      
+            case = 0 
+            for q, joints in quadraples.items():
+                for j in new_joint:
+                    if set(j).issubset(set(q)) and not case:
+                        add_vert = ns_last_vert(j, joints[0], joints[1], q)
+                       # print(old_joint, joints[0], joints[1])
+                        add_edge_event(joints[0], joints[1])
+                        perform_switching(joints[0], joints[1], j, add_vert)
+                        old_joint.append(add_vert)
+                        case = 1
             
-            for i in range(3):
-                single_map()
+            quadraples = quadruple_(old_joint)
+            quadraples_new = quadruple_(new_joint)
+            
+            switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
+
+            for e2 in switching_event:
                 
+                old_junction_i, old_junction_j = quadraples[e2]
+                new_junction_i, new_junction_j = quadraples_new[e2]
+
+                perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j)    
+            
+                        
+            for q, joints in quadraples_new.items():
+                for i in old_joint:
+                    if set(i).issubset(set(q)):            
+                        add_vert = ns_last_vert(i, joints[0], joints[1], q)
+                        
+                        self.joint2vertex[add_vert] = -1
+                        if i in old_joint: old_joint.remove(i)
+                        if joints[0] in new_joint: new_joint.remove(joints[0])
+                        if joints[1] in new_joint: new_joint.remove(joints[1])                           
+                        
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))
             
@@ -1227,10 +1247,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 7
+        seed = 2
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 25)
+        traj = graph_trajectory(seed = seed, frames = 13)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     

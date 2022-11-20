@@ -918,7 +918,20 @@ class graph_trajectory(graph):
             
             quadraples = quadruple_(old_joint)
             quadraples_new = quadruple_(new_joint)
-                      
+ 
+
+            for q, joints in quadraples_new.items():
+                for i in old_joint:
+                    if set(i).issubset(set(q)):            
+                        add_vert = ns_last_vert(i, joints[0], joints[1], q)
+                        
+                        self.joint2vertex[add_vert] = left_over
+                        if i in old_joint: old_joint.remove(i)
+                        if joints[0] in new_joint: new_joint.remove(joints[0])
+                        if joints[1] in new_joint: new_joint.remove(joints[1])                           
+                        perform_switching(add_vert, i, joints[0], joints[1])
+
+                     
             case = 0 
             for q, joints in quadraples.items():
                 for j in new_joint:
@@ -943,16 +956,7 @@ class graph_trajectory(graph):
                 perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j)    
             
                         
-            for q, joints in quadraples_new.items():
-                for i in old_joint:
-                    if set(i).issubset(set(q)):            
-                        add_vert = ns_last_vert(i, joints[0], joints[1], q)
-                        
-                        self.joint2vertex[add_vert] = left_over
-                        if i in old_joint: old_joint.remove(i)
-                        if joints[0] in new_joint: new_joint.remove(joints[0])
-                        if joints[1] in new_joint: new_joint.remove(joints[1])                           
-                        perform_switching(add_vert, i, joints[0], joints[1])
+
                         
                         
             if len(old_joint)>0:
@@ -1252,7 +1256,7 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 2
+        seed = 1
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
         traj = graph_trajectory(seed = seed, frames = 13)

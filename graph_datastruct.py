@@ -835,7 +835,7 @@ class graph_trajectory(graph):
             
             
      #   print(gg_merged)
-        
+        left_over = -1
         for elm_grain, junction in gg_merged.items():
  
             old_vert = []
@@ -859,7 +859,10 @@ class graph_trajectory(graph):
                     self.joint2vertex[k] = old_vert[-1]
                     print('the new joint', k, 'inherit the vert', old_vert[-1])
                     old_vert.pop()
-        
+                    
+            if len(old_vert)>2*len(elm_grain):
+                left_over = old_vert[-1]
+                
         self.grain_events.append(eliminated_grains)
          #   assert len(old_vert) == 2
                     
@@ -945,10 +948,12 @@ class graph_trajectory(graph):
                     if set(i).issubset(set(q)):            
                         add_vert = ns_last_vert(i, joints[0], joints[1], q)
                         
-                        self.joint2vertex[add_vert] = -1
+                        self.joint2vertex[add_vert] = left_over
                         if i in old_joint: old_joint.remove(i)
                         if joints[0] in new_joint: new_joint.remove(joints[0])
                         if joints[1] in new_joint: new_joint.remove(joints[1])                           
+                        perform_switching(add_vert, i, joints[0], joints[1])
+                        
                         
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))

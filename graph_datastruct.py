@@ -440,7 +440,9 @@ class graph:
                 if len(nxt_candidates)>1:
                     nxt_candidates = sorted(nxt_candidates, \
                                             key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
-
+                    for nxt in nxt_candidates:
+                        if (nxt, cur) in self.edges:
+                            nxt_candidates[0] = nxt
                 nxt = nxt_candidates[0] if len(nxt_candidates)>0 else prev
                 prev, cur = cur, nxt            
                 
@@ -1171,7 +1173,7 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 1
+        seed = 7
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
         traj = graph_trajectory(seed = seed, frames = 25)

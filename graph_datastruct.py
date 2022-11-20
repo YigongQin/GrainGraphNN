@@ -902,32 +902,24 @@ class graph_trajectory(graph):
                 new_joint.remove(new_junction_i)
                 new_joint.remove(new_junction_j)                
             
-            old_joint_copy = old_joint.copy()
-            new_joint_copy = new_joint.copy()
-            for i in old_joint_copy:
-                l = []
-                for j in new_joint_copy:
-                    if linked_edge_by_junction(i, j):
-                        l.append(j)
-                if len(l)==1:
-                    self.joint2vertex[j] = self.joint2vertex.pop(i)
-                    print('Single vert mapping: ', i, ' --> ', j)
-                    old_joint.remove(i)
-                    new_joint.remove(j)
+            def single_map():
+                old_joint_copy = old_joint.copy()
+                new_joint_copy = new_joint.copy()
+                for i in old_joint_copy:
+                    l = []
+                    for j in new_joint_copy:
+                        if linked_edge_by_junction(i, j):
+                            l.append(j)
+                    if len(l)==1:
+                        j = l[0]
+                        self.joint2vertex[j] = self.joint2vertex.pop(i)
+                        print('Single vert mapping: ', i, ' --> ', j)
+                        old_joint.remove(i)
+                        new_joint.remove(j)
                     
-            old_joint_copy = old_joint.copy()
-            new_joint_copy = new_joint.copy()
-            for i in old_joint_copy:
-                l = []
-                for j in new_joint_copy:
-                    if linked_edge_by_junction(i, j):
-                        l.append(j)
-                if len(l)==1:
-                    self.joint2vertex[j] = self.joint2vertex.pop(i)
-                    print('Single vert mapping: ', i, ' --> ', j)
-                    old_joint.remove(i)
-                    new_joint.remove(j)            
-            
+        
+            single_map()
+            single_map()
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))
             

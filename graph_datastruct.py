@@ -616,7 +616,7 @@ class graph_trajectory(graph):
             missing = set()
             miss_case = defaultdict(int)
             
-            def clean_data(cur_joint):
+            def clean_data(cur_joint, init):
                # jj_link = 0
                 total_missing = 0
                 for k1 in cur_joint.keys():
@@ -627,13 +627,14 @@ class graph_trajectory(graph):
                 #            jj_link += 1
                           #  print(jj_link, k1, k2)
                     if num_link !=3:
-                        missing.update(set(k1))
-                        miss_case.update({k1:3-num_link})
+                        if init==True:
+                            missing.update(set(k1))
+                            miss_case.update({k1:3-num_link})
                         total_missing += abs(3-num_link)
                      #   print('find missing junction link', k1, 3-num_link)
                 return total_missing   
             
-            total_missing = clean_data(cur_joint)
+            total_missing = clean_data(cur_joint, True)
             print('total missing edges, ', total_missing)
             print('quadruples', len(quadraples))
             #q_pool = []
@@ -658,7 +659,7 @@ class graph_trajectory(graph):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur = clean_data(cur_joint)
+                            cur = clean_data(cur_joint, False)
                             if cur == total_missing -3:
                                 print('fixed!')
                                 total_missing = cur
@@ -672,7 +673,7 @@ class graph_trajectory(graph):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur = clean_data(cur_joint)
+                            cur = clean_data(cur_joint, False)
                             if cur == total_missing -4:
                                 print('fixed!')
                                 total_missing = cur
@@ -686,7 +687,7 @@ class graph_trajectory(graph):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur = clean_data(cur_joint)
+                            cur = clean_data(cur_joint, False)
                             if cur == total_missing -5:
                                 print('fixed!')
                                 total_missing = cur

@@ -831,7 +831,17 @@ class graph_trajectory(graph):
         switching_event = set()
         switching_edges = set() 
         
-        
+        def add_event(old_junction_i, old_junction_j):
+
+            vert_old_i = self.joint2vertex[old_junction_i]
+            vert_old_j = self.joint2vertex[old_junction_j]                
+            switching_edges.add((vert_old_i, vert_old_j))
+            switching_edges.add((vert_old_j, vert_old_i))
+            self.edge_labels[(vert_old_i, vert_old_j)] = 1
+            self.edge_labels[(vert_old_j, vert_old_i)] = 1       
+            
+            
+            
         if old!= new:
             pairs =  set()
             quadraples = {}
@@ -864,22 +874,18 @@ class graph_trajectory(graph):
             
             switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
           #  print(switching_event) 
-      
                                 
             for e2 in switching_event:
                 
                 old_junction_i, old_junction_j = quadraples[e2]
                 new_junction_i, new_junction_j = quadraples_new[e2]
       
+        
                 old_i_x, old_j_x = self.vertices[self.joint2vertex[old_junction_i]], \
-                                    self.vertices[self.joint2vertex[old_junction_j]] 
-                new_i_x, new_j_x = cur_joint[new_junction_i][:2], \
-                                    cur_joint[new_junction_j][:2]                   
+                                   self.vertices[self.joint2vertex[old_junction_j]] 
+                new_i_x, new_j_x = cur_joint[new_junction_i][:2], cur_joint[new_junction_j][:2]                   
       
-                switching_edges.add((self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j]))
-                switching_edges.add((self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i]))
-                self.edge_labels[(self.joint2vertex[old_junction_i], self.joint2vertex[old_junction_j])] = 1
-                self.edge_labels[(self.joint2vertex[old_junction_j], self.joint2vertex[old_junction_i])] = 1
+                add_event(old_junction_i, old_junction_j)
                 
                # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
                 if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
@@ -891,8 +897,14 @@ class graph_trajectory(graph):
                 
                 print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
                 
-      
-      
+                old_joint.remove(old_junction_i)
+                old_joint.remove(old_junction_j)
+                new_joint.remove(new_junction_i)
+                new_joint.remove(new_junction_j)                
+            
+            if len(old_joint)>0:
+                print(colored('match not finisehd','red'))
+            
       
         
         self.edge_events.append(switching_edges)    
@@ -1103,7 +1115,7 @@ if __name__ == '__main__':
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
     parser.add_argument("--level", type=int, default = 0)
-    parser.add_argument("--frame", type=int, default = 25)
+    parser.add_argument("--frame", type=int, default = 13)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'

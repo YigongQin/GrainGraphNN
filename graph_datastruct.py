@@ -680,7 +680,20 @@ class graph_trajectory(graph):
                             else:
                                 for a in ans:
                                     del cur_joint[a]                        
-                    
+
+                    if miss_case_sum == 5:
+                        for ans in list(itertools.combinations(possible, 3)):
+                            print('try ans', ans)
+                            for a in ans:
+                                cur_joint[a] = coor
+                            cur = clean_data(cur_joint)
+                            if cur == total_missing -5:
+                                print('fixed!')
+                                total_missing = cur
+                                break
+                            else:
+                                for a in ans:
+                                    del cur_joint[a]                       
 
             self.joint_traj.append(cur_joint)
             prev_joint = cur_joint

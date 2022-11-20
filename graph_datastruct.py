@@ -828,7 +828,6 @@ class graph_trajectory(graph):
         old = set(self.joint2vertex.keys())
         new = set(cur_joint.keys())
         
-        switching_event = set()
         switching_edges = set() 
         
         def add_event(old_junction_i, old_junction_j):
@@ -858,6 +857,7 @@ class graph_trajectory(graph):
                         if (j, i) not in pairs:
                             pairs.add((i,j))
                             quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)
+                            add_event(i,j)
          #   print(pairs, len(pairs))
          #   print(quadraples)
       
@@ -885,7 +885,7 @@ class graph_trajectory(graph):
                                    self.vertices[self.joint2vertex[old_junction_j]] 
                 new_i_x, new_j_x = cur_joint[new_junction_i][:2], cur_joint[new_junction_j][:2]                   
       
-                add_event(old_junction_i, old_junction_j)
+             #   add_event(old_junction_i, old_junction_j)
                 
                # print(relative_angle(old_i_x, old_j_x), relative_angle(new_i_x, new_j_x))
                 if abs(relative_angle(old_i_x, old_j_x) - relative_angle(new_i_x, new_j_x))>pi/2:
@@ -901,6 +901,16 @@ class graph_trajectory(graph):
                 old_joint.remove(old_junction_j)
                 new_joint.remove(new_junction_i)
                 new_joint.remove(new_junction_j)                
+            
+            old_joint_copy = old_joint.copy()
+            new_joint_copy = new_joint.copy()
+            for i in old_joint_copy:
+                for j in new_joint_copy:
+                    if linked_edge_by_junction(i, j):
+                        self.joint2vertex[j] = self.joint2vertex.pop(i)
+                        print('Single vert mapping: ', i, ' --> ', j)
+                        old_joint.remove(i)
+                        new_joint.remove(j)
             
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))
@@ -927,7 +937,7 @@ class graph_trajectory(graph):
       
         
        
-        print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_event)))
+        print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_edges)//2))
         
       
 

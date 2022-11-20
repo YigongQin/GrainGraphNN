@@ -412,7 +412,7 @@ class graph:
 
             vert_in_region = self.regions[region]
             tent_edge = set()
-            prev = 0
+            
             """
             for cur in range(1, len(vert_in_region)):
                 if linked_edge_by_junction(self.vertex2joint[vert_in_region[prev]], \
@@ -434,7 +434,7 @@ class graph:
                 if y>yc+0.5+eps: y-=1                    
                 return (x-xc)**2 + (y-yc)**2
                 
-            
+            """
             def backtrack(path, edges_visited, prev, cur):
               #  print(path)
                # nonlocal res
@@ -451,46 +451,48 @@ class graph:
                     if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
                                                self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
                         nxt_candidates.append(nxt)
-                """        
-                if edges_visited == 0: nxt_candidates = [nxt_candidates[0]]
-                for nxt in nxt_candidates:
-                    path.append(nxt)
-                    backtrack(path, edges_visited+1, cur, nxt)
-                    path.pop()
-                """
+           
+
                 if len(nxt_candidates)>1:
                     nxt_candidates = sorted(nxt_candidates, key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
                 nxt = nxt_candidates[0]
                 path.append(nxt)
                 backtrack(path, edges_visited+1, cur, nxt)
                 path.pop()
-                
+               
             backtrack([0], 0, 0, 0)
             res = res[0]
+            
          #   print('ress',res)
             for i in range(len(vert_in_region)-1):
                 prev = res[i]
                 cur = res[i+1]
                 tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
                 verts[cur] = periodic_move(verts[cur], verts[prev])                 
-            tent_edge.add((vert_in_region[res[len(vert_in_region)-1]], vert_in_region[res[0]]))    
-            """    
-              
-            for i in range(len(vert_in_region)-1):   
+            tent_edge.add((vert_in_region[res[len(vert_in_region)-1]], vert_in_region[res[0]]))   
+            
+            """ 
+            
+       
+            prev, cur = 0, 0  
+            for i in range(len(vert_in_region)):   
                 nxt_candidates = []
                 for nxt in range(len(vert_in_region)):                        
                     if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
                                                self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
                         nxt_candidates.append(nxt)
                 
-                if len(nxt_candidates)==1:        
-                    prev, cur = cur, nxt_candidates[0]
-                        
+           #     if len(nxt_candidates)==1:        
+           #         prev, cur = cur, nxt_candidates[0]
+                    
+                if len(nxt_candidates)>1:
+                    nxt_candidates = sorted(nxt_candidates, \
+                                            key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
+                prev, cur = cur, nxt_candidates[0]             
+                
                 tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
                 verts[cur] = periodic_move(verts[cur], verts[prev])                                
-            
-            """
-            
+       
             
             
             
@@ -550,7 +552,7 @@ class graph:
         
         self.plot_polygons()
         self.compute_error_layer()
-        assert self.error_layer < 0.1
+
 
     def GNN_update(self, X: np.ndarray):
         
@@ -572,6 +574,7 @@ class graph_trajectory(graph):
         self.show = False
         self.states = []
         self.physical_params = physical_params
+        self.save_frame = [False]*self.frames
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -764,6 +767,7 @@ class graph_trajectory(graph):
         
             self.update()
             self.form_states_tensor(frame)
+            self.save_frame[frame] = True if self.error_layer<0.1 else False
             if self.show == True:
                 self.show_data_struct()   
                 
@@ -1172,17 +1176,17 @@ if __name__ == '__main__':
         #    train_samples.append(hg0)
       
             for snapshot in range(traj.frames-1):
-                hg = traj.states[snapshot]
-                hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
-                                 nxt = traj.states[snapshot+1])
-                
-                if ( args.level == 2 ) \
-                or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
-                or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
-                                         len(traj.edge_events[snapshot+1])==0 ):    
+                if traj.save_frame[snapshot+1] == True:
+                    hg = traj.states[snapshot]
+                    hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
+                                     nxt = traj.states[snapshot+1])
                     
-               # if len(traj.grain_events[snapshot+1])==0:
-                    train_samples.append(hg)
+                    if ( args.level == 2 ) \
+                    or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
+                    or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
+                                             len(traj.edge_events[snapshot+1])==0 ):    
+                        print('save frame %d -> %d, event level %d'%(snapshot, snapshot+1, args.level))
+                        train_samples.append(hg)
         
        
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
@@ -1211,7 +1215,7 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 2
+        seed = 1
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
         traj = graph_trajectory(seed = seed, frames = 25)

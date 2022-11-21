@@ -65,6 +65,13 @@ class DynamicHeteroGraphTemporalSignal(object):
             return {key: torch.LongTensor(value) for key, value in self.edge_index_dicts.items()
                     if value is not None}
 
+    def _get_mask(self):
+        if self.mask is None:
+            return self.mask
+        else:
+            return {key: torch.LongTensor(value) for key, value in self.mask.items()
+                    if value is not None}
+
     def _get_edge_weight(self):
         if self.edge_weight_dicts is None:
             return self.edge_weight_dicts
@@ -110,12 +117,15 @@ class DynamicHeteroGraphTemporalSignal(object):
         self.edge_weight_dicts = data.edge_weight_dicts
         self.feature_dicts = data.feature_dicts
         self.target_dicts = data.target_dicts
+        self.mask = data.mask
         self.add_feature = data.additional_features
  
         edge_index_dict = self._get_edge_index()
         edge_weight_dict = self._get_edge_weight()        
         x_dict = self._get_features()
         y_dict = self._get_target()
+        mask = self._get_mask()
+        
         additional_features = self._get_additional_features()
    
         snapshot = HeteroData()
@@ -131,6 +141,10 @@ class DynamicHeteroGraphTemporalSignal(object):
         if y_dict:
             for key, value in y_dict.items():
                 snapshot[key].y = value
+        if mask:
+            for key, value in mask.items():
+                snapshot['mask'][key] = value            
+
         if additional_features:
      
             for feature_name, feature_dict in additional_features.items():

@@ -996,7 +996,8 @@ class graph_trajectory(graph):
         hg = GrainHeterograph()
         grain_state = np.zeros((self.num_regions, len(hg.features['grain'])))
         joint_state = np.zeros((self.num_vertices, len(hg.features['joint'])))
-        
+        grain_mask = np.zeros((self.num_regions, 1), dtype=int)
+        joint_mask = np.zeros((self.num_vertices, 1), dtype=int)
         
         s = self.imagesize[0]
         
@@ -1005,6 +1006,7 @@ class graph_trajectory(graph):
         for grain, coor in self.region_center.items():
             grain_state[grain-1, 0] = coor[0]
             grain_state[grain-1, 1] = coor[1]
+            grain_mask[grain-1, 0] = 1
 
         grain_state[:, 2] = frame/self.frames
 
@@ -1022,6 +1024,7 @@ class graph_trajectory(graph):
         for joint, coor in self.vertices.items():
             joint_state[joint, 0] = coor[0]
             joint_state[joint, 1] = coor[1]
+            joint_mask[joint, 0] = 1
         
         joint_state[:, 2] = frame/self.frames
         joint_state[:, 3] = 1 - np.log10(self.physical_params['G'])/2
@@ -1043,6 +1046,8 @@ class graph_trajectory(graph):
         hg.edge_index_dicts.update({hg.edge_type[1]:np.array(jg_edge).T})
         hg.edge_index_dicts.update({hg.edge_type[2]:np.array(jj_edge).T})
         
+        
+        hg.mask = {'grain':grain_mask, 'joint':joint_mask}
         
      #   joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
       #  joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
@@ -1075,7 +1080,7 @@ class GrainHeterograph:
     def __init__(self):
         self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
                          'joint':['x', 'y', 'z', 'G', 'R']}
-        self.mask = {'grain':None, 'joint':None}
+        self.mask = {}
         
         self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
         

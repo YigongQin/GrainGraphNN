@@ -17,16 +17,15 @@ from parameters import hyperparam
 from graph_datastruct import graph_trajectory
 
 
-def criterion(data, pred):
+def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))
    # print(data['edge_event'])
    # classifier = torch.nn.NLLLoss()
-    
     p = pred['edge_event']
     y = data['edge_event']
     weight_ratio = 1
    # print(p)
-    return 1000*torch.mean((data['joint'] - pred['joint'])**2)
+    return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
         # torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
@@ -66,7 +65,7 @@ def train(model, num_epochs, train_loader, test_loader):
         count += 1 #data.batch
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
-        train_loss += float(criterion(data.y_dict, pred)) 
+        train_loss += float(criterion(data.y_dict, pred, data['mask'])) 
     train_loss/=count
 
     test_loss, count = 0, 0
@@ -74,7 +73,7 @@ def train(model, num_epochs, train_loader, test_loader):
         count += 1
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
-        test_loss += float(criterion(data.y_dict, pred))  
+        test_loss += float(criterion(data.y_dict, pred, data['mask']))  
     test_loss/=count
 
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
@@ -92,7 +91,7 @@ def train(model, num_epochs, train_loader, test_loader):
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
          
-            loss = criterion(data.y_dict, pred)
+            loss = criterion(data.y_dict, pred, data['mask'])
              
             optimizer.zero_grad()
             loss.backward()
@@ -109,7 +108,7 @@ def train(model, num_epochs, train_loader, test_loader):
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
-            test_loss += float(criterion(data.y_dict, pred)) 
+            test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
             
         test_loss/=count
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))

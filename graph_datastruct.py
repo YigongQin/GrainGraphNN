@@ -602,7 +602,7 @@ class graph_trajectory(graph):
 
             
             ## delete undetermined junctions from quadruples, add right ones later
-            
+            del_joints = []
             for q, coors in quadraples.items():
                 q_list = list(q)
               #  print(q_list)
@@ -611,7 +611,7 @@ class graph_trajectory(graph):
 
                     if arg not in prev_joint and arg in cur_joint:
                         del cur_joint[arg]
-
+                        del_joints.append(arg)
   
             missing = set()
             miss_case = defaultdict(int)
@@ -671,7 +671,7 @@ class graph_trajectory(graph):
                             for a in ans:
                                     del cur_joint[a]
                                     
-
+            
 
             self.joint_traj.append(cur_joint)
             prev_joint = cur_joint
@@ -698,6 +698,8 @@ class graph_trajectory(graph):
             all_grain = cur_grain
 
             
+            if len(cur_joint)<2*len(cur_grain):
+                print(del_joints)
 
             
             print('number of grains pixel %d'%len(cur_grain))

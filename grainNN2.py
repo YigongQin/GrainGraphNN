@@ -23,11 +23,11 @@ def criterion(data, pred, mask):
    # classifier = torch.nn.NLLLoss()
     p = pred['edge_event']
     y = data['edge_event']
-    weight_ratio = 1
+    weight_ratio = 5
    # print(p)
-    return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
+   # return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
-        # torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
+    return torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 

@@ -610,9 +610,10 @@ class graph_trajectory(graph):
                     arg = tuple([q_list[i] for i in comb])
 
                     if arg not in prev_joint and arg in cur_joint:
+
+                        del_joints.append([arg, cur_joint[arg]])
                         del cur_joint[arg]
-                        del_joints.append(arg)
-  
+                        
             missing = set()
             miss_case = defaultdict(int)
             
@@ -638,6 +639,7 @@ class graph_trajectory(graph):
             print('total missing edges, ', total_missing)
             print('quadruples', len(quadraples))
             #q_pool = []
+            
             for q, coor in quadraples.items():
                 if set(q).issubset(missing):
                     
@@ -697,9 +699,15 @@ class graph_trajectory(graph):
             
             all_grain = cur_grain
 
+
+            if len(cur_joint)<2*len(cur_grain):
+                for arg, coor in del_joints:
+                    cur_joint[arg] = coor
+                
+                
             
             if len(cur_joint)<2*len(cur_grain):
-                print(del_joints)
+                print(colored('junction find failed', 'red'))
 
             
             print('number of grains pixel %d'%len(cur_grain))

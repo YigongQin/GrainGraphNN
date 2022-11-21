@@ -640,61 +640,38 @@ class graph_trajectory(graph):
             #q_pool = []
             for q, coor in quadraples.items():
                 if set(q).issubset(missing):
+                    
+                    print('using quadraples',q,' to find missing link')
+                    
                     possible = list(itertools.combinations(list(q), 3))
+                    for c in miss_case.keys():
+                        if c in possible:
+                            possible.remove(c)
+
                     miss_case_sum = 0
-                    max_case = 0
+                 #   max_case = 0
                     
                     for i, j in miss_case.items():
                         if len(set(i).intersection(set(q)))>=2:
                             miss_case_sum += j
-                            max_case = max(max_case, j)
-                    if miss_case_sum>2:
-                        print('using quadraples to find missing link', q)
-                        print('miss links', miss_case_sum)        
-                    if miss_case_sum == 3:
-                        for c in miss_case.keys():
-                            if c in possible:
-                                possible.remove(c)
-                        for ans in list(itertools.combinations(possible, max_case)):
-                            print('try ans', ans)
+                         #   max_case = max(max_case, j)                 
+                        
+                    print('np. missing links', miss_case_sum)        
+                    max_case = 1 if miss_case_sum<4 else 2
+                    for ans in list(itertools.combinations(possible, max_case)):
+                        print('try ans', ans)
+                        for a in ans:
+                            cur_joint[a] = coor
+                        cur = clean_data(cur_joint, False)
+                        if cur == total_missing -miss_case_sum:
+                            print('fixed!')
+                            total_missing = cur
+                            break
+                        else:
                             for a in ans:
-                                cur_joint[a] = coor
-                            cur = clean_data(cur_joint, False)
-                            if cur == total_missing -3:
-                                print('fixed!')
-                                total_missing = cur
-                                break
-                            else:
-                                for a in ans:
                                     del cur_joint[a]
                                     
-                    if miss_case_sum == 4:
-                        for ans in list(itertools.combinations(possible, 2)):
-                            print('try ans', ans)
-                            for a in ans:
-                                cur_joint[a] = coor
-                            cur = clean_data(cur_joint, False)
-                            if cur == total_missing -4:
-                                print('fixed!')
-                                total_missing = cur
-                                break
-                            else:
-                                for a in ans:
-                                    del cur_joint[a]                        
 
-                    if miss_case_sum == 5:
-                        for ans in list(itertools.combinations(possible, 3)):
-                            print('try ans', ans)
-                            for a in ans:
-                                cur_joint[a] = coor
-                            cur = clean_data(cur_joint, False)
-                            if cur == total_missing -5:
-                                print('fixed!')
-                                total_missing = cur
-                                break
-                            else:
-                                for a in ans:
-                                    del cur_joint[a]                       
 
             self.joint_traj.append(cur_joint)
             prev_joint = cur_joint
@@ -1257,7 +1234,7 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 1
+        seed = 2
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
         traj = graph_trajectory(seed = seed, frames = 13)

@@ -44,10 +44,12 @@ def class_acc(data, pred):
     TruePositive = sum( (p==1) & (y==1) )
     FalsePositive = sum( (p==1) & (y==0) )
     FalseNegative = sum( (p==0) & (y==1) )
-    Presicion = TruePositive/(TruePositive + FalsePositive)
-    Recall = TruePositive/(TruePositive + FalseNegative)
-    F1 = 2*Presicion*Recall/(Presicion + Recall)
-    
+    Presicion = TruePositive/(TruePositive + FalsePositive) if TruePositive else 0
+    Recall = TruePositive/(TruePositive + FalseNegative) if TruePositive else 0
+    F1 = 2*Presicion*Recall/(Presicion + Recall) if Presicion + Recall else 0
+   
+  # print(Positive, TruePositive, FalsePositive)
+  #  print(Presicion, Recall, F1)
     return F1 if Positive else -1
     
 def unorder_edge(a):
@@ -113,7 +115,7 @@ def train(model, num_epochs, train_loader, test_loader):
          
             loss = criterion(data.y_dict, pred, data['mask'])
             train_acc = float(class_acc(data.y_dict, pred))
-            if train_acc != -1: train_acc_list.append(train_acc) 
+            train_acc_list.append(train_acc) 
             
             optimizer.zero_grad()
             loss.backward()
@@ -133,7 +135,7 @@ def train(model, num_epochs, train_loader, test_loader):
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
             test_acc = float(class_acc(data.y_dict, pred))
-            if test_acc != -1: test_acc_list.append(test_acc)
+            test_acc_list.append(test_acc)
             
         test_loss/=count
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))

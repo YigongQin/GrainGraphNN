@@ -40,6 +40,7 @@ def class_acc(data, pred):
         
     p = ((p>0.5)*1).long()
     
+    Positive = sum(y==1)
     TruePositive = sum( (p==1) & (y==1) )
     FalsePositive = sum( (p==1) & (y==0) )
     FalseNegative = sum( (p==0) & (y==1) )
@@ -47,7 +48,7 @@ def class_acc(data, pred):
     Recall = TruePositive/(TruePositive + FalseNegative)
     F1 = 2*Presicion*Recall/(Presicion + Recall)
     
-    return F1 if TruePositive else -1
+    return F1 if Positive else -1
     
 def unorder_edge(a):
     return set(map(tuple, a))

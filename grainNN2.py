@@ -47,7 +47,7 @@ def class_acc(data, pred):
     Recall = TruePositive/(TruePositive + FalseNegative)
     F1 = 2*Presicion*Recall/(Presicion + Recall)
     
-    return F1
+    return F1 if TruePositive else -1
     
 def unorder_edge(a):
     return set(map(tuple, a))
@@ -104,13 +104,15 @@ def train(model, num_epochs, train_loader, test_loader):
        # if mode=='train' and epoch==num_epochs-10: optimizer = torch.optim.SGD(model.parameters(), lr=0.02)
         
         train_loss, count = 0, 0
+        train_acc_list = []
         for data in train_loader:   
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
          
             loss = criterion(data.y_dict, pred, data['mask'])
-            train_acc = class_acc(data.y_dict, pred)
+            train_acc = float(class_acc(data.y_dict, pred))
+            if train_acc != -1: train_acc_list.append(train_acc) 
             
             optimizer.zero_grad()
             loss.backward()
@@ -122,17 +124,20 @@ def train(model, num_epochs, train_loader, test_loader):
         
         
         test_loss, count = 0, 0
+        test_acc_list = []
         for data in test_loader:  
         
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
-            test_acc = class_acc(data.y_dict, pred)
+            test_acc = float(class_acc(data.y_dict, pred))
+            if test_acc != -1: test_acc_list.append(test_acc)
             
         test_loss/=count
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
-        print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, float(train_acc), float(test_acc))) 
+        print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, \
+                sum(train_acc_list)/len(train_acc_list), sum(test_acc_list)/len(test_acc_list))) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))       
         scheduler.step()

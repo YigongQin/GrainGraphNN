@@ -31,6 +31,15 @@ def criterion(data, pred, mask):
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
+def class_acc(data, pred):
+    
+    p = pred['edge_event']
+    y = data['edge_event']
+        
+    p = ((p>0.5)*1).long()
+    
+    return sum(p==y)/len(y)
+    
 def unorder_edge(a):
     return set(map(tuple, a))
          
@@ -92,7 +101,8 @@ def train(model, num_epochs, train_loader, test_loader):
             pred = model(data.x_dict, data.edge_index_dict)
          
             loss = criterion(data.y_dict, pred, data['mask'])
-             
+            train_acc = class_acc(data.y_dict, pred)
+            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -109,10 +119,11 @@ def train(model, num_epochs, train_loader, test_loader):
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+            test_acc = class_acc(data.y_dict, pred)
             
         test_loss/=count
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
-         
+        print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, float(train_acc), float(test_acc))) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))       
         scheduler.step()

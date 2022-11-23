@@ -33,12 +33,21 @@ def criterion(data, pred, mask):
 
 def class_acc(data, pred):
     
+    # use F1 measure
+    
     p = pred['edge_event']
     y = data['edge_event']
         
     p = ((p>0.5)*1).long()
     
-    return sum(p==y)/len(y)
+    TruePositive = sum( (p==1) & (y==1) )
+    FalsePositive = sum( (p==1) & (y==0) )
+    FalseNegative = sum( (p==0) & (y==1) )
+    Presicion = TruePositive/(TruePositive + FalsePositive)
+    Recall = TruePositive/(TruePositive + FalseNegative)
+    F1 = 2*Presicion*Recall/(Presicion + Recall)
+    
+    return F1
     
 def unorder_edge(a):
     return set(map(tuple, a))

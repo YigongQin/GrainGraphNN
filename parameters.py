@@ -22,11 +22,12 @@ def hyperparam(mode, model_id):
                'lr':[25e-4, 50e-4, 100e-4, 200e-4], \
                'layer':[2, 3, 4],\
                'hidden':[16, 24, 32],\
-               'weight':[5, 10, 20, 40]}
+               'weight':[5, 10, 20, 40],\
+               'decay_step':[10, 5, 20]}
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
-    hp_order = [1, 4, 3, 2, 0]
+    hp_order = [1, 4, 5, 3, 2, 0]
     hp_size = [hp_size[i] for i in hp_order]
 
     param_dict = {}

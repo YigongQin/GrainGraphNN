@@ -77,7 +77,7 @@ def train(model, num_epochs, train_loader, test_loader):
     optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
                                  #weight_decay=1e-5) # <--
 
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5, last_epoch=-1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)
 
     train_loss, count = 0, 0
@@ -274,14 +274,22 @@ if __name__=='__main__':
     print('type -- multilayer heterogeous GCLSTM')
     
     print('input window', hp.window,'; output window', hp.out_win)
-    print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
+    
     print('input feature dimension: ', [(k, len(v)) for k, v in hp.features.items()])
     print('hidden dim (layer size): ', hp.layer_size, \
           '; number of layers (for both encoder and decoder): ', hp.layers)
-    print('loss type: ', args.loss)
-    if args.loss == 'classification':
-        print('weight of positive event: ', hp.weight)
     print('\n')
+    
+    
+    if mode == 'train':
+        print('************ training specification ***********')            
+        print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
+        print('loss type: ', args.loss)
+        if args.loss == 'classification':
+            print('weight of positive event: ', hp.weight)
+        print('schedueler step: ', hp.decay_step)
+        
+        print('\n')
     
     
     

@@ -390,7 +390,7 @@ class GrainNN2(nn.Module):
        # hidden_state = self.gclstm_decoder2(x_dict, edge_index_dict, hidden_state)
         
         h_dict, c_dict = hidden_state[-1]
-        h_dict = hidden_state[-1]    
+       # h_dict = hidden_state[-1]    
         y_dict = {node_type: self.linear[node_type](h)
              for node_type, h in h_dict.items()} # apply the linear layer
         

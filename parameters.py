@@ -26,7 +26,7 @@ def hyperparam(mode, model_id):
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
-    hp_order = [4, 0, 3, 2, 1]
+    hp_order = [1, 4, 3, 2, 0]
     hp_size = [hp_size[i] for i in hp_order]
 
     param_dict = {}

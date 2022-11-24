@@ -278,9 +278,9 @@ if __name__=='__main__':
     print('input feature dimension: ', [(k, len(v)) for k, v in hp.features.items()])
     print('hidden dim (layer size): ', hp.layer_size, \
           '; number of layers (for both encoder and decoder): ', hp.layers)
-    print('loss type', args.loss)
+    print('loss type: ', args.loss)
     if args.loss == 'classification':
-        print('weight of positive event', hp.weight)
+        print('weight of positive event: ', hp.weight)
     print('\n')
     
     

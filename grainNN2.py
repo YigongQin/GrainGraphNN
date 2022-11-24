@@ -257,7 +257,10 @@ if __name__=='__main__':
     train_tensor = DynamicHeteroGraphTemporalSignal(train_list)
     test_tensor = DynamicHeteroGraphTemporalSignal(test_list)
     
-    heteroData = test_tensor[0]
+    if len(test_list)>0:
+        heteroData = test_tensor[0]
+    else:
+        heteroData = train_tensor[0]
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')

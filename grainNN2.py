@@ -25,9 +25,12 @@ def criterion(data, pred, mask):
     y = data['edge_event']
     weight_ratio = hp.weight
    # print(p)
-   # return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
+    if args.loss == 'regression':
+   
+        return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
-    return torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
+    if args.loss == 'classification':
+        return torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
@@ -275,6 +278,9 @@ if __name__=='__main__':
     print('input feature dimension: ', [(k, len(v)) for k, v in hp.features.items()])
     print('hidden dim (layer size): ', hp.layer_size, \
           '; number of layers (for both encoder and decoder): ', hp.layers)
+    print('loss type', args.loss)
+    if args.loss == 'classification':
+        print('weight of positive event', args.weight)
     print('\n')
     
     

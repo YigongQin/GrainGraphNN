@@ -189,3 +189,81 @@ class HeteroPGCLSTM(torch.nn.Module):
         o_dict = self._calculate_output_gate(x_dict, edge_index_dict, h_dict, c_dict)
         h_dict = self._calculate_hidden_state(o_dict, c_dict)
         return h_dict, c_dict
+    
+class HeteroPGC(torch.nn.Module):
+    r"""An implementation similar to the Integrated Graph Convolutional Long Short Term
+        Memory Cell for heterogeneous Graphs.
+        Args:
+            in_channels_dict (dict of keys=str and values=int): Dimension of each node's input features.
+            out_channels (int): Number of output features.
+            metadata (tuple): Metadata on node types and edge types in the graphs. Can be generated via PyG method
+                :obj:`snapshot.metadata()` where snapshot is a single HeteroData object.
+            bias (bool, optional): If set to :obj:`False`, the layer will not learn
+                an additive bias. (default: :obj:`True`)
+    """
+
+    def __init__(
+            self,
+            in_channels_dict: dict,
+            out_channels: int,
+            metadata: tuple,
+            bias: bool = True,
+            device: str = 'cpu'
+    ):
+        super(HeteroPGC, self).__init__()
+
+        self.in_channels_dict = in_channels_dict
+        self.out_channels = out_channels
+        self.metadata = metadata
+        self.bias = bias
+        self.device = device
+        self._create_parameters_and_layers()
+
+
+    def _create_input_gate_parameters_and_layers(self):
+        self.conv_i = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
+                                                      out_channels=self.out_channels,
+                                                      bias=self.bias) for edge_type in self.metadata[1]})
+
+    def _create_parameters_and_layers(self):
+        self._create_input_gate_parameters_and_layers()
+
+
+  
+
+    def _calculate_hidden_state(self, x_dict, edge_index_dict):
+  
+        conv_i = self.conv_i(x_dict, edge_index_dict)
+        i_dict = {node_type: conv_i[node_type] for node_type, I in x_dict.items()}
+        i_dict = {node_type: torch.relu(I) for node_type, I in i_dict.items()}
+        return i_dict
+
+
+    def forward(
+        self,
+        x_dict,
+        edge_index_dict,
+
+    ):
+        """
+        Making a forward pass. If the hidden state and cell state
+        matrix dicts are not present when the forward pass is called these are
+        initialized with zeros.
+        Arg types:
+            * **x_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensors)* - Node features dicts. Can
+                be obtained via PyG method :obj:`snapshot.x_dict` where snapshot is a single HeteroData object.
+            * **edge_index_dict** *(Dictionary where keys=Tuples and values=PyTorch Long Tensors)* - Graph edge type
+                and index dicts. Can be obtained via PyG method :obj:`snapshot.edge_index_dict`.
+            * **h_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor, optional)* - Node type and
+                hidden state matrix dict for all nodes.
+            * **c_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor, optional)* - Node type and
+                cell state matrix dict for all nodes.
+        Return types:
+            * **h_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor)* - Node type and
+                hidden state matrix dict for all nodes.
+            * **c_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor)* - Node type and
+                cell state matrix dict for all nodes.
+        """
+
+        h_dict = self._calculate_hidden_state(x_dict, edge_index_dict)
+        return h_dict

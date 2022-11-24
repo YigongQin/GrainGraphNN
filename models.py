@@ -348,14 +348,16 @@ class GrainNN2(nn.Module):
       #  self.c = hyper.channel_table 
 
         ## networks
-        '''
+
         self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
                                         self.num_layer, self.metadata, self.device)
         self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                         self.num_layer, self.metadata, self.device)
-        '''
-        self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
+        self.gclstm_decoder2 = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                         self.num_layer, self.metadata, self.device)
+    
+      #  self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
+      #                                  self.num_layer, self.metadata, self.device)
 
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
@@ -378,14 +380,16 @@ class GrainNN2(nn.Module):
                 output channels.
         """        
 
-       # hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
+        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
         
-        hidden_state = self.gc_encoder(x_dict, edge_index_dict) 
+       # hidden_state = self.gc_encoder(x_dict, edge_index_dict) 
         
        # for i in range(self.out_win):
             
-         #   hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
-         #   h_dict, c_dict = hidden_state[-1]
+        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
+       # hidden_state = self.gclstm_decoder2(x_dict, edge_index_dict, hidden_state)
+        
+        h_dict, c_dict = hidden_state[-1]
         h_dict = hidden_state[-1]    
         y_dict = {node_type: self.linear[node_type](h)
              for node_type, h in h_dict.items()} # apply the linear layer

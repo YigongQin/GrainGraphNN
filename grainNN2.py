@@ -246,16 +246,18 @@ if __name__=='__main__':
    # random.shuffle(data_list)
 
     
-   # train_list = data_list[:num_train]
-   # test_list = data_list[num_train:]                 
+    train_list = data_list[:num_train]
+    test_list = data_list[num_train:]                 
     
     hp = hyperparam(mode, model_id)
     hp.features = sample.features
     hp.targets = sample.targets
     hp.device = device
 
-    data_tensor = DynamicHeteroGraphTemporalSignal(data_list)
-    heteroData = data_tensor[0]
+    train_tensor = DynamicHeteroGraphTemporalSignal(train_list)
+    test_tensor = DynamicHeteroGraphTemporalSignal(test_list)
+    
+    heteroData = test_tensor[0]
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')
@@ -316,8 +318,8 @@ if __name__=='__main__':
 
     if args.mode == 'train': 
         ## train the model
-        train_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
-        test_loader = data_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
+        train_loader = train_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
+        test_loader = test_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
         train_loss_list=[]
         test_loss_list=[]
         
@@ -356,7 +358,7 @@ if __name__=='__main__':
         model.eval() 
               
         
-        for case, data in enumerate(data_tensor):
+        for case, data in enumerate(test_tensor):
             print('case %d'%case)
          #   print(pred['joint'])
           #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)

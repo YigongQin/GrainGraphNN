@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from heteropgclstm import HeteroPGCLSTM, HeteroPGC
-from heterogclstm import HeteroGCLSTM
+from heterogclstm import HeteroGCLSTM, HeteroGC
 from graph_datastruct import periodic_move_p
 
 class GC(nn.Module):
@@ -72,7 +72,7 @@ class GC(nn.Module):
                 cur_in_channel = {node_type: self.out_channels[i - 1]
                                    for node_type in self.in_channels_dict}
 
-                cell_list.append(HeteroGCLSTM(in_channels_dict = cur_in_channel,
+                cell_list.append(HeteroGC(in_channels_dict = cur_in_channel,
                                               out_channels = self.out_channels[i],
                                               metadata = self.metadata,
                                               bias = self.bias,

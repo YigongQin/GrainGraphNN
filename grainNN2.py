@@ -23,7 +23,7 @@ def criterion(data, pred, mask):
    # classifier = torch.nn.NLLLoss()
     p = pred['edge_event']
     y = data['edge_event']
-    weight_ratio = 5
+    weight_ratio = hp.weight
    # print(p)
    # return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
@@ -168,11 +168,12 @@ if __name__=='__main__':
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=1)
+    parser.add_argument("--loss", type=str, default='classification')
     args = parser.parse_args()
     
     
     mode = args.mode
-    model_id = args.model_id -1
+    model_id = args.model_id
     device = args.device
     
     if mode == 'test': args.model_exist = True

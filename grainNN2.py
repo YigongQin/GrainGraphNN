@@ -280,7 +280,7 @@ if __name__=='__main__':
           '; number of layers (for both encoder and decoder): ', hp.layers)
     print('loss type', args.loss)
     if args.loss == 'classification':
-        print('weight of positive event', args.weight)
+        print('weight of positive event', hp.weight)
     print('\n')
     
     

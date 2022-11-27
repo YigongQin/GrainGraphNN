@@ -145,8 +145,9 @@ def train(model, num_epochs, train_loader, test_loader):
         train_acc = sum(train_acc_list)/len(train_acc_list) if len(train_acc_list)>0 else -1
         test_acc = sum(test_acc_list)/len(test_acc_list) if len(test_acc_list)>0 else -1
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
-        print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, \
-                train_acc, test_acc)) 
+        if args.loss == 'classification':
+            print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, \
+                    train_acc, test_acc)) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))       
         scheduler.step()

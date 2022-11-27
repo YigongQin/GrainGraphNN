@@ -19,11 +19,11 @@ def hyperparam(mode, model_id):
 
         
     hp_grid = {'frames':[20, 24, 30], \
-               'lr':[25e-4, 50e-4, 100e-4, 200e-4], \
+               'lr':[100e-4, 25e-4, 50e-4,  200e-4], \
                'layer':[2, 3, 4],\
-               'hidden':[16, 24, 32],\
+               'hidden':[32, 24, 16],\
                'weight':[5, 10, 20, 40],\
-               'decay_step':[10, 5, 20]}
+               'decay_step':[5, 10, 20]}
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]

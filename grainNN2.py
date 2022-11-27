@@ -174,7 +174,7 @@ if __name__=='__main__':
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
-    parser.add_argument("--train_ratio", type=float, default=1)
+    parser.add_argument("--train_ratio", type=float, default=0.9)
     parser.add_argument("--loss", type=str, default='classification')
     args = parser.parse_args()
     

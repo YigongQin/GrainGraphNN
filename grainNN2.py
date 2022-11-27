@@ -164,7 +164,7 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser("Train the model.")
     parser.add_argument("--mode", type=str, default="test")
-    parser.add_argument("--model_id", type=int, default=1)
+    parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')

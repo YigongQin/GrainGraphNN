@@ -15,7 +15,7 @@ from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN2
 from parameters import hyperparam
 from graph_datastruct import graph_trajectory
-
+from torch_geometric.loader import DataLoader
 
 def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))
@@ -322,8 +322,8 @@ if __name__=='__main__':
 
     if args.mode == 'train': 
         ## train the model
-        train_loader = train_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
-        test_loader = test_tensor #DataLoader(dataset, batch_size=1, shuffle=True)
+        train_loader = DataLoader(train_tensor, batch_size=64, shuffle=True)
+        test_loader = DataLoader(test_tensor, batch_size=64, shuffle=True)
         train_loss_list=[]
         test_loss_list=[]
         

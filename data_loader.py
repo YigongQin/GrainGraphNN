@@ -135,9 +135,7 @@ class DynamicHeteroGraphTemporalSignal(object):
         if edge_index_dict:
             for key, value in edge_index_dict.items():
                 snapshot[key].edge_index = value
-        if edge_weight_dict:
-            for key, value in edge_weight_dict.items():
-                snapshot[key].edge_attr = value
+
         if y_dict:
             for key, value in y_dict.items():
                 snapshot[key].y = value
@@ -145,6 +143,12 @@ class DynamicHeteroGraphTemporalSignal(object):
             for key, value in mask.items():
                 snapshot['mask'][key] = value            
 
+        """
+        if edge_weight_dict:
+            for key, value in edge_weight_dict.items():
+                snapshot[key].edge_attr = value
+                
+                
         if additional_features:
      
             for feature_name, feature_dict in additional_features.items():
@@ -152,7 +156,8 @@ class DynamicHeteroGraphTemporalSignal(object):
              
                     for key, value in feature_dict.items():
                         snapshot[feature_name][key] = value
-                
+        """
+        
         snapshot.physical_params = data.physical_params
         return snapshot
 

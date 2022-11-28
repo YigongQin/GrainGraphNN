@@ -172,11 +172,12 @@ if __name__=='__main__':
     parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
+    parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.9)
-    parser.add_argument("--loss", type=str, default='classification')
+    parser.add_argument("--loss", type=str, default='regression')
     args = parser.parse_args()
     
     
@@ -322,8 +323,8 @@ if __name__=='__main__':
 
     if args.mode == 'train': 
         ## train the model
-        train_loader = DataLoader(train_tensor, batch_size=64, shuffle=True)
-        test_loader = DataLoader(test_tensor, batch_size=64, shuffle=True)
+        train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
+        test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
         train_loss_list=[]
         test_loss_list=[]
         

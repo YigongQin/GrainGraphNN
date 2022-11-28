@@ -289,8 +289,8 @@ class SeqGCLSTM(nn.Module):
 class EdgeDecoder(torch.nn.Module):
     def __init__(self, out_channels):
         super().__init__()
-        self.lin1 = nn.Linear(2*out_channels, out_channels)
-        self.lin2 = nn.Linear(2*out_channels, 1)
+        self.lin1 = nn.Linear(2*out_channels, 2) # predict dx, dy
+        self.lin2 = nn.Linear(2*out_channels, 1) # predict probability
     
     def forward(self, joint_feature, joint_edge_index):
         

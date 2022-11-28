@@ -30,7 +30,7 @@ def criterion(data, pred, mask):
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
     if args.loss == 'classification':
-        return torch.mean(-weight_ratio*y*torch.log(p) - (1-y)*torch.log(1-p))
+        return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 

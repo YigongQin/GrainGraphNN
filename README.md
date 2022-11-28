@@ -5,6 +5,7 @@ use the local CUDA version
 ```
 export TORCH=1.11.0+cu102
 export CUDA=cu102
+pip3 install torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
 pip3 install -r requirements.txt
 ```
 

@@ -153,7 +153,8 @@ def train(model, num_epochs, train_loader, test_loader):
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))       
         scheduler.step()
-    print('model id:', args.model_id, 'accuracy', train_acc)
+    print('model id:', args.model_id, 'loss', test_loss)
+    print('model id:', args.model_id, 'accuracy', test_acc)
     
     return model 
 

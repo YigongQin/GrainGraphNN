@@ -1056,6 +1056,7 @@ class graph_trajectory(graph):
             if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'))
       #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
+        hg.vertex2joint = self.vertex2joint
       #  for k, v in self.joint2vertex.items():
       #      joint_grain_neighbor[v] = np.array(list(k))
         
@@ -1120,13 +1121,21 @@ class GrainHeterograph:
                                          
             self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
                                          self.feature_dicts['joint'][:,:2]
-        
-
-          #  self.target_dicts['grain_event'] = 1*( (nxt.mask['grain'] - self.mask['grain']) == 1 )
             
             self.target_dicts['edge_event'] = nxt.edge_rotation        
             
             self.additional_features['nxt'] = nxt.edge_index_dicts
+            
+            
+            # check if the grain neighbor of the junction is the same
+            for i in range(len(self.mask['joint'])):
+                if self.mask['joint'][i,0] == 1:
+                    if i in nxt.vertex2joint and set(self.vertex2joint[i]) == set(nxt.vertex2joint[i]):
+                        pass
+                    else:
+                        self.mask['joint'][i,0] = 0
+                      #  print('not matched', i, self.vertex2joint[i])
+            
                                         
         """
             
@@ -1196,28 +1205,33 @@ if __name__ == '__main__':
           #  traj.show_data_struct()
       
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
-           # traj.vertex_matching()
             #traj.show_data_struct()
             
-            
-            # set gradient as output and add to features
-            
-        #    hg0 = traj.states[0]
-        #    hg4 = traj.states[traj.frames - 1]
-          #  print(hg0.feature_dicts['grain'][:,:1])
-        #    hg0.form_gradient(prev = None, nxt = hg4)
-        #    train_samples.append(hg0)
       
             for snapshot in range(traj.frames-1):
+                """
+                training data: snapshot -> snapshot + 1
+                whether data is useful depends on both 
+                <1> regression part:
+                    grain exists at snapshot
+                    triple junction exists at both (shift only)
+                    
+                <2> classification part:
+                    edge exists at both (label 0)
+                    edge switching (label 1)
+                    unknown (mask out)
+                    
+                """
                 if traj.save_frame[snapshot+1] == True:
-                    hg = traj.states[snapshot]
-                    hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
-                                     nxt = traj.states[snapshot+1])
                     
                     if ( args.level == 2 ) \
                     or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
                     or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
                                              len(traj.edge_events[snapshot+1])==0 ):    
+                        
+                        hg = traj.states[snapshot]
+                        hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
+                                         nxt = traj.states[snapshot+1])
                         print('save frame %d -> %d, event level %d'%(snapshot, snapshot+1, args.level))
                         train_samples.append(hg)
                 else:

@@ -172,7 +172,6 @@ if __name__=='__main__':
     parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--model_name", type=str, default='HGCLSTM')
     
-    parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
@@ -295,6 +294,7 @@ if __name__=='__main__':
     if mode == 'train':
         print('************ training specification ***********')            
         print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
+        print('batch size: ', hp.batch_size)
         print('loss type: ', args.loss)
         if args.loss == 'classification':
             print('weight of positive event: ', hp.weight)

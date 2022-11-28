@@ -16,6 +16,8 @@ from models import GrainNN2
 from parameters import hyperparam
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
+from torch_geometric.nn import DataParallel
+
 
 def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))
@@ -314,6 +316,9 @@ if __name__=='__main__':
    # model = model.double()
     if device=='cuda':
         model.cuda()
+        print('use %d GPUs'%torch.cuda.device_count())
+        
+    model = DataParallel(model)
         
     
    # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

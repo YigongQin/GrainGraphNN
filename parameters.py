@@ -108,7 +108,7 @@ def classifier(mode, model_id):
  
        
        
-    param_dict['frames'] += 1
+    param_dict['frames'] = 13
 
     param_dict.update({'window':1, 'out_win':1,\
 	             'layers':1, 'layer_size':32, 'kernel_size':(3,), 'epoch':60, 'bias':True, 'model_list':[0]})

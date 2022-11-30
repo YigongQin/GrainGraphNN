@@ -37,7 +37,7 @@ def criterion(data, pred, mask):
         y = y[qualified_y]
         z = z[qualified_y]
         
-        classifier = torch.nn.BCEWithLogitsLoss(pos_weight=hp.weight)
+        classifier = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(hp.weight))
         
         return classifier(z, y.type(torch.FloatTensor))
         # return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
@@ -264,7 +264,7 @@ if __name__=='__main__':
     if args.loss == 'regression':
         hp = regressor(mode, model_id)
     elif args.loss == 'classification':
-        hp.classifier(mode, model_id)
+        hp = classifier(mode, model_id)
     else:
         raise KeyError
         

@@ -16,23 +16,33 @@ from models import GrainNN2
 from parameters import hyperparam
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import DataParallel
+from torch.nn.parallel import DistributedDataParallel
 
 
 def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))
    # print(data['edge_event'])
-   # classifier = torch.nn.NLLLoss()
-    p = pred['edge_event']
-    y = data['edge_event']
-    weight_ratio = hp.weight
+    
+
    # print(p)
     if args.loss == 'regression':
    
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
     if args.loss == 'classification':
-        return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
+        p = pred['edge_event']
+        y = data['edge_event']
+        
+        qualified_y = torch.where(y>-1)
+        y = y[qualified_y]
+        p = p[qualified_y]
+        
+        #weight_ratio = hp.weight
+        weight = 1*(y==0) + hp.weight*(y==1)
+        classifier = torch.nn.BCELoss(weight=weight)
+        
+        return classifier(p, y)
+        # return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
@@ -319,7 +329,7 @@ if __name__=='__main__':
         model.cuda()
         print('use %d GPUs'%torch.cuda.device_count())
         
-    model = DataParallel(model)
+   # model = DataParallel(model)
         
     
    # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

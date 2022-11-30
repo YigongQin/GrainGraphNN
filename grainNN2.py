@@ -30,18 +30,16 @@ def criterion(data, pred, mask):
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
     if args.loss == 'classification':
-        p = pred['edge_event']
+        z = pred['edge_event']
         y = data['edge_event']
         
         qualified_y = torch.where(y>-1)
         y = y[qualified_y]
-        p = p[qualified_y]
+        z = z[qualified_y]
         
-        #weight_ratio = hp.weight
-        weight = 1*(y==0) + hp.weight*(y==1)
-        classifier = torch.nn.BCELoss(weight=weight)
+        classifier = torch.nn.BCEWithLogitsLoss(pos_weight=hp.weight)
         
-        return classifier(p, y)
+        return classifier(z, y.type(torch.FloatTensor))
         # return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
@@ -50,7 +48,7 @@ def class_acc(data, pred):
     
     # use F1 measure
     
-    p = pred['edge_event']
+    p = torch.sigmoid(pred['edge_event'])
     y = data['edge_event']
         
     p = ((p>0.5)*1).long()

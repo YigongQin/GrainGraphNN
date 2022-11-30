@@ -304,12 +304,19 @@ class EdgeDecoder(torch.nn.Module):
         z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
        # z = F.relu(self.lin1(z))
         z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
-        z = torch.sigmoid(z)
+        
+        
+        """
+        Probability of elimination
+        """
+        
+        
+        p = torch.sigmoid(z)
         
       #  z[check_arg] = 0.9
         ## predict eliminated edge
-        elimed_arg = ((z>0.5)&(src<dst)).nonzero(as_tuple=True)
-        elimed_prob = z[elimed_arg]
+        elimed_arg = ((p>0.5)&(src<dst)).nonzero(as_tuple=True)
+        elimed_prob = p[elimed_arg]
        
       #  print(z, elimed_prob)
         

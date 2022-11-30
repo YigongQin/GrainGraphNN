@@ -161,6 +161,7 @@ class graph:
         self.edge_in_region = []  ## defined by region orientation 
         self.regions = defaultdict(list) ## index group
         self.region_coors = defaultdict(list)
+        self.region_edge = defaultdict(set)
         self.region_area = defaultdict(float)
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
@@ -397,6 +398,7 @@ class graph:
         self.regions.clear()
         self.region_coors.clear()
         self.region_center.clear()
+        self.region_edge.clear()
         
         for k, v in self.joint2vertex.items():
             for region in set(k):
@@ -492,10 +494,11 @@ class graph:
                   #  tent_edge.add((pair[1], pair[0]))
                     self.edges.add((pair[1], pair[0]))
                     self.edges.add(pair)
-            cnt += len(vert_in_region)    
+            cnt += len(vert_in_region) 
+            self.region_edge[region] = tent_edge
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-        print(cnt)
+        print('num vertices of grains', cnt)
         print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
         # form edge             
 
@@ -715,7 +718,10 @@ class graph_trajectory(graph):
             print('number of junctions %d'%len(cur_joint))
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
-            
+            for grain in eliminated_grains:
+                for pair in self.region_edge[grain]:
+                    self.edge_labels[(pair[0], pair[1])] = -100
+                    self.edge_labels[(pair[1], pair[0])] = -100                                 
             
             self.vertex_matching(frame, cur_joint, eliminated_grains)
         

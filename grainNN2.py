@@ -13,7 +13,7 @@ import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN2
-from parameters import hyperparam
+from parameters import regressor, classifier
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
@@ -261,7 +261,13 @@ if __name__=='__main__':
     train_list = data_list[:num_train]
     test_list = data_list[num_train:]                 
     
-    hp = hyperparam(mode, model_id)
+    if args.loss == 'regression':
+        hp = regressor(mode, model_id)
+    elif args.loss == 'classification':
+        hp.classifier(mode, model_id)
+    else:
+        raise KeyError
+        
     hp.features = sample.features
     hp.targets = sample.targets
     hp.device = device
@@ -279,8 +285,7 @@ if __name__=='__main__':
     print('data dir', args.data_dir)
     print('test dir', args.test_dir)
     print('number of train, validation, test runs', num_train, num_valid, num_test)
-    print('data frames: ', hp.all_frames, '; GrainNN frames: ', hp.frames, \
-          '; ratio: ', int((hp.all_frames-1)/(hp.frames-1)))
+    print('GrainNN frames: ', hp.frames)
     print('features: ', [(k, v) for k, v in hp.features.items()])
     print('targets: ', [(k, v) for k, v in hp.targets.items()])
     print('heteroData metadata', heteroData.metadata())
@@ -402,46 +407,4 @@ if __name__=='__main__':
           #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
             
 
-
-'''
-        
-        
-    evolve_runs = num_test #num_test
-    
-    seq_out = np.zeros((evolve_runs,frames,hp.feature_dim,hp.G))
-    
-    seq_out[:,0,:,:] = input_[:,0,:,:]
-    seq_out[:,:,4:,:] = input_[:,:,4:,:]
-    
-    if mode!='test':
-    
-        if args.model_exist:
-          if mode == 'train' :
-            model.load_state_dict(torch.load(args.model_dir+'/lstmmodel'+str(all_id)))
-            model.eval()  
-          if mode == 'ini':  
-            model.load_state_dict(torch.load(args.model_dir+'/ini_lstmmodel'+str(all_id)))
-            model.eval() 
-    
-        ini_model = ConvLSTM_start(hp, device)
-        ini_model = ini_model.double()
-        if device=='cuda':
-           ini_model.cuda()
-        init_total_params = sum(p.numel() for p in ini_model.parameters() if p.requires_grad)
-        print('total number of trained parameters for initialize model', init_total_params)
-        ini_model.load_state_dict(torch.load(args.model_dir+'/ini_lstmmodel'+str(all_id)))
-        ini_model.eval()
-    
-        frac_out, y_out, area_out = network_inf(seq_out,  model, ini_model, hp)
-    
-    if mode=='test':
-        inf_model_list = hp.model_list
-        nn_start = time.time()
-        frac_out, y_out, area_out = ensemble(seq_out, inf_model_list)
-        nn_end = time.time()
-        print('===network inference time %f seconds =====', nn_end-nn_start)
-
-
-
-'''
     

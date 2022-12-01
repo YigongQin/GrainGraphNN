@@ -48,17 +48,20 @@ def class_acc(prob, label):
     
     # use PRAUC
     
-    p = torch.sigmoid(torch.cat(prob))
+    prob = torch.sigmoid(torch.cat(prob))
     y = torch.cat(label)
 
     AUC = 0
-    interval = 0.1
+    intervals = 10
     P_list, R_list = [], []
-    right_bound = 1
-    for threshold in np.arange(0, 1, interval):    
+    left_bound = 0
+ #   for threshold in np.arange(1-interval, -interval, -interval): 
+    for i in range(intervals+1): 
         # the first one is all positive, no negative, recall is one
-        
-        p = ((p>threshold)*1).long()
+        threshold = 1 - i/intervals
+
+       # print(threshold)
+        p = ((prob>threshold)*1).long()
         
        # Positive = sum(y==1)
         TruePositive = sum( (p==1) & (y==1) )
@@ -70,9 +73,12 @@ def class_acc(prob, label):
         
         P_list.append(Precision)
         R_list.append(Recall)
-        AUC += (right_bound-Recall)*Precision
-        right_bound = Recall
         
+        AUC += (Recall-left_bound)*Precision
+        left_bound = Recall
+       # print(Precision, Recall, left_bound)
+    P_list.reverse()    
+    R_list.reverse()
   # print(Positive, TruePositive, FalsePositive)
   #  print(Presicion, Recall, F1)
    # return F1 if Positive else -1
@@ -180,7 +186,7 @@ def train(model, num_epochs, train_loader, test_loader):
         
     print('model id:', args.model_id, 'loss', test_loss)
     if args.loss == 'classification':
-        print('model id:', args.model_id, 'PR AUC', test_auc)
+        print('model id:', args.model_id, 'PR AUC', float(test_auc))
         train.plist = P_list
         train.rlist = R_list
     
@@ -399,7 +405,7 @@ if __name__=='__main__':
         
             optim_arg = max(range(len(train.plist)), key=lambda i: train.rlist[i]+train.plist[i])
             optim_threshold, optim_p, optim_r = optim_arg/len(train.plist), train.plist[optim_arg], train.rlist[optim_arg]
-            print('the optimal threshold for classification is: ', optim_threshold, ', with recall/precision', optim_p, optim_r)
+            print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
 
         with open('loss.txt', 'w') as f:
             f.write('epoch, training loss, validation loss\n' )

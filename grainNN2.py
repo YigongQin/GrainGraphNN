@@ -5,7 +5,7 @@ Created on Fri Sep 30 15:35:27 2022
 
 @author: yigongqin
 """
-import argparse, time, glob, dill, random
+import argparse, time, glob, dill, random, os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -25,11 +25,11 @@ def criterion(data, pred, mask):
     
 
    # print(p)
-    if args.loss == 'regression':
+    if args.model_type== 'regressor':
    
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
 
-    if args.loss == 'classification':
+    if args.model_type== 'classifier':
         z = pred['edge_event']
         y = data['edge_event']
         
@@ -177,7 +177,7 @@ def train(model, train_loader, test_loader):
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
             
-            if args.loss == 'classification':       
+            if args.model_type== 'classifier':       
                 test_prob.append(pred['edge_event'])
                 test_label.append(data.y_dict['edge_event'])
             
@@ -185,7 +185,7 @@ def train(model, train_loader, test_loader):
         
 
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
-        if args.loss == 'classification':
+        if args.model_type== 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             test_auc, P_list, R_list = class_acc(test_prob, test_label)
             print('Validation AUC:{:.6f}'.format(test_auc)) 
@@ -197,7 +197,7 @@ def train(model, train_loader, test_loader):
         scheduler.step()
         
     print('model id:', args.model_id, 'loss', test_loss)
-    if args.loss == 'classification':
+    if args.model_type== 'classifier':
         print('model id:', args.model_id, 'PR AUC', float(test_auc))
         train.plist = [float(i) for i in P_list]
         train.rlist = [float(i) for i in R_list]
@@ -216,16 +216,17 @@ if __name__=='__main__':
     parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
-    parser.add_argument("--model_dir", type=str, default='./fecr_model/')
+    parser.add_argument("--model_dir", type=str, default='./GR/')
+    parser.add_argument("--model_type", type=str, default='regressor')
     parser.add_argument("--data_dir", type=str, default='./data/')
     parser.add_argument("--test_dir", type=str, default='./test/')
-    parser.add_argument("--model_name", type=str, default='regressor')
+
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.9)
-    parser.add_argument("--loss", type=str, default='regression')
+    
     parser.add_argument("--models", type=tuple, default=(0, 0))
     args = parser.parse_args()
     
@@ -300,10 +301,12 @@ if __name__=='__main__':
     train_list = data_list[:num_train]
     test_list = data_list[num_train:]                 
     
-    if args.loss == 'regression':
+    if args.model_type== 'regressor':
         hp = regressor(mode, model_id)
-    elif args.loss == 'classification':
+        
+    elif args.model_type== 'classifier':
         hp = classifier(mode, model_id)
+
     else:
         raise KeyError
     
@@ -351,8 +354,8 @@ if __name__=='__main__':
         print('************ training specification ***********')            
         print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
         print('batch size: ', hp.batch_size)
-        print('loss type: ', args.loss)
-        if args.loss == 'classification':
+        print('model type: ', args.model_type)
+        if args.model_type== 'classifier':
             print('weight of positive event: ', hp.weight)
         print('schedueler step: ', hp.decay_step)
         
@@ -382,9 +385,9 @@ if __name__=='__main__':
         start = time.time()
         
         
-        if args.loss == 'regression':
+        if args.model_type== 'regressor':
             model = GrainNN_regressor(hp)
-        if args.loss == 'classification':
+        if args.model_type== 'classifier':
             model = GrainNN_classifier(hp)
         
         model = train(model, train_loader, test_loader)
@@ -398,7 +401,7 @@ if __name__=='__main__':
         fig, ax = plt.subplots() 
         ax.semilogy(train_loss_list)
         ax.semilogy(test_loss_list)
-        if args.loss == 'classification':
+        if args.model_type== 'classifier':
             ax2 = ax.twinx()
             ax2.plot(test_auc_list, c='r')
             ax2.set_ylabel('PRAUC')
@@ -409,7 +412,7 @@ if __name__=='__main__':
         plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
         plt.savefig('loss.png',dpi=600, bbox_inches='tight')
         
-        if args.loss == 'classification':
+        if args.model_type== 'classifier':
         
             fig, ax = plt.subplots() 
             ax.scatter(train.rlist, train.plist)
@@ -429,8 +432,9 @@ if __name__=='__main__':
             for i in range(len(train_loss_list)):
                 f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
                 
-                
-        torch.save(model.state_dict(), args.model_dir + args.model_name + str(model_id))
+        if not os.path.exists(args.model_dir):
+            os.makedirs(args.model_dir)                
+        torch.save(model.state_dict(), args.model_dir + args.model_type + str(model_id))
 
 
 
@@ -439,7 +443,7 @@ if __name__=='__main__':
         """
         load model
         """
-        assert args.losss == 'regression', "default regression"
+        assert args.model_type == 'regressor', "default regression"
         
         model.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.models[0])))
         model.eval() 

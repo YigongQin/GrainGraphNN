@@ -63,14 +63,14 @@ def classifier(mode, model_id):
 
         
     hp_grid = {'weight':[1, 2, 4, 8],\
-               'batch_size':[4, 8, 16, 32],\
+               'batch_size':[2, 4, 8, 16],\
                'lr':[100e-4, 25e-4, 50e-4], \
                'decay_step':[10, 5, 20],\
                'hidden':[32, 24, 16]}
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
-    hp_order = [0, 1, 2, 3, 4, 5]
+    hp_order = [0, 1, 2, 3, 4]
     hp_size = [hp_size[i] for i in hp_order]
 
     param_dict = {}

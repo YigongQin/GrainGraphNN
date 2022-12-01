@@ -189,10 +189,11 @@ def train(model, train_loader, test_loader):
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             test_auc, P_list, R_list = class_acc(test_prob, test_label)
             print('Validation AUC:{:.6f}'.format(test_auc)) 
+            test_auc_list.append(float(test_auc))
          #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))      
-        test_auc_list.append(float(test_auc))
+        
         scheduler.step()
         
     print('model id:', args.model_id, 'loss', test_loss)
@@ -211,7 +212,7 @@ if __name__=='__main__':
 
     
     parser = argparse.ArgumentParser("Train the model.")
-    parser.add_argument("--mode", type=str, default="test")
+    parser.add_argument("--mode", type=str, default="train")
     parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')

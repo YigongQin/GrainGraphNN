@@ -110,8 +110,7 @@ def train(model, num_epochs, train_loader, test_loader):
 
     model.train()
 
-    optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
-                                 #weight_decay=1e-5) # <--
+    optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr, weight_decay=hp.weight_decay) 
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)

@@ -64,7 +64,7 @@ def classifier(mode, model_id):
         
     hp_grid = {'weight':[1, 2, 4, 8],\
                'batch_size':[4, 8, 16, 32],\
-               'weight_decay':[1e-4, 1e-3, 1e-2, 1e-1],\
+               'weight_decay':[0, 1e-4, 1e-3, 1e-2],\
                'lr':[100e-4, 25e-4, 50e-4], \
                'decay_step':[10, 5, 20],\
                'hidden':[32, 24, 16]}

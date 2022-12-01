@@ -55,27 +55,34 @@ def class_acc(prob, label):
     intervals = 10
     P_list, R_list = [], []
     left_bound = 0
- #   for threshold in np.arange(1-interval, -interval, -interval): 
+
     for i in range(intervals+1): 
         # the first one is all positive, no negative, recall is one
         threshold = 1 - i/intervals
 
        # print(threshold)
-        p = ((prob>threshold)*1).long()
+
+        TruePositive  = sum( (y==1) & (prob>threshold) )
+        FalsePositive = sum( (y==0) & (prob>threshold) )
+        FalseNegative = sum( (y==1) & (prob<=threshold) )
         
-       # Positive = sum(y==1)
-        TruePositive = sum( (p==1) & (y==1) )
-        FalsePositive = sum( (p==1) & (y==0) )
-        FalseNegative = sum( (p==0) & (y==1) )
-        Precision = TruePositive/(TruePositive + FalsePositive) if TruePositive else 0
-        Recall = TruePositive/(TruePositive + FalseNegative) if TruePositive else 0
-      #  F1 = 2*Presicion*Recall/(Presicion + Recall) if Presicion + Recall else 0
+        
+        if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
+            
+            # it's a valid data
+            
+            Precision = TruePositive/(TruePositive + FalsePositive) 
+            Recall = TruePositive/(TruePositive + FalseNegative)
+    
+            AUC += (Recall-left_bound)*Precision
+            left_bound = Recall
+        
+        else:
+            Precision = -1
+            Recall = -1
         
         P_list.append(Precision)
         R_list.append(Recall)
-        
-        AUC += (Recall-left_bound)*Precision
-        left_bound = Recall
        # print(Precision, Recall, left_bound)
     P_list.reverse()    
     R_list.reverse()

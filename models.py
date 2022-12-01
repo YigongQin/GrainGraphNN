@@ -424,7 +424,7 @@ class GrainNN_classifier(torch.nn.Module):
 
         self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
         self.lin2 = nn.Linear(2*self.out_channels, 1) # predict probability
-        self.threshold = 0.5
+        self.threshold = 1
         
     def forward(self, x_dict, edge_index_dict):    
     

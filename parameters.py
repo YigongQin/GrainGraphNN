@@ -64,7 +64,6 @@ def classifier(mode, model_id):
         
     hp_grid = {'weight':[1, 2, 4, 8],\
                'batch_size':[4, 8, 16, 32],\
-               'weight_decay':[0, 1e-4, 1e-3, 1e-2],\
                'lr':[100e-4, 25e-4, 50e-4], \
                'decay_step':[10, 5, 20],\
                'hidden':[32, 24, 16]}
@@ -91,8 +90,8 @@ def classifier(mode, model_id):
        
     param_dict['frames'] = 13
 
-    param_dict.update({'window':1, 'out_win':1, 'layers':1, 'layer_size':32, 'kernel_size':(3,), \
-                       'epoch':60, 'bias':True, 'model_list':[0]})
+    param_dict.update({'window':1, 'out_win':1, 'layers':1,  'weight_decay':0, \
+                       'layer_size':32, 'kernel_size':(3,), 'epoch':60, 'bias':True, 'model_list':[0]})
 
 
     return Param(param_dict)

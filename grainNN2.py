@@ -112,7 +112,7 @@ def train(model, train_loader, test_loader):
         
     model.train()
 
-    optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr, weight_decay=hp.weight_decay) 
+    optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)
@@ -218,13 +218,14 @@ if __name__=='__main__':
     parser.add_argument("--model_dir", type=str, default='./fecr_model/')
     parser.add_argument("--data_dir", type=str, default='./data/')
     parser.add_argument("--test_dir", type=str, default='./test/')
-    parser.add_argument("--model_name", type=str, default='HGCLSTM')
+    parser.add_argument("--model_name", type=str, default='regressor')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.9)
     parser.add_argument("--loss", type=str, default='regression')
+    parser.add_argument("--models", type=tuple, default=(0, 0))
     args = parser.parse_args()
     
     
@@ -392,8 +393,6 @@ if __name__=='__main__':
         end = time.time()
         print('training time', end - start)
         
-        if mode == 'train': torch.save(model.state_dict(), args.model_dir + args.model_name + str(model_id))
-      #  if mode == 'ini': torch.save(model.state_dict(), './ini_lstmmodel'+str(all_id))
         
         fig, ax = plt.subplots() 
         ax.semilogy(train_loss_list)
@@ -422,17 +421,36 @@ if __name__=='__main__':
             optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.plist)-1), train.plist[optim_arg], train.rlist[optim_arg]
             print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
 
+            model.threshold = optim_threshold
+
         with open('loss.txt', 'w') as f:
             f.write('epoch, training loss, validation loss\n' )
             for i in range(len(train_loss_list)):
                 f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
+                
+                
+        torch.save(model.state_dict(), args.model_dir + args.model_name + str(model_id))
+
 
 
     if args.mode == 'test':
         
-        model.load_state_dict(torch.load(args.model_dir + args.model_name + str(model_id)))
+        """
+        load model
+        """
+        assert args.losss == 'regression', "default regression"
+        
+        model.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.models[0])))
         model.eval() 
-              
+        
+        hp_classifier = classifier(mode, args.models[1])
+        hp_classifier.features = hp.features
+        hp_classifier.device = hp.device
+        Classifier = GrainNN_classifier(hp_classifier)
+        
+        Classifier.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.models[1])))
+        Classifier.eval() 
+
         
         for case, data in enumerate(test_tensor):
             print('case %d'%case)
@@ -445,18 +463,41 @@ if __name__=='__main__':
                 except:
                     raise EOFError
 
-            
-            pred = model(data.x_dict, data.edge_index_dict)
-            data.x_dict, data.edge_index_dict = model.update(data.x_dict, data.edge_index_dict, pred)
-            pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
-            
-            
-            traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
-           # traj.show_data_struct()
-            
-            
-            print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
-          #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+
+            for frame in range(hp.frames):
+                """
+                <1> combine two predictions
+                """            
+    
+                pred = model(data.x_dict, data.edge_index_dict)
+                pred_c = Classifier(data.x_dict, data.edge_index_dict)
+                pred.update(pred_c)
+                
+                """
+                <2>  update node features
+                """
+                
+                data.x_dict = model.update(data.x_dict, pred)
+                
+                """
+                <3> predict events and update features and connectivity
+                """            
+                
+                data.x_dict, data.edge_index_dict = Classifier.update(data.x_dict, data.edge_index_dict, pred)
+
+     
+                """
+                Evaluation
+                """
+                pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+                
+                
+                traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
+               # traj.show_data_struct()
+                
+                
+                print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
+              #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
             
 
     

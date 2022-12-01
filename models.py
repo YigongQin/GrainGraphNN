@@ -286,55 +286,11 @@ class SeqGCLSTM(nn.Module):
         return param
     
     
-class EdgeDecoder(torch.nn.Module):
-    def __init__(self, out_channels):
-        super().__init__()
-        self.lin1 = nn.Linear(2*out_channels, 2) # predict dx, dy
-        self.lin2 = nn.Linear(2*out_channels, 1) # predict probability
-    
-    def forward(self, joint_feature, joint_edge_index):
-        
-        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
-      #  print(joint_edge_index[:,check_arg])
-        
-        src, dst = joint_edge_index[0], joint_edge_index[1]
 
-        # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
-      #  z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1) 
-        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
-       # z = F.relu(self.lin1(z))
-        z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
-        
-        
-        """
-        Probability of elimination
-        """
-        
-        
-        p = torch.sigmoid(z)
-        
-      #  z[check_arg] = 0.9
-        ## predict eliminated edge
-        elimed_arg = ((p>0.5)&(src<dst)).nonzero(as_tuple=True)
-        elimed_prob = p[elimed_arg]
-       
-      #  print(z, elimed_prob)
-        
-        src = src[elimed_arg]
-        dst = dst[elimed_arg]
-        
-        ## sort
-        sorted_prob, indices= torch.sort(elimed_prob, dim=0, descending=True)
-        src = src[indices]
-        dst = dst[indices]
-        
-      #  print(sorted_prob, indices, src, dst)
-        
-        return z, (sorted_prob, src, dst)
 
     
     
-class GrainNN2(nn.Module):
+class GrainNN_regressor(nn.Module):
     """ GrainNN in 3D
         Args:
             hyper: hyper-parameter class
@@ -369,8 +325,7 @@ class GrainNN2(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
 
-        self.edge_decoder = EdgeDecoder(self.out_channels)
-      #  self.jj_edge = nn.Linear(2*self.out_channels, 1)
+
 
     def forward(self, x_dict, edge_index_dict):
         
@@ -403,7 +358,7 @@ class GrainNN2(nn.Module):
         
         """
         
-        GrainNN specific y output 
+        GrainNN specific regressor output 
         
         """
         
@@ -417,43 +372,18 @@ class GrainNN2(nn.Module):
  
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
         
-        
-        """
-        
-        GrainNN specific topological event
-        
-        """            
-        
-        edge_prob, edge_event_list = self.edge_decoder(h_dict['joint'], \
-                        edge_index_dict['joint', 'connect', 'joint'])
-        
-        
-            
+                
         y_dict.update({'grain_event': 1*(area<1e-6) })
-        y_dict.update({'edge_event': edge_prob})
-        y_dict.update({'edge_switch':edge_event_list})
+
             
 
         return y_dict            
 
 
-            
-    def update(self, x_dict, edge_index_dict, y_dict):            
-            
-        """
-        
-        Online update for next snapshot input x
-        
-        """    
-            
-        x_dict = self.form_next_x(x_dict, y_dict)
-        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, y_dict['edge_switch'])
-            
-                        
-        return x_dict, edge_index_dict
+
     
     @staticmethod
-    def form_next_x(x_dict, y_dict):
+    def update(x_dict, y_dict):
         
         # features
         x_dict['joint'][:, :2]  += y_dict['joint']
@@ -465,6 +395,112 @@ class GrainNN2(nn.Module):
         x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]
         
         return x_dict
+
+
+        
+
+
+class GrainNN_classifier(torch.nn.Module):
+
+    def __init__(self, hyper):
+        super().__init__()
+  
+        self.in_channels_dict = {node_type: len(features) 
+                                 for node_type, features in hyper.features.items()}
+        
+        self.out_channels = hyper.layer_size 
+        self.num_layer = hyper.layers
+        self.metadata = hyper.metadata  # heterogeneous graph structure
+        self.out_win = hyper.out_win
+        self.device = hyper.device
+
+        ## networks
+
+        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
+                                        self.num_layer, self.metadata, self.device)
+        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
+                                        self.num_layer, self.metadata, self.device)
+
+
+        self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
+        self.lin2 = nn.Linear(2*self.out_channels, 1) # predict probability
+        self.threshold = 0.5
+        
+    def forward(self, x_dict, edge_index_dict):    
+    
+
+        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
+            
+        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
+        
+        h_dict, c_dict = hidden_state[-1]
+        
+        
+        """
+        
+        GrainNN specific topological event
+        
+        """            
+        
+
+        joint_feature = h_dict['joint']
+        joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
+
+        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
+      #  print(joint_edge_index[:,check_arg])
+        
+        src, dst = joint_edge_index[0], joint_edge_index[1]
+
+        # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
+
+        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
+  
+        z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
+           
+        y_dict = {'edge_event': z}
+
+
+        return y_dict
+
+
+    def update(self, x_dict, edge_index_dict, y_dict):            
+            
+  
+
+        """
+        Probability of elimination
+        """
+        joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
+        src, dst = joint_edge_index[0], joint_edge_index[1]
+        
+        p = torch.sigmoid(y_dict['edge_event'])
+        
+      #  z[check_arg] = 0.9
+        ## predict eliminated edge
+        elimed_arg = ((p>self.threshold)&(src<dst)).nonzero(as_tuple=True)
+        elimed_prob = p[elimed_arg]
+       
+      #  print(z, elimed_prob)
+        
+        src = src[elimed_arg]
+        dst = dst[elimed_arg]
+        
+        ## sort
+        sorted_prob, indices= torch.sort(elimed_prob, dim=0, descending=True)
+        src = src[indices]
+        dst = dst[indices]
+        
+
+            
+        # features
+        x_dict['joint'][:, :2]  += y_dict['joint']
+        # gradients
+        x_dict['joint'][:, -2:] =  y_dict['joint']
+  
+        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, (sorted_prob, src, dst))
+            
+                        
+        return x_dict, edge_index_dict
 
     @staticmethod
     def from_next_edge_index(edge_index_dict, x_dict, edge_event_list):
@@ -576,7 +612,7 @@ class GrainNN2(nn.Module):
         E_qp[0], E_qp[1] = E_pq[1], E_pq[0]       
         
         return edge_index_dict
-        
+
 
 def point_in_triangle(t, v1, v2, v3):
     sign = lambda a, b, c: (a[0] - c[0])*(b[1] - c[1]) - \

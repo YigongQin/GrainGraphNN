@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
-from models import GrainNN2
+from models import GrainNN_classifier, GrainNN_regressor
 from parameters import regressor, classifier
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
@@ -84,8 +84,6 @@ def class_acc(prob, label):
         P_list.append(Precision)
         R_list.append(Recall)
        # print(Precision, Recall, left_bound)
-    P_list.reverse()    
-    R_list.reverse()
   # print(Positive, TruePositive, FalsePositive)
   #  print(Presicion, Recall, F1)
    # return F1 if Positive else -1
@@ -106,8 +104,12 @@ def edge_error_metric(data_edge_index, pred_edge_index):
            1-len(E_pq.intersection(E_t_pq))/len(E_pq)
 
 
-def train(model, num_epochs, train_loader, test_loader):
-
+def train(model, train_loader, test_loader):
+    
+    if device=='cuda':
+        print('use %d GPUs'%torch.cuda.device_count())
+        model.cuda()
+        
     model.train()
 
     optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr, weight_decay=hp.weight_decay) 
@@ -139,13 +141,13 @@ def train(model, num_epochs, train_loader, test_loader):
     train_loss_list.append(float(train_loss))
     test_loss_list.append(float(test_loss))  
 
-    for epoch in range(num_epochs):
+    for epoch in range(hp.epoch):
 
 
        # if mode=='train' and epoch==num_epochs-10: optimizer = torch.optim.SGD(model.parameters(), lr=0.02)
         
         train_loss, count = 0, 0
-        train_prob, train_label = [], []
+       # train_prob, train_label = [], []
         for data in train_loader:   
             count += 1
             data.to(device)
@@ -153,8 +155,8 @@ def train(model, num_epochs, train_loader, test_loader):
          
             loss = criterion(data.y_dict, pred, data['mask'])
             
-            train_prob.append(pred['edge_event'])
-            train_label.append(data.y_dict['edge_event'])
+        #    train_prob.append(pred['edge_event'])
+        #    train_label.append(data.y_dict['edge_event'])
 
             
             optimizer.zero_grad()
@@ -174,27 +176,30 @@ def train(model, num_epochs, train_loader, test_loader):
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
-                   
-            test_prob.append(pred['edge_event'])
-            test_label.append(data.y_dict['edge_event'])
+            
+            if args.loss == 'classification':       
+                test_prob.append(pred['edge_event'])
+                test_label.append(data.y_dict['edge_event'])
             
         test_loss/=count
         
 
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
         if args.loss == 'classification':
-            train_auc, P_list, R_list = class_acc(train_prob, train_label)
+         #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             test_auc, P_list, R_list = class_acc(test_prob, test_label)
-            print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
+            print('Validation AUC:{:.6f}'.format(test_auc)) 
+         #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
         train_loss_list.append(float(train_loss))
-        test_loss_list.append(float(test_loss))       
+        test_loss_list.append(float(test_loss))      
+        test_auc_list.append(float(test_auc))
         scheduler.step()
         
     print('model id:', args.model_id, 'loss', test_loss)
     if args.loss == 'classification':
         print('model id:', args.model_id, 'PR AUC', float(test_auc))
-        train.plist = P_list
-        train.rlist = R_list
+        train.plist = [float(i) for i in P_list]
+        train.rlist = [float(i) for i in R_list]
     
     return model 
 
@@ -299,6 +304,7 @@ if __name__=='__main__':
         hp = classifier(mode, model_id)
     else:
         raise KeyError
+    
         
     hp.features = sample.features
     hp.targets = sample.targets
@@ -350,20 +356,12 @@ if __name__=='__main__':
         
         print('\n')
     
-    
-    
 
-    model = GrainNN2(hp)
    # print(model)
    # for model_id, (name, param) in enumerate(model.named_parameters()):
    #            print(name, model_id)
 
-    
-   # model = model.double()
-    if device=='cuda':
-        model.cuda()
-        print('use %d GPUs'%torch.cuda.device_count())
-        
+
    # model = DataParallel(model)
         
     
@@ -378,10 +376,16 @@ if __name__=='__main__':
         test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
         train_loss_list=[]
         test_loss_list=[]
-        
+        test_auc_list = []
         start = time.time()
         
-        model = train(model, hp.epoch, train_loader, test_loader)
+        
+        if args.loss == 'regression':
+            model = GrainNN_regressor(hp)
+        if args.loss == 'classification':
+            model = GrainNN_classifier(hp)
+        
+        model = train(model, train_loader, test_loader)
         x = train.x
         y = train.y
         edge = train.edge
@@ -394,11 +398,16 @@ if __name__=='__main__':
         fig, ax = plt.subplots() 
         ax.semilogy(train_loss_list)
         ax.semilogy(test_loss_list)
-        plt.xlabel('epoch')
-        plt.ylabel('loss')
-        plt.legend(['training loss','validation loss'])
+        if args.loss == 'classification':
+            ax2 = ax.twinx()
+            ax2.plot(test_auc_list, c='r')
+            ax2.set_ylabel('PRAUC')
+            ax2.legend(['PRAUC'],loc='upper center')
+        ax.set_xlabel('epoch')
+        ax.set_ylabel('loss')
+        ax.legend(['training loss', 'validation loss'])
         plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
-        plt.savefig('loss.png')
+        plt.savefig('loss.png',dpi=600, bbox_inches='tight')
         
         if args.loss == 'classification':
         
@@ -407,10 +416,10 @@ if __name__=='__main__':
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.title('Precision-Recall Plot')
-            plt.savefig('PR.png')        
+            plt.savefig('PR.png',dpi=600, bbox_inches='tight')        
         
             optim_arg = max(range(len(train.plist)), key=lambda i: train.rlist[i]+train.plist[i])
-            optim_threshold, optim_p, optim_r = optim_arg/len(train.plist), train.plist[optim_arg], train.rlist[optim_arg]
+            optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.plist)-1), train.plist[optim_arg], train.rlist[optim_arg]
             print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
 
         with open('loss.txt', 'w') as f:

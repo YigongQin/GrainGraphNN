@@ -44,27 +44,40 @@ def criterion(data, pred, mask):
         # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
         # + torch.mean((data['grain'] - pred['grain'])**2)
 
-def class_acc(data, pred):
+def class_acc(prob, label):
     
-    # use F1 measure
+    # use PRAUC
     
-    p = torch.sigmoid(pred['edge_event'])
-    y = data['edge_event']
+    p = torch.sigmoid(torch.cat(prob))
+    y = torch.cat(label)
+
+    AUC = 0
+    interval = 0.1
+    P_list, R_list = [], []
+    right_bound = 1
+    for threshold in np.arange(0, 1, interval):    
+        # the first one is all positive, no negative, recall is one
         
-    p = ((p>0.5)*1).long()
-    
-    Positive = sum(y==1)
-    TruePositive = sum( (p==1) & (y==1) )
-    FalsePositive = sum( (p==1) & (y==0) )
-    FalseNegative = sum( (p==0) & (y==1) )
-    Presicion = TruePositive/(TruePositive + FalsePositive) if TruePositive else 0
-    Recall = TruePositive/(TruePositive + FalseNegative) if TruePositive else 0
-    F1 = 2*Presicion*Recall/(Presicion + Recall) if Presicion + Recall else 0
-   
+        p = ((p>threshold)*1).long()
+        
+       # Positive = sum(y==1)
+        TruePositive = sum( (p==1) & (y==1) )
+        FalsePositive = sum( (p==1) & (y==0) )
+        FalseNegative = sum( (p==0) & (y==1) )
+        Precision = TruePositive/(TruePositive + FalsePositive) if TruePositive else 0
+        Recall = TruePositive/(TruePositive + FalseNegative) if TruePositive else 0
+      #  F1 = 2*Presicion*Recall/(Presicion + Recall) if Presicion + Recall else 0
+        
+        P_list.append(Precision)
+        R_list.append(Recall)
+        AUC += (right_bound-Recall)*Precision
+        right_bound = Recall
+        
   # print(Positive, TruePositive, FalsePositive)
   #  print(Presicion, Recall, F1)
-    return F1 if Positive else -1
-    
+   # return F1 if Positive else -1
+    return AUC, P_list, R_list
+
 def unorder_edge(a):
     return set(map(tuple, a))
          
@@ -120,15 +133,17 @@ def train(model, num_epochs, train_loader, test_loader):
        # if mode=='train' and epoch==num_epochs-10: optimizer = torch.optim.SGD(model.parameters(), lr=0.02)
         
         train_loss, count = 0, 0
-        train_acc_list = []
+        train_prob, train_label = [], []
         for data in train_loader:   
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
          
             loss = criterion(data.y_dict, pred, data['mask'])
-            train_acc = float(class_acc(data.y_dict, pred))
-            if train_acc != -1: train_acc_list.append(train_acc) 
+            
+            train_prob.append(pred['edge_event'])
+            train_label.append(data.y_dict['edge_event'])
+
             
             optimizer.zero_grad()
             loss.backward()
@@ -140,29 +155,34 @@ def train(model, num_epochs, train_loader, test_loader):
         
         
         test_loss, count = 0, 0
-        test_acc_list = []
+        test_prob, test_label = [], []
         for data in test_loader:  
         
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
-            test_acc = float(class_acc(data.y_dict, pred))
-            if test_acc != -1: test_acc_list.append(test_acc)
+                   
+            test_prob.append(pred['edge_event'])
+            test_label.append(data.y_dict['edge_event'])
             
         test_loss/=count
         
-        train_acc = sum(train_acc_list)/len(train_acc_list) if len(train_acc_list)>0 else -1
-        test_acc = sum(test_acc_list)/len(test_acc_list) if len(test_acc_list)>0 else -1
+
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
         if args.loss == 'classification':
-            print('Epoch:{}, Train accuracy:{:.6f}, valid accuracy:{:.6f}'.format(epoch+1, \
-                    train_acc, test_acc)) 
+            train_auc, P_list, R_list = class_acc(train_prob, train_label)
+            test_auc, P_list, R_list = class_acc(test_prob, test_label)
+            print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))       
         scheduler.step()
+        
     print('model id:', args.model_id, 'loss', test_loss)
-    print('model id:', args.model_id, 'accuracy', test_acc)
+    if args.loss == 'classification':
+        print('model id:', args.model_id, 'PR AUC', test_auc)
+        train.plist = P_list
+        train.rlist = R_list
     
     return model 
 
@@ -362,13 +382,24 @@ if __name__=='__main__':
         fig, ax = plt.subplots() 
         ax.semilogy(train_loss_list)
         ax.semilogy(test_loss_list)
-     #   txt = 'final train loss '+str('%1.2e'%train_loss_list[-1])+' validation loss '+ str('%1.2e'%test_loss_list[-1]) 
-     #   fig.text(.5, .2, txt, ha='center')
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.legend(['training loss','validation loss'])
         plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
         plt.savefig('loss.png')
+        
+        if args.loss == 'classification':
+        
+            fig, ax = plt.subplots() 
+            ax.scatter(train.rlist, train.plist)
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title('Precision-Recall Plot')
+            plt.savefig('PR.png')        
+        
+            optim_arg = max(range(len(train.plist)), key=lambda i: train.rlist[i]+train.plist[i])
+            optim_threshold, optim_p, optim_r = optim_arg/len(train.plist), train.plist[optim_arg], train.rlist[optim_arg]
+            print('the optimal threshold for classification is: ', optim_threshold, ', with recall/precision', optim_p, optim_r)
 
         with open('loss.txt', 'w') as f:
             f.write('epoch, training loss, validation loss\n' )

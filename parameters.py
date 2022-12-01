@@ -82,7 +82,7 @@ def classifier(mode, model_id):
 
 
         
-    hp_grid = {'weight':[5, 10, 20, 40],\
+    hp_grid = {'weight':[1, 2, 4, 8],\
                'lr':[100e-4, 25e-4, 50e-4,  200e-4], \
                'batch_size':[2, 1, 4, 8],\
                'decay_step':[10, 5, 20],\

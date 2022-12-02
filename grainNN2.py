@@ -8,7 +8,7 @@ Created on Fri Sep 30 15:35:27 2022
 import argparse, time, glob, dill, random, os
 import numpy as np
 import matplotlib.pyplot as plt
-
+from collections import defaultdict
 import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
@@ -27,7 +27,8 @@ def criterion(data, pred, mask):
    # print(p)
     if args.model_type== 'regressor':
    
-        return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2)
+        return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
+             + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
 
     if args.model_type== 'classifier':
         z = pred['edge_event']
@@ -40,9 +41,19 @@ def criterion(data, pred, mask):
         classifier = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(hp.weight))
         
         return classifier(z, y.type(torch.FloatTensor))
-        # return torch.mean(-weight_ratio*y*torch.log(p+1e-10) - (1-y)*torch.log(1+1e-10-p))
-        # 1000*torch.mean((data['joint'] - pred['joint'])**2) \
-        # + torch.mean((data['grain'] - pred['grain'])**2)
+    
+
+def regress_acc(data, pred, acc_dicts):
+
+    def add(key, idx):
+        acc_dicts[key+str(idx)] += torch.sum((data[key][:,idx] - pred[key][:,idx])**2)
+        acc_dicts[key+str(idx)+'err'] += torch.sum((data[key][:,idx])**2)
+
+    add('grain', 0)
+    add('grain', 1)
+    add('joint', 0)
+    add('joint', 1)
+
 
 def class_acc(prob, label):
     
@@ -89,10 +100,11 @@ def class_acc(prob, label):
    # return F1 if Positive else -1
     return AUC, P_list, R_list
 
-def unorder_edge(a):
-    return set(map(tuple, a))
+
          
 def edge_error_metric(data_edge_index, pred_edge_index):
+    
+    unorder_edge = lambda a:set(map(tuple, a))
 
     E_pp = unorder_edge(data_edge_index['joint', 'connect', 'joint'].detach().numpy().T)
     E_pq = unorder_edge(data_edge_index['joint', 'pull', 'grain'].detach().numpy().T)
@@ -110,7 +122,7 @@ def train(model, train_loader, test_loader):
         print('use %d GPUs'%torch.cuda.device_count())
         model.cuda()
         
-    model.train()
+    
 
     optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
 
@@ -145,20 +157,16 @@ def train(model, train_loader, test_loader):
 
 
        # if mode=='train' and epoch==num_epochs-10: optimizer = torch.optim.SGD(model.parameters(), lr=0.02)
-        
+
+        model.train()
         train_loss, count = 0, 0
-       # train_prob, train_label = [], []
         for data in train_loader:   
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict)
          
             loss = criterion(data.y_dict, pred, data['mask'])
-            
-        #    train_prob.append(pred['edge_event'])
-        #    train_label.append(data.y_dict['edge_event'])
-
-            
+             
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -167,19 +175,23 @@ def train(model, train_loader, test_loader):
 
         train_loss/=count
         
-        
+        model.eval()
         test_loss, count = 0, 0
         test_prob, test_label = [], []
-        for data in test_loader:  
-        
-            count += 1
-            data.to(device)
-            pred = model(data.x_dict, data.edge_index_dict)
-            test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+        test_acc_dict = defaultdict(float)
+        with torch.no_grad():
+            for data in test_loader:  
             
-            if args.model_type== 'classifier':       
-                test_prob.append(pred['edge_event'])
-                test_label.append(data.y_dict['edge_event'])
+                count += 1
+                data.to(device)
+                pred = model(data.x_dict, data.edge_index_dict)
+                test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+                
+                regress_acc(data.y_dict, pred, test_acc_dict)
+                
+                if args.model_type== 'classifier':       
+                    test_prob.append(pred['edge_event'])
+                    test_label.append(data.y_dict['edge_event'])
             
         test_loss/=count
         
@@ -193,14 +205,18 @@ def train(model, train_loader, test_loader):
          #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))      
+        test_acc_list.append(test_acc_dict)
         
         scheduler.step()
         
     print('model id:', args.model_id, 'loss', test_loss)
-    if args.model_type== 'classifier':
+    if args.model_type == 'classifier':
         print('model id:', args.model_id, 'PR AUC', float(test_auc))
         train.plist = [float(i) for i in P_list]
         train.rlist = [float(i) for i in R_list]
+    
+    if args.model_type == 'regressor':
+        print('model id:', args.model_id, 'ACCURACY', test_acc_dict)
     
     return model 
 
@@ -382,6 +398,7 @@ if __name__=='__main__':
         train_loss_list=[]
         test_loss_list=[]
         test_auc_list = []
+        test_acc_list = []
         start = time.time()
         
         
@@ -416,6 +433,8 @@ if __name__=='__main__':
         
             fig, ax = plt.subplots() 
             ax.scatter(train.rlist, train.plist)
+            ax.set_ylim(bottom=0.)
+            ax.set_xlim(left=0.)
             plt.xlabel('Recall')
             plt.ylabel('Precision')
             plt.title('Precision-Recall Plot')

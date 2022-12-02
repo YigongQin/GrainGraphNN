@@ -295,7 +295,7 @@ if __name__=='__main__':
         num_test = len(data_list)
         sample = data_list[0]
         
-    random.shuffle(data_list)
+  #  random.shuffle(data_list)
 
     
     train_list = data_list[:num_train]

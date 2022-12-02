@@ -373,7 +373,7 @@ class GrainNN_regressor(nn.Module):
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
         
                 
-        y_dict.update({'grain_event': 1*(area<1e-6) })
+        y_dict.update({'grain_event': torch.where(area<1e-6) })
 
             
 
@@ -445,80 +445,90 @@ class GrainNN_classifier(torch.nn.Module):
 
         joint_feature = h_dict['joint']
         joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
-
-        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
-      #  print(joint_edge_index[:,check_arg])
         
         src, dst = joint_edge_index[0], joint_edge_index[1]
 
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
 
-        z = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
+        pair_feature = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
   
-        z = self.lin2(z).view(-1) # p(i,j), size (Ejj,)
            
-        y_dict = {'edge_event': z}
+        y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 
+        y_dict['edge_rotation'] = torch.sigmoid(self.lin1(pair_feature)) - 0.5
 
         return y_dict
 
 
     def update(self, x_dict, edge_index_dict, y_dict):            
             
-  
 
-        """
-        Probability of elimination
-        """
-        joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
-        src, dst = joint_edge_index[0], joint_edge_index[1]
+        E_pp = edge_index_dict['joint', 'connect', 'joint']
+        E_qp = edge_index_dict['grain', 'push', 'joint']
+
+        src, dst = E_pp[0], E_pp[1]
         
-        p = torch.sigmoid(y_dict['edge_event'])
-        
+        prob = torch.sigmoid(y_dict['edge_event'])
+
+        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
+      #  print(joint_edge_index[:,check_arg])        
       #  z[check_arg] = 0.9
         ## predict eliminated edge
-        elimed_arg = ((p>self.threshold)&(src<dst)).nonzero(as_tuple=True)
-        elimed_prob = p[elimed_arg]
-       
-      #  print(z, elimed_prob)
-        
-        src = src[elimed_arg]
-        dst = dst[elimed_arg]
-        
-        ## sort
-        sorted_prob, indices= torch.sort(elimed_prob, dim=0, descending=True)
-        src = src[indices]
-        dst = dst[indices]
+        L1 = ((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True)
         
 
-            
-        # features
-        x_dict['joint'][:, :2]  += y_dict['joint']
-        # gradients
-        x_dict['joint'][:, -2:] =  y_dict['joint']
-  
-        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, (sorted_prob, src, dst))
-            
-                        
-        return x_dict, edge_index_dict
-
-    @staticmethod
-    def from_next_edge_index(edge_index_dict, x_dict, edge_event_list):
-
-        print(edge_event_list)
         """
+        E2: Grain elimination
+        """
+        for grain in y_dict['grain_event']:
+            Np = (E_qp[0]==grain).nonzero().view(-1)
+            pairs = torch.combinations(Np, r=2)
+            L2 = []
+            for p1, p2 in pairs:
+                if torch.tensor([p1, p2]) in E_pp and p1<p2:
+                    E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
+                    L2.append(E_index)
+                    if E_index in L1:
+                        L1 = L1[L1!=E_index]
+            L2 = torch.cat(L2)
+            edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
+            
+        """
+        E1: Neigbor switching
+        """
+
+        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)
+                                
+        return x_dict, edge_index_dict
+    
+    
+    @staticmethod
+    def from_next_edge_index(edge_index_dict, x_dict, prob, elimed_arg, truncate=0):
+
+        print(elimed_arg)
         
-        Neighbor switching
         
-        """          
-        
-        prob, src, dst = edge_event_list
+      #  src, dst = edge_event_list
         E_pp = edge_index_dict['joint', 'connect', 'joint']
         E_pq = edge_index_dict['joint', 'pull', 'grain']
         E_qp = edge_index_dict['grain', 'push', 'joint']
         
-        for vanish_edge_id in range(len(src)):
-            p1, p2 = src[vanish_edge_id], dst[vanish_edge_id]
+        
+      #  src_edge = src[elimed_arg]
+      #  dst_edge = dst[elimed_arg]
+        pairs = E_pp.T
+        pairs = pairs[elimed_arg]
+        ## sort
+        sorted_prob, indices= torch.sort(prob[elimed_arg], dim=0, descending=True)
+        #  print(p, elimed_prob)
+        
+      #  src_edge  = src_edge[indices]
+      #  dst_edge  = dst_edge[indices]     
+        pairs = pairs[indices][:-truncate] 
+        
+        
+        
+        for p1, p2 in pairs:
             
             # grain neighbors
             p1_qn_index = (E_pq[0]==p1).nonzero().view(-1)
@@ -531,6 +541,23 @@ class GrainNN_classifier(torch.nn.Module):
             p1_pn = E_pp[1][ p1_pn_index ]
             p2_pn_index = ((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)
             p2_pn = E_pp[1][ p2_pn_index ]            
+            
+            
+            
+            """
+            p1_p2 = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
+            p2_p1 = ((E_pp[0]==p2)&(E_pp[1]==p1)).nonzero().view(-1)
+            
+            x_dict['joint'][p1, :2]  = x_dict['joint'][p1, :2] - y_dict['joint'][p1] + y_dict['edge_rotation'][p1_p2]
+            x_dict['joint'][p2, :2]  = x_dict['joint'][p2, :2] - y_dict['joint'][p2] + y_dict['edge_rotation'][p2_p1]
+            
+            x_dict['joint'][p1, -2:] =  y_dict['edge_rotation'][p1_p2]
+            x_dict['joint'][p2, -2:] =  y_dict['edge_rotation'][p2_p1]
+            
+            """
+            
+            
+            
             
             # find two expanding grains and two shrinking grains
             expand_q1 = p1_qn[(1-sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)] # new neighbor for p2

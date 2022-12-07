@@ -46,8 +46,8 @@ def criterion(data, pred, mask):
 def regress_acc(data, pred, acc_dicts):
 
     def add(key, idx):
-        acc_dicts[key+str(idx)] += torch.sum((data[key][:,idx] - pred[key][:,idx])**2)
-        acc_dicts[key+str(idx)+'err'] += torch.sum((data[key][:,idx])**2)
+        acc_dicts[key+str(idx)+'err'] += torch.sum((data[key][:,idx] - pred[key][:,idx])**2)
+        acc_dicts[key+str(idx)] += torch.sum((data[key][:,idx])**2)
 
     add('grain', 0)
     add('grain', 1)

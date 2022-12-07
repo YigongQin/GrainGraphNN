@@ -187,7 +187,8 @@ def train(model, train_loader, test_loader):
                 pred = model(data.x_dict, data.edge_index_dict)
                 test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
                 
-                regress_acc(data.y_dict, pred, test_acc_dict)
+                if args.model_type== 'regressor': 
+                    regress_acc(data.y_dict, pred, test_acc_dict)
                 
                 if args.model_type== 'classifier':       
                     test_prob.append(pred['edge_event'])

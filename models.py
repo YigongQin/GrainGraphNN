@@ -658,6 +658,34 @@ def point_in_triangle(t, v1, v2, v3):
     
     return not (has_neg & has_pos)
 
+
+def rot90(data, symmetry, rot):
+    
+    if rot == 0: return
+    
+    signx, signy = -1, -1
+ #   signx = 
+    
+
+    if symmetry == 2:
+        data.x_dict['grain'][:,:2]  = -data.x_dict['grain'][:,:2]
+        data.x_dict['grain'][:,5:6] = -data.x_dict['grain'][:,5:6]
+        data.x_dict['joint'][:,:2]  = -data.x_dict['joint'][:,:2]
+        data.x_dict['joint'][:,-2:] = -data.x_dict['joint'][:,-2:]
+        data.y_dict['joint'][:,:2]  = -data.y_dict['joint'][:,:2]
+ 
+    if symmetry == 4:
+        
+ 
+    
+        data.x_dict['grain'][:,0], data.x_dict['grain'][:,1]   = -data.x_dict['grain'][:,1], data.x_dict['grain'][:,0]
+        data.x_dict['grain'][:,5], data.x_dict['grain'][:,6]   = -data.x_dict['grain'][:,6], data.x_dict['grain'][:,5]    
+        
+        data.x_dict['joint'][:,0], data.x_dict['joint'][:,1]   = -data.x_dict['joint'][:,1], data.x_dict['joint'][:,0]    
+        data.x_dict['joint'][:,-2], data.x_dict['joint'][:,-1] = -data.x_dict['joint'][:,-1], data.x_dict['joint'][:,-2] 
+        
+        data.y_dict['joint'][:,0], data.y_dict['joint'][:,1]   = -data.y_dict['joint'][:,1], data.y_dict['joint'][:,0]       
+
 """
 
   self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],

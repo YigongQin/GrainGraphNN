@@ -12,7 +12,7 @@ from collections import defaultdict
 import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
-from models import GrainNN_classifier, GrainNN_regressor
+from models import GrainNN_classifier, GrainNN_regressor, rot90
 from parameters import regressor, classifier
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
@@ -161,17 +161,23 @@ def train(model, train_loader, test_loader):
         model.train()
         train_loss, count = 0, 0
         for data in train_loader:   
-            count += 1
             data.to(device)
-            pred = model(data.x_dict, data.edge_index_dict)
-         
-            loss = criterion(data.y_dict, pred, data['mask'])
-             
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            symmetry = 2
+            for rot in range(symmetry):
+                
+                rot90(data, symmetry, rot)
             
-            train_loss += float(loss)
+                count += 1
+                
+                pred = model(data.x_dict, data.edge_index_dict)
+             
+                loss = criterion(data.y_dict, pred, data['mask'])
+                 
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                
+                train_loss += float(loss)
 
         train_loss/=count
         

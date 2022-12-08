@@ -668,9 +668,9 @@ def rot90(data, symmetry, rot):
     
 
     if symmetry == 2:
-        data.x_dict['grain'][:,:2]  = -data.x_dict['grain'][:,:2]
+        data.x_dict['grain'][:,:2]  = 1-data.x_dict['grain'][:,:2]
         data.x_dict['grain'][:,5:6] = -data.x_dict['grain'][:,5:6]
-        data.x_dict['joint'][:,:2]  = -data.x_dict['joint'][:,:2]
+        data.x_dict['joint'][:,:2]  = 1-data.x_dict['joint'][:,:2]
         data.x_dict['joint'][:,-2:] = -data.x_dict['joint'][:,-2:]
         data.y_dict['joint'][:,:2]  = -data.y_dict['joint'][:,:2]
  

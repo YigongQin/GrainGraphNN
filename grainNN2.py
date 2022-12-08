@@ -28,7 +28,7 @@ def criterion(data, pred, mask):
     if args.model_type== 'regressor':
    
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
-             + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+     #        + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
 
     if args.model_type== 'classifier':
         z = pred['edge_event']
@@ -162,7 +162,7 @@ def train(model, train_loader, test_loader):
         train_loss, count = 0, 0
         for data in train_loader:   
             data.to(device)
-            symmetry = 2
+            symmetry = 4
             for rot in range(symmetry):
                 
                 rot90(data, symmetry, rot)

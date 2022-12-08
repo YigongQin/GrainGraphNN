@@ -162,7 +162,7 @@ def train(model, train_loader, test_loader):
         train_loss, count = 0, 0
         for data in train_loader:   
             data.to(device)
-            symmetry = 4
+            symmetry = args.symmetry
             for rot in range(symmetry):
                 
                 rot90(data, symmetry, rot)
@@ -249,6 +249,7 @@ if __name__=='__main__':
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.9)
+    parser.add_argument("--symmetry", type=int, default=1)
     
     parser.add_argument("--models", type=tuple, default=(0, 0))
     args = parser.parse_args()

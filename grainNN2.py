@@ -26,9 +26,9 @@ def criterion(data, pred, mask):
 
    # print(p)
     if args.model_type== 'regressor':
-   
+        #print(data['grain'][:,:1], pred['grain'][:,:1]) 
         return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
-     #        + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+             + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
 
     if args.model_type== 'classifier':
         z = pred['edge_event']

@@ -364,10 +364,14 @@ class GrainNN_regressor(nn.Module):
         
         y_dict['joint'] = torch.sigmoid(y_dict['joint']) - 0.5 # dx, dy are in the range [-1, 1]
         
-        area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 3]) # darea + area_old is positive    
+       # area = F.relu(y_dict['grain'][:, 0] + x_dict['grain'][:, 3]) # darea + area_old is positive    
         
-        area = F.normalize(area, p=1, dim=-1)  # normalize the area
+       # area = F.normalize(area, p=1, dim=-1)  # normalize the area
         
+       # y_dict['grain'][:, 0] = torch.tanh(y_dict['grain'][:, 0]) #area - x_dict['grain'][:, 3]
+
+        area = torch.tanh(y_dict['grain'][:, 0]) + x_dict['grain'][:, 3]
+       # area = F.normalize(area, p=1, dim=-1)
         y_dict['grain'][:, 0] = area - x_dict['grain'][:, 3]
  
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
@@ -679,7 +683,7 @@ def rot90(data, symmetry, rot):
  
     
         data.x_dict['grain'][:,0], data.x_dict['grain'][:,1]   = 1 - data.x_dict['grain'][:,1], data.x_dict['grain'][:,0]
-        data.x_dict['grain'][:,5], data.x_dict['grain'][:,6]   = -data.x_dict['grain'][:,6], data.x_dict['grain'][:,5]    
+        data.x_dict['grain'][:,5], data.x_dict['grain'][:,6]   = data.x_dict['grain'][:,6], -data.x_dict['grain'][:,5]    
         
         data.x_dict['joint'][:,0], data.x_dict['joint'][:,1]   = 1 - data.x_dict['joint'][:,1], data.x_dict['joint'][:,0]    
         data.x_dict['joint'][:,-2], data.x_dict['joint'][:,-1] = -data.x_dict['joint'][:,-1], data.x_dict['joint'][:,-2] 

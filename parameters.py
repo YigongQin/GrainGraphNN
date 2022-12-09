@@ -97,7 +97,41 @@ def classifier(mode, model_id):
     return Param(param_dict)
 
 
+def classifier_transfered(mode, model_id):
 
+
+        
+    hp_grid = {'lr_1':[0.01, 0.1, 1],\
+               'lr_2':[0.01, 0.1, 1],\
+               'lr':[5e-4, 20e-4, 100e-4, 400e-4]}
+        
+    
+    hp_size = [(len(v),k) for k, v in hp_grid.items()]
+    hp_order = [0, 1, 2, 3, 4]
+    hp_size = [hp_size[i] for i in hp_order]
+
+    param_dict = {}
+    prev_dim = 1
+    
+    for grid_dim, param in hp_size:
+        
+        cur_dim = prev_dim*grid_dim
+        
+        
+        param_idx = (model_id%cur_dim)//prev_dim
+        param_dict.update({param:hp_grid[param][param_idx]})
+        
+        prev_dim = cur_dim
+ 
+       
+       
+    param_dict['frames'] = 13
+
+    param_dict.update({'window':1, 'out_win':1, 'layers':1,  'weight_decay':0, 'batch_size':2, 'decay_step':10, 'weight':2,\
+                       'layer_size':32, 'kernel_size':(3,), 'epoch':60, 'bias':True, 'model_list':[0]})
+
+
+    return Param(param_dict)
 
 """
 frames_id = all_id//81

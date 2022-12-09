@@ -13,7 +13,7 @@ import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier, rot90
-from parameters import regressor, classifier
+from parameters import regressor, classifier, classifier_transfered
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
@@ -125,6 +125,15 @@ def train(model, train_loader, test_loader):
     
 
     optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
+    if args.transfer:
+        optimizer = torch.optim.Adam(
+        [
+            {"params": model.gclstm_encoder.parameters(), "lr": hp.lr_1*hp.lr_2*hp.lr},
+            {"params": model.gclstm_decoder.parameters(), "lr": hp.lr_2*hp.lr},
+            {"params": model.lin2.parameters()},
+        ],
+        lr=hp.lr,
+        )
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)
@@ -330,7 +339,10 @@ if __name__=='__main__':
         hp = regressor(mode, model_id)
         
     elif args.model_type== 'classifier':
-        hp = classifier(mode, model_id)   
+        if args.transfer:
+            hp = classifier_transfered(mode, model_id)
+        else:
+            hp = classifier(mode, model_id)   
 
     else:
         raise KeyError

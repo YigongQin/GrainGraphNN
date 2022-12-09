@@ -12,7 +12,7 @@ from collections import defaultdict
 import torch
 import torch.optim as optim
 from data_loader import DynamicHeteroGraphTemporalSignal
-from models import GrainNN_classifier, GrainNN_regressor, rot90
+from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier, rot90
 from parameters import regressor, classifier
 from graph_datastruct import graph_trajectory
 from torch_geometric.loader import DataLoader
@@ -330,6 +330,9 @@ if __name__=='__main__':
         
     elif args.model_type== 'classifier':
         hp = classifier(mode, model_id)
+    
+    elif args.model_type == 'transfered':
+        hp = classifier(mode, model_id)
 
     else:
         raise KeyError
@@ -414,6 +417,18 @@ if __name__=='__main__':
             model = GrainNN_regressor(hp)
         if args.model_type== 'classifier':
             model = GrainNN_classifier(hp)
+        if args.model_type== 'transfered':
+            hp_r = regressor(mode, 14)
+            hp_r.features = sample.features
+            hp_r.targets = sample.targets
+            hp_r.device = device
+            hp_r.metadata = heteroData.metadata()
+            pretrained_model = GrainNN_regressor(hp_r)
+            pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(14)))
+            pretrained_model.eval()
+            print('transfered learned parameters from regressor')
+            model = regressor_classifier(hp, pretrained_model)
+            
         
         model = train(model, train_loader, test_loader)
         x = train.x

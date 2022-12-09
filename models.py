@@ -395,7 +395,62 @@ class GrainNN_regressor(nn.Module):
         return x_dict
 
 
+class regressor_classifier(torch.nn.Module):
+
+    def __init__(self, hyper, regressor):
+        super().__init__()
+  
+        self.in_channels_dict = {node_type: len(features) 
+                                 for node_type, features in hyper.features.items()}
         
+        self.out_channels = hyper.layer_size 
+        self.num_layer = hyper.layers
+        self.metadata = hyper.metadata  # heterogeneous graph structure
+        self.out_win = hyper.out_win
+        self.device = hyper.device
+
+        ## networks
+
+        self.gclstm_encoder = regressor.gclstm_encoder
+        self.gclstm_decoder = regressor.gclstm_decoder
+
+
+        self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
+        self.lin2 = nn.Linear(2*self.out_channels, 1) # predict probability
+        self.threshold = 1
+        
+    def forward(self, x_dict, edge_index_dict):    
+    
+
+        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
+            
+        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
+        
+        h_dict, c_dict = hidden_state[-1]
+        
+        
+        """
+        
+        GrainNN specific topological event
+        
+        """            
+        
+
+        joint_feature = h_dict['joint']
+        joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
+        
+        src, dst = joint_edge_index[0], joint_edge_index[1]
+
+        # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
+
+        pair_feature = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
+  
+           
+        y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
+
+        y_dict['edge_rotation'] = torch.sigmoid(self.lin1(pair_feature)) - 0.5
+
+        return y_dict        
 
 
 class GrainNN_classifier(torch.nn.Module):

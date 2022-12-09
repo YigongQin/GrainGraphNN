@@ -1098,6 +1098,8 @@ class GrainHeterograph:
         self.edge_type = [('grain', 'push', 'joint'), \
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
+        
+        self.targets_scaling = {'grain':10, 'joint':20}    
             
         self.feature_dicts = {}
         self.target_dicts = {}
@@ -1123,10 +1125,11 @@ class GrainHeterograph:
         
             darea = nxt.feature_dicts['grain'][:,3:4] - self.feature_dicts['grain'][:,3:4]
             
-            self.target_dicts['grain'] = np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
+            self.target_dicts['grain'] = self.targets_scaling['grain']*\
+                np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
                                          
-            self.target_dicts['joint'] = nxt.feature_dicts['joint'][:,:2] - \
-                                         self.feature_dicts['joint'][:,:2]
+            self.target_dicts['joint'] = self.targets_scaling['joint']*\
+                (nxt.feature_dicts['joint'][:,:2] - self.feature_dicts['joint'][:,:2])
             
             self.target_dicts['edge_event'] = nxt.edge_rotation        
             

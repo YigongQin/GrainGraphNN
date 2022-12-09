@@ -1136,8 +1136,7 @@ class GrainHeterograph:
             self.additional_features['nxt'] = nxt.edge_index_dicts
             
             
-            assert np.all(self.target_dicts['joint']>-1) and (np.all(self.target_dicts['joint']<1))
-            assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
+
             
             # check if the grain neighbor of the junction is the same
             for i in range(len(self.mask['joint'])):
@@ -1148,6 +1147,10 @@ class GrainHeterograph:
                         self.mask['joint'][i,0] = 0
                       #  print('not matched', i, self.vertex2joint[i])
             
+            assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
+               and np.all(self.mask['joint']*self.target_dicts['joint']<1)
+            assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
+
                                         
         """
             

@@ -166,7 +166,7 @@ def train(model, train_loader, test_loader):
         pred = model(data.x_dict, data.edge_index_dict)
         test_loss += float(criterion(data.y_dict, pred, data['mask']))  
         regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
-        print(test_acc_dict)
+    print(test_acc_dict)
     test_loss/=count
 
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
@@ -215,12 +215,12 @@ def train(model, train_loader, test_loader):
                 
                 if args.model_type== 'regressor': 
                     regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, epoch)
-                    if epoch == hp.epoch: print(test_acc_dict)
+                    
                 
                 if args.model_type== 'classifier':       
                     test_prob.append(pred['edge_event'])
                     test_label.append(data.y_dict['edge_event'])
-            
+        if epoch == hp.epoch: print(test_acc_dict)    
         test_loss/=count
         
 

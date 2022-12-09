@@ -247,6 +247,7 @@ if __name__=='__main__':
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
+    parser.add_argument("--transfer", type=bool, default=True)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.9)
     parser.add_argument("--symmetry", type=int, default=1)
@@ -329,10 +330,7 @@ if __name__=='__main__':
         hp = regressor(mode, model_id)
         
     elif args.model_type== 'classifier':
-        hp = classifier(mode, model_id)
-    
-    elif args.model_type == 'transfered':
-        hp = classifier(mode, model_id)
+        hp = classifier(mode, model_id)   
 
     else:
         raise KeyError
@@ -417,7 +415,7 @@ if __name__=='__main__':
             model = GrainNN_regressor(hp)
         if args.model_type== 'classifier':
             model = GrainNN_classifier(hp)
-        if args.model_type== 'transfered':
+        if args.transfer:
             hp_r = regressor(mode, 14)
             hp_r.features = sample.features
             hp_r.targets = sample.targets

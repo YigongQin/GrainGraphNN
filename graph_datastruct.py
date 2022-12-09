@@ -1159,9 +1159,12 @@ class GrainHeterograph:
             prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
                     
         else:
-            prev_grad_grain = self.feature_dicts['grain'][:,3:4] - prev.feature_dicts['grain'][:,3:4] 
-            prev_grad_joint = self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2]             
+            prev_grad_grain = self.targets_scaling['grain']*\
+                (self.feature_dicts['grain'][:,3:4] - prev.feature_dicts['grain'][:,3:4]) 
+            prev_grad_joint = self.targets_scaling['joint']*\
+                (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
         
+        self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
         self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
 
         self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint)) 

@@ -362,7 +362,7 @@ class GrainNN_regressor(nn.Module):
         
         """
         
-        y_dict['joint'] = torch.sigmoid(y_dict['joint']) - 0.5 # dx, dy are in the range [-1, 1]
+        y_dict['joint'] = torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
 
         area = torch.tanh(y_dict['grain'][:, 0]) + x_dict['grain'][:, 3] # darea + area_old is positive    
        # area = F.normalize(area, p=1, dim=-1)

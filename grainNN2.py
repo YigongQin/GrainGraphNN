@@ -27,8 +27,12 @@ def criterion(data, pred, mask):
    # print(p)
     if args.model_type== 'regressor':
         #print(data['grain'][:,:1], pred['grain'][:,:1]) 
-        return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
-             + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+      #  return 1000*torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
+      #       + 100 *torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+
+        loss = torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
+             + torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+        return 10*loss
 
     if args.model_type== 'classifier':
         z = pred['edge_event']
@@ -43,11 +47,15 @@ def criterion(data, pred, mask):
         return classifier(z, y.type(torch.FloatTensor))
     
 
-def regress_acc(data, pred, acc_dicts):
+def regress_acc(data, pred, mask, acc_dicts, epoch):
 
     def add(key, idx):
-        acc_dicts[key+str(idx)+'err'] += torch.sum((data[key][:,idx] - pred[key][:,idx])**2)
-        acc_dicts[key+str(idx)] += torch.sum((data[key][:,idx])**2)
+       # print((( mask[key][:,0]*(data[key][:,idx] - pred[key][:,idx])**2 )))
+       # print((( mask[key][:,0]*(data[key][:,idx])**2 )))
+        acc_dicts[key+str(idx)+'err'] += float(torch.sum( mask[key][:,0]*(data[key][:,idx] - pred[key][:,idx])**2 ))
+        if epoch == 0:
+            acc_dicts[key+str(idx)] += float(torch.sum( mask[key][:,0] *(data[key][:,idx])**2 ))
+       # print(mask)
 
     add('grain', 0)
     add('grain', 1)
@@ -125,7 +133,7 @@ def train(model, train_loader, test_loader):
     
 
     optimizer = torch.optim.Adam(model.parameters(),lr=hp.lr) 
-    if args.transfer:
+    if args.transfer and args.model_type== 'classifier':
         optimizer = torch.optim.Adam(
         [
             {"params": model.gclstm_encoder.parameters(), "lr": hp.lr_1*hp.lr_2*hp.lr},
@@ -151,18 +159,21 @@ def train(model, train_loader, test_loader):
     train_loss/=count
 
     test_loss, count = 0, 0
+    test_acc_dict = defaultdict(float)
     for data in test_loader:      
         count += 1
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
         test_loss += float(criterion(data.y_dict, pred, data['mask']))  
+        regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
+        print(test_acc_dict)
     test_loss/=count
 
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
     train_loss_list.append(float(train_loss))
     test_loss_list.append(float(test_loss))  
 
-    for epoch in range(hp.epoch):
+    for epoch in range(1, hp.epoch+1):
 
 
        # if mode=='train' and epoch==num_epochs-10: optimizer = torch.optim.SGD(model.parameters(), lr=0.02)
@@ -203,7 +214,8 @@ def train(model, train_loader, test_loader):
                 test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
                 
                 if args.model_type== 'regressor': 
-                    regress_acc(data.y_dict, pred, test_acc_dict)
+                    regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, epoch)
+                    if epoch == hp.epoch: print(test_acc_dict)
                 
                 if args.model_type== 'classifier':       
                     test_prob.append(pred['edge_event'])
@@ -212,7 +224,7 @@ def train(model, train_loader, test_loader):
         test_loss/=count
         
 
-        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch+1, float(train_loss), float(test_loss)))
+        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss), float(test_loss)))
         if args.model_type== 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             test_auc, P_list, R_list = class_acc(test_prob, test_label)
@@ -426,19 +438,20 @@ if __name__=='__main__':
         if args.model_type== 'regressor':
             model = GrainNN_regressor(hp)
         if args.model_type== 'classifier':
-            model = GrainNN_classifier(hp)
-        if args.transfer:
-            hp_r = regressor(mode, 14)
-            hp_r.features = sample.features
-            hp_r.targets = sample.targets
-            hp_r.device = device
-            hp_r.metadata = heteroData.metadata()
-            pretrained_model = GrainNN_regressor(hp_r)
-            pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(14)))
-            pretrained_model.eval()
-            print('transfered learned parameters from regressor')
-            model = regressor_classifier(hp, pretrained_model)
             
+            if args.transfer:
+                hp_r = regressor(mode, 14)
+                hp_r.features = sample.features
+                hp_r.targets = sample.targets
+                hp_r.device = device
+                hp_r.metadata = heteroData.metadata()
+                pretrained_model = GrainNN_regressor(hp_r)
+                pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(14)))
+                pretrained_model.eval()
+                print('transfered learned parameters from regressor')
+                model = regressor_classifier(hp, pretrained_model)
+            else:
+                model = GrainNN_classifier(hp)
         
         model = train(model, train_loader, test_loader)
         x = train.x

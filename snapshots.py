@@ -130,7 +130,9 @@ if __name__ == '__main__':
         num_plots = args.runs
         
     row = int(np.sqrt(num_plots))
-    col = args.frame//row
+    row = row//5*5
+    col = num_plots//row
+    print('number of rows and columns', row, col)
     fig, ax = plt.subplots(row, col, figsize=(10,10))
     
     for i in range(row):
@@ -142,7 +144,7 @@ if __name__ == '__main__':
                 subplot_field(ax, i, j, seed, time)
     
             elif args.mode == 'run':
-                time = args.frame
+                time = args.frame - 1
                 seed = i*col+j
                 subplot_field(ax, i, j, seed, time)
     

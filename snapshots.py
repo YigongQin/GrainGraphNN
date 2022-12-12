@@ -55,7 +55,11 @@ def subplot_field(ax, i, j, seed, time):
     if args.mode == 'time':
         ax[i][j].set_title('t='+str(time))
     elif args.mode == 'run':
-        ax[i][j].set_title('$G$'+str('%1.1f'%G)+' $R$'+str('%1.1f'%R))
+        if i==0:
+            ax[i][j].set_title('$G$'+str('%1.1f'%G), fontsize=4)
+        if j==0:
+            ax[i][j].set_ylabel('$R$'+str('%1.1f'%R), fontsize=4)
+        
     """
     #plt.locator_params(nbins=3)
     if i==-10:

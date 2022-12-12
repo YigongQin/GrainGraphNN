@@ -165,6 +165,7 @@ def train(model, train_loader, test_loader):
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
         test_loss += float(criterion(data.y_dict, pred, data['mask']))  
+    if args.model_type=='regressor':
         regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
     print(test_acc_dict)
     test_loss/=count
@@ -440,13 +441,14 @@ if __name__=='__main__':
         if args.model_type== 'classifier':
             
             if args.transfer:
-                hp_r = regressor(mode, 14)
+                regressor_id = 17
+                hp_r = regressor(mode, regressor_id)
                 hp_r.features = sample.features
                 hp_r.targets = sample.targets
                 hp_r.device = device
                 hp_r.metadata = heteroData.metadata()
                 pretrained_model = GrainNN_regressor(hp_r)
-                pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(14)))
+                pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(regressor_id)))
                 pretrained_model.eval()
                 print('transfered learned parameters from regressor')
                 model = regressor_classifier(hp, pretrained_model)

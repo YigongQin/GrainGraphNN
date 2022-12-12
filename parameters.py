@@ -107,7 +107,7 @@ def classifier_transfered(mode, model_id):
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
-    hp_order = [0, 1, 2, 3, 4]
+    hp_order = [0, 1, 2]
     hp_size = [hp_size[i] for i in hp_order]
 
     param_dict = {}

@@ -1099,7 +1099,7 @@ class GrainHeterograph:
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
         
-        self.targets_scaling = {'grain':10, 'joint':20}    
+        self.targets_scaling = {'grain':10, 'joint':10}    
             
         self.feature_dicts = {}
         self.target_dicts = {}

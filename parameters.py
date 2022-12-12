@@ -133,7 +133,7 @@ def classifier_transfered(mode, model_id):
     param_dict.update({'window':1, 'out_win':1, 'layers':1,  'weight_decay':0, 'batch_size':2, 'decay_step':10, 'weight':2,\
                        'layer_size':32, 'kernel_size':(3,), 'epoch':60, 'bias':True, 'model_list':[0]})
 
-
+    param_dict.update({'lr_1':1, 'lr_2':1}) 
     return Param(param_dict)
 
 """

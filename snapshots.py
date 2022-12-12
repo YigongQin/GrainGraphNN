@@ -25,9 +25,10 @@ def subplot_field(ax, i, j, seed, time):
     datasets = sorted((glob.glob(args.rawdat_dir + '/*seed'+str(seed)+'_*')))
     fname =datasets[0]#; print(fname)
     f = h5py.File(str(fname), 'r')
-   # number_list=re.findall(r"[-+]?\d*\.\d+|\d+", fname)
-   # R= float(number_list[8])
-  #  G = float(number_list[7])
+    number_list=re.findall(r"[-+]?\d*\.\d+|\d+", fname)
+    G = float(number_list[3])
+    R = float(number_list[4])
+    
     
    # tid= 3*i*col+3*j
     
@@ -51,6 +52,10 @@ def subplot_field(ax, i, j, seed, time):
     ax[i][j].tick_params(axis='x', colors=bg_color); ax[i][j].tick_params(axis='y', colors=bg_color);
     ax[i][j].set_xticks([])
     ax[i][j].set_yticks([])
+    if args.mode == 'time':
+        ax[i][j].set_title('t='+str(time))
+    elif args.mode == 'run':
+        ax[i][j].set_title('$G$'+str('%1.1f'%G)+' $R$'+str('%1.1f'%R))
     """
     #plt.locator_params(nbins=3)
     if i==-10:

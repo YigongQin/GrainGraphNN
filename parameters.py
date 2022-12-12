@@ -99,12 +99,15 @@ def classifier(mode, model_id):
 
 def classifier_transfered(mode, model_id):
 
-
-        
+    hp_grid = {'weight':[1, 2, 4, 8],\
+               'batch_size':[2, 4, 8, 16],\
+               'lr':[100e-4, 25e-4, 50e-4]}
+                   
+    """    
     hp_grid = {'lr_1':[0.01, 0.1, 1],\
                'lr_2':[0.01, 0.1, 1],\
                'lr':[5e-4, 20e-4, 100e-4, 400e-4]}
-        
+    """    
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
     hp_order = [0, 1, 2]

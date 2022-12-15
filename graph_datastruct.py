@@ -71,6 +71,20 @@ def periodic_move_p(p, pc):
 
 
 
+def periodic_dist_(p, pc):
+    
+    x,  y  = p
+    xc, yc = pc
+    
+    if x<xc-0.5-eps: x+=1
+    if x>xc+0.5+eps: x-=1
+    if y<yc-0.5-eps: y+=1
+    if y>yc+0.5+eps: y-=1         
+           
+    return (x-xc)**2 + (y-yc)**2
+
+
+
 def relative_angle(p1, p2):
     
     p1 = periodic_move(p1, p2)
@@ -148,7 +162,7 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
 
         
 class graph:
-    def __init__(self, lxd: float = 20, seed: int = 1, BC: str = 'periodic', randInit: bool = True):
+    def __init__(self, lxd: float = 20, seed: int = 1, noise: float = 0):
         mesh_size, grain_size = 0.08, 4
         self.lxd = lxd
         self.seed = seed
@@ -166,11 +180,13 @@ class graph:
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
         self.density = grain_size/lxd
-        self.noise = 0.001/lxd
-        self.BC = BC
+        self.noise = noise/lxd
+        self.BC = 'periodic'
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
+        
+        randInit = True
         
         if randInit:
             np.random.seed(seed)
@@ -309,8 +325,8 @@ class graph:
                         ii += s
                         jj += s
                     else:
-                        pass
-                       # raise ValueError(i,j)
+                       # pass
+                        raise ValueError(i,j)
                 alpha = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]   
                 self.alpha_field[i,j] = alpha 
                 self.region_area[alpha] += 1
@@ -713,8 +729,8 @@ class graph_trajectory(graph):
                 print(colored('junction find failed', 'red'))
 
             
-            print('number of grains pixel %d'%len(cur_grain))
-            print('number of grains junction %d'%len(grain_set))
+            print('number of grains in pixels %d'%len(cur_grain))
+        #    print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
@@ -784,89 +800,67 @@ class graph_trajectory(graph):
             self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
             self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
             
-            print('E2 neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
+            print('neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
             
             if old_junction_i in old_joint: old_joint.remove(old_junction_i)
             if old_junction_j in old_joint: old_joint.remove(old_junction_j)
             if new_junction_i in new_joint: new_joint.remove(new_junction_i)
             if new_junction_j in new_joint: new_joint.remove(new_junction_j)    
 
-        if len(eliminated_grains)>0:
-            print('E1 grain_elimination: ', eliminated_grains)
-        
-        """
-        
-        E1: grain elimination
-        
-        """
 
-        grain_grain_neigh = {}
-        # step 1 merge grains to be eliminated
-        for elm_grain in eliminated_grains:
-            junction = set()
-            for k, v in self.joint2vertex.items():
-                if elm_grain in set(k):
-                    junction.update(set(k))
-            junction.remove(elm_grain) 
-            grain_grain_neigh[elm_grain] = junction
-      #  print(grain_grain_neigh)
-        
-        gg_merged = {}
-        visited = set()
-        for k1, v1 in grain_grain_neigh.items():
-            ks, vs = [k1], v1
-            for k2, v2 in grain_grain_neigh.items():
-                if k1 != k2 and k2 not in visited:
-                    if k1 in v2:
-                        ks.append(k2)
-                        vs.update(v2)
-                        
-                        visited.add(k2)
-            if k1 not in visited:
-                gg_merged[tuple(ks)] = vs
-            visited.add(k1)            
-            
-            
-     #   print(gg_merged)
-        left_over = -1
-        for elm_grain, junction in gg_merged.items():
- 
-            old_vert = []
-            todelete = set()
-        #    junction = set()
-            for k, v in self.joint2vertex.items():
-                
-                if len(set(elm_grain).intersection(set(k)))>0:
-             #       junction.update(set(k))
-                    old_vert.append(v)
-                    todelete.add(k)
-      
-           # junction.remove(elm_grain)        
-            print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
-            for k in todelete:
-                del self.joint2vertex[k]   
-                
-            
-            for k, v in cur_joint.items():
-                if set(k).issubset(junction) and k not in self.joint2vertex:
-                    self.joint2vertex[k] = old_vert[-1]
-                    print('the new joint', k, 'inherit the vert', old_vert[-1])
-                    old_vert.pop()
-                    
-            if len(old_vert)>2*len(elm_grain):
-                left_over = old_vert[-1]
-                
-        self.grain_events.append(eliminated_grains)
-         #   assert len(old_vert) == 2
-                    
         """
         
-        E2: neighbor switching
+        E0: vertex moving
+        
+        """
+        
+
+        
+        for k, v in cur_joint.items():
+            cur_joint[k] = v[:2]
+
+ 
+        
+        old_vertices = self.vertices.copy()
+        self.vertices.clear()
+
+        print('Expect %d junctions removed'%(2*len(eliminated_grains)))
+        
+        
+        
+        print('\nE0:')
+        
+        def match():
+            old_map = self.joint2vertex.copy()
+            new_map = cur_joint.copy()
+     
+            for joint in self.joint2vertex.keys():
+                if joint in cur_joint:        
+                  
+    
+                 #   vert = self.joint2vertex[joint]
+                 #   coors = cur_joint[joint]
+                 #   self.vertices[vert] = periodic_move(coors, old_vertices[vert])
+    
+                    del old_map[joint]
+                    del new_map[joint]
+                    
+            return old_map, new_map
+                
+        old_map, new_map = match()
+        print('number of moving vertices', len(self.joint2vertex) - len(old_map))
+
+
+        """
+        
+        E1: neighbor switching
         
         """          
+        print('\nE1:')
         
-        old = set(self.joint2vertex.keys())
-        new = set(cur_joint.keys())
+        
+        old = set(old_map.keys())
+        new = set(new_map.keys())
         
         switching_edges = set() 
         
@@ -894,8 +888,8 @@ class graph_trajectory(graph):
                 new_junction_i, new_junction_j = quadraples_new[e2]
       
         
-                old_i_x, old_j_x = self.vertices[self.joint2vertex[old_junction_i]], \
-                                   self.vertices[self.joint2vertex[old_junction_j]] 
+                old_i_x, old_j_x = old_vertices[self.joint2vertex[old_junction_i]], \
+                                   old_vertices[self.joint2vertex[old_junction_j]] 
                 new_i_x, new_j_x = cur_joint[new_junction_i][:2], cur_joint[new_junction_j][:2]                   
       
                 
@@ -912,7 +906,7 @@ class graph_trajectory(graph):
             quadraples = quadruple_(old_joint)
             quadraples_new = quadruple_(new_joint)
  
-
+            """
             if left_over!= -1:
                 for q, joints in quadraples_new.items():
                     for i in old_joint:
@@ -925,7 +919,8 @@ class graph_trajectory(graph):
                             if joints[1] in new_joint: new_joint.remove(joints[1])                           
                             perform_switching(add_vert, i, joints[0], joints[1])
 
-                     
+            
+            
             case = 0 
             for q, joints in quadraples.items():
                 for j in new_joint:
@@ -956,16 +951,136 @@ class graph_trajectory(graph):
             if len(old_joint)>0:
                 print(colored('match not finisehd','red'))
             
-      
+            """
+
+
         
+        """
+        
+        E2: grain elimination
+        
+        """
+        
+        old_map, new_map = match()
+      #  print(old_map, new_map )
+        
+        if len(eliminated_grains)>0:
+            print('\nE2 grain_elimination: ', eliminated_grains)
+            
+        grain_grain_neigh = {}
+        # step 1 merge grains to be eliminated
+        for elm_grain in eliminated_grains:
+            junction = set()
+            for k, v in self.joint2vertex.items():
+                if elm_grain in set(k):
+                    junction.update(set(k))
+            junction.remove(elm_grain) 
+            grain_grain_neigh[elm_grain] = junction
+      #  print(grain_grain_neigh)
+        
+        gg_merged = {}
+        visited = set()
+        for k1, v1 in grain_grain_neigh.items():
+            ks, vs = [k1], v1
+            for k2, v2 in grain_grain_neigh.items():
+                if k1 != k2 and k2 not in visited:
+                    if k1 in v2:
+                        ks.append(k2)
+                        vs.update(v2)
+                        
+                        visited.add(k2)
+            if k1 not in visited:
+                gg_merged[tuple(ks)] = vs
+            visited.add(k1)            
+            
+            
+     #   print(gg_merged)
+      #  left_over = -1
+        for elm_grain, junction in gg_merged.items():
+ 
+            old_vert = []
+            todelete = set()
+            toadd = []
+        #    junction = set()
+            for k, v in self.joint2vertex.items():
+                
+                if len(set(elm_grain).intersection(set(k)))>0:
+             #       junction.update(set(k))
+                    old_vert.append(v)
+                    todelete.add(k)
+            
+            for k, v in new_map.items():
+                if set(k).issubset(junction):# and k not in self.joint2vertex:
+                    
+                    toadd.append(k)                    
+                    
+            if len(old_vert) == len(toadd) + 2:
+                """ remove vertices connect to elim grains"""       
+                print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
+                for k in todelete:
+                    del self.joint2vertex[k]                     
+                """ add vertices """       
+                for i in range(len(toadd)):
+                    self.joint2vertex[toadd[i]] = old_vert[i]
+                    print('the new joint', toadd[i], 'inherit the vert', old_vert[i])
+             #   del new_map[toadd[i]]
+         #   assert len(old_vert) == 2
+        
+        """
+        old_map, new_map = match()            
+        for elm_grain, junction in gg_merged.items():
+ 
+            old_vert = []
+            todelete = set()
+            toadd = []
+        #    junction = set()
+            for k, v in self.joint2vertex.items():
+                
+                if len(set(elm_grain).intersection(set(k)))>0:
+             #       junction.update(set(k))
+                    old_vert.append(v)
+                    todelete.add(k)
+      
+            '''remove vertices connect to elim grains'''  
+            print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
+            for k in todelete:
+                del self.joint2vertex[k]   
+                
+            
+            for k, v in new_map.items():
+                if set(k).issubset(junction):# and k not in self.joint2vertex:      
+                    toadd.append(k)                    
+  
+            
+              #  left_over = old_vert[-1]
+            diff = len(old_vert) - len(toadd) - 2
+            neigh = []
+            '''find missing vertices'''
+            for k, v in new_map.items():
+                if len( set(k).intersection(junction) ) == 2:
+                    neigh.append([periodic_dist_(self.region_center[elm_grain[0]], v), k])
+                    
+            neigh = sorted(neigh)
+            for i in range(diff):
+                toadd.append(neigh[-i-1][1])
+            
+          #  print(toadd)
+            ''' add vertices '''       
+            for i in range(len(toadd)):
+                self.joint2vertex[toadd[i]] = old_vert[i]
+                print('the new joint', toadd[i], 'inherit the vert', old_vert[i])
+                del new_map[toadd[i]]
+            
+        """
+            
+        self.grain_events.append(eliminated_grains)
         self.edge_events.append(switching_edges)    
         
-        old_vertices = self.vertices.copy()
-        self.vertices.clear()
+
         for joint in self.joint2vertex.keys():
             if joint in cur_joint:
                 vert = self.joint2vertex[joint]
-                coors = cur_joint[joint][:2]
+                coors = cur_joint[joint]
                 self.vertices[vert] = periodic_move(coors, old_vertices[vert])
       
             else:
@@ -978,7 +1093,7 @@ class graph_trajectory(graph):
       
         
        
-        print('number of E1 %d, number of E2 %d'%(len(eliminated_grains), len(switching_edges)//2))
+        print('number of E2 %d, number of E1 %d'%(len(eliminated_grains), len(switching_edges)//2))
         
       
 
@@ -1281,13 +1396,24 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 2
+        seed = 95
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
         traj = graph_trajectory(seed = seed, frames = 13)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
-    
+    if args.mode == 'instance':
+        
+        for seed in range(20):
+            print('\n')
+            print('test seed', seed)
+            try:
+                g1 = graph(lxd = 20, seed=seed, noise = 0.01) 
+            except:    
+                print('seed %d failed with noise 0.01, try 0'%seed)
+                g1 = graph(lxd = 20, seed=seed)
+
+            g1.show_data_struct()                
     # TODO:
     # 4) node matching and iteration for different time frames
     # 5) equi-spaced QoI sampling, change tip_y to tip_nz

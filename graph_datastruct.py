@@ -24,7 +24,7 @@ from shapely.geometry.polygon import Polygon
 from shapely.geometry import Point
 from collections import defaultdict
 import math
-
+import argparse
 
 
 def angle_norm(angular):
@@ -618,8 +618,35 @@ class GrainHeterograph:
         for nodes, features in self.features.items():
             self.features[nodes] = self.features[nodes] + self.features_grad[nodes]  
             assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
+
+
+if __name__ == '__main__':
+    
+    parser = argparse.ArgumentParser("Generate heterograph data")
+    parser.add_argument("--mode", type=str, default = 'check')
+    parser.add_argument("--seed", type=int, default = 1)
+    parser.add_argument("--level", type=int, default = 0)
+
+    args = parser.parse_args()        
         
+    if args.mode == 'check':
+        seed = 0
+        g1 = graph(lxd = 20, seed=1) 
+      #  g1.show_data_struct()
+
+    
+    if args.mode == 'instance':
         
+        for seed in range(20):
+            print('\n')
+            print('test seed', seed)
+            try:
+                g1 = graph(lxd = 20, seed=seed) 
+            except:    
+                print('seed %d failed with noise 0.01, try 0'%seed)
+                g1 = graph(lxd = 20, seed=seed, noise = 0.0)
+
+            g1.show_data_struct() 
                
     # TODO:
     # 4) node matching and iteration for different time frames

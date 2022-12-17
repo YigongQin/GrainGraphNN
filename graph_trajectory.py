@@ -609,7 +609,7 @@ class graph_trajectory(graph):
 if __name__ == '__main__':
 
 
-    parser = argparse.ArgumentParser("Generate heterograph data")
+    parser = argparse.ArgumentParser("Generate heterograph trajectory")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--train_dir", type=str, default = './sameGR/')

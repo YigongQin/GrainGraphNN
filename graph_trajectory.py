@@ -229,7 +229,7 @@ class graph_trajectory(graph):
             
             if len(cur_joint)<2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
-
+                continue
             
             print('number of grains in pixels %d'%len(cur_grain))
         #    print('number of grains junction %d'%len(grain_set))

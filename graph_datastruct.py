@@ -184,7 +184,8 @@ class graph:
                 self.update(init=True)
             
             except:
-                self.noise = 0 
+                self.noise = 0
+                self.edges = [] 
                 self.vertex2joint = defaultdict(set)
                 self.random_voronoi()
                 self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())

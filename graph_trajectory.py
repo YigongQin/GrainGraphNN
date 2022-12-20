@@ -218,7 +218,7 @@ class graph_trajectory(graph):
 
             eliminated_grains = all_grain - cur_grain
             
-            all_grain = cur_grain
+            
 
 
             if len(cur_joint)<2*len(cur_grain):
@@ -229,11 +229,16 @@ class graph_trajectory(graph):
             
             if len(cur_joint)<2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
+                print(len(cur_joint), len(cur_grain))
+               # exit()
                 continue
             
             print('number of grains in pixels %d'%len(cur_grain))
         #    print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
+            
+            all_grain = cur_grain
+            
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
             for grain in eliminated_grains:
@@ -823,7 +828,7 @@ if __name__ == '__main__':
         seed = 0
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
+        traj = graph_trajectory(seed = seed, frames = 40, noise=0.01)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

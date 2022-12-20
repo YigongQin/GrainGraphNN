@@ -175,10 +175,22 @@ class graph:
         
         if randInit:
             np.random.seed(seed)
-            self.random_voronoi()
-            self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-            self.alpha_pde = self.alpha_field
-            self.update(init=True)
+            
+            try:
+            
+                self.random_voronoi()
+                self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+                self.alpha_pde = self.alpha_field
+                self.update(init=True)
+            
+            except:
+                self.noise = 0 
+                self.vertex2joint = defaultdict(set)
+                self.random_voronoi()
+                self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+                self.alpha_pde = self.alpha_field
+                self.update(init=True)            
+            
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
             
@@ -613,23 +625,21 @@ if __name__ == '__main__':
     args = parser.parse_args()        
         
     if args.mode == 'check':
-        seed = 0
+        seed = 8
         g1 = graph(lxd = 20, seed=seed) 
         g1.show_data_struct()
 
     
     if args.mode == 'instance':
         
-        for seed in range(20):
+        for seed in range(300):
             print('\n')
             print('test seed', seed)
-            try:
-                g1 = graph(lxd = 20, seed=seed) 
-            except:    
-                print('seed %d failed with noise 0.01, try 0'%seed)
-                g1 = graph(lxd = 20, seed=seed, noise = 0.0)
 
-            g1.show_data_struct() 
+            g1 = graph(lxd = 20, seed=seed) 
+
+
+          #  g1.show_data_struct() 
                
 
 

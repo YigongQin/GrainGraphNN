@@ -230,6 +230,10 @@ class graph_trajectory(graph):
             if len(cur_joint)<2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
                 print(len(cur_joint), len(cur_grain))
+                self.grain_events.append(set())
+                self.edge_events.append(set())  
+                self.form_states_tensor(frame)
+                
                # exit()
                 continue
             

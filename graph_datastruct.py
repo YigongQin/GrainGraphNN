@@ -503,7 +503,7 @@ class graph:
             
             
 
-        self.plot_polygons()
+      #  self.plot_polygons()
         self.compute_error_layer()
 
 

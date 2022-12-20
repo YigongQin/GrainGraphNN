@@ -245,8 +245,8 @@ class graph_trajectory(graph):
         
             self.update()
             self.form_states_tensor(frame)
-            if self.error_layer>0.08:
-                self.save_frame[frame] = False
+          #  if self.error_layer>0.08:
+          #      self.save_frame[frame] = False
           #  if len(self.edges)!=6*len(cur_grain):
           #      self.save_frame[frame] = False
                 
@@ -698,6 +698,7 @@ class graph_trajectory(graph):
         for k, v in self.vertex_neighbor.items():
             if len(v)<3: print(colored('junction with less than three junction neighbor', 'red'), k)
             if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'), k)
+            assert len(v)==3
       #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
         hg.vertex2joint = self.vertex2joint
@@ -819,10 +820,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 95
+        seed = 0
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 25, noise=0.001)
+        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

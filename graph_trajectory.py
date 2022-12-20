@@ -36,8 +36,8 @@ class QoI_trajectory:
 
 
 class graph_trajectory(graph):
-    def __init__(self, lxd: float = 20, seed: int = 1, frames: int = 1, physical_params = {}):   
-        super().__init__(lxd = lxd, seed = seed)
+    def __init__(self, lxd: float = 20, seed: int = 1, noise = 0.01, frames: int = 1, physical_params = {}):   
+        super().__init__(lxd = lxd, seed = seed, noise = noise)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition
@@ -247,8 +247,8 @@ class graph_trajectory(graph):
             self.form_states_tensor(frame)
             if self.error_layer>0.08:
                 self.save_frame[frame] = False
-            if len(self.edges)!=6*len(cur_grain):
-                self.save_frame[frame] = False
+          #  if len(self.edges)!=6*len(cur_grain):
+          #      self.save_frame[frame] = False
                 
             if self.show == True:
                 self.show_data_struct()   
@@ -297,10 +297,42 @@ class graph_trajectory(graph):
 
         def perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j):
             
+            vert_old_i = self.joint2vertex[old_junction_i]
+            vert_old_j = self.joint2vertex[old_junction_j]             
+            N_i = [i[0] for i in self.edges if i[1]==vert_old_i]
+            N_j = [i[0] for i in self.edges if i[1]==vert_old_j]
+            N_i.remove(vert_old_j)
+            N_j.remove(vert_old_i)
+            N_i, N_j = list(N_i), list(N_j)
+            if len(set(self.vertex2joint[N_i[1]]).intersection(set(new_junction_i)))==2:
+                N_i.reverse()
+            if len(set(self.vertex2joint[N_j[1]]).intersection(set(new_junction_j)))==2:
+                N_j.reverse()
             
-  
+            """
+            l = list(self.edges.values())
+            e_key = list(self.edges.keys())
+            idx = l.index([vert_old_i, N_i[1]])
+            self.edges[e_key[idx]] = [vert_old_i, N_j[1]]
+            idx = l.index([vert_old_j, N_j[1]])
+            self.edges[e_key[idx]] = [vert_old_j, N_i[1]]  
+            
+            idx = l.index([N_i[1], vert_old_i])
+            self.edges[e_key[idx]] = [N_j[1], vert_old_i]
+            idx = l.index([N_j[1], vert_old_j])
+            self.edges[e_key[idx]] = [N_i[1], vert_old_j]  
+            """
+         #   print(N_i, N_j)
+            self.edges[self.edges.index([vert_old_i, N_i[1]])] = [vert_old_i, N_j[1]]
+            self.edges[self.edges.index([vert_old_j, N_j[1]])] = [vert_old_j, N_i[1]]
+            self.edges[self.edges.index([N_i[1], vert_old_i])] = [N_j[1], vert_old_i]
+            self.edges[self.edges.index([N_j[1], vert_old_j])] = [N_i[1], vert_old_j]            
+            
             self.joint2vertex[new_junction_i] = self.joint2vertex.pop(old_junction_i)
             self.joint2vertex[new_junction_j] = self.joint2vertex.pop(old_junction_j)
+            
+
+            
             
             print('neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
             
@@ -338,12 +370,6 @@ class graph_trajectory(graph):
      
             for joint in self.joint2vertex.keys():
                 if joint in cur_joint:        
-                  
-    
-                 #   vert = self.joint2vertex[joint]
-                 #   coors = cur_joint[joint]
-                 #   self.vertices[vert] = periodic_move(coors, old_vertices[vert])
-    
                     del old_map[joint]
                     del new_map[joint]
                     
@@ -452,6 +478,13 @@ class graph_trajectory(graph):
             
      #   print(gg_merged)
       #  left_over = -1
+        """
+        l = list(self.edges.values())
+        lsrc = [i[0] for i in l]
+        ldst = [i[1] for i in l]
+        e_key = list(self.edges.keys())
+        """
+        
         for elm_grain, junction in gg_merged.items():
  
             old_vert = []
@@ -465,21 +498,78 @@ class graph_trajectory(graph):
                     old_vert.append(v)
                     todelete.add(k)
             
+            
             for k, v in new_map.items():
                 if set(k).issubset(junction):# and k not in self.joint2vertex:
                     
                     toadd.append(k)                    
-                    
-            if len(old_vert) == len(toadd) + 2:
-                """ remove vertices connect to elim grains"""       
+
+            
+            visited_joint = {}
+            remove_vert = []
+
+            for vert in old_vert:
+                for neigh in self.vertex_neighbor[vert]:
+                    if neigh not in old_vert:
+                        for joint in toadd:
+                            if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:
+                                # find new link
+                                if joint in visited_joint:
+                                    remove_vert.append([vert, visited_joint[joint]])
+                                else:
+                                    visited_joint.update({joint:vert})
+            o1, o2 = remove_vert[0][0], remove_vert[1][0]
+            r1, r2 = remove_vert[0][1], remove_vert[1][1]
+          #  print(o1, o2, old_vert)  
+            old_vert.remove(o1)
+            old_vert.remove(o2)                        
+            
+            connect = len(set(self.vertex2joint[o1]).intersection(set(self.vertex2joint[o2])))==2
+            
+            if len(old_vert) == len(toadd) :
+                ''' remove vertices connect to elim grains '''     
                 print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
                 for k in todelete:
-                    del self.joint2vertex[k]                     
-                """ add vertices """       
-                for i in range(len(toadd)):
-                    self.joint2vertex[toadd[i]] = old_vert[i]
-                    print('the new joint', toadd[i], 'inherit the vert', old_vert[i])
-             #   del new_map[toadd[i]]
+                    del self.joint2vertex[k]       
+                    
+
+                ''' add vertices '''     
+                for joint, vert in visited_joint.items():
+                    self.joint2vertex[joint] = vert
+                    print('the new joint', joint, 'inherit the vert', vert)
+
+                ''' remove 5 add 2 edges '''    
+                
+                def elim_edge(o1, o2, r1, r2):
+                    N1 = [i for i, x in enumerate(self.edges) if x[1] == o1 ] 
+                    
+                    case = 1
+                    for i in N1:
+                        src = self.edges[i][0]
+
+                        if src == o2:
+                            self.edges[i] = [-1, -1]
+                            
+                        elif src in old_vert:
+                            idx = self.edges.index([o1, src])    
+                            self.edges[i] = [-1, -1]
+                            
+                            if not connect and case:
+                                self.edges[idx] = [r1, r2]
+                                case -= 1
+                            else: 
+                                self.edges[idx] = [-1, -1]
+                            
+                        else:
+                            idx = self.edges.index([o1, src]) 
+                            
+                            self.edges[i] = [src, r1]
+                            self.edges[idx] = [r1, src]
+                            
+                    print(o1, src, 'replace by', r1, src)
+
+                elim_edge(o1, o2, r1, r2)
+                elim_edge(o2, o1, r2, r1)
          #   assert len(old_vert) == 2
 
             
@@ -583,8 +673,8 @@ class graph_trajectory(graph):
      #   joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
       #  joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
         for k, v in self.vertex_neighbor.items():
-            if len(v)<3: print(colored('junction with less than three junction neighbor', 'red'))
-            if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'))
+            if len(v)<3: print(colored('junction with less than three junction neighbor', 'red'), k)
+            if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'), k)
       #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
         hg.vertex2joint = self.vertex2joint
@@ -649,7 +739,9 @@ if __name__ == '__main__':
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             #traj.show_data_struct()
             
-      
+            with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                dill.dump(traj, outp)
+                
             for snapshot in range(traj.frames-1):
                 """
                 training data: snapshot -> snapshot + 1
@@ -682,8 +774,7 @@ if __name__ == '__main__':
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
 
-            with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                dill.dump(traj, outp)
+
 
     if args.mode == 'test':   
         if not os.path.exists(args.test_dir):
@@ -708,7 +799,7 @@ if __name__ == '__main__':
         seed = 0
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 100)
+        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

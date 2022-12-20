@@ -156,8 +156,8 @@ class graph:
         self.vertices = defaultdict(list) ## vertices coordinates
         self.vertex2joint = defaultdict(set) ## (vertex index, x coordiante, y coordinate)  -> (region1, region2, region3)
         self.vertex_neighbor = defaultdict(set)
-        self.edges = set()  ## index linkage
-        self.edge_in_region = []  ## defined by region orientation 
+        self.edges = []  ## index linkage
+        self.edge_len = []
         self.regions = defaultdict(list) ## index group
         self.region_coors = defaultdict(list)
         self.region_edge = defaultdict(set)
@@ -178,7 +178,7 @@ class graph:
             self.random_voronoi()
             self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
             self.alpha_pde = self.alpha_field
-            self.update()
+            self.update(init=True)
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
             
@@ -210,6 +210,7 @@ class graph:
        # vertices = []
         vert_map = {}
         vert_count = 0
+        edge_count = 0
         alpha = 0
        # edges = []
         
@@ -257,12 +258,17 @@ class graph:
                     else:
                         reordered_region.append(vert_map[point])
                                           
-                    
+                sorted_vert = reordered_region    
                 for i in range(len(reordered_region)):
 
                     self.vertex2joint[reordered_region[i]].add(alpha)  
-
-            
+                    
+                    """
+                    cur = sorted_vert[i]
+                    nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
+                    self.edges.update({edge_count:[cur, nxt]})
+                    edge_count += 1
+                    """
     
       #  vor.filtered_points = seeds
       #  vor.filtered_regions = regions
@@ -381,20 +387,17 @@ class graph:
                
         plt.savefig('./voronoi.png', dpi=400)
        
-    def update(self):
+    def update(self, init = False):
         
         """
-        Input: joint2vertex, vertices
-        Output: edges, region_coors
+        Input: joint2vertex, vertices, edges, 
+        Output: region_coors
         """
         
         
         self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
         self.vertex_neighbor.clear()                    
-        self.edges.clear()
-                    
-
-        
+   
         # form region
         self.regions.clear()
         self.region_coors.clear()
@@ -407,6 +410,7 @@ class graph:
                 
                 self.region_coors[region].append(self.vertices[v])
         cnt = 0
+        edge_count = 0
         for region, verts in self.region_coors.items():
             if len(verts)<=1: continue
         #    assert len(verts)>1, ('one vertex is not a grain ', region, self.regions[region])
@@ -414,48 +418,26 @@ class graph:
             moved_region = []
 
             vert_in_region = self.regions[region]
-            tent_edge = set()
-            
-        
-            def periodic_dist(nxt, cur):
-                x,  y  = self.vertices[nxt]
-                xc, yc = self.vertices[cur]
-                
-                if x<xc-0.5-eps: x+=1
-                if x>xc+0.5+eps: x-=1
-                if y<yc-0.5-eps: y+=1
-                if y>yc+0.5+eps: y-=1                    
-                return (x-xc)**2 + (y-yc)**2
+            grain_edge = set()
 
-            
-       
-            prev, cur = 0, 0  
-            for i in range(len(vert_in_region)):   
-                nxt_candidates = []
-                for nxt in range(len(vert_in_region)):                        
-                    if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
-                                               self.vertex2joint[vert_in_region[nxt]]) and nxt!=prev:
-                        nxt_candidates.append(nxt)
+            prev, cur = 0, 0
+            for i in range(len(vert_in_region)):
                 
-           #     if len(nxt_candidates)==1:        
-           #         prev, cur = cur, nxt_candidates[0]
-                    
-                if len(nxt_candidates)>1:
-                    nxt_candidates = sorted(nxt_candidates, \
-                                            key=lambda x: periodic_dist(vert_in_region[x], vert_in_region[cur]))
-                    for nxt in nxt_candidates:
-                        if (nxt, cur) in self.edges:
-                            nxt_candidates[0] = nxt
-                nxt = nxt_candidates[0] if len(nxt_candidates)>0 else prev
-                prev, cur = cur, nxt            
-                
-                tent_edge.add((vert_in_region[prev], vert_in_region[cur]))        
-                verts[cur] = periodic_move(verts[cur], verts[prev])                                
+                for nxt in range(len(vert_in_region)): 
+                    if nxt!=prev:
+                        if init:
+                            if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
+                                                    self.vertex2joint[vert_in_region[nxt]]):
+                               break
+                          
+                        else:
+                            if [vert_in_region[cur], vert_in_region[nxt]] in self.edges:
+                                break
+                            
+                prev, cur = cur, nxt
+                verts[cur] = periodic_move(verts[cur], verts[prev]) 
 
-            
-            if len(tent_edge)!=len(vert_in_region):
-                print('found anam', vert_in_region, tent_edge)
-                              
+                
             inbound = [True, True]
             
             for vert in verts:
@@ -478,35 +460,36 @@ class graph:
             
             sorted_vert = [vert_in_region[i] for i in sort_index]
             self.regions[region] = sorted_vert
-          #  print(sort_index, vert_in_region)
-            counter_edge = set()
-            for i in range(len(sorted_vert)):
-                link = (sorted_vert[i-1], sorted_vert[i]) if i >0 else (sorted_vert[len(sorted_vert)-1], sorted_vert[i])
-                
-              #  if link in self.edges:
-              #      print('already found one')
 
-                
-                counter_edge.add(link)
-                
-            if True: #len(counter_edge.intersection(tent_edge))<len(tent_edge)//2:
-                for pair in tent_edge:
-                  #  tent_edge.remove(pair)
-                  #  tent_edge.add((pair[1], pair[0]))
-                    self.edges.add((pair[1], pair[0]))
-                    self.edges.add(pair)
+
             cnt += len(vert_in_region) 
-            self.region_edge[region] = tent_edge
+
+            
+            for i in range(len(sorted_vert)):
+                cur = sorted_vert[i]
+                nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
+                
+                grain_edge.add((cur, nxt))
+                
+                if init:
+                    self.edges.append([cur, nxt])
+                    edge_count += 1
+                    
+            self.region_edge[region] = grain_edge
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
         print('num vertices of grains', cnt)
-        print('num edges, junctions', len(self.edges), len(self.joint2vertex))        
+        print('num edges, junctions', len([i for i in self.edges if i[0]>-1 ]), len(self.joint2vertex))        
         # form edge             
 
         for src, dst in self.edges:
-            self.vertex_neighbor[src].add(dst)
+            if src>-1:
+                self.vertex_neighbor[src].add(dst)
+                #print(src, dst)
+                self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
+            
+            
 
-        
         self.plot_polygons()
         self.compute_error_layer()
 
@@ -631,8 +614,8 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
         seed = 0
-        g1 = graph(lxd = 20, seed=1) 
-      #  g1.show_data_struct()
+        g1 = graph(lxd = 20, seed=seed) 
+        g1.show_data_struct()
 
     
     if args.mode == 'instance':
@@ -648,11 +631,6 @@ if __name__ == '__main__':
 
             g1.show_data_struct() 
                
-    # TODO:
-    # 4) node matching and iteration for different time frames
-    # 5) equi-spaced QoI sampling, change tip_y to tip_nz
-    # 6) Image to graph qoi computation/ check sum to 1
-    # 7) run 2000 simulations and create one-to-one prediction
-    # 8) 1 layer architecture and train loop
+
 
 

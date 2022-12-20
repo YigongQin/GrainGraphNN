@@ -193,6 +193,7 @@ class graph:
             
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
+            self.num_edges = len(self.edges)
             
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))

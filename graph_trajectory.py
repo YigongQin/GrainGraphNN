@@ -527,6 +527,25 @@ class graph_trajectory(graph):
             connect = len(set(self.vertex2joint[o1]).intersection(set(self.vertex2joint[o2])))==2
             
             if len(old_vert) == len(toadd) :
+
+
+                for v1 in old_vert:
+                    for v2 in old_vert:
+                        if [v1, v2] in self.edges:
+                            self.edges[self.edges.index([v1, v2])] = [-1, -1]
+                            self.edges[self.edges.index([v2, v1])] = [-1, -1]
+                            
+                for k1 in toadd:
+                    for k2 in toadd: 
+                        if k1 != k2 and len( set(k1).intersection(set(k2)) ) == 2:
+                            v1 = visited_joint[k1]
+                            v2 = visited_joint[k2]
+                            if [v1, v2] not in self.edges:
+                                self.edges.append([v1, v2])
+                                self.edges.append([v2, v1])     
+
+
+
                 ''' remove vertices connect to elim grains '''     
                 print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
                 for k in todelete:
@@ -538,7 +557,11 @@ class graph_trajectory(graph):
                     self.joint2vertex[joint] = vert
                     print('the new joint', joint, 'inherit the vert', vert)
 
-                ''' remove 5 add 2 edges '''    
+                '''  '''    
+
+                
+                       
+                            
                 
                 def elim_edge(o1, o2, r1, r2):
                     N1 = [i for i, x in enumerate(self.edges) if x[1] == o1 ] 
@@ -554,11 +577,11 @@ class graph_trajectory(graph):
                             idx = self.edges.index([o1, src])    
                             self.edges[i] = [-1, -1]
                             
-                            if not connect and case:
-                                self.edges[idx] = [r1, r2]
-                                case -= 1
-                            else: 
-                                self.edges[idx] = [-1, -1]
+                          #  if not connect and case:
+                          #      self.edges[idx] = [r1, r2]
+                          #      case -= 1
+                           # else: 
+                            self.edges[idx] = [-1, -1]
                             
                         else:
                             idx = self.edges.index([o1, src]) 
@@ -566,7 +589,7 @@ class graph_trajectory(graph):
                             self.edges[i] = [src, r1]
                             self.edges[idx] = [r1, src]
                             
-                    print(o1, src, 'replace by', r1, src)
+                            print(o1, src, 'replace by', r1, src)
 
                 elim_edge(o1, o2, r1, r2)
                 elim_edge(o2, o1, r2, r1)
@@ -796,10 +819,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 0
+        seed = 95
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
+        traj = graph_trajectory(seed = seed, frames = 25, noise=0.001)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

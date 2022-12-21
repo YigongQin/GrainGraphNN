@@ -515,32 +515,34 @@ class graph_trajectory(graph):
                     toadd.append(k)                    
 
             
-            visited_joint = {}
-            remove_vert = []
 
-            for vert in old_vert:
-                N_vert = [i[0] for i in self.edges if i[1]==vert]
-                for neigh in self.vertex_neighbor[vert]:
-                    if neigh not in old_vert:
-                        for joint in toadd:
-                            if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:
-                                # find new link
-                                if joint in visited_joint:
-                                    remove_vert.append([vert, visited_joint[joint]])
-                                else:
-                                    visited_joint.update({joint:vert})
-            print(remove_vert)                        
-            o1, o2 = remove_vert[0][0], remove_vert[1][0]
-            r1, r2 = remove_vert[0][1], remove_vert[1][1]
-          #  print(o1, o2, old_vert)  
-            old_vert.remove(o1)
-            old_vert.remove(o2)                        
             
-            connect = len(set(self.vertex2joint[o1]).intersection(set(self.vertex2joint[o2])))==2
+            if len(old_vert) == len(toadd) + 2 :
+
+
+                visited_joint = {}
+                remove_vert = []
+    
+                for vert in old_vert:
+                    N_vert = [i[0] for i in self.edges if i[1]==vert]
+                    for neigh in self.vertex_neighbor[vert]:
+                        if neigh not in old_vert:
+                            for joint in toadd:
+                                if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:
+                                    # find new link
+                                    if joint in visited_joint:
+                                        remove_vert.append([vert, visited_joint[joint]])
+                                    else:
+                                        visited_joint.update({joint:vert})
+                print(remove_vert)                        
+                o1, o2 = remove_vert[0][0], remove_vert[1][0]
+                r1, r2 = remove_vert[0][1], remove_vert[1][1]
+              #  print(o1, o2, old_vert)  
+                old_vert.remove(o1)
+                old_vert.remove(o2)                        
+                
+                connect = len(set(self.vertex2joint[o1]).intersection(set(self.vertex2joint[o2])))==2
             
-            if len(old_vert) == len(toadd) :
-
-
                 for v1 in old_vert:
                     for v2 in old_vert:
                         if [v1, v2] in self.edges:

@@ -518,7 +518,8 @@ class graph_trajectory(graph):
             remove_vert = []
 
             for vert in old_vert:
-                for neigh in self.vertex_neighbor[vert]:
+                N_vert = [i[0] for i in self.edges if i[1]==vert]
+                for neigh in N_vert:
                     if neigh not in old_vert:
                         for joint in toadd:
                             if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:

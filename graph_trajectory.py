@@ -344,7 +344,7 @@ class graph_trajectory(graph):
 
             
             
-            print('neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
+            print( (vert_old_i, vert_old_j), 'neighor switching: ', old_junction_i, old_junction_j, ' --> ', new_junction_i, new_junction_j)
             
             if old_junction_i in old_joint: old_joint.remove(old_junction_i)
             if old_junction_j in old_joint: old_joint.remove(old_junction_j)

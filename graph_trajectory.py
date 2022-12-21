@@ -227,7 +227,7 @@ class graph_trajectory(graph):
                 miss_quadruple(quadraples)
                 
             
-            if len(cur_joint)<2*len(cur_grain):
+            if len(cur_joint)!=2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
                 print(len(cur_joint), len(cur_grain))
                 self.grain_events.append(set())
@@ -245,6 +245,7 @@ class graph_trajectory(graph):
             
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
+            self.edge_labels = {(src, dst):0 for src, dst in self.edges}
             for grain in eliminated_grains:
                 for pair in self.region_edge[grain]:
                     self.edge_labels[(pair[0], pair[1])] = -100
@@ -727,7 +728,7 @@ class graph_trajectory(graph):
         self.states.append(hg) # states at current time
 
         # reset the edge_labels, check event at next snapshot
-        self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
+        # self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
 if __name__ == '__main__':
 

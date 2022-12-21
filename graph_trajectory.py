@@ -520,7 +520,7 @@ class graph_trajectory(graph):
 
             for vert in old_vert:
                 N_vert = [i[0] for i in self.edges if i[1]==vert]
-                for neigh in N_vert:
+                for neigh in self.vertex_neighbor[vert]:
                     if neigh not in old_vert:
                         for joint in toadd:
                             if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:
@@ -529,6 +529,7 @@ class graph_trajectory(graph):
                                     remove_vert.append([vert, visited_joint[joint]])
                                 else:
                                     visited_joint.update({joint:vert})
+            print(remove_vert)                        
             o1, o2 = remove_vert[0][0], remove_vert[1][0]
             r1, r2 = remove_vert[0][1], remove_vert[1][1]
           #  print(o1, o2, old_vert)  

@@ -80,7 +80,7 @@ class graph_trajectory(graph):
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         self.active_args = self.active_args.\
-            reshape((self.num_vertex_features, 5*len(self.vertices), data_frames ), order='F')
+            reshape((self.num_vertex_features, 5*len(self.vertices), 600 ), order='F')
         self.active_coors = self.active_args[:2,:,:]
         self.active_max = self.active_args[2,:,:]
         self.active_args = self.active_args[3:,:,:]
@@ -203,18 +203,18 @@ class graph_trajectory(graph):
 
             # check loaded information
             
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
-            self.area_counts = dict(zip(cur_grain, counts))
-            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
-            cur_grain = set(cur_grain)
+           # self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+           # cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+           # self.area_counts = dict(zip(cur_grain, counts))
+           # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
+           # cur_grain = set(cur_grain)
             
             
             grain_set = set()
             for k in cur_joint.keys():
                 grain_set.update(set(k))
 
-
+            cur_grain = grain_set
 
             eliminated_grains = all_grain - cur_grain
             
@@ -232,7 +232,7 @@ class graph_trajectory(graph):
                 print(len(cur_joint), len(cur_grain))
                 self.grain_events.append(set())
                 self.edge_events.append(set())  
-                self.form_states_tensor(frame)
+#                self.form_states_tensor(frame)
                 
                # exit()
                 continue
@@ -254,7 +254,7 @@ class graph_trajectory(graph):
             self.vertex_matching(frame, cur_joint, eliminated_grains)
         
             self.update()
-            self.form_states_tensor(frame)
+          #  self.form_states_tensor(frame)
           #  if self.error_layer>0.08:
           #      self.save_frame[frame] = False
           #  if len(self.edges)!=6*len(cur_grain):
@@ -834,10 +834,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 0
+        seed = 280
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 40, noise=0.01)
+        traj = graph_trajectory(seed = seed, frames = 400, noise=0.01)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

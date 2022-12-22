@@ -17,7 +17,7 @@ from parameters import regressor, classifier, classifier_transfered
 from graph_trajectory import graph_trajectory
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
-from metrics import regress_acc, class_acc
+from metrics import regress_acc, class_acc, edge_error_metric
 
 def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))

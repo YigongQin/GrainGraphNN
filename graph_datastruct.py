@@ -41,6 +41,15 @@ def in_bound(x, y):
     
 
 
+def periodic_move_p(p, pc):
+
+    if p[0]<pc[0]-0.5-eps: p[0]+=1
+    if p[0]>pc[0]+0.5+eps: p[0]-=1
+    if p[1]<pc[1]-0.5-eps: p[1]+=1
+    if p[1]>pc[1]+0.5+eps: p[1]-=1    
+
+
+
 def periodic_move(p, pc):
     x,  y  = p
     xc, yc = pc

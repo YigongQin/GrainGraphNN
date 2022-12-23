@@ -67,7 +67,7 @@ def periodic_move(p, pc):
     
     assert -0.5<x - xc<0.5
     assert -0.5<y - yc<0.5
-    return (x, y)
+    return [x, y]
 
 
 def periodic_dist_(p, pc):
@@ -418,7 +418,7 @@ class graph:
         """
         
         
-        self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
+      #  self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
         self.vertex_neighbor.clear()                    
    
         # form region
@@ -508,7 +508,13 @@ class graph:
         for src, dst in self.edges:
             if src>-1:
                 self.vertex_neighbor[src].add(dst)
-                #print(src, dst)
+                if src not in self.vertices:
+                    print('in', self.vertex2joint[src])
+                    print(src, 'not available')
+                if dst not in self.vertices:
+                    print(dst, 'not available',src) 
+                    print('in', self.vertex2joint[dst])
+                                       
                 self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
             
             

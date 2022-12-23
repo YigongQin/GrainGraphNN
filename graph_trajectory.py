@@ -13,7 +13,7 @@ from collections import defaultdict
 from termcolor import colored
 import matplotlib.pyplot as plt
 import itertools
-from graph_datastruct import graph, GrainHeterograph, periodic_move
+from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction
 from math import pi
 
 
@@ -36,7 +36,7 @@ class QoI_trajectory:
 
 
 class graph_trajectory(graph):
-    def __init__(self, lxd: float = 20, seed: int = 1, noise = 0.01, frames: int = 1, physical_params = {}):   
+    def __init__(self, lxd: float = 40, seed: int = 1, noise = 0.01, frames: int = 1, physical_params = {}):   
         super().__init__(lxd = lxd, seed = seed, noise = noise)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
@@ -80,7 +80,7 @@ class graph_trajectory(graph):
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         self.active_args = self.active_args.\
-            reshape((self.num_vertex_features, 5*len(self.vertices), 600 ), order='F')
+            reshape((self.num_vertex_features, 5*len(self.vertices), 500 ), order='F')[:,:,::5]
         self.active_coors = self.active_args[:2,:,:]
         self.active_max = self.active_args[2,:,:]
         self.active_args = self.active_args[3:,:,:]
@@ -295,15 +295,7 @@ class graph_trajectory(graph):
                             quadraples[tuple(sorted(set(i).union(set(j))))] = (i,j)            
             
             return quadraples
-        
-        
-        def ns_last_vert(j1, i1, i2, q):
 
-            j2 = set(q) - set(j1)
-            j2.add(list(set(i1)-set(i2))[0])
-            j2.add(list(set(i2)-set(i1))[0])
-
-            return tuple(sorted(list(j2)))
 
         def perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j):
             
@@ -361,6 +353,7 @@ class graph_trajectory(graph):
 
         
         for k, v in cur_joint.items():
+            assert len(v)>=2
             cur_joint[k] = v[:2]
 
  
@@ -524,7 +517,7 @@ class graph_trajectory(graph):
                 remove_vert = []
     
                 for vert in old_vert:
-                    N_vert = [i[0] for i in self.edges if i[1]==vert]
+        #            N_vert = [i[0] for i in self.edges if i[1]==vert]
                     for neigh in self.vertex_neighbor[vert]:
                         if neigh not in old_vert:
                             for joint in toadd:
@@ -534,15 +527,21 @@ class graph_trajectory(graph):
                                         remove_vert.append([vert, visited_joint[joint]])
                                     else:
                                         visited_joint.update({joint:vert})
-                print(remove_vert)                        
-                o1, o2 = remove_vert[0][0], remove_vert[1][0]
-                r1, r2 = remove_vert[0][1], remove_vert[1][1]
-              #  print(o1, o2, old_vert)  
-                old_vert.remove(o1)
-                old_vert.remove(o2)                        
-                
-                connect = len(set(self.vertex2joint[o1]).intersection(set(self.vertex2joint[o2])))==2
-            
+
+
+                ''' remove vertices connect to elim grains '''     
+                print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
+                for k in todelete:
+                    del self.joint2vertex[k]       
+                    
+
+                ''' add vertices '''     
+                for joint, vert in visited_joint.items():
+                    self.joint2vertex[joint] = vert
+                    print('the new joint', joint, 'inherit the vert', vert)
+                    
+            #    print(remove_vert)     
+ 
                 for v1 in old_vert:
                     for v2 in old_vert:
                         if [v1, v2] in self.edges:
@@ -559,28 +558,8 @@ class graph_trajectory(graph):
                                 self.edges.append([v2, v1])     
 
 
-
-                ''' remove vertices connect to elim grains '''     
-                print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
-                for k in todelete:
-                    del self.joint2vertex[k]       
-                    
-
-                ''' add vertices '''     
-                for joint, vert in visited_joint.items():
-                    self.joint2vertex[joint] = vert
-                    print('the new joint', joint, 'inherit the vert', vert)
-
-                '''  '''    
-
-                
-                       
-                            
-                
                 def elim_edge(o1, o2, r1, r2):
                     N1 = [i for i, x in enumerate(self.edges) if x[1] == o1 ] 
-                    
-                    case = 1
                     for i in N1:
                         src = self.edges[i][0]
 
@@ -590,11 +569,6 @@ class graph_trajectory(graph):
                         elif src in old_vert:
                             idx = self.edges.index([o1, src])    
                             self.edges[i] = [-1, -1]
-                            
-                          #  if not connect and case:
-                          #      self.edges[idx] = [r1, r2]
-                          #      case -= 1
-                           # else: 
                             self.edges[idx] = [-1, -1]
                             
                         else:
@@ -603,17 +577,28 @@ class graph_trajectory(graph):
                             self.edges[i] = [src, r1]
                             self.edges[idx] = [r1, src]
                             
-                            print(o1, src, 'replace by', r1, src)
+                        #    print(o1, src, 'replace by', r1, src)
 
-                elim_edge(o1, o2, r1, r2)
-                elim_edge(o2, o1, r2, r1)
+                try: 
+                    o1, o2 = remove_vert[0][0], remove_vert[1][0]
+                    r1, r2 = remove_vert[0][1], remove_vert[1][1]
+                  #  print(o1, o2, old_vert)  
+                    old_vert.remove(o1)
+                    old_vert.remove(o2) 
+                    elim_edge(o1, o2, r1, r2)
+                    elim_edge(o2, o1, r2, r1)
+                    
+                except:
+                    pass
          #   assert len(old_vert) == 2
 
             
         self.grain_events.append(eliminated_grains)
         self.edge_events.append(switching_edges)    
-        
+        print('number of E2 %d, number of E1 %d'%(len(eliminated_grains), len(switching_edges)//2))
 
+        match = True
+        todelete = []
         for joint in self.joint2vertex.keys():
             if joint in cur_joint:
                 vert = self.joint2vertex[joint]
@@ -621,22 +606,46 @@ class graph_trajectory(graph):
                 self.vertices[vert] = periodic_move(coors, old_vertices[vert])
       
             else:
+                match = False
                 vert = self.joint2vertex[joint]
-                self.vertices[vert] = old_vertices[vert]
-                print(colored('unmatched joint detected: ', 'red'), joint, self.joint2vertex[joint])
+                #self.vertices[vert] = old_vertices[vert]
+                print(colored('disappeared joint detected: ', 'red'), joint, self.joint2vertex[joint])
+                ''' cannot resolve, give up the vertex'''
+                todelete.append(joint)
+        for joint in todelete:
+                del self.joint2vertex[joint]
+               # del self.vertices[vert]
+                
         for joint in cur_joint.keys():
             if joint not in self.joint2vertex:
-                print(colored('unused joint detected: ', 'green'), joint)
-      
+                match = False
+                print(colored('emerged joint detected: ', 'green'), joint)
+                self.joint2vertex[joint] = self.num_vertices
+                self.vertices[self.num_vertices] = cur_joint[joint]
+                self.num_vertices += 1
         
-       
-        print('number of E2 %d, number of E1 %d'%(len(eliminated_grains), len(switching_edges)//2))
+        self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
+        ''' ensure the edge connectivity is correct '''
         
-      
+       # if not match, fix the edges:
 
-            
+        for k1, v1 in self.joint2vertex.items():
+            for k2, v2 in self.joint2vertex.items():
+                if k1!=k2 and linked_edge_by_junction(k1, k2):
+                    if [v1, v2] not in self.edges:
+                        self.edges.append([v1, v2])
+                        
+        for i, (src, dst) in enumerate(self.edges):
+            if src>-1:
+                if src in self.vertex2joint and dst in self.vertex2joint:
+                    if not linked_edge_by_junction(self.vertex2joint[src], self.vertex2joint[dst]):
+                        self.edges[i] = [-1, -1]                        
+                else:
+                    self.edges[i] = [-1, -1]
 
-            
+                            
+
+
 
     def show_events(self):
         
@@ -744,7 +753,7 @@ if __name__ == '__main__':
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
     parser.add_argument("--level", type=int, default = 0)
-    parser.add_argument("--frame", type=int, default = 13)
+    parser.add_argument("--frame", type=int, default = 100)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -834,10 +843,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 280
+        seed = 360
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 400, noise=0.01)
+        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':
@@ -858,6 +867,17 @@ if __name__ == '__main__':
             
             
 """
+
+
+        def ns_last_vert(j1, i1, i2, q):
+
+            j2 = set(q) - set(j1)
+            j2.add(list(set(i1)-set(i2))[0])
+            j2.add(list(set(i2)-set(i1))[0])
+
+            return tuple(sorted(list(j2)))
+        
+        
 if left_over!= -1:
     for q, joints in quadraples_new.items():
         for i in old_joint:

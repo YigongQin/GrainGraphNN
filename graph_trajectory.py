@@ -80,7 +80,7 @@ class graph_trajectory(graph):
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         self.active_args = self.active_args.\
-            reshape((self.num_vertex_features, 5*len(self.vertices), 500 ), order='F')[:,:,::5]
+            reshape((self.num_vertex_features, 5*len(self.vertices), data_frames ), order='F')
         self.active_coors = self.active_args[:2,:,:]
         self.active_max = self.active_args[2,:,:]
         self.active_args = self.active_args[3:,:,:]
@@ -203,10 +203,10 @@ class graph_trajectory(graph):
 
             # check loaded information
             
-           # self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-           # cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
-           # self.area_counts = dict(zip(cur_grain, counts))
-           # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
+            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+            self.area_counts = dict(zip(cur_grain, counts))
+            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
            # cur_grain = set(cur_grain)
             
             
@@ -231,8 +231,10 @@ class graph_trajectory(graph):
                 print(colored('junction find failed', 'red'))
                 print(len(cur_joint), len(cur_grain))
                 self.grain_events.append(set())
-                self.edge_events.append(set())  
-#                self.form_states_tensor(frame)
+                self.edge_events.append(set()) 
+                self.save_frame[frame] = False
+                self.form_states_tensor(frame)
+                print('----killed-----')
                 
                # exit()
                 continue
@@ -254,7 +256,7 @@ class graph_trajectory(graph):
             self.vertex_matching(frame, cur_joint, eliminated_grains)
         
             self.update()
-          #  self.form_states_tensor(frame)
+            self.form_states_tensor(frame)
           #  if self.error_layer>0.08:
           #      self.save_frame[frame] = False
           #  if len(self.edges)!=6*len(cur_grain):
@@ -716,20 +718,14 @@ class graph_trajectory(graph):
         
         hg.mask = {'grain':grain_mask, 'joint':joint_mask}
         
-     #   joint_grain_neighbor = -np.ones((self.num_vertices,3), dtype=int)
-      #  joint_joint_neighbor = -np.ones((self.num_vertices,3), dtype=int)
+
         for k, v in self.vertex_neighbor.items():
             if len(v)<3: print(colored('junction with less than three junction neighbor', 'red'), k)
             if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'), k)
             assert len(v)==3
-      #      joint_joint_neighbor[k][:len(v)] = np.array(list(v))
         
         hg.vertex2joint = self.vertex2joint
-      #  for k, v in self.joint2vertex.items():
-      #      joint_grain_neighbor[v] = np.array(list(k))
-        
-      #  hg.neighbor_dicts.update({('joint','joint'):joint_joint_neighbor})
-      #  hg.neighbor_dicts.update({('joint','grain'):joint_grain_neighbor})
+
         
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed})
@@ -737,6 +733,8 @@ class graph_trajectory(graph):
         if frame>0:
             hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
+        
+        hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)}
         
         self.states.append(hg) # states at current time
 
@@ -752,8 +750,8 @@ if __name__ == '__main__':
     parser.add_argument("--train_dir", type=str, default = './sameGR/')
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
-    parser.add_argument("--level", type=int, default = 0)
-    parser.add_argument("--frame", type=int, default = 100)
+    parser.add_argument("--level", type=int, default = 2)
+    parser.add_argument("--frame", type=int, default = 120)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -843,10 +841,10 @@ if __name__ == '__main__':
      
         
     if args.mode == 'check':
-        seed = 360
+        seed = 220
       #  g1 = graph(lxd = 20, seed=1) 
       #  g1.show_data_struct()
-        traj = graph_trajectory(seed = seed, frames = 100, noise=0.01)
+        traj = graph_trajectory(seed = seed, frames = 120)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
     if args.mode == 'instance':

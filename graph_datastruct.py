@@ -80,7 +80,7 @@ def periodic_dist_(p, pc):
     if y<yc-0.5-eps: y+=1
     if y>yc+0.5+eps: y-=1         
            
-    return (x-xc)**2 + (y-yc)**2
+    return math.sqrt((x-xc)**2 + (y-yc)**2)
 
 
 
@@ -579,8 +579,8 @@ class GrainHeterograph:
                 np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
                                          
             self.target_dicts['joint'] = self.targets_scaling['joint']*\
-                (nxt.feature_dicts['joint'][:,:2] - self.feature_dicts['joint'][:,:2])
-            
+               self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
+               # (nxt.feature_dicts['joint'][:,:2] - self.feature_dicts['joint'][:,:2])
             self.target_dicts['edge_event'] = nxt.edge_rotation        
             
             self.additional_features['nxt'] = nxt.edge_index_dicts
@@ -618,7 +618,8 @@ class GrainHeterograph:
             prev_grad_grain = self.targets_scaling['grain']*\
                 (self.feature_dicts['grain'][:,3:4] - prev.feature_dicts['grain'][:,3:4]) 
             prev_grad_joint = self.targets_scaling['joint']*\
-                (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
+                self.subtract(self.feature_dicts['joint'][:,:2], prev.feature_dicts['joint'][:,:2], 'prev')
+               # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
         self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
@@ -630,6 +631,18 @@ class GrainHeterograph:
         for nodes, features in self.features.items():
             self.features[nodes] = self.features[nodes] + self.features_grad[nodes]  
             assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
+
+
+    @staticmethod
+    def subtract(b, a, loc):
+        
+        short_len = len(a)
+        
+        if loc == 'prev':
+            return np.concatenate((b[:short_len,:]-a, 0*b[short_len:,:]), axis=0)
+            
+        if loc == 'next':
+            return b[:short_len,:]-a
 
 
 if __name__ == '__main__':

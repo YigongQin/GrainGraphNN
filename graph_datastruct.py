@@ -519,7 +519,8 @@ class graph:
             
             
 
-      #  self.plot_polygons()
+        if init:  
+            self.plot_polygons()
         self.compute_error_layer()
 
 
@@ -549,7 +550,7 @@ class GrainHeterograph:
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
         
-        self.targets_scaling = {'grain':40, 'joint':10}    
+        self.targets_scaling = {'grain':20, 'joint':5}    
             
         self.feature_dicts = {}
         self.target_dicts = {}

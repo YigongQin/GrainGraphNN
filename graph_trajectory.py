@@ -543,8 +543,8 @@ class graph_trajectory(graph):
                 remove_vert = []
     
                 for vert in old_vert:
-        #            N_vert = [i[0] for i in self.edges if i[1]==vert]
-                    for neigh in self.vertex_neighbor[vert]:
+                    N_vert = [i[0] for i in self.edges if i[1]==vert]
+                    for neigh in N_vert: #self.vertex_neighbor[vert]:
                         if neigh not in old_vert:
                             for joint in toadd:
                                 if len(set(joint).intersection(set(self.vertex2joint[neigh])))==2:
@@ -553,7 +553,7 @@ class graph_trajectory(graph):
                                         remove_vert.append([vert, visited_joint[joint]])
                                     else:
                                         visited_joint.update({joint:vert})
-
+                                        break
 
                 ''' remove vertices connect to elim grains '''     
                 print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)

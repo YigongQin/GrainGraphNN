@@ -200,7 +200,8 @@ class graph_trajectory(graph):
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             print('total missing edges, ', total_missing)
             miss_quadruple(quadraples, total_missing)
-            print('case missed', miss_case)
+            total_missing, candidates, miss_case  = check_connectivity(cur_joint)
+            
 
 
             ''' check grain information'''
@@ -234,7 +235,7 @@ class graph_trajectory(graph):
                 
             if len(cur_joint)>2*len(cur_grain):
                 total_missing, candidates, miss_case  = check_connectivity(cur_joint)
-                print(miss_case)
+             #   print(miss_case)
                 for key in miss_case.keys():
                     
                     joint = cur_joint[key]
@@ -243,15 +244,17 @@ class graph_trajectory(graph):
                     if total_missing:
                         cur_joint[key] = joint
                     else:
+                        print('delete', key)
                         break
- 
+                    
+            print('case missed', miss_case)
             print('number of grains in pixels %d'%len(cur_grain))
         #    print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
             
-            if len(cur_joint)!=2*len(cur_grain):
+            if len(cur_joint)!=2*len(cur_grain) or len(miss_case)>0:
                 print(colored('junction find failed', 'red'))
-                print(len(cur_joint), len(cur_grain))
+               # print(len(cur_joint), len(cur_grain))
                 self.grain_events.append(set())
                 self.edge_events.append(set()) 
                 self.save_frame[frame] = False

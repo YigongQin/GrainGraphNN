@@ -549,7 +549,7 @@ class GrainHeterograph:
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
         
-        self.targets_scaling = {'grain':10, 'joint':10}    
+        self.targets_scaling = {'grain':40, 'joint':10}    
             
         self.feature_dicts = {}
         self.target_dicts = {}
@@ -596,7 +596,8 @@ class GrainHeterograph:
                     else:
                         self.mask['joint'][i,0] = 0
                       #  print('not matched', i, self.vertex2joint[i])
-            
+            print('maximum movement', np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])))
+            print('maximum grain change', np.max(np.absolute(self.target_dicts['grain'])))
             assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))

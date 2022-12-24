@@ -36,7 +36,12 @@ class QoI_trajectory:
 
 
 class graph_trajectory(graph):
-    def __init__(self, lxd: float = 40, seed: int = 1, noise = 0.01, frames: int = 1, physical_params = {}):   
+    def __init__(self, 
+                 lxd: float = 40, 
+                 seed: int = 1, 
+                 noise: float = 0.01, 
+                 frames: int = 1, 
+                 physical_params = {}):   
         super().__init__(lxd = lxd, seed = seed, noise = noise)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
@@ -179,14 +184,14 @@ class graph_trajectory(graph):
                                 miss_case_sum += j
                              #   max_case = max(max_case, j)                 
                             
-                        print('np. missing links', miss_case_sum)        
+                        print('no. missing links', miss_case_sum)        
                         max_case = 1 if miss_case_sum<4 else 2
                         for ans in list(itertools.combinations(possible, max_case)):
                             print('try ans', ans)
                             for a in ans:
                                 cur_joint[a] = coor
-                            cur, _, _ = check_connectivity(cur_joint)
-                            if cur == total_missing -miss_case_sum:
+                            cur, _, case_new = check_connectivity(cur_joint)
+                            if miss_case_sum>0 and cur == total_missing - miss_case_sum and len(case_new)<=len(miss_case):
                                 print('fixed!')
                                 total_missing = cur
                                 break
@@ -206,7 +211,7 @@ class graph_trajectory(graph):
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
-            self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(self.num_regions)}
+           # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
            # cur_grain = set(cur_grain)
             
             
@@ -222,11 +227,29 @@ class graph_trajectory(graph):
 
 
             if len(cur_joint)<2*len(cur_grain):
+                total_missing, missing, miss_case  = check_connectivity(cur_joint)
                 for arg, coor in del_joints:
                     cur_joint[arg] = coor
+                    total_new, missing, miss_case  = check_connectivity(cur_joint)
+                    if total_missing<total_new:
+                        del cur_joint[arg]
+                    
                 miss_quadruple(quadraples)
-                
             
+                
+            if len(cur_joint)>2*len(cur_grain):
+                total_missing, missing, miss_case  = check_connectivity(cur_joint)
+                print(miss_case)
+                for key in miss_case.keys():
+                    
+                    joint = cur_joint[key]
+                    del cur_joint[key]
+                    total_missing, missing, miss_case  = check_connectivity(cur_joint)
+                    if total_missing:
+                        cur_joint[key] = joint
+                    else:
+                        break
+                    
             if len(cur_joint)!=2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
                 print(len(cur_joint), len(cur_grain))
@@ -675,11 +698,15 @@ class graph_trajectory(graph):
         for grain, coor in self.region_center.items():
             grain_state[grain-1, 0] = coor[0]
             grain_state[grain-1, 1] = coor[1]
+            if grain in self.area_counts:
+                grain_state[grain-1, 3] = self.area_counts[grain]/s**2
+            else:
+                grain_state[grain-1, 3] = 0
             grain_mask[grain-1, 0] = 1
 
         grain_state[:, 2] = frame/self.frames
 
-        grain_state[:, 3] = np.array(list(self.area_counts.values())) /s**2
+      #  grain_state[:, 3] = np.array(list(self.area_counts.values())) /s**2
         if frame>0:
             grain_state[:, 4] = self.extraV_frames[:, frame]/s**3
         
@@ -751,7 +778,9 @@ if __name__ == '__main__':
     parser.add_argument("--test_dir", type=str, default = './test/')
     parser.add_argument("--seed", type=int, default = 1)
     parser.add_argument("--level", type=int, default = 2)
-    parser.add_argument("--frame", type=int, default = 120)
+    parser.add_argument("--frame", type=int, default = 121)
+    parser.add_argument("--span", type=int, default = 6)
+    parser.add_argument("--gap", type=int, default = 3)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -787,9 +816,9 @@ if __name__ == '__main__':
             with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(traj, outp)
                 
-            for snapshot in range(traj.frames-1):
+            for snapshot in range(0, traj.frames-args.span, args.gap):
                 """
-                training data: snapshot -> snapshot + 1
+                training data: snapshot -> snapshot + args.span
                 whether data is useful depends on both 
                 <1> regression part:
                     grain exists at snapshot
@@ -801,20 +830,23 @@ if __name__ == '__main__':
                     unknown (mask out)
                     
                 """
-                if traj.save_frame[snapshot+1] == True:
+                if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
+                    if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
+                        print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+                        continue
                     
                     if ( args.level == 2 ) \
                     or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
                     or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
-                                             len(traj.edge_events[snapshot+1])==0 ):    
+                                             len(traj.edge_events[snapshot+1])==0 ):   
                         
+                        print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
                         hg = traj.states[snapshot]
-                        hg.form_gradient(prev = None if snapshot ==0 else traj.states[snapshot-1], \
-                                         nxt = traj.states[snapshot+1])
-                        print('save frame %d -> %d, event level %d'%(snapshot, snapshot+1, args.level))
+                        hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
+                                         nxt = traj.states[snapshot+args.span])
                         train_samples.append(hg)
                 else:
-                    print(colored('irregular data ignored, frame','red'), snapshot+1)
+                    print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
        
             with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)

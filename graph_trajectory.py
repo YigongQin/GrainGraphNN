@@ -229,7 +229,7 @@ class graph_trajectory(graph):
                         del cur_joint[arg]
                     else:
                         print('add', arg)
-                miss_quadruple(quadraples)
+               # miss_quadruple(quadraples, total_missing)
             
                 
             if len(cur_joint)>2*len(cur_grain):

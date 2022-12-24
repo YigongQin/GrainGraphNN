@@ -92,7 +92,7 @@ class graph_trajectory(graph):
         
 
         prev_joint = {k:[0,0,100] for k, v in self.joint2vertex.items()}
-        all_grain = set(np.arange(self.num_regions)+1)
+        prev_grain = set(np.arange(self.num_regions)+1)
         
         for frame in range(self.frames):
            
@@ -201,12 +201,8 @@ class graph_trajectory(graph):
                                     
             miss_quadruple(quadraples)
 
-            self.joint_traj.append(cur_joint)
-            prev_joint = cur_joint
-            
 
-
-            # check loaded information
+            ''' check grain information'''
             
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
@@ -214,18 +210,15 @@ class graph_trajectory(graph):
            # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
            # cur_grain = set(cur_grain)
             
-            
             grain_set = set()
             for k in cur_joint.keys():
                 grain_set.update(set(k))
 
             cur_grain = grain_set
 
-            eliminated_grains = all_grain - cur_grain
+            eliminated_grains = prev_grain - cur_grain
             
             
-
-
             if len(cur_joint)<2*len(cur_grain):
                 total_missing, missing, miss_case  = check_connectivity(cur_joint)
                 for arg, coor in del_joints:
@@ -249,7 +242,11 @@ class graph_trajectory(graph):
                         cur_joint[key] = joint
                     else:
                         break
-                    
+ 
+            print('number of grains in pixels %d'%len(cur_grain))
+        #    print('number of grains junction %d'%len(grain_set))
+            print('number of junctions %d'%len(cur_joint))
+            
             if len(cur_joint)!=2*len(cur_grain):
                 print(colored('junction find failed', 'red'))
                 print(len(cur_joint), len(cur_grain))
@@ -262,11 +259,10 @@ class graph_trajectory(graph):
                # exit()
                 continue
             
-            print('number of grains in pixels %d'%len(cur_grain))
-        #    print('number of grains junction %d'%len(grain_set))
-            print('number of junctions %d'%len(cur_joint))
-            
-            all_grain = cur_grain
+ 
+            self.joint_traj.append(cur_joint)
+            prev_joint = cur_joint            
+            prev_grain = cur_grain
             
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate

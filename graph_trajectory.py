@@ -145,7 +145,7 @@ class graph_trajectory(graph):
             def check_connectivity(cur_joint):
                # jj_link = 0
                
-                missing = set()
+                candidates = set()
                 miss_case = defaultdict(int)
                 total_missing = 0
                 for k1 in cur_joint.keys():
@@ -157,21 +157,17 @@ class graph_trajectory(graph):
                           #  print(jj_link, k1, k2)
                     if num_link !=3:
 
-                        missing.update(set(k1))
+                        candidates.update(set(k1))
                         miss_case.update({k1:3-num_link})
                         total_missing += abs(3-num_link)
                      #   print('find missing junction link', k1, 3-num_link)
-                return total_missing, missing, miss_case   
+                return total_missing, candidates, miss_case   
 
-            def miss_quadruple(quadraples):
+            def miss_quadruple(quadraples, total_missing):
 
-                total_missing, missing, miss_case  = check_connectivity(cur_joint)
-                print('total missing edges, ', total_missing)
                 for q, coor in quadraples.items():
-                    if set(q).issubset(missing):
-                        
-                        print('using quadraples',q,' to find missing link')
-                        
+                    if set(q).issubset(candidates):
+
                         possible = list(itertools.combinations(list(q), 3))
                         for c in miss_case.keys():
                             if c in possible:
@@ -180,11 +176,13 @@ class graph_trajectory(graph):
                         miss_case_sum = 0
 
                         for i, j in miss_case.items():
+                            if j<0:
+                                return
                             if len(set(i).intersection(set(q)))>=2:
                                 miss_case_sum += j
                              #   max_case = max(max_case, j)                 
                             
-                        print('no. missing links', miss_case_sum)        
+                        print('using quadraples',q,' to find missing links', miss_case_sum)        
                         max_case = 1 if miss_case_sum<4 else 2
                         for ans in list(itertools.combinations(possible, max_case)):
                             print('try ans', ans)
@@ -198,8 +196,11 @@ class graph_trajectory(graph):
                             else:
                                 for a in ans:
                                         del cur_joint[a]
-                                    
-            miss_quadruple(quadraples)
+            
+            total_missing, candidates, miss_case  = check_connectivity(cur_joint)
+            print('total missing edges, ', total_missing)
+            miss_quadruple(quadraples, total_missing)
+            print('case missed', miss_case)
 
 
             ''' check grain information'''
@@ -220,24 +221,25 @@ class graph_trajectory(graph):
             
             
             if len(cur_joint)<2*len(cur_grain):
-                total_missing, missing, miss_case  = check_connectivity(cur_joint)
+                total_missing, candidates, miss_case  = check_connectivity(cur_joint)
                 for arg, coor in del_joints:
                     cur_joint[arg] = coor
-                    total_new, missing, miss_case  = check_connectivity(cur_joint)
-                    if total_missing<total_new:
+                    total_new, candidates, miss_case  = check_connectivity(cur_joint)
+                    if total_missing<=total_new:
                         del cur_joint[arg]
-                    
+                    else:
+                        print('add', arg)
                 miss_quadruple(quadraples)
             
                 
             if len(cur_joint)>2*len(cur_grain):
-                total_missing, missing, miss_case  = check_connectivity(cur_joint)
+                total_missing, candidates, miss_case  = check_connectivity(cur_joint)
                 print(miss_case)
                 for key in miss_case.keys():
                     
                     joint = cur_joint[key]
                     del cur_joint[key]
-                    total_missing, missing, miss_case  = check_connectivity(cur_joint)
+                    total_missing, candidates, miss_case  = check_connectivity(cur_joint)
                     if total_missing:
                         cur_joint[key] = joint
                     else:

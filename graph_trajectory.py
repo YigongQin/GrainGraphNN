@@ -734,7 +734,7 @@ class graph_trajectory(graph):
                 gj_edge.append([grain-1, joint])
         
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
-        jj_edge = [[src, dst] for src, dst in self.edges]
+        jj_edge = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
         
         
         hg.feature_dicts.update({'grain':grain_state})

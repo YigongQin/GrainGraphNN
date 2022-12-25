@@ -574,8 +574,8 @@ class graph_trajectory(graph):
                             self.edges[self.edges.index([v1, v2])] = [-1, -1]
                             self.edges[self.edges.index([v2, v1])] = [-1, -1]
                             
-                for k1 in toadd:
-                    for k2 in toadd: 
+                for k1 in visited_joint:
+                    for k2 in visited_joint: 
                         if k1 != k2 and len( set(k1).intersection(set(k2)) ) == 2:
                             v1 = visited_joint[k1]
                             v2 = visited_joint[k2]

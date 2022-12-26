@@ -44,7 +44,7 @@ def subplot_field(ax, i, j, seed, time):
     #else: plt.title('t = '+str('%4.2e'%time) + ' s',color=bg_color)
     
     # cs = ax[i][j].imshow(u.T,cmap=plt.get_cmap('coolwarm_r'),origin='lower',extent= ( 0, lx, 0, ly))
-    cs = ax[i][j].imshow(u.T,cmap=plt.get_cmap('coolwarm_r'),extent= ( 0, lx, 0, ly))
+    cs = ax[i][j].imshow(u.T,cmap=plt.get_cmap('coolwarm_r'))
   #  ax[i].set_xlabel('('+case[i]+')'+' $G$'+str(int(G))+'_$R$'+str('%1.1f'%R)+'_$\epsilon_k$'+str('%1.2f'%anis)); 
     #ax[i].set_ylabel('$y\ (\mu m)$'); 
     ax[i][j].spines['bottom'].set_color(bg_color);ax[i][j].spines['left'].set_color(bg_color)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         num_plots = args.runs
         
     row = int(np.sqrt(num_plots))
-    row = row//5*5
+    #row = row//5*5
     col = num_plots//row
     print('number of rows and columns', row, col)
     fig, ax = plt.subplots(row, col, figsize=(10,10))

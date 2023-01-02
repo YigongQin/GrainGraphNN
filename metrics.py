@@ -11,8 +11,9 @@ import math
 
 
 class feature_metric:
-    def __init__(self, model_type):
+    def __init__(self, model_type, model_id):
         self.model_type = model_type
+        self.model_id = model_id
         self.metric_list = []
         
         self.acc_dicts = defaultdict(float)

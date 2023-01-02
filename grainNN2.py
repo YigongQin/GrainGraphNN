@@ -69,7 +69,7 @@ def train(model, train_loader, test_loader):
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)
-    metric = feature_metric(args.model_type)
+    metric = feature_metric(args.model_type, args.model_id)
 
     train_loss, count = 0, 0
 
@@ -155,7 +155,7 @@ def train(model, train_loader, test_loader):
         
         test_loss/=count
         
-
+        print('\n')
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss)/train0, float(test_loss)/test0 ))
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))    

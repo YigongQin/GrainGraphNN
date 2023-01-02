@@ -66,6 +66,10 @@ class feature_metric:
             v_err = 100*math.sqrt(self.acc_dicts['grain1err']/self.acc_dicts['grain1'])
             
             print('err, joint x: %2.1f, y: %2.1f, grain s: %2.1f, v: %2.1f'%(x_err, y_err, s_err, v_err))
+            self.acc_dicts['joint0err'] = 0
+            self.acc_dicts['joint1err'] = 0
+            self.acc_dicts['grain0err'] = 0
+            self.acc_dicts['grain1err'] = 0            
             
 
     def summary(self):

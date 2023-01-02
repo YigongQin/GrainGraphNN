@@ -24,17 +24,6 @@ def relative_angle(p1, p2):
     return np.arctan2(p2[1]-p1[1], p2[0]-p1[0])
 
 
-class QoI_trajectory:
-    def __init__(self):
-        
-        self.num_grains
-        
-    def plot(self):
-        
-        return
-
-
-
 class graph_trajectory(graph):
     def __init__(self, 
                  lxd: float = 40, 
@@ -337,19 +326,7 @@ class graph_trajectory(graph):
             if len(set(self.vertex2joint[N_j[1]]).intersection(set(new_junction_j)))==2:
                 N_j.reverse()
             
-            """
-            l = list(self.edges.values())
-            e_key = list(self.edges.keys())
-            idx = l.index([vert_old_i, N_i[1]])
-            self.edges[e_key[idx]] = [vert_old_i, N_j[1]]
-            idx = l.index([vert_old_j, N_j[1]])
-            self.edges[e_key[idx]] = [vert_old_j, N_i[1]]  
-            
-            idx = l.index([N_i[1], vert_old_i])
-            self.edges[e_key[idx]] = [N_j[1], vert_old_i]
-            idx = l.index([N_j[1], vert_old_j])
-            self.edges[e_key[idx]] = [N_i[1], vert_old_j]  
-            """
+
          #   print(N_i, N_j)
             self.edges[self.edges.index([vert_old_i, N_i[1]])] = [vert_old_i, N_j[1]]
             self.edges[self.edges.index([vert_old_j, N_j[1]])] = [vert_old_j, N_i[1]]
@@ -724,7 +701,7 @@ class graph_trajectory(graph):
             joint_mask[joint, 0] = 1
         
         joint_state[:, 2] = frame/self.frames
-        joint_state[:, 3] = 1 - np.log10(self.physical_params['G'])/2
+        joint_state[:, 3] = 1 - self.physical_params['G']/10 #1 - np.log10(self.physical_params['G'])/2
         joint_state[:, 4] = self.physical_params['R']/2
         
         
@@ -756,7 +733,7 @@ class graph_trajectory(graph):
 
         
         hg.physical_params = self.physical_params
-        hg.physical_params.update({'seed':self.seed})
+        hg.physical_params.update({'seed':self.seed, 'height':frame})
 
         if frame>0:
             hg.edge_rotation = np.array(list(self.edge_labels.values()))
@@ -895,6 +872,20 @@ if __name__ == '__main__':
             
 
 
+
+"""
+l = list(self.edges.values())
+e_key = list(self.edges.keys())
+idx = l.index([vert_old_i, N_i[1]])
+self.edges[e_key[idx]] = [vert_old_i, N_j[1]]
+idx = l.index([vert_old_j, N_j[1]])
+self.edges[e_key[idx]] = [vert_old_j, N_i[1]]  
+
+idx = l.index([N_i[1], vert_old_i])
+self.edges[e_key[idx]] = [N_j[1], vert_old_i]
+idx = l.index([N_j[1], vert_old_j])
+self.edges[e_key[idx]] = [N_i[1], vert_old_j]  
+"""
             
             
 """

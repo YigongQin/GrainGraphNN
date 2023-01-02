@@ -597,13 +597,16 @@ class GrainHeterograph:
                     else:
                         self.mask['joint'][i,0] = 0
                       #  print('not matched', i, self.vertex2joint[i])
-            print('maximum movement', np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])))
-            print('maximum grain change', np.max(np.absolute(self.target_dicts['grain'])))
+                      
+            self.gradient_scale = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
+                                   'grain':np.max(np.absolute(self.target_dicts['grain']))}     
+            print('maximum gradient', self.gradient_scale)
+            
             assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
 
-                                        
+                                   
         """
             
         Gradients of history

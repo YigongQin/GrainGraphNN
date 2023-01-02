@@ -6,6 +6,73 @@ Created on Thu Dec 15 13:43:45 2022
 @author: yigongqin
 """
 import torch
+from collections import defaultdict
+
+
+
+class feature_metric:
+    def __init__(self, model_type):
+        self.model_type = model_type
+        self.metric_list = []
+        
+        self.acc_dicts = defaultdict(float)
+        self.class_dicts = defaultdict(list)
+        
+    def record(self, y_dict, pred, mask, epoch):
+
+        def add(key, idx):
+           # print((( mask[key][:,0]*(data[key][:,idx] - pred[key][:,idx])**2 )))
+           # print((( mask[key][:,0]*(data[key][:,idx])**2 )))
+            self.acc_dicts[key+str(idx)+'err'] += float(torch.sum( mask[key][:,0]*(y_dict[key][:,idx] - pred[key][:,idx])**2 ))
+            if epoch == 0:
+                self.acc_dicts[key+str(idx)] += float(torch.sum( mask[key][:,0] *(y_dict[key][:,idx])**2 ))
+        
+        def PR(key, threshold, y, prob):
+            
+            for i, t in enumerate(threshold):
+                self.acc_dicts['TP'][i] += float(sum( (y==1) & (prob>t) )) 
+                self.acc_dicts['FP'][i] += float(sum( (y==0) & (prob>t) ))
+                self.acc_dicts['FN'][i] += float(sum( (y==1) & (prob<=t) ))
+                
+        if self.model_type == 'regressor':
+            
+            add('grain', 0)
+            add('grain', 1)
+            add('joint', 0)
+            add('joint', 1)        
+
+        
+
+        if self.model_type == 'classifier':
+            
+            pass
+            
+    
+    def epoch_summary(self):
+        
+        if self.model_type == 'classifier':
+         #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
+            self.test_auc, self.P_list, self.R_list = class_acc(self.test_prob, self.test_label)
+            print('Validation AUC:{:.6f}'.format(self.test_auc)) 
+            self.metric_list.append(float(self.test_auc))
+         #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
+
+        if self.model_type == 'regressor':
+            
+            
+            print(self.acc_dicts)
+            
+
+    def summary(self):
+
+
+        if self.model_type == 'classifier':
+            print('model id:', self.model_id, 'PR AUC', float(self.test_auc))
+            self.plist = [float(i) for i in self.P_list]
+            self.rlist = [float(i) for i in self.R_list]
+        
+        if self.model_type == 'regressor':
+            print('model id:', self.model_id, 'ACCURACY', self.acc_dicts)
 
 
 
@@ -24,47 +91,7 @@ def regress_acc(data, pred, mask, acc_dicts, epoch):
     add('joint', 0)
     add('joint', 1)
 
-    
 
-    """
-    # use PRAUC
-    
-    area = torch.sigmoid(torch.cat(prob))
-    y = torch.cat(label)
-
-    AUC = 0
-    intervals = 5
-    P_list, R_list = [], []
-    left_bound = 0
-
-    for i in range(intervals+1): 
-        # the first one is all positive, no negative, recall is one
-        threshold = 1 - i/intervals
-
-        TruePositive  = sum( (y==1) & (prob>threshold) )
-        FalsePositive = sum( (y==0) & (prob>threshold) )
-        FalseNegative = sum( (y==1) & (prob<=threshold) )
-        
-        
-        if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
-            
-            # it's a valid data
-            
-            Precision = TruePositive/(TruePositive + FalsePositive) 
-            Recall = TruePositive/(TruePositive + FalseNegative)
-    
-            AUC += (Recall-left_bound)*Precision
-            left_bound = Recall
-        
-        else:
-            Precision = -1
-            Recall = -1
-        
-        P_list.append(Precision)
-        R_list.append(Recall)
-    
-    return AUC, P_list, R_list
-    """
 
 
 def class_acc(prob, label):

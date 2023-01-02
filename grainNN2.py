@@ -8,16 +8,16 @@ Created on Fri Sep 30 15:35:27 2022
 import argparse, time, glob, dill, random, os
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import defaultdict
 import torch
 import torch.optim as optim
+from torch_geometric.loader import DataLoader
+from torch.nn.parallel import DistributedDataParallel
 from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier, rot90
 from parameters import regressor, classifier, classifier_transfered
 from graph_trajectory import graph_trajectory
-from torch_geometric.loader import DataLoader
-from torch.nn.parallel import DistributedDataParallel
-from metrics import regress_acc, class_acc, edge_error_metric
+from metrics import feature_metric, edge_error_metric
+from QoI import data_analysis
 
 def criterion(data, pred, mask):
    # print(torch.log(pred['edge_event']))
@@ -69,6 +69,7 @@ def train(model, train_loader, test_loader):
 
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=hp.decay_step, gamma=0.5, last_epoch=-1)
   #  torch.autograd.set_detect_anomaly(True)
+    metric = feature_metric(args.model_type)
 
     train_loss, count = 0, 0
 
@@ -83,20 +84,24 @@ def train(model, train_loader, test_loader):
     train_loss/=count
 
     test_loss, count = 0, 0
-    test_acc_dict = defaultdict(float)
+  #  test_acc_dict = defaultdict(float)
     for data in test_loader:      
         count += 1
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict)
         test_loss += float(criterion(data.y_dict, pred, data['mask']))  
-    if args.model_type=='regressor':
-        regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
-    print(test_acc_dict)
+        
+        metric.record(data.y_dict, pred, data['mask'], 0)
+   # if args.model_type=='regressor':
+   #     regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
+   # print(test_acc_dict)
     test_loss/=count
 
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
     train_loss_list.append(float(train_loss))
     test_loss_list.append(float(test_loss))  
+    metric.epoch_summary()
+
 
     for epoch in range(1, hp.epoch+1):
 
@@ -107,29 +112,24 @@ def train(model, train_loader, test_loader):
         train_loss, count = 0, 0
         for data in train_loader:   
             data.to(device)
-            symmetry = args.symmetry
-            for rot in range(symmetry):
-                
-                rot90(data, symmetry, rot)
+            count += 1
             
-                count += 1
-                
-                pred = model(data.x_dict, data.edge_index_dict)
+            pred = model(data.x_dict, data.edge_index_dict)
+         
+            loss = criterion(data.y_dict, pred, data['mask'])
              
-                loss = criterion(data.y_dict, pred, data['mask'])
-                 
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                
-                train_loss += float(loss)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += float(loss)
 
         train_loss/=count
         
         model.eval()
         test_loss, count = 0, 0
-        test_prob, test_label = [], []
-        test_acc_dict = defaultdict(float)
+      #  test_prob, test_label = [], []
+      #  test_acc_dict = defaultdict(float)
         with torch.no_grad():
             for data in test_loader:  
             
@@ -137,39 +137,38 @@ def train(model, train_loader, test_loader):
                 data.to(device)
                 pred = model(data.x_dict, data.edge_index_dict)
                 test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+                metric.record(data.y_dict, pred, data['mask'], epoch)
                 
-                if args.model_type== 'regressor': 
-                    regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, epoch)
+              #  if args.model_type== 'regressor': 
+              #      regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, epoch)
                     
                 
-                if args.model_type== 'classifier':       
-                    test_prob.append(pred['edge_event'])
-                    test_label.append(data.y_dict['edge_event'])
-        if epoch == hp.epoch: print(test_acc_dict)    
+              #  if args.model_type== 'classifier':       
+                     
+              #      test_prob.append(pred['edge_event'])
+              #      test_label.append(data.y_dict['edge_event'])
+                    
+     #   if epoch == hp.epoch: print(test_acc_dict)    
+        
         test_loss/=count
         
 
         print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss), float(test_loss)))
-        if args.model_type== 'classifier':
-         #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
-            test_auc, P_list, R_list = class_acc(test_prob, test_label)
-            print('Validation AUC:{:.6f}'.format(test_auc)) 
-            test_auc_list.append(float(test_auc))
-         #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
         train_loss_list.append(float(train_loss))
-        test_loss_list.append(float(test_loss))      
-        test_acc_list.append(test_acc_dict)
+        test_loss_list.append(float(test_loss))    
+        metric.epoch_summary()
+        
+        
+      #  test_acc_list.append(test_acc_dict)
         
         scheduler.step()
         
     print('model id:', args.model_id, 'loss', test_loss)
-    if args.model_type == 'classifier':
-        print('model id:', args.model_id, 'PR AUC', float(test_auc))
-        train.plist = [float(i) for i in P_list]
-        train.rlist = [float(i) for i in R_list]
+    metric.summary()
     
-    if args.model_type == 'regressor':
-        print('model id:', args.model_id, 'ACCURACY', test_acc_dict)
+    
+    train.metric = metric
+        
     
     return model 
 
@@ -187,9 +186,9 @@ if __name__=='__main__':
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./GR/')
     parser.add_argument("--model_type", type=str, default='regressor')
-    parser.add_argument("--data_dir", type=str, default='./data/')
+    parser.add_argument("--data_dir", type=str, default='./sameGR/level2/')
     parser.add_argument("--test_dir", type=str, default='./test/')
-
+    parser.add_argument("--use_sample", type=str, default='all')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
@@ -270,7 +269,12 @@ if __name__=='__main__':
 
     
     train_list = data_list[:num_train]
-    test_list = data_list[num_train:]                 
+    if args.use_sample !='all':
+        train_list = train_list[:int(args.use_sample)]
+    
+    test_list = data_list[num_train:]       
+
+    #data_prop = data_analysis(train_list)          
     
     if args.model_type== 'regressor':
         hp = regressor(mode, model_id)

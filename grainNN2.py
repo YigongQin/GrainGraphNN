@@ -100,6 +100,9 @@ def train(model, train_loader, test_loader):
     print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
     train_loss_list.append(float(train_loss))
     test_loss_list.append(float(test_loss))  
+    train0, test0 = train_loss_list[0], test_loss_list[0]
+    
+    
     metric.epoch_summary()
 
 
@@ -153,7 +156,7 @@ def train(model, train_loader, test_loader):
         test_loss/=count
         
 
-        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss), float(test_loss)))
+        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss)/train0, float(test_loss)/test0 ))
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))    
         metric.epoch_summary()

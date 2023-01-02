@@ -7,7 +7,7 @@ Created on Thu Dec 15 13:43:45 2022
 """
 import torch
 from collections import defaultdict
-
+import math
 
 
 class feature_metric:
@@ -58,9 +58,13 @@ class feature_metric:
          #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
 
         if self.model_type == 'regressor':
+
+            x_err = 100*math.sqrt(self.acc_dicts['joint0err']/self.acc_dicts['joint0'])
+            y_err = 100*math.sqrt(self.acc_dicts['joint1err']/self.acc_dicts['joint1'])
+            s_err = 100*math.sqrt(self.acc_dicts['grain0err']/self.acc_dicts['grain0'])
+            v_err = 100*math.sqrt(self.acc_dicts['grain1err']/self.acc_dicts['grain1'])
             
-            
-            print(self.acc_dicts)
+            print('err, joint x: %2.1f, y: %2.1f, grain s: %2.1f, v: %2.1f'%(x_err, y_err, s_err, v_err))
             
 
     def summary(self):

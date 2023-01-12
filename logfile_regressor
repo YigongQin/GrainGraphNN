@@ -1,0 +1,4143 @@
+/scratch1/07428/ygqin/graph/GrainGraphNN
+Mon Jan  2 13:58:50 CST 2023
+Launcher: Setup complete.
+
+------------- SUMMARY ---------------
+   Number of hosts:    3
+   Working directory:  /scratch1/07428/ygqin/graph/GrainGraphNN
+   Processes per host: 16
+   Total processes:    48
+   Total jobs:         48
+   Scheduling method:  dynamic
+
+-------------------------------------
+Launcher: Starting parallel tasks...
+Launcher: Task 21 running job 1 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=0)
+Launcher: Task 4 running job 2 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=1)
+Launcher: Task 32 running job 3 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=2)
+Launcher: Task 24 running job 4 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=3)
+Launcher: Task 26 running job 5 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=4)
+Launcher: Task 18 running job 6 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=5)
+Launcher: Task 3 running job 7 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=6)
+Launcher: Task 8 running job 8 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=7)
+Launcher: Task 12 running job 9 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=8)
+Launcher: Task 34 running job 10 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=9)
+Launcher: Task 13 running job 11 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=10)
+Launcher: Task 10 running job 12 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=11)
+Launcher: Task 33 running job 13 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=12)
+Launcher: Task 5 running job 14 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=13)
+Launcher: Task 43 running job 15 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=14)
+Launcher: Task 38 running job 16 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=15)
+Launcher: Task 17 running job 17 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=16)
+Launcher: Task 35 running job 18 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=17)
+Launcher: Task 1 running job 19 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=18)
+Launcher: Task 28 running job 20 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=19)
+Launcher: Task 36 running job 21 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=20)
+Launcher: Task 14 running job 22 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=21)
+Launcher: Task 6 running job 23 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=22)
+Launcher: Task 29 running job 24 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=23)
+Launcher: Task 19 running job 25 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=24)
+Launcher: Task 0 running job 26 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=25)
+Launcher: Task 22 running job 27 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=26)
+Launcher: Task 11 running job 28 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=27)
+Launcher: Task 40 running job 29 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=28)
+Launcher: Task 31 running job 30 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=29)
+Launcher: Task 44 running job 31 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=30)
+Launcher: Task 20 running job 32 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=31)
+Launcher: Task 30 running job 33 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=32)
+Launcher: Task 2 running job 34 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=33)
+Launcher: Task 39 running job 35 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=34)
+Launcher: Task 47 running job 36 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=35)
+Launcher: Task 27 running job 37 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=36)
+Launcher: Task 42 running job 38 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=37)
+Launcher: Task 7 running job 40 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=39)
+Launcher: Task 15 running job 39 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=38)
+Launcher: Task 9 running job 41 on c199-102.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=40)
+Launcher: Task 41 running job 42 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=41)
+Launcher: Task 46 running job 43 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=42)
+Launcher: Task 16 running job 44 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=43)
+Launcher: Task 45 running job 45 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=44)
+Launcher: Task 23 running job 47 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=46)
+Launcher: Task 25 running job 46 on c199-111.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=45)
+Launcher: Task 37 running job 48 on c199-112.frontera.tacc.utexas.edu (python3 grainNN2.py --data_dir=quality/level2/ --model_id=47)
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  45
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.279910, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.012101, valid loss:0.002667
+err, joint x: 60.3, y: 61.8, grain s: 35.2, v: 100.0
+
+
+Epoch:2, Train loss:0.006484, valid loss:0.002414
+err, joint x: 57.2, y: 59.2, grain s: 31.7, v: 100.0
+
+
+Epoch:3, Train loss:0.005807, valid loss:0.002253
+err, joint x: 54.7, y: 56.5, grain s: 32.6, v: 100.0
+
+
+Epoch:4, Train loss:0.005370, valid loss:0.002062
+err, joint x: 52.9, y: 54.6, grain s: 28.5, v: 100.0
+
+
+Epoch:5, Train loss:0.004970, valid loss:0.002010
+err, joint x: 52.9, y: 52.7, grain s: 29.3, v: 100.0
+
+
+Epoch:6, Train loss:0.004661, valid loss:0.002022
+err, joint x: 55.0, y: 51.4, grain s: 28.0, v: 100.0
+
+
+Epoch:7, Train loss:0.004422, valid loss:0.001752
+err, joint x: 48.9, y: 49.4, grain s: 26.8, v: 100.0
+
+
+Epoch:8, Train loss:0.004272, valid loss:0.001684
+err, joint x: 47.6, y: 48.6, grain s: 26.3, v: 100.0
+
+
+Epoch:9, Train loss:0.004141, valid loss:0.001692
+err, joint x: 48.0, y: 48.4, grain s: 26.8, v: 100.0
+
+
+Epoch:10, Train loss:0.004005, valid loss:0.001619
+err, joint x: 46.5, y: 47.9, grain s: 25.7, v: 100.0
+model id: 45 loss 0.0005849986323266334
+model id: 45 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 1652.4282083511353
+Launcher: Job 46 completed in 1690 seconds.
+Launcher: Task 25 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  44
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.279910, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.009656, valid loss:0.002447
+err, joint x: 57.6, y: 59.3, grain s: 33.0, v: 100.0
+
+
+Epoch:2, Train loss:0.005733, valid loss:0.002170
+err, joint x: 55.4, y: 54.5, grain s: 30.3, v: 100.0
+
+
+Epoch:3, Train loss:0.004878, valid loss:0.002041
+err, joint x: 49.4, y: 54.6, grain s: 34.1, v: 100.0
+
+
+Epoch:4, Train loss:0.004432, valid loss:0.001691
+err, joint x: 47.8, y: 48.8, grain s: 26.3, v: 100.0
+
+
+Epoch:5, Train loss:0.004158, valid loss:0.001823
+err, joint x: 46.7, y: 48.3, grain s: 37.9, v: 100.0
+
+
+Epoch:6, Train loss:0.004032, valid loss:0.001876
+err, joint x: 50.2, y: 47.8, grain s: 35.7, v: 100.0
+
+
+Epoch:7, Train loss:0.003901, valid loss:0.001617
+err, joint x: 46.5, y: 47.4, grain s: 26.3, v: 100.0
+
+
+Epoch:8, Train loss:0.003812, valid loss:0.001530
+err, joint x: 45.3, y: 46.3, grain s: 24.8, v: 100.0
+
+
+Epoch:9, Train loss:0.003747, valid loss:0.001607
+err, joint x: 46.2, y: 46.4, grain s: 28.8, v: 100.0
+
+
+Epoch:10, Train loss:0.003709, valid loss:0.001542
+err, joint x: 44.0, y: 47.8, grain s: 25.2, v: 100.0
+model id: 44 loss 0.0005570928070006804
+model id: 44 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 1698.0682814121246
+Launcher: Job 45 completed in 1738 seconds.
+Launcher: Task 45 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  46
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.279910, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.010686, valid loss:0.002559
+err, joint x: 59.2, y: 60.4, grain s: 34.4, v: 100.0
+
+
+Epoch:2, Train loss:0.006088, valid loss:0.002515
+err, joint x: 57.5, y: 62.1, grain s: 31.0, v: 100.0
+
+
+Epoch:3, Train loss:0.005365, valid loss:0.002046
+err, joint x: 52.0, y: 54.6, grain s: 29.4, v: 100.0
+
+
+Epoch:4, Train loss:0.004804, valid loss:0.001796
+err, joint x: 49.5, y: 50.3, grain s: 26.7, v: 100.0
+
+
+Epoch:5, Train loss:0.004420, valid loss:0.001904
+err, joint x: 50.8, y: 50.9, grain s: 30.6, v: 100.0
+
+
+Epoch:6, Train loss:0.004182, valid loss:0.001959
+err, joint x: 55.8, y: 49.0, grain s: 26.3, v: 100.0
+
+
+Epoch:7, Train loss:0.004019, valid loss:0.001704
+err, joint x: 47.8, y: 49.6, grain s: 25.2, v: 100.0
+
+
+Epoch:8, Train loss:0.003931, valid loss:0.001570
+err, joint x: 45.3, y: 47.3, grain s: 25.6, v: 100.0
+
+
+Epoch:9, Train loss:0.003828, valid loss:0.001589
+err, joint x: 46.3, y: 47.0, grain s: 25.7, v: 100.0
+
+
+Epoch:10, Train loss:0.003747, valid loss:0.001554
+err, joint x: 45.0, y: 46.6, grain s: 26.6, v: 100.0
+model id: 46 loss 0.000561451964867523
+model id: 46 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 1702.6732032299042
+Launcher: Job 47 completed in 1739 seconds.
+Launcher: Task 23 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  47
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.279910, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.009453, valid loss:0.002438
+err, joint x: 57.6, y: 60.4, grain s: 30.3, v: 100.0
+
+
+Epoch:2, Train loss:0.005688, valid loss:0.002525
+err, joint x: 53.6, y: 53.0, grain s: 52.8, v: 100.0
+
+
+Epoch:3, Train loss:0.005054, valid loss:0.002160
+err, joint x: 50.8, y: 59.7, grain s: 27.6, v: 100.0
+
+
+Epoch:4, Train loss:0.004680, valid loss:0.001756
+err, joint x: 49.9, y: 48.1, grain s: 28.0, v: 100.0
+
+
+Epoch:5, Train loss:0.004375, valid loss:0.001932
+err, joint x: 48.5, y: 55.6, grain s: 27.2, v: 100.0
+
+
+Epoch:6, Train loss:0.004200, valid loss:0.001839
+err, joint x: 46.0, y: 52.5, grain s: 32.2, v: 100.0
+
+
+Epoch:7, Train loss:0.004208, valid loss:0.001647
+err, joint x: 47.6, y: 47.5, grain s: 26.3, v: 100.0
+
+
+Epoch:8, Train loss:0.004078, valid loss:0.001509
+err, joint x: 44.7, y: 45.9, grain s: 25.1, v: 100.0
+
+
+Epoch:9, Train loss:0.003954, valid loss:0.001922
+err, joint x: 53.3, y: 50.6, grain s: 26.3, v: 100.0
+
+
+Epoch:10, Train loss:0.003932, valid loss:0.001602
+err, joint x: 47.2, y: 46.4, grain s: 25.9, v: 100.0
+model id: 47 loss 0.0005787742834183432
+model id: 47 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 1708.4204211235046
+Launcher: Job 48 completed in 1745 seconds.
+Launcher: Task 37 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  40
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280166, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.008094, valid loss:0.002436
+err, joint x: 55.4, y: 59.5, grain s: 36.3, v: 100.0
+
+
+Epoch:2, Train loss:0.005131, valid loss:0.001832
+err, joint x: 48.5, y: 50.7, grain s: 30.5, v: 100.0
+
+
+Epoch:3, Train loss:0.004486, valid loss:0.002044
+err, joint x: 48.6, y: 58.5, grain s: 27.1, v: 100.0
+
+
+Epoch:4, Train loss:0.004224, valid loss:0.001609
+err, joint x: 45.9, y: 47.6, grain s: 27.0, v: 100.0
+
+
+Epoch:5, Train loss:0.004018, valid loss:0.001642
+err, joint x: 45.5, y: 47.1, grain s: 31.0, v: 100.0
+
+
+Epoch:6, Train loss:0.003929, valid loss:0.002306
+err, joint x: 53.4, y: 58.5, grain s: 34.2, v: 100.0
+
+
+Epoch:7, Train loss:0.003812, valid loss:0.001965
+err, joint x: 51.1, y: 54.4, grain s: 26.4, v: 100.0
+
+
+Epoch:8, Train loss:0.003766, valid loss:0.001435
+err, joint x: 43.5, y: 44.7, grain s: 24.6, v: 100.0
+
+
+Epoch:9, Train loss:0.003738, valid loss:0.001499
+err, joint x: 44.2, y: 45.7, grain s: 25.9, v: 100.0
+
+
+Epoch:10, Train loss:0.003656, valid loss:0.001418
+err, joint x: 43.4, y: 44.3, grain s: 24.4, v: 100.0
+model id: 40 loss 0.0005123895590215744
+model id: 40 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2220.73029756546
+Launcher: Job 41 completed in 2265 seconds.
+Launcher: Task 9 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  43
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280166, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007942, valid loss:0.002119
+err, joint x: 52.5, y: 54.8, grain s: 32.7, v: 100.0
+
+
+Epoch:2, Train loss:0.005238, valid loss:0.002004
+err, joint x: 50.0, y: 55.2, grain s: 29.6, v: 100.0
+
+
+Epoch:3, Train loss:0.004825, valid loss:0.002209
+err, joint x: 50.7, y: 51.2, grain s: 46.5, v: 100.0
+
+
+Epoch:4, Train loss:0.004658, valid loss:0.001740
+err, joint x: 47.4, y: 49.8, grain s: 28.8, v: 100.0
+
+
+Epoch:5, Train loss:0.004412, valid loss:0.001895
+err, joint x: 50.1, y: 52.2, grain s: 28.4, v: 100.0
+
+
+Epoch:6, Train loss:0.004334, valid loss:0.001670
+err, joint x: 47.0, y: 48.2, grain s: 27.6, v: 100.0
+
+
+Epoch:7, Train loss:0.004288, valid loss:0.001830
+err, joint x: 48.2, y: 53.1, grain s: 26.1, v: 100.0
+
+
+Epoch:8, Train loss:0.004185, valid loss:0.001560
+err, joint x: 44.7, y: 48.0, grain s: 24.7, v: 100.0
+
+
+Epoch:9, Train loss:0.004157, valid loss:0.001789
+err, joint x: 45.1, y: 48.2, grain s: 38.2, v: 100.0
+
+
+Epoch:10, Train loss:0.004128, valid loss:0.001679
+err, joint x: 45.6, y: 50.6, grain s: 26.2, v: 100.0
+model id: 43 loss 0.0006065970602711397
+model id: 43 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2265.099458694458
+Launcher: Job 44 completed in 2305 seconds.
+Launcher: Task 16 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  41
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280166, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.009669, valid loss:0.002809
+err, joint x: 58.8, y: 59.8, grain s: 48.3, v: 100.0
+
+
+Epoch:2, Train loss:0.005985, valid loss:0.002391
+err, joint x: 56.8, y: 57.8, grain s: 34.0, v: 100.0
+
+
+Epoch:3, Train loss:0.005186, valid loss:0.002094
+err, joint x: 52.0, y: 53.0, grain s: 35.3, v: 100.0
+
+
+Epoch:4, Train loss:0.004653, valid loss:0.001738
+err, joint x: 48.5, y: 49.8, grain s: 28.0, v: 82.3
+
+
+Epoch:5, Train loss:0.003882, valid loss:0.001650
+err, joint x: 47.7, y: 49.9, grain s: 27.4, v: 19.4
+
+
+Epoch:6, Train loss:0.003627, valid loss:0.001711
+err, joint x: 51.3, y: 48.1, grain s: 27.4, v: 16.2
+
+
+Epoch:7, Train loss:0.003475, valid loss:0.001574
+err, joint x: 45.4, y: 46.7, grain s: 33.0, v: 14.2
+
+
+Epoch:8, Train loss:0.003367, valid loss:0.001448
+err, joint x: 44.1, y: 47.0, grain s: 26.3, v: 12.8
+
+
+Epoch:9, Train loss:0.003292, valid loss:0.001447
+err, joint x: 44.9, y: 46.6, grain s: 25.4, v: 22.6
+
+
+Epoch:10, Train loss:0.003203, valid loss:0.001369
+err, joint x: 44.0, y: 44.8, grain s: 24.5, v: 30.4
+model id: 41 loss 0.0004946084241271906
+model id: 41 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2283.861228942871
+Launcher: Job 42 completed in 2325 seconds.
+Launcher: Task 41 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  42
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280166, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.008697, valid loss:0.002317
+err, joint x: 56.3, y: 57.6, grain s: 31.3, v: 100.0
+
+
+Epoch:2, Train loss:0.005373, valid loss:0.001950
+err, joint x: 51.5, y: 51.5, grain s: 30.1, v: 100.0
+
+
+Epoch:3, Train loss:0.004550, valid loss:0.002199
+err, joint x: 47.6, y: 49.5, grain s: 51.7, v: 100.0
+
+
+Epoch:4, Train loss:0.004167, valid loss:0.001610
+err, joint x: 46.2, y: 46.9, grain s: 27.5, v: 100.0
+
+
+Epoch:5, Train loss:0.003936, valid loss:0.001584
+err, joint x: 46.3, y: 46.4, grain s: 26.8, v: 100.0
+
+
+Epoch:6, Train loss:0.003819, valid loss:0.002023
+err, joint x: 47.0, y: 51.4, grain s: 42.3, v: 100.0
+
+
+Epoch:7, Train loss:0.003735, valid loss:0.001589
+err, joint x: 45.2, y: 46.6, grain s: 28.4, v: 100.0
+
+
+Epoch:8, Train loss:0.003658, valid loss:0.001444
+err, joint x: 43.7, y: 44.8, grain s: 24.7, v: 100.0
+
+
+Epoch:9, Train loss:0.003595, valid loss:0.001497
+err, joint x: 43.4, y: 45.7, grain s: 27.4, v: 100.0
+
+
+Epoch:10, Train loss:0.003553, valid loss:0.001391
+err, joint x: 43.0, y: 44.1, grain s: 23.6, v: 100.0
+model id: 42 loss 0.0005027821420558862
+model id: 42 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2438.708681821823
+Launcher: Job 43 completed in 2479 seconds.
+Launcher: Task 46 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  13
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472520, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.007115, valid loss:0.001588
+err, joint x: 59.5, y: 62.2, grain s: 36.0, v: 100.0
+
+
+Epoch:2, Train loss:0.003755, valid loss:0.001361
+err, joint x: 56.0, y: 57.1, grain s: 31.2, v: 100.0
+
+
+Epoch:3, Train loss:0.003203, valid loss:0.001232
+err, joint x: 54.0, y: 52.9, grain s: 30.5, v: 100.0
+
+
+Epoch:4, Train loss:0.002878, valid loss:0.001089
+err, joint x: 49.0, y: 50.7, grain s: 29.4, v: 100.0
+
+
+Epoch:5, Train loss:0.002612, valid loss:0.001401
+err, joint x: 50.7, y: 65.0, grain s: 28.0, v: 100.0
+
+
+Epoch:6, Train loss:0.002474, valid loss:0.001018
+err, joint x: 46.9, y: 47.6, grain s: 31.9, v: 100.0
+
+
+Epoch:7, Train loss:0.002369, valid loss:0.000998
+err, joint x: 46.9, y: 48.1, grain s: 28.7, v: 100.0
+
+
+Epoch:8, Train loss:0.002272, valid loss:0.000933
+err, joint x: 45.1, y: 46.2, grain s: 28.6, v: 100.0
+
+
+Epoch:9, Train loss:0.002207, valid loss:0.000917
+err, joint x: 44.5, y: 46.3, grain s: 27.5, v: 100.0
+
+
+Epoch:10, Train loss:0.002130, valid loss:0.000843
+err, joint x: 43.2, y: 44.5, grain s: 24.4, v: 100.0
+model id: 13 loss 0.0005139734754006245
+model id: 13 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2443.143629550934
+Launcher: Job 14 completed in 2498 seconds.
+Launcher: Task 5 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  12
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472520, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.005548, valid loss:0.001983
+err, joint x: 72.4, y: 58.1, grain s: 49.6, v: 100.0
+
+
+Epoch:2, Train loss:0.003142, valid loss:0.001121
+err, joint x: 48.9, y: 50.5, grain s: 33.7, v: 100.0
+
+
+Epoch:3, Train loss:0.002609, valid loss:0.000975
+err, joint x: 47.6, y: 48.7, grain s: 29.1, v: 36.2
+
+
+Epoch:4, Train loss:0.002257, valid loss:0.000918
+err, joint x: 46.2, y: 47.6, grain s: 26.8, v: 44.0
+
+
+Epoch:5, Train loss:0.002077, valid loss:0.001172
+err, joint x: 46.5, y: 61.0, grain s: 26.4, v: 17.1
+
+
+Epoch:6, Train loss:0.002001, valid loss:0.000878
+err, joint x: 44.4, y: 48.2, grain s: 25.4, v: 19.0
+
+
+Epoch:7, Train loss:0.001927, valid loss:0.000873
+err, joint x: 44.2, y: 45.0, grain s: 31.1, v: 35.4
+
+
+Epoch:8, Train loss:0.001861, valid loss:0.000818
+err, joint x: 43.9, y: 44.4, grain s: 26.2, v: 34.8
+
+
+Epoch:9, Train loss:0.001819, valid loss:0.001127
+err, joint x: 58.5, y: 46.9, grain s: 26.1, v: 23.5
+
+
+Epoch:10, Train loss:0.001776, valid loss:0.000783
+err, joint x: 42.2, y: 43.7, grain s: 26.9, v: 21.4
+model id: 12 loss 0.0004771711814793802
+model id: 12 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2447.9905450344086
+Launcher: Job 13 completed in 2503 seconds.
+Launcher: Task 33 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  15
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472520, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.005313, valid loss:0.002405
+err, joint x: 67.3, y: 56.8, grain s: 80.3, v: 100.0
+
+
+Epoch:2, Train loss:0.002998, valid loss:0.001082
+err, joint x: 48.2, y: 50.3, grain s: 31.4, v: 100.0
+
+
+Epoch:3, Train loss:0.002639, valid loss:0.000992
+err, joint x: 47.4, y: 48.5, grain s: 26.6, v: 100.0
+
+
+Epoch:4, Train loss:0.002545, valid loss:0.000949
+err, joint x: 45.5, y: 46.3, grain s: 29.7, v: 100.0
+
+
+Epoch:5, Train loss:0.002409, valid loss:0.001263
+err, joint x: 50.5, y: 48.6, grain s: 46.6, v: 100.0
+
+
+Epoch:6, Train loss:0.002345, valid loss:0.000937
+err, joint x: 44.5, y: 47.8, grain s: 27.4, v: 100.0
+
+
+Epoch:7, Train loss:0.002314, valid loss:0.000926
+err, joint x: 44.1, y: 47.3, grain s: 27.4, v: 100.0
+
+
+Epoch:8, Train loss:0.002256, valid loss:0.000854
+err, joint x: 43.7, y: 44.1, grain s: 25.8, v: 100.0
+
+
+Epoch:9, Train loss:0.002184, valid loss:0.001193
+err, joint x: 56.6, y: 47.6, grain s: 30.9, v: 100.0
+
+
+Epoch:10, Train loss:0.002150, valid loss:0.000856
+err, joint x: 43.6, y: 44.8, grain s: 24.5, v: 100.0
+model id: 15 loss 0.0005217949773872359
+model id: 15 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2476.6353125572205
+Launcher: Job 16 completed in 2531 seconds.
+Launcher: Task 38 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  14
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472520, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.006045, valid loss:0.001543
+err, joint x: 59.3, y: 60.0, grain s: 36.6, v: 100.0
+
+
+Epoch:2, Train loss:0.003354, valid loss:0.001164
+err, joint x: 51.2, y: 52.8, grain s: 29.1, v: 100.0
+
+
+Epoch:3, Train loss:0.002797, valid loss:0.001142
+err, joint x: 49.0, y: 50.4, grain s: 36.3, v: 100.0
+
+
+Epoch:4, Train loss:0.002586, valid loss:0.000955
+err, joint x: 46.3, y: 47.4, grain s: 26.3, v: 100.0
+
+
+Epoch:5, Train loss:0.002389, valid loss:0.001238
+err, joint x: 47.4, y: 58.9, grain s: 31.6, v: 100.0
+
+
+Epoch:6, Train loss:0.002287, valid loss:0.000916
+err, joint x: 45.6, y: 46.0, grain s: 26.0, v: 100.0
+
+
+Epoch:7, Train loss:0.002079, valid loss:0.000943
+err, joint x: 44.6, y: 49.9, grain s: 29.2, v: 26.6
+
+
+Epoch:8, Train loss:0.001872, valid loss:0.000803
+err, joint x: 43.5, y: 44.4, grain s: 24.8, v: 42.4
+
+
+Epoch:9, Train loss:0.001816, valid loss:0.001031
+err, joint x: 45.0, y: 45.8, grain s: 43.6, v: 15.4
+
+
+Epoch:10, Train loss:0.001759, valid loss:0.000762
+err, joint x: 42.2, y: 44.2, grain s: 23.0, v: 25.8
+model id: 14 loss 0.0004644938564438018
+model id: 14 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2524.5058410167694
+Launcher: Job 15 completed in 2579 seconds.
+Launcher: Task 43 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  9
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472742, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.005555, valid loss:0.001514
+err, joint x: 58.8, y: 60.2, grain s: 34.0, v: 100.0
+
+
+Epoch:2, Train loss:0.003260, valid loss:0.001149
+err, joint x: 51.1, y: 51.9, grain s: 29.7, v: 100.0
+
+
+Epoch:3, Train loss:0.002627, valid loss:0.001007
+err, joint x: 49.2, y: 49.1, grain s: 28.9, v: 32.9
+
+
+Epoch:4, Train loss:0.002210, valid loss:0.000996
+err, joint x: 50.2, y: 46.7, grain s: 29.5, v: 47.3
+
+
+Epoch:5, Train loss:0.002049, valid loss:0.000900
+err, joint x: 44.8, y: 47.3, grain s: 29.3, v: 19.1
+
+
+Epoch:6, Train loss:0.001958, valid loss:0.000961
+err, joint x: 45.4, y: 46.9, grain s: 35.3, v: 34.1
+
+
+Epoch:7, Train loss:0.001877, valid loss:0.000773
+err, joint x: 42.7, y: 43.8, grain s: 23.9, v: 36.0
+
+
+Epoch:8, Train loss:0.001836, valid loss:0.000770
+err, joint x: 42.7, y: 43.9, grain s: 23.9, v: 15.3
+
+
+Epoch:9, Train loss:0.001741, valid loss:0.000856
+err, joint x: 46.0, y: 44.9, grain s: 26.4, v: 18.4
+
+
+Epoch:10, Train loss:0.001704, valid loss:0.000790
+err, joint x: 45.0, y: 43.3, grain s: 22.9, v: 13.8
+model id: 9 loss 0.00048188523006891567
+model id: 9 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 2988.291937828064
+Launcher: Job 10 completed in 3047 seconds.
+Launcher: Task 34 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  10
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472742, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004975, valid loss:0.001327
+err, joint x: 55.5, y: 55.6, grain s: 31.8, v: 100.0
+
+
+Epoch:2, Train loss:0.002885, valid loss:0.001063
+err, joint x: 50.0, y: 50.6, grain s: 27.9, v: 67.1
+
+
+Epoch:3, Train loss:0.002296, valid loss:0.001091
+err, joint x: 50.6, y: 48.8, grain s: 34.2, v: 57.2
+
+
+Epoch:4, Train loss:0.002087, valid loss:0.000967
+err, joint x: 48.9, y: 47.2, grain s: 28.2, v: 42.1
+
+
+Epoch:5, Train loss:0.001972, valid loss:0.000876
+err, joint x: 45.0, y: 45.4, grain s: 29.6, v: 16.4
+
+
+Epoch:6, Train loss:0.001890, valid loss:0.000846
+err, joint x: 44.3, y: 46.7, grain s: 24.7, v: 26.5
+
+
+Epoch:7, Train loss:0.001830, valid loss:0.000781
+err, joint x: 42.5, y: 44.2, grain s: 25.4, v: 20.7
+
+
+Epoch:8, Train loss:0.001762, valid loss:0.000762
+err, joint x: 42.9, y: 43.5, grain s: 23.4, v: 14.6
+
+
+Epoch:9, Train loss:0.001700, valid loss:0.001073
+err, joint x: 48.3, y: 50.1, grain s: 36.4, v: 16.8
+
+
+Epoch:10, Train loss:0.001669, valid loss:0.000823
+err, joint x: 41.3, y: 43.4, grain s: 33.5, v: 24.3
+model id: 10 loss 0.0005020914859848009
+model id: 10 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3005.058432817459
+Launcher: Job 11 completed in 3061 seconds.
+Launcher: Task 13 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  8
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472742, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004549, valid loss:0.001190
+err, joint x: 51.2, y: 52.0, grain s: 33.5, v: 100.0
+
+
+Epoch:2, Train loss:0.002641, valid loss:0.001022
+err, joint x: 48.7, y: 49.6, grain s: 27.8, v: 69.5
+
+
+Epoch:3, Train loss:0.002308, valid loss:0.001100
+err, joint x: 47.7, y: 50.5, grain s: 38.0, v: 43.4
+
+
+Epoch:4, Train loss:0.002145, valid loss:0.001113
+err, joint x: 53.0, y: 52.5, grain s: 26.4, v: 15.9
+
+
+Epoch:5, Train loss:0.002026, valid loss:0.000811
+err, joint x: 43.6, y: 44.8, grain s: 25.4, v: 22.4
+
+
+Epoch:6, Train loss:0.001941, valid loss:0.000975
+err, joint x: 47.3, y: 49.1, grain s: 28.7, v: 47.3
+
+
+Epoch:7, Train loss:0.001881, valid loss:0.000858
+err, joint x: 42.5, y: 43.9, grain s: 34.6, v: 22.6
+
+
+Epoch:8, Train loss:0.001842, valid loss:0.000784
+err, joint x: 42.6, y: 43.8, grain s: 25.9, v: 27.6
+
+
+Epoch:9, Train loss:0.001791, valid loss:0.001034
+err, joint x: 47.7, y: 46.7, grain s: 38.5, v: 35.8
+
+
+Epoch:10, Train loss:0.001761, valid loss:0.000778
+err, joint x: 42.2, y: 45.1, grain s: 22.7, v: 33.0
+model id: 8 loss 0.00047446695056610873
+model id: 8 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3010.433232307434
+Launcher: Job 9 completed in 3068 seconds.
+Launcher: Task 12 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  11
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.472742, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004546, valid loss:0.001299
+err, joint x: 52.8, y: 53.3, grain s: 38.6, v: 100.0
+
+
+Epoch:2, Train loss:0.002994, valid loss:0.001104
+err, joint x: 48.8, y: 49.8, grain s: 33.4, v: 100.0
+
+
+Epoch:3, Train loss:0.002826, valid loss:0.001238
+err, joint x: 50.9, y: 56.6, grain s: 30.1, v: 100.0
+
+
+Epoch:4, Train loss:0.002670, valid loss:0.001296
+err, joint x: 57.7, y: 52.9, grain s: 29.8, v: 100.0
+
+
+Epoch:5, Train loss:0.002592, valid loss:0.001400
+err, joint x: 55.3, y: 55.8, grain s: 38.5, v: 100.0
+
+
+Epoch:6, Train loss:0.002501, valid loss:0.001305
+err, joint x: 47.5, y: 54.3, grain s: 45.8, v: 100.0
+
+
+Epoch:7, Train loss:0.002462, valid loss:0.001051
+err, joint x: 47.1, y: 48.1, grain s: 34.6, v: 100.0
+
+
+Epoch:8, Train loss:0.002422, valid loss:0.001037
+err, joint x: 49.6, y: 47.5, grain s: 29.4, v: 100.0
+
+
+Epoch:9, Train loss:0.002419, valid loss:0.001085
+err, joint x: 49.8, y: 51.3, grain s: 26.9, v: 100.0
+
+
+Epoch:10, Train loss:0.002371, valid loss:0.000959
+err, joint x: 46.0, y: 47.6, grain s: 27.4, v: 100.0
+model id: 11 loss 0.0005846041409919659
+model id: 11 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3191.1101977825165
+Launcher: Job 12 completed in 3248 seconds.
+Launcher: Task 10 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  31
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130350, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.025009, valid loss:0.005168
+err, joint x: 54.9, y: 56.6, grain s: 38.9, v: 100.0
+
+
+Epoch:2, Train loss:0.011675, valid loss:0.004397
+err, joint x: 49.9, y: 51.0, grain s: 37.9, v: 100.0
+
+
+Epoch:3, Train loss:0.010023, valid loss:0.004318
+err, joint x: 50.8, y: 52.4, grain s: 31.8, v: 100.0
+
+
+Epoch:4, Train loss:0.009253, valid loss:0.004724
+err, joint x: 49.4, y: 50.1, grain s: 47.0, v: 100.0
+
+
+Epoch:5, Train loss:0.008976, valid loss:0.003696
+err, joint x: 48.0, y: 46.6, grain s: 30.1, v: 100.0
+
+
+Epoch:6, Train loss:0.008596, valid loss:0.003543
+err, joint x: 46.5, y: 47.2, grain s: 27.3, v: 100.0
+
+
+Epoch:7, Train loss:0.008350, valid loss:0.004035
+err, joint x: 46.5, y: 54.4, grain s: 27.1, v: 100.0
+
+
+Epoch:8, Train loss:0.008141, valid loss:0.003371
+err, joint x: 46.0, y: 45.3, grain s: 26.3, v: 100.0
+
+
+Epoch:9, Train loss:0.008106, valid loss:0.003399
+err, joint x: 43.3, y: 49.2, grain s: 24.3, v: 100.0
+
+
+Epoch:10, Train loss:0.007886, valid loss:0.003490
+err, joint x: 47.3, y: 45.9, grain s: 26.1, v: 100.0
+model id: 31 loss 0.0005766628781289217
+model id: 31 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3273.7449848651886
+Launcher: Job 32 completed in 3320 seconds.
+Launcher: Task 20 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  28
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130350, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.017993, valid loss:0.006568
+err, joint x: 68.7, y: 62.1, grain s: 35.4, v: 90.0
+
+
+Epoch:2, Train loss:0.009952, valid loss:0.003816
+err, joint x: 48.4, y: 49.4, grain s: 33.1, v: 23.1
+
+
+Epoch:3, Train loss:0.008351, valid loss:0.003616
+err, joint x: 47.4, y: 47.4, grain s: 32.0, v: 48.9
+
+
+Epoch:4, Train loss:0.007577, valid loss:0.003463
+err, joint x: 46.0, y: 46.6, grain s: 31.6, v: 46.3
+
+
+Epoch:5, Train loss:0.007450, valid loss:0.003302
+err, joint x: 44.6, y: 48.7, grain s: 26.0, v: 24.9
+
+
+Epoch:6, Train loss:0.006891, valid loss:0.003122
+err, joint x: 45.4, y: 45.1, grain s: 25.7, v: 16.5
+
+
+Epoch:7, Train loss:0.006693, valid loss:0.003311
+err, joint x: 42.4, y: 43.7, grain s: 38.6, v: 25.1
+
+
+Epoch:8, Train loss:0.006443, valid loss:0.003342
+err, joint x: 46.1, y: 45.1, grain s: 31.4, v: 21.5
+
+
+Epoch:9, Train loss:0.006318, valid loss:0.002863
+err, joint x: 41.9, y: 42.6, grain s: 29.1, v: 17.1
+
+
+Epoch:10, Train loss:0.006138, valid loss:0.003688
+err, joint x: 49.0, y: 50.5, grain s: 25.4, v: 20.2
+model id: 28 loss 0.0006093994791929921
+model id: 28 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3300.4716584682465
+Launcher: Job 29 completed in 3348 seconds.
+Launcher: Task 40 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  30
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130350, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.017945, valid loss:0.005434
+err, joint x: 61.1, y: 56.8, grain s: 32.0, v: 100.0
+
+
+Epoch:2, Train loss:0.010411, valid loss:0.004001
+err, joint x: 50.6, y: 51.6, grain s: 29.4, v: 29.8
+
+
+Epoch:3, Train loss:0.008486, valid loss:0.003740
+err, joint x: 49.4, y: 48.6, grain s: 29.2, v: 48.1
+
+
+Epoch:4, Train loss:0.007687, valid loss:0.003418
+err, joint x: 47.3, y: 48.0, grain s: 25.9, v: 27.9
+
+
+Epoch:5, Train loss:0.007499, valid loss:0.003528
+err, joint x: 46.3, y: 49.7, grain s: 28.2, v: 18.2
+
+
+Epoch:6, Train loss:0.006882, valid loss:0.002944
+err, joint x: 43.7, y: 44.5, grain s: 24.2, v: 15.8
+
+
+Epoch:7, Train loss:0.006595, valid loss:0.003109
+err, joint x: 42.9, y: 45.4, grain s: 28.6, v: 46.3
+
+
+Epoch:8, Train loss:0.006384, valid loss:0.002972
+err, joint x: 42.7, y: 45.4, grain s: 25.4, v: 27.8
+
+
+Epoch:9, Train loss:0.006283, valid loss:0.002735
+err, joint x: 41.8, y: 43.1, grain s: 23.4, v: 26.4
+
+
+Epoch:10, Train loss:0.005933, valid loss:0.003000
+err, joint x: 41.7, y: 43.4, grain s: 32.0, v: 15.6
+model id: 30 loss 0.0004956951680859285
+model id: 30 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3307.1771330833435
+Launcher: Job 31 completed in 3353 seconds.
+Launcher: Task 44 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  29
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  8
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130350, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.019091, valid loss:0.005430
+err, joint x: 58.0, y: 59.0, grain s: 34.1, v: 100.0
+
+
+Epoch:2, Train loss:0.011675, valid loss:0.004245
+err, joint x: 50.9, y: 51.5, grain s: 30.9, v: 100.0
+
+
+Epoch:3, Train loss:0.009234, valid loss:0.003860
+err, joint x: 51.8, y: 49.5, grain s: 27.3, v: 22.9
+
+
+Epoch:4, Train loss:0.008073, valid loss:0.003428
+err, joint x: 46.7, y: 48.0, grain s: 27.6, v: 21.9
+
+
+Epoch:5, Train loss:0.007622, valid loss:0.003610
+err, joint x: 45.4, y: 52.3, grain s: 26.6, v: 18.0
+
+
+Epoch:6, Train loss:0.007068, valid loss:0.002991
+err, joint x: 43.9, y: 44.9, grain s: 24.9, v: 21.4
+
+
+Epoch:7, Train loss:0.006772, valid loss:0.002936
+err, joint x: 43.2, y: 44.7, grain s: 24.8, v: 16.3
+
+
+Epoch:8, Train loss:0.006604, valid loss:0.002929
+err, joint x: 43.8, y: 44.3, grain s: 24.0, v: 18.0
+
+
+Epoch:9, Train loss:0.006286, valid loss:0.002763
+err, joint x: 42.4, y: 43.2, grain s: 23.0, v: 28.6
+
+
+Epoch:10, Train loss:0.006111, valid loss:0.003177
+err, joint x: 43.1, y: 46.7, grain s: 29.0, v: 15.3
+model id: 29 loss 0.0005248478472432387
+model id: 29 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3313.337166070938
+Launcher: Job 30 completed in 3360 seconds.
+Launcher: Task 31 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  34
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280640, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007536, valid loss:0.002994
+err, joint x: 71.7, y: 58.6, grain s: 32.6, v: 100.0
+
+
+Epoch:2, Train loss:0.004796, valid loss:0.001742
+err, joint x: 48.5, y: 49.6, grain s: 26.7, v: 100.0
+
+
+Epoch:3, Train loss:0.004282, valid loss:0.001714
+err, joint x: 47.7, y: 49.4, grain s: 26.7, v: 100.0
+
+
+Epoch:4, Train loss:0.004036, valid loss:0.001558
+err, joint x: 45.2, y: 46.9, grain s: 25.9, v: 100.0
+
+
+Epoch:5, Train loss:0.003880, valid loss:0.001604
+err, joint x: 44.3, y: 49.1, grain s: 26.6, v: 100.0
+
+
+Epoch:6, Train loss:0.003782, valid loss:0.002216
+err, joint x: 48.8, y: 59.4, grain s: 36.3, v: 100.0
+
+
+Epoch:7, Train loss:0.003714, valid loss:0.001603
+err, joint x: 46.5, y: 47.7, grain s: 24.4, v: 100.0
+
+
+Epoch:8, Train loss:0.003653, valid loss:0.001442
+err, joint x: 44.5, y: 44.4, grain s: 23.6, v: 100.0
+
+
+Epoch:9, Train loss:0.003607, valid loss:0.001518
+err, joint x: 44.5, y: 46.7, grain s: 24.7, v: 100.0
+
+
+Epoch:10, Train loss:0.003548, valid loss:0.001498
+err, joint x: 43.9, y: 46.7, grain s: 24.3, v: 100.0
+model id: 34 loss 0.0005414904596927088
+model id: 34 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3361.181371450424
+Launcher: Job 35 completed in 3405 seconds.
+Launcher: Task 39 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  33
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280640, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.008234, valid loss:0.002580
+err, joint x: 56.2, y: 58.4, grain s: 44.2, v: 100.0
+
+
+Epoch:2, Train loss:0.005337, valid loss:0.001906
+err, joint x: 50.7, y: 52.1, grain s: 27.9, v: 100.0
+
+
+Epoch:3, Train loss:0.004497, valid loss:0.001796
+err, joint x: 50.2, y: 49.5, grain s: 27.0, v: 100.0
+
+
+Epoch:4, Train loss:0.004148, valid loss:0.001605
+err, joint x: 46.2, y: 47.5, grain s: 25.9, v: 100.0
+
+
+Epoch:5, Train loss:0.003946, valid loss:0.001831
+err, joint x: 45.9, y: 51.3, grain s: 33.9, v: 100.0
+
+
+Epoch:6, Train loss:0.003803, valid loss:0.001543
+err, joint x: 45.1, y: 46.3, grain s: 26.3, v: 100.0
+
+
+Epoch:7, Train loss:0.003712, valid loss:0.001545
+err, joint x: 46.3, y: 45.7, grain s: 25.2, v: 100.0
+
+
+Epoch:8, Train loss:0.003624, valid loss:0.001459
+err, joint x: 43.5, y: 44.6, grain s: 26.7, v: 100.0
+
+
+Epoch:9, Train loss:0.003560, valid loss:0.001520
+err, joint x: 44.0, y: 45.6, grain s: 28.1, v: 100.0
+
+
+Epoch:10, Train loss:0.003496, valid loss:0.001432
+err, joint x: 43.3, y: 44.6, grain s: 24.9, v: 100.0
+model id: 33 loss 0.0005173004063267616
+model id: 33 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3389.158857822418
+Launcher: Job 34 completed in 3434 seconds.
+Launcher: Task 2 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  35
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280640, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007317, valid loss:0.002695
+err, joint x: 64.7, y: 59.1, grain s: 31.6, v: 100.0
+
+
+Epoch:2, Train loss:0.005588, valid loss:0.002447
+err, joint x: 65.0, y: 52.5, grain s: 29.0, v: 100.0
+
+
+Epoch:3, Train loss:0.005225, valid loss:0.002192
+err, joint x: 55.1, y: 52.7, grain s: 35.9, v: 100.0
+
+
+Epoch:4, Train loss:0.005056, valid loss:0.001805
+err, joint x: 48.8, y: 50.6, grain s: 28.4, v: 100.0
+
+
+Epoch:5, Train loss:0.005007, valid loss:0.002040
+err, joint x: 52.9, y: 52.2, grain s: 32.2, v: 100.0
+
+
+Epoch:6, Train loss:0.004928, valid loss:0.002340
+err, joint x: 51.7, y: 51.9, grain s: 49.6, v: 100.0
+
+
+Epoch:7, Train loss:0.004950, valid loss:0.001943
+err, joint x: 51.5, y: 51.8, grain s: 29.6, v: 100.0
+
+
+Epoch:8, Train loss:0.004810, valid loss:0.002833
+err, joint x: 53.3, y: 69.5, grain s: 40.1, v: 100.0
+
+
+Epoch:9, Train loss:0.004746, valid loss:0.002063
+err, joint x: 56.7, y: 50.7, grain s: 27.8, v: 100.0
+
+
+Epoch:10, Train loss:0.004858, valid loss:0.002964
+err, joint x: 66.7, y: 64.7, grain s: 31.0, v: 100.0
+model id: 35 loss 0.0010711971415384184
+model id: 35 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3444.2093799114227
+Launcher: Job 36 completed in 3488 seconds.
+Launcher: Task 47 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  32
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.280640, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007050, valid loss:0.002041
+err, joint x: 52.4, y: 52.3, grain s: 33.0, v: 100.0
+
+
+Epoch:2, Train loss:0.004866, valid loss:0.001764
+err, joint x: 49.5, y: 49.3, grain s: 26.7, v: 100.0
+
+
+Epoch:3, Train loss:0.004468, valid loss:0.001718
+err, joint x: 47.0, y: 50.2, grain s: 26.8, v: 100.0
+
+
+Epoch:4, Train loss:0.004246, valid loss:0.001678
+err, joint x: 45.5, y: 46.7, grain s: 33.8, v: 100.0
+
+
+Epoch:5, Train loss:0.004127, valid loss:0.001903
+err, joint x: 51.1, y: 50.1, grain s: 31.1, v: 100.0
+
+
+Epoch:6, Train loss:0.004049, valid loss:0.001941
+err, joint x: 46.3, y: 48.2, grain s: 44.1, v: 100.0
+
+
+Epoch:7, Train loss:0.004002, valid loss:0.001659
+err, joint x: 46.6, y: 48.1, grain s: 27.8, v: 100.0
+
+
+Epoch:8, Train loss:0.003984, valid loss:0.001545
+err, joint x: 44.7, y: 47.7, grain s: 24.3, v: 100.0
+
+
+Epoch:9, Train loss:0.003919, valid loss:0.001671
+err, joint x: 46.5, y: 47.5, grain s: 30.1, v: 100.0
+
+
+Epoch:10, Train loss:0.003884, valid loss:0.001582
+err, joint x: 45.5, y: 45.7, grain s: 29.4, v: 100.0
+model id: 32 loss 0.0005716479222645008
+model id: 32 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3447.770345211029
+Launcher: Job 33 completed in 3492 seconds.
+Launcher: Task 30 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  26
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130426, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.015248, valid loss:0.007285
+err, joint x: 55.4, y: 78.7, grain s: 40.1, v: 100.0
+
+
+Epoch:2, Train loss:0.009640, valid loss:0.003599
+err, joint x: 46.8, y: 49.8, grain s: 26.7, v: 58.6
+
+
+Epoch:3, Train loss:0.007912, valid loss:0.003281
+err, joint x: 46.1, y: 45.9, grain s: 28.5, v: 13.9
+
+
+Epoch:4, Train loss:0.007338, valid loss:0.003525
+err, joint x: 43.3, y: 47.4, grain s: 37.3, v: 22.2
+
+
+Epoch:5, Train loss:0.006900, valid loss:0.002921
+err, joint x: 42.9, y: 44.3, grain s: 24.3, v: 48.5
+
+
+Epoch:6, Train loss:0.006538, valid loss:0.002874
+err, joint x: 41.7, y: 44.9, grain s: 24.2, v: 34.2
+
+
+Epoch:7, Train loss:0.006272, valid loss:0.002712
+err, joint x: 41.5, y: 42.6, grain s: 23.0, v: 49.3
+
+
+Epoch:8, Train loss:0.006120, valid loss:0.002936
+err, joint x: 44.0, y: 43.4, grain s: 25.1, v: 35.7
+
+
+Epoch:9, Train loss:0.005845, valid loss:0.003154
+err, joint x: 44.1, y: 46.6, grain s: 26.5, v: 19.7
+
+
+Epoch:10, Train loss:0.005777, valid loss:0.002768
+err, joint x: 42.8, y: 42.5, grain s: 22.2, v: 50.7
+model id: 26 loss 0.0004573283215341646
+model id: 26 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3790.454434633255
+Launcher: Job 27 completed in 3838 seconds.
+Launcher: Task 22 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  27
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130426, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.018647, valid loss:0.004526
+err, joint x: 51.3, y: 53.6, grain s: 34.1, v: 100.0
+
+
+Epoch:2, Train loss:0.010901, valid loss:0.004502
+err, joint x: 51.1, y: 51.9, grain s: 37.0, v: 100.0
+
+
+Epoch:3, Train loss:0.010242, valid loss:0.004103
+err, joint x: 51.3, y: 50.6, grain s: 28.3, v: 100.0
+
+
+Epoch:4, Train loss:0.009620, valid loss:0.003493
+err, joint x: 46.1, y: 47.4, grain s: 25.8, v: 100.0
+
+
+Epoch:5, Train loss:0.009392, valid loss:0.003519
+err, joint x: 45.7, y: 47.4, grain s: 27.6, v: 100.0
+
+
+Epoch:6, Train loss:0.009022, valid loss:0.004078
+err, joint x: 49.9, y: 52.3, grain s: 26.5, v: 100.0
+
+
+Epoch:7, Train loss:0.009385, valid loss:0.004862
+err, joint x: 46.8, y: 64.7, grain s: 27.7, v: 100.0
+
+
+Epoch:8, Train loss:0.008859, valid loss:0.005409
+err, joint x: 49.0, y: 70.2, grain s: 24.9, v: 100.0
+
+
+Epoch:9, Train loss:0.008789, valid loss:0.005918
+err, joint x: 67.2, y: 54.7, grain s: 35.3, v: 100.0
+
+
+Epoch:10, Train loss:0.008747, valid loss:0.003803
+err, joint x: 44.6, y: 46.0, grain s: 39.3, v: 100.0
+model id: 27 loss 0.0006282972102607822
+model id: 27 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3791.8506197929382
+Launcher: Job 28 completed in 3839 seconds.
+Launcher: Task 11 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  25
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130426, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.016326, valid loss:0.006410
+err, joint x: 56.8, y: 71.5, grain s: 33.5, v: 100.0
+
+
+Epoch:2, Train loss:0.009712, valid loss:0.003581
+err, joint x: 47.7, y: 48.8, grain s: 28.4, v: 22.8
+
+
+Epoch:3, Train loss:0.008097, valid loss:0.003399
+err, joint x: 47.4, y: 47.7, grain s: 26.0, v: 13.9
+
+
+Epoch:4, Train loss:0.007451, valid loss:0.003451
+err, joint x: 45.3, y: 45.9, grain s: 34.9, v: 17.1
+
+
+Epoch:5, Train loss:0.006990, valid loss:0.003115
+err, joint x: 45.1, y: 45.9, grain s: 24.6, v: 25.5
+
+
+Epoch:6, Train loss:0.006650, valid loss:0.002773
+err, joint x: 42.6, y: 43.3, grain s: 23.0, v: 17.5
+
+
+Epoch:7, Train loss:0.006357, valid loss:0.003387
+err, joint x: 41.9, y: 44.5, grain s: 40.2, v: 25.2
+
+
+Epoch:8, Train loss:0.006149, valid loss:0.002811
+err, joint x: 43.1, y: 43.3, grain s: 23.4, v: 16.8
+
+
+Epoch:9, Train loss:0.005924, valid loss:0.002742
+err, joint x: 42.0, y: 43.4, grain s: 22.6, v: 24.8
+
+
+Epoch:10, Train loss:0.005783, valid loss:0.002746
+err, joint x: 41.8, y: 42.8, grain s: 24.1, v: 30.2
+model id: 25 loss 0.00045371559515063254
+model id: 25 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3861.405519962311
+Launcher: Job 26 completed in 3910 seconds.
+Launcher: Task 0 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  24
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  4
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130426, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.015438, valid loss:0.005371
+err, joint x: 61.1, y: 53.4, grain s: 39.9, v: 54.1
+
+
+Epoch:2, Train loss:0.009376, valid loss:0.004221
+err, joint x: 47.6, y: 57.1, grain s: 29.4, v: 50.6
+
+
+Epoch:3, Train loss:0.008210, valid loss:0.004059
+err, joint x: 52.3, y: 45.2, grain s: 35.1, v: 100.0
+
+
+Epoch:4, Train loss:0.008483, valid loss:0.003400
+err, joint x: 45.7, y: 44.3, grain s: 29.7, v: 100.0
+
+
+Epoch:5, Train loss:0.008020, valid loss:0.003030
+err, joint x: 43.0, y: 43.6, grain s: 24.1, v: 100.0
+
+
+Epoch:6, Train loss:0.007709, valid loss:0.003321
+err, joint x: 44.1, y: 44.6, grain s: 29.4, v: 100.0
+
+
+Epoch:7, Train loss:0.007533, valid loss:0.003788
+err, joint x: 52.8, y: 43.2, grain s: 29.1, v: 100.0
+
+
+Epoch:8, Train loss:0.007422, valid loss:0.003323
+err, joint x: 45.1, y: 46.5, grain s: 23.7, v: 100.0
+
+
+Epoch:9, Train loss:0.007298, valid loss:0.003394
+err, joint x: 47.4, y: 45.6, grain s: 23.3, v: 100.0
+
+
+Epoch:10, Train loss:0.007102, valid loss:0.003080
+err, joint x: 41.4, y: 44.9, grain s: 26.4, v: 100.0
+model id: 24 loss 0.000508964068666544
+model id: 24 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 3903.2599425315857
+Launcher: Job 25 completed in 3952 seconds.
+Launcher: Task 19 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  1
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.473272, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004751, valid loss:0.001335
+err, joint x: 54.6, y: 55.8, grain s: 34.0, v: 100.0
+
+
+Epoch:2, Train loss:0.002768, valid loss:0.001050
+err, joint x: 48.5, y: 51.4, grain s: 28.5, v: 66.6
+
+
+Epoch:3, Train loss:0.002233, valid loss:0.000934
+err, joint x: 46.8, y: 47.5, grain s: 26.9, v: 61.4
+
+
+Epoch:4, Train loss:0.002043, valid loss:0.001015
+err, joint x: 46.6, y: 51.1, grain s: 31.0, v: 31.6
+
+
+Epoch:5, Train loss:0.001931, valid loss:0.000858
+err, joint x: 44.9, y: 44.9, grain s: 28.1, v: 34.2
+
+
+Epoch:6, Train loss:0.001848, valid loss:0.000795
+err, joint x: 43.0, y: 45.3, grain s: 23.8, v: 14.3
+
+
+Epoch:7, Train loss:0.001784, valid loss:0.000773
+err, joint x: 42.2, y: 43.8, grain s: 25.5, v: 27.2
+
+
+Epoch:8, Train loss:0.001734, valid loss:0.000799
+err, joint x: 43.8, y: 44.7, grain s: 23.7, v: 22.5
+
+
+Epoch:9, Train loss:0.001678, valid loss:0.000904
+err, joint x: 44.3, y: 49.2, grain s: 26.7, v: 27.5
+
+
+Epoch:10, Train loss:0.001638, valid loss:0.000817
+err, joint x: 41.2, y: 42.5, grain s: 34.4, v: 14.1
+model id: 1 loss 0.0004982882833463096
+model id: 1 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4039.6197164058685
+Launcher: Job 2 completed in 4100 seconds.
+Launcher: Task 4 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  2
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.473272, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004305, valid loss:0.001597
+err, joint x: 57.5, y: 66.2, grain s: 30.8, v: 100.0
+
+
+Epoch:2, Train loss:0.002490, valid loss:0.000968
+err, joint x: 46.0, y: 50.5, grain s: 26.8, v: 50.7
+
+
+Epoch:3, Train loss:0.002171, valid loss:0.001012
+err, joint x: 48.6, y: 47.7, grain s: 31.2, v: 67.4
+
+
+Epoch:4, Train loss:0.002016, valid loss:0.000925
+err, joint x: 46.0, y: 46.2, grain s: 31.1, v: 43.4
+
+
+Epoch:5, Train loss:0.001918, valid loss:0.001423
+err, joint x: 43.8, y: 59.7, grain s: 54.1, v: 15.4
+
+
+Epoch:6, Train loss:0.001848, valid loss:0.000838
+err, joint x: 44.0, y: 44.4, grain s: 29.0, v: 25.0
+
+
+Epoch:7, Train loss:0.001774, valid loss:0.000795
+err, joint x: 42.6, y: 42.6, grain s: 29.5, v: 24.3
+
+
+Epoch:8, Train loss:0.001742, valid loss:0.000764
+err, joint x: 42.3, y: 44.0, grain s: 23.6, v: 19.3
+
+
+Epoch:9, Train loss:0.001701, valid loss:0.000875
+err, joint x: 45.4, y: 46.0, grain s: 27.4, v: 27.3
+
+
+Epoch:10, Train loss:0.001660, valid loss:0.000792
+err, joint x: 42.9, y: 44.7, grain s: 23.8, v: 29.5
+model id: 2 loss 0.00048293380920464796
+model id: 2 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4051.570944547653
+Launcher: Job 3 completed in 4111 seconds.
+Launcher: Task 32 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  0
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.473272, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004076, valid loss:0.001368
+err, joint x: 57.2, y: 57.1, grain s: 34.4, v: 41.6
+
+
+Epoch:2, Train loss:0.002807, valid loss:0.000960
+err, joint x: 45.9, y: 48.2, grain s: 26.1, v: 100.0
+
+
+Epoch:3, Train loss:0.002544, valid loss:0.001279
+err, joint x: 49.2, y: 57.7, grain s: 35.1, v: 100.0
+
+
+Epoch:4, Train loss:0.002407, valid loss:0.000993
+err, joint x: 47.8, y: 48.1, grain s: 27.2, v: 100.0
+
+
+Epoch:5, Train loss:0.002323, valid loss:0.001686
+err, joint x: 62.5, y: 65.6, grain s: 31.3, v: 100.0
+
+
+Epoch:6, Train loss:0.002252, valid loss:0.001116
+err, joint x: 52.5, y: 48.8, grain s: 29.3, v: 100.0
+
+
+Epoch:7, Train loss:0.002209, valid loss:0.000922
+err, joint x: 46.0, y: 46.5, grain s: 24.4, v: 100.0
+
+
+Epoch:8, Train loss:0.002178, valid loss:0.000950
+err, joint x: 47.4, y: 46.9, grain s: 24.6, v: 100.0
+
+
+Epoch:9, Train loss:0.002160, valid loss:0.000959
+err, joint x: 48.9, y: 45.0, grain s: 26.3, v: 100.0
+
+
+Epoch:10, Train loss:0.002111, valid loss:0.000920
+err, joint x: 43.7, y: 47.9, grain s: 25.8, v: 100.0
+model id: 0 loss 0.0005606862209138594
+model id: 0 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4080.997217655182
+Launcher: Job 1 completed in 4140 seconds.
+Launcher: Task 21 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  3
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.473272, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004390, valid loss:0.001997
+err, joint x: 55.4, y: 61.5, grain s: 69.6, v: 100.0
+
+
+Epoch:2, Train loss:0.003314, valid loss:0.001061
+err, joint x: 49.1, y: 49.0, grain s: 29.9, v: 100.0
+
+
+Epoch:3, Train loss:0.003010, valid loss:0.001374
+err, joint x: 54.4, y: 55.5, grain s: 39.0, v: 100.0
+
+
+Epoch:4, Train loss:0.003085, valid loss:0.001468
+err, joint x: 50.9, y: 65.9, grain s: 32.7, v: 100.0
+
+
+Epoch:5, Train loss:0.002948, valid loss:0.001121
+err, joint x: 49.7, y: 51.2, grain s: 31.3, v: 100.0
+
+
+Epoch:6, Train loss:0.002853, valid loss:0.001243
+err, joint x: 54.0, y: 55.6, grain s: 27.0, v: 100.0
+
+
+Epoch:7, Train loss:0.002854, valid loss:0.001303
+err, joint x: 52.5, y: 54.7, grain s: 37.2, v: 100.0
+
+
+Epoch:8, Train loss:0.002860, valid loss:0.001065
+err, joint x: 48.8, y: 50.6, grain s: 27.7, v: 100.0
+
+
+Epoch:9, Train loss:0.002828, valid loss:0.001125
+err, joint x: 49.6, y: 50.6, grain s: 32.9, v: 100.0
+
+
+Epoch:10, Train loss:0.002757, valid loss:0.001425
+err, joint x: 50.4, y: 59.4, grain s: 42.7, v: 100.0
+model id: 3 loss 0.0008689697161095129
+model id: 3 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4452.576148748398
+Launcher: Job 4 completed in 4512 seconds.
+Launcher: Task 24 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  18
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130586, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.013625, valid loss:0.005586
+err, joint x: 50.9, y: 58.9, grain s: 52.7, v: 37.8
+
+
+Epoch:2, Train loss:0.008733, valid loss:0.003979
+err, joint x: 47.6, y: 47.2, grain s: 42.2, v: 18.8
+
+
+Epoch:3, Train loss:0.007776, valid loss:0.004019
+err, joint x: 52.8, y: 49.0, grain s: 31.2, v: 15.7
+
+
+Epoch:4, Train loss:0.007265, valid loss:0.003495
+err, joint x: 48.6, y: 47.4, grain s: 26.4, v: 32.5
+
+
+Epoch:5, Train loss:0.006826, valid loss:0.003249
+err, joint x: 44.7, y: 47.1, grain s: 27.8, v: 23.4
+
+
+Epoch:6, Train loss:0.006497, valid loss:0.003870
+err, joint x: 55.8, y: 46.5, grain s: 23.0, v: 38.5
+
+
+Epoch:7, Train loss:0.006290, valid loss:0.005236
+err, joint x: 57.5, y: 49.0, grain s: 49.5, v: 60.1
+
+
+Epoch:8, Train loss:0.006132, valid loss:0.003036
+err, joint x: 41.6, y: 43.7, grain s: 32.7, v: 16.7
+
+
+Epoch:9, Train loss:0.005908, valid loss:0.003624
+err, joint x: 48.3, y: 47.7, grain s: 30.5, v: 29.3
+
+
+Epoch:10, Train loss:0.005824, valid loss:0.002748
+err, joint x: 42.1, y: 42.3, grain s: 24.1, v: 46.2
+model id: 18 loss 0.00045397902223547656
+model id: 18 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4931.220747709274
+Launcher: Job 19 completed in 4985 seconds.
+Launcher: Task 1 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  17
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130586, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.014114, valid loss:0.007979
+err, joint x: 50.8, y: 54.6, grain s: 87.9, v: 40.9
+
+
+Epoch:2, Train loss:0.008746, valid loss:0.003467
+err, joint x: 45.7, y: 46.9, grain s: 32.9, v: 17.0
+
+
+Epoch:3, Train loss:0.007617, valid loss:0.003132
+err, joint x: 46.1, y: 45.2, grain s: 24.8, v: 16.5
+
+
+Epoch:4, Train loss:0.007063, valid loss:0.002972
+err, joint x: 43.7, y: 44.8, grain s: 24.1, v: 38.8
+
+
+Epoch:5, Train loss:0.006653, valid loss:0.002781
+err, joint x: 42.5, y: 43.3, grain s: 23.7, v: 16.7
+
+
+Epoch:6, Train loss:0.006367, valid loss:0.002943
+err, joint x: 41.8, y: 43.2, grain s: 30.4, v: 14.2
+
+
+Epoch:7, Train loss:0.006143, valid loss:0.004354
+err, joint x: 57.8, y: 48.2, grain s: 31.9, v: 19.8
+
+
+Epoch:8, Train loss:0.005941, valid loss:0.002889
+err, joint x: 42.4, y: 45.4, grain s: 23.0, v: 23.4
+
+
+Epoch:9, Train loss:0.005723, valid loss:0.003356
+err, joint x: 49.5, y: 44.3, grain s: 26.4, v: 22.1
+
+
+Epoch:10, Train loss:0.005625, valid loss:0.002641
+err, joint x: 41.0, y: 42.4, grain s: 23.2, v: 23.2
+model id: 17 loss 0.00043630729834105643
+model id: 17 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4965.976090192795
+Launcher: Job 18 completed in 5020 seconds.
+Launcher: Task 35 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  19
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130586, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.016265, valid loss:0.006896
+err, joint x: 54.2, y: 75.3, grain s: 42.5, v: 100.0
+
+
+Epoch:2, Train loss:0.011560, valid loss:0.010481
+err, joint x: 102.5, y: 64.5, grain s: 28.1, v: 100.0
+
+
+Epoch:3, Train loss:0.010795, valid loss:0.004136
+err, joint x: 49.3, y: 50.6, grain s: 33.0, v: 100.0
+
+
+Epoch:4, Train loss:0.010400, valid loss:0.004549
+err, joint x: 47.4, y: 54.5, grain s: 39.8, v: 100.0
+
+
+Epoch:5, Train loss:0.010385, valid loss:0.003927
+err, joint x: 47.4, y: 48.6, grain s: 34.3, v: 100.0
+
+
+Epoch:6, Train loss:0.010229, valid loss:0.004045
+err, joint x: 46.8, y: 54.5, grain s: 27.4, v: 100.0
+
+
+Epoch:7, Train loss:0.010395, valid loss:0.005023
+err, joint x: 60.2, y: 50.5, grain s: 35.2, v: 100.0
+
+
+Epoch:8, Train loss:0.009860, valid loss:0.004854
+err, joint x: 49.9, y: 50.6, grain s: 48.5, v: 100.0
+
+
+Epoch:9, Train loss:0.010990, valid loss:0.005294
+err, joint x: 58.1, y: 59.6, grain s: 30.6, v: 100.0
+
+
+Epoch:10, Train loss:0.010994, valid loss:0.005049
+err, joint x: 53.4, y: 60.5, grain s: 30.9, v: 100.0
+model id: 19 loss 0.0008342589135281742
+model id: 19 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4977.51222038269
+Launcher: Job 20 completed in 5029 seconds.
+Launcher: Task 28 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  16
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  2
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130586, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.014143, valid loss:0.006266
+err, joint x: 52.7, y: 51.0, grain s: 67.4, v: 100.0
+
+
+Epoch:2, Train loss:0.010028, valid loss:0.004316
+err, joint x: 49.5, y: 47.5, grain s: 42.0, v: 100.0
+
+
+Epoch:3, Train loss:0.009119, valid loss:0.003761
+err, joint x: 48.0, y: 49.5, grain s: 26.7, v: 100.0
+
+
+Epoch:4, Train loss:0.008599, valid loss:0.003595
+err, joint x: 44.2, y: 51.1, grain s: 25.0, v: 100.0
+
+
+Epoch:5, Train loss:0.008265, valid loss:0.003508
+err, joint x: 44.7, y: 46.7, grain s: 30.9, v: 100.0
+
+
+Epoch:6, Train loss:0.008065, valid loss:0.003105
+err, joint x: 44.2, y: 43.8, grain s: 23.4, v: 100.0
+
+
+Epoch:7, Train loss:0.008017, valid loss:0.003274
+err, joint x: 43.5, y: 43.9, grain s: 30.4, v: 100.0
+
+
+Epoch:8, Train loss:0.007907, valid loss:0.003346
+err, joint x: 44.4, y: 46.4, grain s: 26.4, v: 100.0
+
+
+Epoch:9, Train loss:0.007796, valid loss:0.003944
+err, joint x: 48.4, y: 48.7, grain s: 33.0, v: 100.0
+
+
+Epoch:10, Train loss:0.008058, valid loss:0.004255
+err, joint x: 53.5, y: 50.3, grain s: 28.5, v: 100.0
+model id: 16 loss 0.0007030544026444355
+model id: 16 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 4985.808461666107
+Launcher: Job 17 completed in 5039 seconds.
+Launcher: Task 17 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  37
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.281646, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007322, valid loss:0.002143
+err, joint x: 53.1, y: 53.2, grain s: 35.8, v: 100.0
+
+
+Epoch:2, Train loss:0.004681, valid loss:0.001734
+err, joint x: 47.9, y: 49.7, grain s: 27.3, v: 100.0
+
+
+Epoch:3, Train loss:0.004191, valid loss:0.001689
+err, joint x: 46.4, y: 47.8, grain s: 30.9, v: 100.0
+
+
+Epoch:4, Train loss:0.003938, valid loss:0.001519
+err, joint x: 44.7, y: 45.7, grain s: 26.2, v: 100.0
+
+
+Epoch:5, Train loss:0.003797, valid loss:0.001490
+err, joint x: 45.1, y: 45.0, grain s: 24.8, v: 100.0
+
+
+Epoch:6, Train loss:0.003699, valid loss:0.001630
+err, joint x: 47.7, y: 46.9, grain s: 25.9, v: 100.0
+
+
+Epoch:7, Train loss:0.003635, valid loss:0.001535
+err, joint x: 45.5, y: 46.0, grain s: 25.1, v: 100.0
+
+
+Epoch:8, Train loss:0.003561, valid loss:0.001704
+err, joint x: 47.5, y: 50.1, grain s: 24.7, v: 100.0
+
+
+Epoch:9, Train loss:0.003517, valid loss:0.001420
+err, joint x: 42.7, y: 45.3, grain s: 23.7, v: 100.0
+
+
+Epoch:10, Train loss:0.003466, valid loss:0.001409
+err, joint x: 43.4, y: 44.1, grain s: 24.0, v: 100.0
+model id: 37 loss 0.0005091889165452726
+model id: 37 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 5087.506240367889
+Launcher: Job 38 completed in 5129 seconds.
+Launcher: Task 42 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  38
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.281646, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.006845, valid loss:0.001951
+err, joint x: 52.2, y: 51.7, grain s: 28.6, v: 100.0
+
+
+Epoch:2, Train loss:0.004615, valid loss:0.001873
+err, joint x: 49.3, y: 48.3, grain s: 36.2, v: 100.0
+
+
+Epoch:3, Train loss:0.004275, valid loss:0.001671
+err, joint x: 48.3, y: 46.9, grain s: 27.8, v: 100.0
+
+
+Epoch:4, Train loss:0.004058, valid loss:0.001576
+err, joint x: 45.3, y: 45.7, grain s: 29.4, v: 100.0
+
+
+Epoch:5, Train loss:0.003940, valid loss:0.001543
+err, joint x: 45.0, y: 46.6, grain s: 26.0, v: 100.0
+
+
+Epoch:6, Train loss:0.003849, valid loss:0.001645
+err, joint x: 47.4, y: 46.2, grain s: 29.3, v: 100.0
+
+
+Epoch:7, Train loss:0.003797, valid loss:0.001617
+err, joint x: 48.1, y: 45.5, grain s: 27.1, v: 100.0
+
+
+Epoch:8, Train loss:0.003752, valid loss:0.001615
+err, joint x: 44.1, y: 50.1, grain s: 25.3, v: 100.0
+
+
+Epoch:9, Train loss:0.003698, valid loss:0.001530
+err, joint x: 43.6, y: 44.4, grain s: 31.7, v: 100.0
+
+
+Epoch:10, Train loss:0.003634, valid loss:0.001397
+err, joint x: 43.1, y: 43.8, grain s: 23.9, v: 100.0
+model id: 38 loss 0.0005047133170245658
+model id: 38 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 5318.851172208786
+Launcher: Job 39 completed in 5359 seconds.
+Launcher: Task 15 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  39
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.281646, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.007767, valid loss:0.005908
+err, joint x: 60.2, y: 121.4, grain s: 31.1, v: 100.0
+
+
+Epoch:2, Train loss:0.006613, valid loss:0.002935
+err, joint x: 71.4, y: 57.8, grain s: 31.9, v: 100.0
+
+
+Epoch:3, Train loss:0.006424, valid loss:0.002449
+err, joint x: 55.9, y: 55.5, grain s: 43.0, v: 100.0
+
+
+Epoch:4, Train loss:0.006069, valid loss:0.002151
+err, joint x: 52.4, y: 57.4, grain s: 29.2, v: 100.0
+
+
+Epoch:5, Train loss:0.006850, valid loss:0.002708
+err, joint x: 62.6, y: 62.1, grain s: 31.8, v: 100.0
+
+
+Epoch:6, Train loss:0.007163, valid loss:0.003136
+err, joint x: 64.3, y: 66.7, grain s: 41.7, v: 100.0
+
+
+Epoch:7, Train loss:0.006665, valid loss:0.002823
+err, joint x: 67.6, y: 59.9, grain s: 30.5, v: 100.0
+
+
+Epoch:8, Train loss:0.006633, valid loss:0.003001
+err, joint x: 67.9, y: 63.7, grain s: 32.3, v: 100.0
+
+
+Epoch:9, Train loss:0.006639, valid loss:0.003365
+err, joint x: 66.4, y: 57.4, grain s: 60.1, v: 100.0
+
+
+Epoch:10, Train loss:0.006521, valid loss:0.002389
+err, joint x: 55.7, y: 60.6, grain s: 30.2, v: 100.0
+model id: 39 loss 0.000863392108363942
+model id: 39 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 5392.37668800354
+Launcher: Job 40 completed in 5433 seconds.
+Launcher: Task 7 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  36
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  16 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.281646, valid loss:0.361363
+err, joint x: 1254.4, y: 1203.9, grain s: 497.4, v: 1245.8
+
+
+Epoch:1, Train loss:0.006809, valid loss:0.002691
+err, joint x: 52.9, y: 59.7, grain s: 51.5, v: 100.0
+
+
+Epoch:2, Train loss:0.005083, valid loss:0.001758
+err, joint x: 48.7, y: 49.1, grain s: 28.5, v: 100.0
+
+
+Epoch:3, Train loss:0.004870, valid loss:0.001831
+err, joint x: 47.7, y: 51.5, grain s: 30.5, v: 100.0
+
+
+Epoch:4, Train loss:0.004658, valid loss:0.001688
+err, joint x: 47.1, y: 48.9, grain s: 27.6, v: 100.0
+
+
+Epoch:5, Train loss:0.004563, valid loss:0.001835
+err, joint x: 46.6, y: 47.4, grain s: 39.9, v: 100.0
+
+
+Epoch:6, Train loss:0.004469, valid loss:0.003544
+err, joint x: 56.9, y: 62.4, grain s: 71.3, v: 100.0
+
+
+Epoch:7, Train loss:0.004424, valid loss:0.001728
+err, joint x: 45.9, y: 48.0, grain s: 34.0, v: 100.0
+
+
+Epoch:8, Train loss:0.004296, valid loss:0.001723
+err, joint x: 45.6, y: 47.6, grain s: 34.9, v: 100.0
+
+
+Epoch:9, Train loss:0.004279, valid loss:0.001608
+err, joint x: 46.3, y: 47.0, grain s: 27.1, v: 100.0
+
+
+Epoch:10, Train loss:0.004286, valid loss:0.001661
+err, joint x: 46.2, y: 46.9, grain s: 31.2, v: 100.0
+model id: 36 loss 0.0006003931658120738
+model id: 36 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 5426.721616268158
+Launcher: Job 37 completed in 5471 seconds.
+Launcher: Task 27 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  4
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.474268, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004160, valid loss:0.001260
+err, joint x: 54.9, y: 53.5, grain s: 30.6, v: 100.0
+
+
+Epoch:2, Train loss:0.002941, valid loss:0.001179
+err, joint x: 51.2, y: 53.8, grain s: 29.3, v: 100.0
+
+
+Epoch:3, Train loss:0.002692, valid loss:0.001235
+err, joint x: 49.5, y: 54.1, grain s: 37.7, v: 100.0
+
+
+Epoch:4, Train loss:0.002602, valid loss:0.001573
+err, joint x: 73.9, y: 47.4, grain s: 27.0, v: 100.0
+
+
+Epoch:5, Train loss:0.002519, valid loss:0.001030
+err, joint x: 47.4, y: 50.8, grain s: 26.2, v: 100.0
+
+
+Epoch:6, Train loss:0.002529, valid loss:0.002064
+err, joint x: 51.8, y: 88.8, grain s: 28.4, v: 100.0
+
+
+Epoch:7, Train loss:0.002463, valid loss:0.001122
+err, joint x: 45.9, y: 53.0, grain s: 34.6, v: 100.0
+
+
+Epoch:8, Train loss:0.002423, valid loss:0.001091
+err, joint x: 48.3, y: 54.1, grain s: 24.5, v: 100.0
+
+
+Epoch:9, Train loss:0.002442, valid loss:0.001487
+err, joint x: 68.4, y: 49.6, grain s: 30.3, v: 100.0
+
+
+Epoch:10, Train loss:0.002391, valid loss:0.001375
+err, joint x: 58.8, y: 55.6, grain s: 29.6, v: 100.0
+model id: 4 loss 0.0008383866571377785
+model id: 4 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 6166.172114372253
+Launcher: Job 5 completed in 6223 seconds.
+Launcher: Task 26 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  6
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.474268, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.003914, valid loss:0.001416
+err, joint x: 50.8, y: 50.1, grain s: 57.1, v: 48.8
+
+
+Epoch:2, Train loss:0.002469, valid loss:0.000925
+err, joint x: 46.1, y: 48.6, grain s: 26.9, v: 30.7
+
+
+Epoch:3, Train loss:0.002184, valid loss:0.001215
+err, joint x: 48.9, y: 52.2, grain s: 36.0, v: 131.8
+
+
+Epoch:4, Train loss:0.002049, valid loss:0.000980
+err, joint x: 45.1, y: 52.3, grain s: 27.9, v: 21.7
+
+
+Epoch:5, Train loss:0.001976, valid loss:0.001092
+err, joint x: 43.8, y: 44.6, grain s: 49.7, v: 47.3
+
+
+Epoch:6, Train loss:0.001925, valid loss:0.001057
+err, joint x: 56.3, y: 44.1, grain s: 29.1, v: 29.3
+
+
+Epoch:7, Train loss:0.001865, valid loss:0.000772
+err, joint x: 42.1, y: 43.0, grain s: 27.4, v: 18.1
+
+
+Epoch:8, Train loss:0.001809, valid loss:0.000978
+err, joint x: 43.7, y: 44.6, grain s: 42.2, v: 31.1
+
+
+Epoch:9, Train loss:0.001782, valid loss:0.000833
+err, joint x: 44.3, y: 45.0, grain s: 26.6, v: 17.4
+
+
+Epoch:10, Train loss:0.001756, valid loss:0.001011
+err, joint x: 45.5, y: 52.2, grain s: 30.5, v: 19.0
+model id: 6 loss 0.000616688084500354
+model id: 6 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 6248.640604257584
+Launcher: Job 7 completed in 6308 seconds.
+Launcher: Task 3 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  5
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.474268, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004093, valid loss:0.001131
+err, joint x: 50.6, y: 53.5, grain s: 30.5, v: 35.3
+
+
+Epoch:2, Train loss:0.002420, valid loss:0.000889
+err, joint x: 45.5, y: 47.1, grain s: 26.6, v: 22.9
+
+
+Epoch:3, Train loss:0.002139, valid loss:0.000923
+err, joint x: 45.4, y: 47.7, grain s: 28.4, v: 57.5
+
+
+Epoch:4, Train loss:0.002005, valid loss:0.000888
+err, joint x: 44.3, y: 45.2, grain s: 32.7, v: 24.8
+
+
+Epoch:5, Train loss:0.001899, valid loss:0.000805
+err, joint x: 44.7, y: 43.9, grain s: 24.1, v: 27.7
+
+
+Epoch:6, Train loss:0.001833, valid loss:0.000862
+err, joint x: 45.7, y: 46.3, grain s: 24.9, v: 17.4
+
+
+Epoch:7, Train loss:0.001774, valid loss:0.000780
+err, joint x: 44.3, y: 42.6, grain s: 24.6, v: 24.2
+
+
+Epoch:8, Train loss:0.001722, valid loss:0.000737
+err, joint x: 41.7, y: 43.2, grain s: 23.3, v: 19.8
+
+
+Epoch:9, Train loss:0.001678, valid loss:0.000763
+err, joint x: 42.8, y: 43.6, grain s: 23.5, v: 25.1
+
+
+Epoch:10, Train loss:0.001656, valid loss:0.000778
+err, joint x: 43.9, y: 43.0, grain s: 24.2, v: 23.7
+model id: 5 loss 0.00047443763330756196
+model id: 5 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 6360.459006071091
+Launcher: Job 6 completed in 6420 seconds.
+Launcher: Task 18 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  7
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  32 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.474268, valid loss:0.609750
+err, joint x: 1337.1, y: 1163.1, grain s: 1044.7, v: 6995.5
+
+
+Epoch:1, Train loss:0.004908, valid loss:0.001403
+err, joint x: 55.9, y: 57.4, grain s: 35.0, v: 100.0
+
+
+Epoch:2, Train loss:0.003888, valid loss:0.001459
+err, joint x: 55.2, y: 62.2, grain s: 32.5, v: 100.0
+
+
+Epoch:3, Train loss:0.003751, valid loss:0.001407
+err, joint x: 54.1, y: 57.9, grain s: 38.4, v: 100.0
+
+
+Epoch:4, Train loss:0.003714, valid loss:0.001261
+err, joint x: 53.3, y: 56.0, grain s: 28.7, v: 100.0
+
+
+Epoch:5, Train loss:0.003849, valid loss:0.001246
+err, joint x: 52.9, y: 54.9, grain s: 30.9, v: 100.0
+
+
+Epoch:6, Train loss:0.003681, valid loss:0.001581
+err, joint x: 64.4, y: 55.2, grain s: 38.8, v: 100.0
+
+
+Epoch:7, Train loss:0.003771, valid loss:0.001660
+err, joint x: 66.7, y: 59.2, grain s: 33.3, v: 100.0
+
+
+Epoch:8, Train loss:0.003711, valid loss:0.001422
+err, joint x: 51.7, y: 63.9, grain s: 31.5, v: 100.0
+
+
+Epoch:9, Train loss:0.003738, valid loss:0.003803
+err, joint x: 125.9, y: 60.2, grain s: 37.1, v: 100.0
+
+
+Epoch:10, Train loss:0.003562, valid loss:0.001394
+err, joint x: 53.3, y: 60.7, grain s: 33.0, v: 100.0
+model id: 7 loss 0.0008497039698773907
+model id: 7 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 6638.884763240814
+Launcher: Job 8 completed in 6696 seconds.
+Launcher: Task 8 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  22
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.005
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130867, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.013793, valid loss:0.004359
+err, joint x: 52.0, y: 52.9, grain s: 29.6, v: 100.0
+
+
+Epoch:2, Train loss:0.009509, valid loss:0.003510
+err, joint x: 45.7, y: 47.0, grain s: 28.1, v: 100.0
+
+
+Epoch:3, Train loss:0.008614, valid loss:0.004678
+err, joint x: 64.2, y: 45.4, grain s: 24.0, v: 100.0
+
+
+Epoch:4, Train loss:0.008197, valid loss:0.003321
+err, joint x: 43.1, y: 48.6, grain s: 23.2, v: 100.0
+
+
+Epoch:5, Train loss:0.007898, valid loss:0.003025
+err, joint x: 43.4, y: 43.4, grain s: 23.2, v: 100.0
+
+
+Epoch:6, Train loss:0.007728, valid loss:0.003308
+err, joint x: 45.4, y: 45.9, grain s: 23.8, v: 100.0
+
+
+Epoch:7, Train loss:0.007508, valid loss:0.004255
+err, joint x: 46.9, y: 55.5, grain s: 30.8, v: 100.0
+
+
+Epoch:8, Train loss:0.007339, valid loss:0.003352
+err, joint x: 46.2, y: 44.2, grain s: 27.4, v: 100.0
+
+
+Epoch:9, Train loss:0.008205, valid loss:0.004549
+err, joint x: 57.5, y: 48.9, grain s: 30.5, v: 100.0
+
+
+Epoch:10, Train loss:0.007188, valid loss:0.003772
+err, joint x: 42.4, y: 49.9, grain s: 35.9, v: 100.0
+model id: 22 loss 0.0006232157244258339
+model id: 22 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 7267.496930599213
+Launcher: Job 23 completed in 7319 seconds.
+Launcher: Task 6 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  20
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.01
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130867, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.014544, valid loss:0.004976
+err, joint x: 59.7, y: 53.1, grain s: 30.9, v: 100.0
+
+
+Epoch:2, Train loss:0.010521, valid loss:0.004017
+err, joint x: 50.5, y: 49.8, grain s: 29.0, v: 100.0
+
+
+Epoch:3, Train loss:0.009878, valid loss:0.004664
+err, joint x: 56.8, y: 54.0, grain s: 25.5, v: 100.0
+
+
+Epoch:4, Train loss:0.009425, valid loss:0.003786
+err, joint x: 47.5, y: 47.1, grain s: 33.0, v: 100.0
+
+
+Epoch:5, Train loss:0.009196, valid loss:0.003523
+err, joint x: 45.7, y: 47.6, grain s: 27.0, v: 100.0
+
+
+Epoch:6, Train loss:0.009195, valid loss:0.003445
+err, joint x: 44.9, y: 46.8, grain s: 28.0, v: 100.0
+
+
+Epoch:7, Train loss:0.008833, valid loss:0.008298
+err, joint x: 72.3, y: 51.1, grain s: 72.3, v: 100.0
+
+
+Epoch:8, Train loss:0.008827, valid loss:0.005288
+err, joint x: 66.8, y: 46.7, grain s: 33.8, v: 100.0
+
+
+Epoch:9, Train loss:0.008665, valid loss:0.004397
+err, joint x: 55.1, y: 48.4, grain s: 33.3, v: 100.0
+
+
+Epoch:10, Train loss:0.008727, valid loss:0.008163
+err, joint x: 48.5, y: 51.4, grain s: 92.2, v: 100.0
+model id: 20 loss 0.0013486676394850725
+model id: 20 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 7344.501327753067
+Launcher: Job 21 completed in 7396 seconds.
+Launcher: Task 36 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  21
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.0025
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130867, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.013273, valid loss:0.004242
+err, joint x: 52.8, y: 50.6, grain s: 32.9, v: 50.2
+
+
+Epoch:2, Train loss:0.008425, valid loss:0.003707
+err, joint x: 49.5, y: 50.5, grain s: 25.2, v: 15.4
+
+
+Epoch:3, Train loss:0.007514, valid loss:0.003349
+err, joint x: 48.7, y: 46.2, grain s: 24.7, v: 18.1
+
+
+Epoch:4, Train loss:0.006974, valid loss:0.002933
+err, joint x: 43.2, y: 44.7, grain s: 24.9, v: 12.9
+
+
+Epoch:5, Train loss:0.006594, valid loss:0.002790
+err, joint x: 41.9, y: 44.0, grain s: 22.7, v: 38.4
+
+
+Epoch:6, Train loss:0.006377, valid loss:0.002766
+err, joint x: 43.2, y: 42.2, grain s: 22.4, v: 36.9
+
+
+Epoch:7, Train loss:0.006102, valid loss:0.002842
+err, joint x: 42.8, y: 43.1, grain s: 25.0, v: 17.6
+
+
+Epoch:8, Train loss:0.005927, valid loss:0.002771
+err, joint x: 40.8, y: 44.1, grain s: 24.8, v: 25.3
+
+
+Epoch:9, Train loss:0.005738, valid loss:0.002939
+err, joint x: 44.2, y: 42.7, grain s: 26.6, v: 21.8
+
+
+Epoch:10, Train loss:0.005623, valid loss:0.003065
+err, joint x: 44.1, y: 46.9, grain s: 22.3, v: 23.3
+model id: 21 loss 0.000506461779531535
+model id: 21 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 7387.495119810104
+Launcher: Job 22 completed in 7438 seconds.
+Launcher: Task 14 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the mode is:  train , the model id is:  23
+device:  cpu
+model already exists, no training required:  False
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+data dir quality/level2/
+test dir ./test/
+number of train, validation, test runs 11639 1294 0
+GrainNN frames:  21
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 118), ('joint', 236)]
+edges in samples [(('grain', 'push', 'joint'), 702), (('joint', 'pull', 'grain'), 702), (('joint', 'connect', 'joint'), 702)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  10 ; learning rate:  0.02
+batch size:  1
+model type:  regressor
+schedueler step:  10
+
+
+Epoch:0, Train loss:0.130867, valid loss:0.165225
+err, joint x: 313.4, y: 873.8, grain s: 825.5, v: 1759.0
+
+
+Epoch:1, Train loss:0.018079, valid loss:0.005636
+err, joint x: 58.0, y: 63.1, grain s: 31.2, v: 100.0
+
+
+Epoch:2, Train loss:0.014555, valid loss:0.004811
+err, joint x: 55.9, y: 55.0, grain s: 30.4, v: 100.0
+
+
+Epoch:3, Train loss:0.014047, valid loss:0.005629
+err, joint x: 60.3, y: 59.3, grain s: 34.7, v: 100.0
+
+
+Epoch:4, Train loss:0.013782, valid loss:0.004863
+err, joint x: 55.8, y: 56.9, grain s: 28.1, v: 100.0
+
+
+Epoch:5, Train loss:0.013868, valid loss:0.007609
+err, joint x: 66.4, y: 54.6, grain s: 67.7, v: 100.0
+
+
+Epoch:6, Train loss:0.013787, valid loss:0.005531
+err, joint x: 62.4, y: 56.7, grain s: 33.1, v: 100.0
+
+
+Epoch:7, Train loss:0.013734, valid loss:0.011790
+err, joint x: 76.8, y: 100.1, grain s: 42.5, v: 100.0
+
+
+Epoch:8, Train loss:0.013572, valid loss:0.007217
+err, joint x: 59.7, y: 76.2, grain s: 37.7, v: 100.0
+
+
+Epoch:9, Train loss:0.013188, valid loss:0.006440
+err, joint x: 63.2, y: 65.5, grain s: 37.0, v: 100.0
+
+
+Epoch:10, Train loss:0.013649, valid loss:0.011329
+err, joint x: 100.0, y: 75.3, grain s: 35.1, v: 100.0
+model id: 23 loss 0.001871874899647775
+model id: 23 ACCURACY defaultdict(<class 'float'>, {'grain0err': 0, 'grain0': 27.082816570997238, 'grain1err': 0, 'grain1': 1.0142007579561323, 'joint0err': 0, 'joint0': 67.93350613117218, 'joint1err': 0, 'joint1': 66.26270389556885})
+training time 9011.382553577423
+Launcher: Job 24 completed in 9062 seconds.
+Launcher: Task 29 done. Exiting.
+Launcher: Done. Job exited without errors

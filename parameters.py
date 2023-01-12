@@ -18,14 +18,14 @@ def regressor(mode, model_id):
     hp_grid = {'frames':[20, 24, 30], \
                'lr':[100e-4, 25e-4, 50e-4,  200e-4], \
                'layer':[2, 3, 4],\
-               'hidden':[32, 24, 16],\
+               'layer_size':[32, 48, 16],\
                'weight':[5, 10, 20, 40],\
                'decay_step':[10, 5, 20],\
                'batch_size':[2, 1, 4, 8]}
         
     
     hp_size = [(len(v),k) for k, v in hp_grid.items()]
-    hp_order = [1, 5, 6, 3, 2, 0, 4]
+    hp_order = [1, 6, 3, 2, 0, 4, 5]
     hp_size = [hp_size[i] for i in hp_order]
 
     param_dict = {}
@@ -50,7 +50,7 @@ def regressor(mode, model_id):
 
 
     param_dict.update({'window':1, 'out_win':1, 'weight_decay':0, 'layers':1, \
-                       'layer_size':32, 'kernel_size':(3,), 'epoch':60, 'bias':True, 'model_list':[0]})
+                       'kernel_size':(3,), 'epoch':10, 'bias':True, 'model_list':[0]})
 
 
     return Param(param_dict)

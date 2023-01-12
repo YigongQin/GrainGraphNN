@@ -25,6 +25,7 @@ class feature_metric:
            # print((( mask[key][:,0]*(data[key][:,idx] - pred[key][:,idx])**2 )))
            # print((( mask[key][:,0]*(data[key][:,idx])**2 )))
             self.acc_dicts[key+str(idx)+'err'] += float(torch.sum( mask[key][:,0]*(y_dict[key][:,idx] - pred[key][:,idx])**2 ))
+            #print(mask[key])
             if epoch == 0:
                 self.acc_dicts[key+str(idx)] += float(torch.sum( mask[key][:,0] *(y_dict[key][:,idx])**2 ))
         

@@ -24,9 +24,9 @@ class feature_metric:
             # the first one is all positive, no negative, recall is one
                 self.threshold.append( 1 - i/intervals )
                 
-        self.class_dicts['TP'] = np.zeros(len(self.threshold))
-        self.class_dicts['FP'] = np.zeros(len(self.threshold))
-        self.class_dicts['FN'] = np.zeros(len(self.threshold))
+        self.class_dicts = {'TP':np.zeros(len(self.threshold)),\
+                            'FP':np.zeros(len(self.threshold)),\
+                            'FN':np.zeros(len(self.threshold))}
         
     def record(self, y_dict, pred, mask, epoch):
 

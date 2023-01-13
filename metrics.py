@@ -8,7 +8,7 @@ Created on Thu Dec 15 13:43:45 2022
 import torch
 from collections import defaultdict
 import math
-
+import numpy as np
 
 class feature_metric:
     def __init__(self, model_type, model_id):
@@ -17,7 +17,16 @@ class feature_metric:
         self.metric_list = []
         
         self.acc_dicts = defaultdict(float)
-        self.class_dicts = defaultdict(list)
+        
+        intervals = 10
+        self.threshold = []
+        for i in range(intervals+1): 
+            # the first one is all positive, no negative, recall is one
+                self.threshold.append( 1 - i/intervals )
+                
+        self.class_dicts['TP'] = np.zeros(len(self.threshold))
+        self.class_dicts['FP'] = np.zeros(len(self.threshold))
+        self.class_dicts['FN'] = np.zeros(len(self.threshold))
         
     def record(self, y_dict, pred, mask, epoch):
 
@@ -29,12 +38,12 @@ class feature_metric:
             if epoch == 0:
                 self.acc_dicts[key+str(idx)] += float(torch.sum( mask[key][:,0] *(y_dict[key][:,idx])**2 ))
         
-        def PR(key, threshold, y, prob):
+        def PR( y, prob):
             
-            for i, t in enumerate(threshold):
-                self.acc_dicts['TP'][i] += float(sum( (y==1) & (prob>t) )) 
-                self.acc_dicts['FP'][i] += float(sum( (y==0) & (prob>t) ))
-                self.acc_dicts['FN'][i] += float(sum( (y==1) & (prob<=t) ))
+            for i, t in enumerate(self.threshold):
+                self.class_dicts['TP'][i] += float(sum( (y==1) & (prob>t) )) 
+                self.class_dicts['FP'][i] += float(sum( (y==0) & (prob>t) ))
+                self.class_dicts['FN'][i] += float(sum( (y==1) & (prob<=t) ))
                 
         if self.model_type == 'regressor':
             
@@ -46,15 +55,46 @@ class feature_metric:
         
 
         if self.model_type == 'classifier':
+
+            PR(y_dict['edge_event'], torch.sigmoid(pred['edge_event']))
             
-            pass
             
     
     def epoch_summary(self):
         
+        
+        def PRAUC():
+            
+            P_list, R_list = [], []
+            left_bound, AUC = 0, 0
+            
+            for i in range(len(self.threshold)): 
+
+                TruePositive  = self.class_dicts['TP'][i]
+                FalsePositive = self.class_dicts['FP'][i]
+                FalseNegative = self.class_dicts['FN'][i]
+                
+                if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
+
+                    Precision = TruePositive/(TruePositive + FalsePositive) 
+                    Recall = TruePositive/(TruePositive + FalseNegative)
+            
+                    AUC += (Recall-left_bound)*Precision
+                    left_bound = Recall
+                
+                else:
+                    Precision = -1
+                    Recall = -1
+                
+                P_list.append(Precision)
+                R_list.append(Recall)    
+                
+            return AUC, P_list, R_list
+            
+        
         if self.model_type == 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
-            self.test_auc, self.P_list, self.R_list = class_acc(self.test_prob, self.test_label)
+            self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
             print('Validation AUC:{:.6f}'.format(self.test_auc)) 
             self.metric_list.append(float(self.test_auc))
          #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
@@ -78,8 +118,8 @@ class feature_metric:
 
         if self.model_type == 'classifier':
             print('model id:', self.model_id, 'PR AUC', float(self.test_auc))
-            self.plist = [float(i) for i in self.P_list]
-            self.rlist = [float(i) for i in self.R_list]
+           # self.plist = [float(i) for i in self.P_list]
+           # self.rlist = [float(i) for i in self.R_list]
         
         if self.model_type == 'regressor':
             print('model id:', self.model_id, 'ACCURACY', self.acc_dicts)

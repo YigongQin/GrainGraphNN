@@ -372,7 +372,7 @@ if __name__=='__main__':
         if args.model_type== 'classifier':
             
             if args.transfer:
-                regressor_id = 17
+                regressor_id = 41
                 hp_r = regressor(mode, regressor_id)
                 hp_r.features = sample.features
                 hp_r.targets = sample.targets

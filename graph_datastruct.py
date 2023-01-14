@@ -561,7 +561,7 @@ class GrainHeterograph:
         
         self.physical_params = {}
 
-    def form_gradient(self, prev, nxt):
+    def form_gradient(self, prev, nxt, event_list):
         
         
         
@@ -582,7 +582,7 @@ class GrainHeterograph:
             self.target_dicts['joint'] = self.targets_scaling['joint']*\
                self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
                # (nxt.feature_dicts['joint'][:,:2] - self.feature_dicts['joint'][:,:2])
-            self.target_dicts['edge_event'] = nxt.edge_rotation        
+           # self.target_dicts['edge_event'] = nxt.edge_rotation        
             
             self.additional_features['nxt'] = nxt.edge_index_dicts
             
@@ -606,7 +606,19 @@ class GrainHeterograph:
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
 
-                                   
+            
+            self.target_dicts['edge_event'] = -100*np.ones(len(self.edges), dtype=int)
+ 
+            for i, pair in enumerate(self.edges):
+                if pair in nxt.edges and pair[0]>-1:
+                    if tuple(pair) in event_list:
+                        self.target_dicts['edge_event'][i] = 1
+                    else:
+                        self.target_dicts['edge_event'][i] = 0
+                    
+
+
+                       
         """
             
         Gradients of history

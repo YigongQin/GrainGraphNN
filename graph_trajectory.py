@@ -260,11 +260,11 @@ class graph_trajectory(graph):
             
           #  print('estimated number of junction-junction links %d'%jj_link) 
             # when it approaches the end, 3*junction is not accurate
-            self.edge_labels = {(src, dst):0 for src, dst in self.edges}
-            for grain in eliminated_grains:
-                for pair in self.region_edge[grain]:
-                    self.edge_labels[(pair[0], pair[1])] = -100
-                    self.edge_labels[(pair[1], pair[0])] = -100                                 
+           # self.edge_labels = {(src, dst):0 for src, dst in self.edges if src>-1}
+           # for grain in eliminated_grains:
+           #     for pair in self.region_edge[grain]:
+           #         self.edge_labels[(pair[0], pair[1])] = -100
+           #         self.edge_labels[(pair[1], pair[0])] = -100                                 
             
             self.vertex_matching(frame, cur_joint, eliminated_grains)
         
@@ -295,8 +295,8 @@ class graph_trajectory(graph):
             vert_old_j = self.joint2vertex[old_junction_j]                
             switching_edges.add((vert_old_i, vert_old_j))
             switching_edges.add((vert_old_j, vert_old_i))
-            self.edge_labels[(vert_old_i, vert_old_j)] = 1
-            self.edge_labels[(vert_old_j, vert_old_i)] = 1  
+         #   self.edge_labels[(vert_old_i, vert_old_j)] = 1
+         #   self.edge_labels[(vert_old_j, vert_old_i)] = 1  
 
 
         def quadruple_(junctions):
@@ -735,11 +735,12 @@ class graph_trajectory(graph):
         hg.physical_params = self.physical_params
         hg.physical_params.update({'seed':self.seed, 'height':frame})
 
-        if frame>0:
-            hg.edge_rotation = np.array(list(self.edge_labels.values()))
+      #  if frame>0:
+      #      hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
         
         hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)}
+        hg.edges = self.edges
         
         self.states.append(hg) # states at current time
 
@@ -814,14 +815,15 @@ if __name__ == '__main__':
                         continue
                     
                     if ( args.level == 2 ) \
-                    or ( args.level == 1 and len(traj.grain_events[snapshot+1])==0 ) \
-                    or ( args.level == 0 and len(traj.grain_events[snapshot+1])==0 and \
-                                             len(traj.edge_events[snapshot+1])==0 ):   
+                    or ( args.level == 1 and len(traj.grain_events[snapshot+args.span])==0 ) \
+                    or ( args.level == 0 and len(traj.grain_events[snapshot+args.span])==0 and \
+                                             len(traj.edge_events[snapshot+args.span])==0 ):   
                         
                         print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
                         hg = traj.states[snapshot]
+                        event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
                         hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
-                                         nxt = traj.states[snapshot+args.span])
+                                         nxt = traj.states[snapshot+args.span], event_list = event_list)
                         train_samples.append(hg)
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)

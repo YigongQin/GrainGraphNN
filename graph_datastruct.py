@@ -619,7 +619,9 @@ class GrainHeterograph:
                     
             print('number of positive/negative events', \
                   sum(self.target_dicts['edge_event']>0), sum(self.target_dicts['edge_event']==0))
-
+            
+            del self.edges
+            del self.vertex2joint
                        
         """
             

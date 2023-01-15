@@ -5,7 +5,7 @@ Created on Fri Sep 30 15:35:27 2022
 
 @author: yigongqin
 """
-import argparse, time, glob, dill, random, os
+import argparse, time, dill, random, os
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
 from data_loader import DynamicHeteroGraphTemporalSignal
-from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier, rot90
+from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier
 from parameters import regressor, classifier, classifier_transfered
 from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
@@ -237,17 +237,8 @@ if __name__=='__main__':
     
     if mode == 'train':
     
-        datasets = sorted(glob.glob(args.data_dir + 'case*'))
-        random.shuffle(datasets)
         data_list = []
-        """
-        for case in datasets:
-            with open(case, 'rb') as inp:  
-                try:
-                    data_list = data_list + dill.load(inp)
-                except:
-                    raise EOFError
-        """
+
         with open('dataset_train.pkl', 'rb') as inp:  
             try:
                 data_list = dill.load(inp)
@@ -258,17 +249,15 @@ if __name__=='__main__':
         sample = data_list[0]
         
     if mode == 'test':
-        
-        datasets = sorted(glob.glob(args.test_dir + 'case*'))
+
         
         data_list = []
         
-        for case in datasets:
-            with open(case, 'rb') as inp:  
-                try:
-                    data_list = data_list + dill.load(inp)
-                except:
-                    raise EOFError
+        with open('dataset_test.pkl', 'rb') as inp:  
+            try:
+                data_list = dill.load(inp)
+            except:
+                raise EOFError
                 
         num_test = len(data_list)
         sample = data_list[0]
@@ -416,7 +405,7 @@ if __name__=='__main__':
         if args.model_type== 'classifier':
         
             fig, ax = plt.subplots() 
-            ax.scatter(train.rlist, train.plist)
+            ax.scatter(train.metric.rlist, train.metric.plist)
             ax.set_ylim(bottom=0.)
             ax.set_xlim(left=0.)
             plt.xlabel('Recall')

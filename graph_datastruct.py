@@ -607,16 +607,18 @@ class GrainHeterograph:
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
 
             
+            self.edges = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
             self.target_dicts['edge_event'] = -100*np.ones(len(self.edges), dtype=int)
  
             for i, pair in enumerate(self.edges):
-                if pair in nxt.edges and pair[0]>-1:
+                if pair in nxt.edges:
                     if tuple(pair) in event_list:
                         self.target_dicts['edge_event'][i] = 1
                     else:
                         self.target_dicts['edge_event'][i] = 0
                     
-
+            print('number of positive/negative events', \
+                  sum(self.target_dicts['edge_event']>0), sum(self.target_dicts['edge_event']==0))
 
                        
         """

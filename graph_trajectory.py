@@ -740,7 +740,7 @@ class graph_trajectory(graph):
 
         
         hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)}
-        hg.edges = self.edges
+        hg.edges = self.edges.copy()
         
         self.states.append(hg) # states at current time
 
@@ -809,6 +809,7 @@ if __name__ == '__main__':
                     unknown (mask out)
                     
                 """
+                print('\n')
                 if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
                     if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
                         print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)

@@ -17,6 +17,9 @@ class feature_metric:
         self.metric_list = []
         
         self.acc_dicts = defaultdict(float)
+        self.test_label, self.test_prob = [], []
+        
+        """
         
         intervals = 10
         self.threshold = []
@@ -27,7 +30,8 @@ class feature_metric:
         self.class_dicts = {'TP':np.zeros(len(self.threshold)),\
                             'FP':np.zeros(len(self.threshold)),\
                             'FN':np.zeros(len(self.threshold))}
-        
+        """
+            
     def record(self, y_dict, pred, mask, epoch):
 
         def add(key, idx):
@@ -38,12 +42,7 @@ class feature_metric:
             if epoch == 0:
                 self.acc_dicts[key+str(idx)] += float(torch.sum( mask[key][:,0] *(y_dict[key][:,idx])**2 ))
         
-        def PR( y, prob):
-            
-            for i, t in enumerate(self.threshold):
-                self.class_dicts['TP'][i] += float(sum( (y==1) & (prob>t) )) 
-                self.class_dicts['FP'][i] += float(sum( (y==0) & (prob>t) ))
-                self.class_dicts['FN'][i] += float(sum( (y==1) & (prob<=t) ))
+
                 
         if self.model_type == 'regressor':
             
@@ -53,50 +52,28 @@ class feature_metric:
             add('joint', 1)        
 
         
-
         if self.model_type == 'classifier':
 
-            PR(y_dict['edge_event'], torch.sigmoid(pred['edge_event']))
             
+           # PR(y_dict['edge_event'], torch.sigmoid(pred['edge_event']))
+            p = pred['edge_event']
+            y = y_dict['edge_event']
             
+            qualified_y = torch.where(y>-1)
+            y = y[qualified_y]
+            p = p[qualified_y]
+            self.test_prob.append(p)
+            self.test_label.append(y)
     
     def epoch_summary(self):
         
-        
-        def PRAUC():
-            
-            P_list, R_list = [], []
-            left_bound, AUC = 0, 0
-            
-            for i in range(len(self.threshold)): 
 
-                TruePositive  = self.class_dicts['TP'][i]
-                FalsePositive = self.class_dicts['FP'][i]
-                FalseNegative = self.class_dicts['FN'][i]
-                
-                if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
-
-                    Precision = TruePositive/(TruePositive + FalsePositive) 
-                    Recall = TruePositive/(TruePositive + FalseNegative)
-            
-                    AUC += (Recall-left_bound)*Precision
-                    left_bound = Recall
-                
-                else:
-                    Precision = -1
-                    Recall = -1
-                
-                P_list.append(Precision)
-                R_list.append(Recall)    
-                
-            return AUC, P_list, R_list
-            
-        
         if self.model_type == 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
             print('Validation AUC:{:.6f}'.format(self.test_auc)) 
             self.metric_list.append(float(self.test_auc))
+            self.test_label, self.test_prob = [], []
          #   print('Train AUC:{:.6f}, valid AUC:{:.6f}'.format(train_auc, test_auc)) 
 
         if self.model_type == 'regressor':
@@ -203,3 +180,42 @@ def edge_error_metric(data_edge_index, pred_edge_index):
 
     return 1-len(E_pp.intersection(E_t_pp))/len(E_pp), \
            1-len(E_pq.intersection(E_t_pq))/len(E_pq)
+
+'''
+
+        def PR( y, prob):
+            
+            for i, t in enumerate(self.threshold):
+                self.class_dicts['TP'][i] += float(sum( (y==1) & (prob>t) )) 
+                self.class_dicts['FP'][i] += float(sum( (y==0) & (prob>t) ))
+                self.class_dicts['FN'][i] += float(sum( (y==1) & (prob<=t) ))
+                
+                
+def PRAUC():
+     
+     P_list, R_list = [], []
+     left_bound, AUC = 0, 0
+     
+     for i in range(len(self.threshold)): 
+
+         TruePositive  = self.class_dicts['TP'][i]
+         FalsePositive = self.class_dicts['FP'][i]
+         FalseNegative = self.class_dicts['FN'][i]
+         
+         if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
+
+             Precision = TruePositive/(TruePositive + FalsePositive) 
+             Recall = TruePositive/(TruePositive + FalseNegative)
+     
+             AUC += (Recall-left_bound)*Precision
+             left_bound = Recall
+         
+         else:
+             Precision = -1
+             Recall = -1
+         
+         P_list.append(Precision)
+         R_list.append(Recall)    
+         
+     return AUC, P_list, R_list
+ '''

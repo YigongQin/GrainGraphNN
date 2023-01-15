@@ -240,14 +240,19 @@ if __name__=='__main__':
         datasets = sorted(glob.glob(args.data_dir + 'case*'))
         random.shuffle(datasets)
         data_list = []
-        
+        """
         for case in datasets:
             with open(case, 'rb') as inp:  
                 try:
                     data_list = data_list + dill.load(inp)
                 except:
                     raise EOFError
-
+        """
+        with open('dataset_train.pkl', 'rb') as inp:  
+            try:
+                data_list = dill.load(inp)
+            except:
+                raise EOFError
         num_train = int(args.train_ratio*len(data_list))
         num_valid = len(data_list) - num_train
         sample = data_list[0]

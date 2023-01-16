@@ -10,11 +10,12 @@ import glob, dill, random, sys, argparse
 
 
 parser = argparse.ArgumentParser("Train the model.")
-parser.add_argument("--data_dir", type=str, default='./sameGR/level2/')
+parser.add_argument("--data_dir", type=str, default='./quality/level2/')
 parser.add_argument("--name", type=str, default='train')   
 args = parser.parse_args()
 
 datasets = sorted(glob.glob(args.data_dir + 'case*'))
+random.seed(35)
 random.shuffle(datasets)
 data_list = []
 

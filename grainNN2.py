@@ -242,8 +242,7 @@ if __name__=='__main__':
         train_list = train_list[:int(args.use_sample)]
     
     test_list = data_list[num_train:]       
-
-    #data_prop = data_analysis(train_list)          
+       
     
     if args.model_type== 'regressor':
         hp = regressor(model_id)
@@ -270,6 +269,19 @@ if __name__=='__main__':
     else:
         heteroData = train_tensor[0]
     hp.metadata = heteroData.metadata()
+    
+    
+    
+    dx_max_gradient_dict = {}
+    for data in train_list:
+        G, R = data.physical_params['G'], data.physical_params['R']
+        if (G, R) not in dx_max_gradient_dict:
+            dx_max_gradient_dict[(G, R)] = data.gradient_scale['joint']
+        else:
+            dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_scale['joint'])
+            
+    print(dx_max_gradient_dict)
+    
     
     print('==========  data information  =========')
 

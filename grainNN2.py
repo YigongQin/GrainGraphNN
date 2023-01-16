@@ -183,6 +183,7 @@ if __name__=='__main__':
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--transfer", type=bool, default=True)
+    parser.add_argument("--regressor_id", type=int, default=41)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
     parser.add_argument("--symmetry", type=int, default=1)
@@ -335,14 +336,13 @@ if __name__=='__main__':
     if args.model_type== 'classifier':
         
         if args.transfer:
-            regressor_id = 41
-            hp_r = regressor(regressor_id)
+            hp_r = regressor(args.regressor_id)
             hp_r.features = sample.features
             hp_r.targets = sample.targets
             hp_r.device = device
             hp_r.metadata = heteroData.metadata()
             pretrained_model = GrainNN_regressor(hp_r)
-            pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(regressor_id)))
+            pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id)))
             pretrained_model.eval()
             print('transfered learned parameters from regressor')
             model = regressor_classifier(hp, pretrained_model)

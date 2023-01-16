@@ -279,8 +279,11 @@ if __name__=='__main__':
             dx_max_gradient_dict[(G, R)] = data.gradient_scale['joint']
         else:
             dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_scale['joint'])
-            
-    print(dx_max_gradient_dict)
+    
+    
+    with open('dx_GR.pkl', 'wb') as outp:
+        dill.dump(dx_max_gradient_dict, outp)
+   # print(dx_max_gradient_dict)
     
     
     print('==========  data information  =========')

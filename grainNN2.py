@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
 from data_loader import DynamicHeteroGraphTemporalSignal
-from models import GrainNN_classifier, GrainNN_regressor, regressor_classifier
+from models import GrainNN_classifier, GrainNN_regressor
 from parameters import regressor, classifier, classifier_transfered
 from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
@@ -345,7 +345,7 @@ if __name__=='__main__':
             pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id)))
             pretrained_model.eval()
             print('transfered learned parameters from regressor')
-            model = regressor_classifier(hp, pretrained_model)
+            model = GrainNN_classifier(hp, pretrained_model)
         else:
             model = GrainNN_classifier(hp)
     

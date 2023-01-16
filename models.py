@@ -371,7 +371,7 @@ class GrainNN_regressor(nn.Module):
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
         
                 
-        y_dict.update({'grain_event': torch.where(area<1e-6) })
+        y_dict.update({'grain_event': torch.where(area<1e-2)[0] })
 
             
 
@@ -395,67 +395,9 @@ class GrainNN_regressor(nn.Module):
         return x_dict
 
 
-class regressor_classifier(torch.nn.Module):
-
-    def __init__(self, hyper, regressor):
-        super().__init__()
-  
-        self.in_channels_dict = {node_type: len(features) 
-                                 for node_type, features in hyper.features.items()}
-        
-        self.out_channels = hyper.layer_size 
-        self.num_layer = hyper.layers
-        self.metadata = hyper.metadata  # heterogeneous graph structure
-        self.out_win = hyper.out_win
-        self.device = hyper.device
-
-        ## networks
-
-        self.gclstm_encoder = regressor.gclstm_encoder
-        self.gclstm_decoder = regressor.gclstm_decoder
-
-
-        self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
-        self.lin2 = nn.Linear(2*self.out_channels, 1) # predict probability
-        self.threshold = 1
-        
-    def forward(self, x_dict, edge_index_dict):    
-    
-
-        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
-            
-        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
-        
-        h_dict, c_dict = hidden_state[-1]
-        
-        
-        """
-        
-        GrainNN specific topological event
-        
-        """            
-        
-
-        joint_feature = h_dict['joint']
-        joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
-        
-        src, dst = joint_edge_index[0], joint_edge_index[1]
-
-        # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
-
-        pair_feature = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
-  
-           
-        y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
-
-        y_dict['edge_rotation'] = torch.sigmoid(self.lin1(pair_feature)) - 0.5
-
-        return y_dict        
-
-
 class GrainNN_classifier(torch.nn.Module):
 
-    def __init__(self, hyper):
+    def __init__(self, hyper, regressor=None):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -468,11 +410,16 @@ class GrainNN_classifier(torch.nn.Module):
         self.device = hyper.device
 
         ## networks
-
-        self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
-                                        self.num_layer, self.metadata, self.device)
-        self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
-                                        self.num_layer, self.metadata, self.device)
+        if regressor:
+            self.gclstm_encoder = regressor.gclstm_encoder
+            self.gclstm_decoder = regressor.gclstm_decoder
+            
+        else:
+            
+            self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
+                                            self.num_layer, self.metadata, self.device)
+            self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
+                                            self.num_layer, self.metadata, self.device)
 
 
         self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
@@ -712,6 +659,24 @@ def point_in_triangle(t, v1, v2, v3):
     return not (has_neg & has_pos)
 
 
+     
+
+"""
+
+  self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
+                   'joint':['x', 'y', 'z', 'G', 'R']}
+  
+  self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
+  
+  self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
+
+  self.edge_type = [('grain', 'push', 'joint'), \
+                      ('joint', 'pull', 'grain'), \
+                      ('joint', 'connect', 'joint')]
+            
+"""
+
+"""
 def rot90(data, symmetry, rot):
     
     if rot == 0: return
@@ -737,19 +702,6 @@ def rot90(data, symmetry, rot):
         data.x_dict['joint'][:,0], data.x_dict['joint'][:,1]   = 1 - data.x_dict['joint'][:,1], data.x_dict['joint'][:,0]    
         data.x_dict['joint'][:,-2], data.x_dict['joint'][:,-1] = -data.x_dict['joint'][:,-1], data.x_dict['joint'][:,-2] 
         
-        data.y_dict['joint'][:,0], data.y_dict['joint'][:,1]   = -data.y_dict['joint'][:,1], data.y_dict['joint'][:,0]       
-
-"""
-
-  self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
-                   'joint':['x', 'y', 'z', 'G', 'R']}
-  
-  self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
-  
-  self.targets = {'grain':['darea', 'extraV'], 'joint':['dx', 'dy']}    
-
-  self.edge_type = [('grain', 'push', 'joint'), \
-                      ('joint', 'pull', 'grain'), \
-                      ('joint', 'connect', 'joint')]
-            
+        data.y_dict['joint'][:,0], data.y_dict['joint'][:,1]   = -data.y_dict['joint'][:,1], data.y_dict['joint'][:,0]  
+        
 """

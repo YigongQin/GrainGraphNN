@@ -175,12 +175,9 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser("Train the model.")
     parser.add_argument("--model_id", type=int, default=0)
-    parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
-    parser.add_argument("--model_dir", type=str, default='./GR/')
+    parser.add_argument("--model_dir", type=str, default='./model/')
     parser.add_argument("--model_type", type=str, default='regressor')
-    parser.add_argument("--data_dir", type=str, default='./sameGR/level2/')
-    parser.add_argument("--test_dir", type=str, default='./test/')
     parser.add_argument("--use_sample", type=str, default='all')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
@@ -213,7 +210,6 @@ if __name__=='__main__':
     print('3D grain microstructure evolution')
     print('the model id is: ', model_id)
     print('device: ', args.device)
-    print('model already exists, no training required: ', args.model_exist)
     print('no PDE solver required, input is random: ', args.noPDE)
     print('plot GrainNN verus PDE pointwise error: ', args.plot_flag)
     print('\n')
@@ -275,8 +271,7 @@ if __name__=='__main__':
     hp.metadata = heteroData.metadata()
     
     print('==========  data information  =========')
-    print('data dir', args.data_dir)
-    print('test dir', args.test_dir)
+
     print('number of train, validation, test runs', num_train, num_valid, num_test)
     print('GrainNN frames: ', hp.frames)
     print('features: ', [(k, v) for k, v in hp.features.items()])

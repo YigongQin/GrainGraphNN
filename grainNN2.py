@@ -7,6 +7,7 @@ Created on Fri Sep 30 15:35:27 2022
 """
 import argparse, time, dill, random, os
 import numpy as np
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
@@ -271,6 +272,11 @@ if __name__=='__main__':
     hp.metadata = heteroData.metadata()
     
     
+    """
+    Fit scale of dx for G, R
+    
+    """
+    
     
     dx_max_gradient_dict = {}
     for data in train_list:
@@ -280,9 +286,24 @@ if __name__=='__main__':
         else:
             dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_scale['joint'])
     
+
+    G, R, Dx = [], [], []
     
-    with open('dx_GR.pkl', 'wb') as outp:
-        dill.dump(dx_max_gradient_dict, outp)
+    for (g, r), dx in dx_max_gradient_dict.items():
+        G.append(g)
+        R.append(r)
+        Dx.append(dx)
+    
+    def func(x, a, b, c):
+        return a + b*x[0] + c*x[1]
+    
+    xdata = np.array([G, R])
+    
+    popt, _ = curve_fit(func, xdata, Dx)
+    hp.dx_scale = torch.from_numpy(popt).to(device)
+    
+   # with open('dx_GR.pkl', 'wb') as outp:
+   #     dill.dump(dx_max_gradient_dict, outp)
    # print(dx_max_gradient_dict)
     
     

@@ -598,9 +598,13 @@ class GrainHeterograph:
                         self.mask['joint'][i,0] = 0
                       #  print('not matched', i, self.vertex2joint[i])
                       
-            self.gradient_scale = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
-                                   'grain':np.max(np.absolute(self.target_dicts['grain']))}     
-            print('maximum gradient', self.gradient_scale)
+            self.gradient_max = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
+                                   'grain':np.max(np.absolute(self.target_dicts['grain']))}   
+                
+            self.gradient_scale = {'joint':np.mean(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
+                                   'grain':np.mean(np.absolute(self.target_dicts['grain']))}     
+                
+            print('maximum gradient', self.gradient_max)
             
             assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)

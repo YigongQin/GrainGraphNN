@@ -10,7 +10,7 @@ class Param(Updater):
 
 
 
-def regressor(mode, model_id):
+def regressor(model_id):
 
 
     Ct = 1
@@ -58,7 +58,7 @@ def regressor(mode, model_id):
 
 
 
-def classifier(mode, model_id):
+def classifier(model_id):
 
 
         
@@ -97,7 +97,7 @@ def classifier(mode, model_id):
     return Param(param_dict)
 
 
-def classifier_transfered(mode, model_id):
+def classifier_transfered(model_id):
 
     hp_grid = {'weight':[1, 2, 4],\
                'batch_size':[8, 16, 32],\

@@ -142,16 +142,7 @@ def train(model, train_loader, test_loader):
                 test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
                 metric.record(data.y_dict, pred, data['mask'], epoch)
                 
-              #  if args.model_type== 'regressor': 
-              #      regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, epoch)
-                    
-                
-              #  if args.model_type== 'classifier':       
-                     
-              #      test_prob.append(pred['edge_event'])
-              #      test_label.append(data.y_dict['edge_event'])
-                    
-     #   if epoch == hp.epoch: print(test_acc_dict)    
+  
         
         test_loss/=count
         
@@ -183,7 +174,6 @@ if __name__=='__main__':
 
     
     parser = argparse.ArgumentParser("Train the model.")
-    parser.add_argument("--mode", type=str, default="train")
     parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--model_exist", type=bool, default=False)
     parser.add_argument("--device", type=str, default='cpu')
@@ -203,12 +193,10 @@ if __name__=='__main__':
     parser.add_argument("--models", type=tuple, default=(0, 0))
     args = parser.parse_args()
     
-    
-    mode = args.mode
+
     model_id = args.model_id
     device = args.device
     
-    if mode == 'test': args.model_exist = True
     
     seed = args.seed
     random.seed(seed)
@@ -223,7 +211,7 @@ if __name__=='__main__':
     
     print('==========  GrainNN specification  =========')
     print('3D grain microstructure evolution')
-    print('the mode is: ', mode, ', the model id is: ', model_id)
+    print('the model id is: ', model_id)
     print('device: ', args.device)
     print('model already exists, no training required: ', args.model_exist)
     print('no PDE solver required, input is random: ', args.noPDE)
@@ -235,32 +223,19 @@ if __name__=='__main__':
     num_train, num_valid, num_test = 0, 0, 0 
     
     
-    if mode == 'train':
+
     
-        data_list = []
+    data_list = []
 
-        with open('dataset_train.pkl', 'rb') as inp:  
-            try:
-                data_list = dill.load(inp)
-            except:
-                raise EOFError
-        num_train = int(args.train_ratio*len(data_list))
-        num_valid = len(data_list) - num_train
-        sample = data_list[0]
+    with open('dataset_train.pkl', 'rb') as inp:  
+        try:
+            data_list = dill.load(inp)
+        except:
+            raise EOFError
+    num_train = int(args.train_ratio*len(data_list))
+    num_valid = len(data_list) - num_train
+    sample = data_list[0]
         
-    if mode == 'test':
-
-        
-        data_list = []
-        
-        with open('dataset_test.pkl', 'rb') as inp:  
-            try:
-                data_list = dill.load(inp)
-            except:
-                raise EOFError
-                
-        num_test = len(data_list)
-        sample = data_list[0]
         
   #  random.shuffle(data_list)
 
@@ -274,13 +249,13 @@ if __name__=='__main__':
     #data_prop = data_analysis(train_list)          
     
     if args.model_type== 'regressor':
-        hp = regressor(mode, model_id)
+        hp = regressor(model_id)
         
     elif args.model_type== 'classifier':
         if args.transfer:
-            hp = classifier_transfered(mode, model_id)
+            hp = classifier_transfered(model_id)
         else:
-            hp = classifier(mode, model_id)   
+            hp = classifier(model_id)   
 
     else:
         raise KeyError
@@ -325,16 +300,16 @@ if __name__=='__main__':
     print('\n')
     
     
-    if mode == 'train':
-        print('************ training specification ***********')            
-        print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
-        print('batch size: ', hp.batch_size)
-        print('model type: ', args.model_type)
-        if args.model_type== 'classifier':
-            print('weight of positive event: ', hp.weight)
-        print('schedueler step: ', hp.decay_step)
-        
-        print('\n')
+
+    print('************ training specification ***********')            
+    print('epochs: ', hp.epoch, '; learning rate: ', hp.lr)
+    print('batch size: ', hp.batch_size)
+    print('model type: ', args.model_type)
+    if args.model_type== 'classifier':
+        print('weight of positive event: ', hp.weight)
+    print('schedueler step: ', hp.decay_step)
+    
+    print('\n')
     
 
    # print(model)
@@ -350,152 +325,83 @@ if __name__=='__main__':
    # print('\n')
     
 
-    if args.mode == 'train': 
-        ## train the model
-        train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
-        test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
-        train_loss_list=[]
-        test_loss_list=[]
-        test_auc_list = []
-        test_acc_list = []
-        start = time.time()
+
+    train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
+    test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
+    train_loss_list=[]
+    test_loss_list=[]
+    test_auc_list = []
+    test_acc_list = []
+    start = time.time()
+    
+    
+    if args.model_type== 'regressor':
+        model = GrainNN_regressor(hp)
+    if args.model_type== 'classifier':
         
-        
-        if args.model_type== 'regressor':
-            model = GrainNN_regressor(hp)
-        if args.model_type== 'classifier':
-            
-            if args.transfer:
-                regressor_id = 41
-                hp_r = regressor(mode, regressor_id)
-                hp_r.features = sample.features
-                hp_r.targets = sample.targets
-                hp_r.device = device
-                hp_r.metadata = heteroData.metadata()
-                pretrained_model = GrainNN_regressor(hp_r)
-                pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(regressor_id)))
-                pretrained_model.eval()
-                print('transfered learned parameters from regressor')
-                model = regressor_classifier(hp, pretrained_model)
-            else:
-                model = GrainNN_classifier(hp)
-        
-        model = train(model, train_loader, test_loader)
-        x = train.x
-        y = train.y
-        edge = train.edge
-        end = time.time()
-        print('training time', end - start)
-        
-        
+        if args.transfer:
+            regressor_id = 41
+            hp_r = regressor(regressor_id)
+            hp_r.features = sample.features
+            hp_r.targets = sample.targets
+            hp_r.device = device
+            hp_r.metadata = heteroData.metadata()
+            pretrained_model = GrainNN_regressor(hp_r)
+            pretrained_model.load_state_dict(torch.load('./GR/regressor'+str(regressor_id)))
+            pretrained_model.eval()
+            print('transfered learned parameters from regressor')
+            model = regressor_classifier(hp, pretrained_model)
+        else:
+            model = GrainNN_classifier(hp)
+    
+    model = train(model, train_loader, test_loader)
+    x = train.x
+    y = train.y
+    edge = train.edge
+    end = time.time()
+    print('training time', end - start)
+    
+    
+    fig, ax = plt.subplots() 
+    ax.semilogy(train_loss_list)
+    ax.semilogy(test_loss_list)
+    if args.model_type== 'classifier':
+        ax2 = ax.twinx()
+        ax2.plot(test_auc_list, c='r')
+        ax2.set_ylabel('PRAUC')
+        ax2.legend(['PRAUC'],loc='upper center')
+    ax.set_xlabel('epoch')
+    ax.set_ylabel('loss')
+    ax.legend(['training loss', 'validation loss'])
+    plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
+    plt.savefig('loss.png',dpi=600, bbox_inches='tight')
+    
+    if args.model_type== 'classifier':
+    
         fig, ax = plt.subplots() 
-        ax.semilogy(train_loss_list)
-        ax.semilogy(test_loss_list)
-        if args.model_type== 'classifier':
-            ax2 = ax.twinx()
-            ax2.plot(test_auc_list, c='r')
-            ax2.set_ylabel('PRAUC')
-            ax2.legend(['PRAUC'],loc='upper center')
-        ax.set_xlabel('epoch')
-        ax.set_ylabel('loss')
-        ax.legend(['training loss', 'validation loss'])
-        plt.title('training time:'+str( "%d"%int( (end-start)/60 ) )+'min')
-        plt.savefig('loss.png',dpi=600, bbox_inches='tight')
-        
-        if args.model_type== 'classifier':
-        
-            fig, ax = plt.subplots() 
-            ax.scatter(train.metric.rlist, train.metric.plist)
-            ax.set_ylim(bottom=0.)
-            ax.set_xlim(left=0.)
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title('Precision-Recall Plot')
-            plt.savefig('PR.png',dpi=600, bbox_inches='tight')        
-        
-            optim_arg = max(range(len(train.metric.plist)), key=lambda i: train.metric.rlist[i]+train.metric.plist[i])
-            optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.metric.plist)-1), \
-                train.metric.plist[optim_arg], train.metric.rlist[optim_arg]
-            print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
-
-            model.threshold = optim_threshold
-
-        with open('loss.txt', 'w') as f:
-            f.write('epoch, training loss, validation loss\n' )
-            for i in range(len(train_loss_list)):
-                f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
-                
-        if not os.path.exists(args.model_dir):
-            os.makedirs(args.model_dir)                
-        torch.save(model.state_dict(), args.model_dir + args.model_type + str(model_id))
-
-
-
-    if args.mode == 'test':
-        
-        """
-        load model
-        """
-        assert args.model_type == 'regressor', "default regression"
-        
-        model.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.models[0])))
-        model.eval() 
-        
-        hp_classifier = classifier(mode, args.models[1])
-        hp_classifier.features = hp.features
-        hp_classifier.device = hp.device
-        Classifier = GrainNN_classifier(hp_classifier)
-        
-        Classifier.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.models[1])))
-        Classifier.eval() 
-
-        
-        for case, data in enumerate(test_tensor):
-            print('case %d'%case)
-         #   print(pred['joint'])
-          #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)
-           # traj.load_trajectory(rawdat_dir = '.')
-            with open('./edge_data/traj1.pkl', 'rb') as inp:  
-                try:
-                    traj = dill.load(inp)
-                except:
-                    raise EOFError
-
-
-            for frame in range(hp.frames):
-                """
-                <1> combine two predictions
-                """            
+        ax.scatter(train.metric.rlist, train.metric.plist)
+        ax.set_ylim(bottom=0.)
+        ax.set_xlim(left=0.)
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('Precision-Recall Plot')
+        plt.savefig('PR.png',dpi=600, bbox_inches='tight')        
     
-                pred = model(data.x_dict, data.edge_index_dict)
-                pred_c = Classifier(data.x_dict, data.edge_index_dict)
-                pred.update(pred_c)
-                
-                """
-                <2>  update node features
-                """
-                
-                data.x_dict = model.update(data.x_dict, pred)
-                
-                """
-                <3> predict events and update features and connectivity
-                """            
-                
-                data.x_dict, data.edge_index_dict = Classifier.update(data.x_dict, data.edge_index_dict, pred)
+        optim_arg = max(range(len(train.metric.plist)), key=lambda i: train.metric.rlist[i]+train.metric.plist[i])
+        optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.metric.plist)-1), \
+            train.metric.plist[optim_arg], train.metric.rlist[optim_arg]
+        print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
 
-     
-                """
-                Evaluation
-                """
-                pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
-                
-                
-                traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
-               # traj.show_data_struct()
-                
-                
-                print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
-              #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+        model.threshold = optim_threshold
+
+    with open('loss.txt', 'w') as f:
+        f.write('epoch, training loss, validation loss\n' )
+        for i in range(len(train_loss_list)):
+            f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
             
+    if not os.path.exists(args.model_dir):
+        os.makedirs(args.model_dir)                
+    torch.save(model.state_dict(), args.model_dir + args.model_type + str(model_id))
 
-    
+
+

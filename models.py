@@ -363,7 +363,8 @@ class GrainNN_regressor(nn.Module):
         """
         dx_scale = self.GR_fit[0] + self.GR_fit[1]*x_dict['joint'][:, 3] + self.GR_fit[2]*x_dict['joint'][:, 4]  
         
-        y_dict['joint'] = dx_scale*torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
+        #y_dict['joint'] = dx_scale.view(-1, 1)*torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
+        y_dict['joint'] = torch.tanh(y_dict['joint'])
 
         area = torch.tanh(y_dict['grain'][:, 0]) + x_dict['grain'][:, 3] # darea + area_old is positive    
        # area = F.normalize(area, p=1, dim=-1)

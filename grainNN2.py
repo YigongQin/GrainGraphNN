@@ -282,9 +282,9 @@ if __name__=='__main__':
     for data in train_list:
         G, R = data.feature_dicts['joint'][0][3], data.feature_dicts['joint'][0][4]
         if (G, R) not in dx_max_gradient_dict:
-            dx_max_gradient_dict[(G, R)] = data.gradient_scale['joint']
+            dx_max_gradient_dict[(G, R)] = data.gradient_max['joint']
         else:
-            dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_scale['joint'])
+            dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_max['joint'])
     
 
     G, R, Dx = [], [], []
@@ -300,8 +300,9 @@ if __name__=='__main__':
     xdata = np.array([G, R])
     
     popt, _ = curve_fit(func, xdata, Dx)
+    popt = np.array(popt, dtype='float32')
     hp.GR_fit = torch.from_numpy(popt).to(device)
-    
+   # print(hp.GR_fit) 
    # with open('dx_GR.pkl', 'wb') as outp:
    #     dill.dump(dx_max_gradient_dict, outp)
    # print(dx_max_gradient_dict)

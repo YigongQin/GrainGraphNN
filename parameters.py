@@ -16,7 +16,7 @@ def regressor(model_id):
     Ct = 1
         
     hp_grid = {'frames':[20, 24, 30], \
-               'lr':[100e-4, 25e-4, 50e-4,  200e-4], \
+               'lr':[100e-4, 25e-4, 50e-4], \
                'layer':[2, 3, 4],\
                'layer_size':[32, 48, 16],\
                'weight':[5, 10, 20, 40],\

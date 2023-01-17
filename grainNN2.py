@@ -184,7 +184,7 @@ if __name__=='__main__':
     parser.add_argument("--plot_flag", type=bool, default=False)
     parser.add_argument("--noPDE", type=bool, default=True)
     parser.add_argument("--transfer", type=bool, default=True)
-    parser.add_argument("--regressor_id", type=int, default=41)
+    parser.add_argument("--regressor_id", type=int, default=14)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
     parser.add_argument("--symmetry", type=int, default=1)

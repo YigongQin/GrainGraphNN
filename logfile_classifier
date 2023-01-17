@@ -1,0 +1,5919 @@
+/scratch/07428/ygqin/graph/GrainGraphNN
+Tue Jan 17 12:39:57 CST 2023
+Launcher: Setup complete.
+
+------------- SUMMARY ---------------
+   Number of hosts:    1
+   Working directory:  /scratch/07428/ygqin/graph/GrainGraphNN
+   Processes per host: 128
+   Total processes:    128
+   Total jobs:         24
+   Scheduling method:  dynamic
+
+-------------------------------------
+Launcher: Starting parallel tasks...
+Launcher: Task 18 running job 2 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=1 --model_type=classifier --regressor_id=14)
+Launcher: Task 31 running job 1 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=0 --model_type=classifier --regressor_id=14)
+Launcher: Task 25 running job 5 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=4 --model_type=classifier --regressor_id=14)
+Launcher: Task 9 running job 4 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=3 --model_type=classifier --regressor_id=14)
+Launcher: Task 23 running job 3 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=2 --model_type=classifier --regressor_id=14)
+Launcher: Task 54 running job 6 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=5 --model_type=classifier --regressor_id=14)
+Launcher: Task 55 running job 7 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=6 --model_type=classifier --regressor_id=14)
+Launcher: Task 87 running job 8 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=7 --model_type=classifier --regressor_id=14)
+Launcher: Task 85 running job 10 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=9 --model_type=classifier --regressor_id=14)
+Launcher: Task 86 running job 9 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=8 --model_type=classifier --regressor_id=14)
+Launcher: Task 97 running job 11 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=10 --model_type=classifier --regressor_id=14)
+Launcher: Task 104 running job 12 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=11 --model_type=classifier --regressor_id=14)
+Launcher: Task 105 running job 13 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=12 --model_type=classifier --regressor_id=14)
+Launcher: Task 5 running job 14 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=13 --model_type=classifier --regressor_id=14)
+Launcher: Task 19 running job 15 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=14 --model_type=classifier --regressor_id=14)
+Launcher: Task 39 running job 16 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=15 --model_type=classifier --regressor_id=14)
+Launcher: Task 50 running job 17 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=16 --model_type=classifier --regressor_id=14)
+Launcher: Task 76 running job 20 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=19 --model_type=classifier --regressor_id=14)
+Launcher: Task 83 running job 19 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=18 --model_type=classifier --regressor_id=14)
+Launcher: Task 75 running job 21 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=20 --model_type=classifier --regressor_id=14)
+Launcher: Task 74 running job 18 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=17 --model_type=classifier --regressor_id=14)
+Launcher: Task 99 running job 23 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=22 --model_type=classifier --regressor_id=14)
+Launcher: Task 88 running job 22 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=21 --model_type=classifier --regressor_id=14)
+Launcher: Task 95 running job 24 on c302-004.ls6.tacc.utexas.edu (python3 grainNN2.py --model_id=23 --model_type=classifier --regressor_id=14)
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  10
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  32
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.162342, valid loss:0.062584
+Validation AUC:0.626323
+
+
+Epoch:2, Train loss:0.049054, valid loss:0.049397
+Validation AUC:0.741421
+
+
+Epoch:3, Train loss:0.041130, valid loss:0.042676
+Validation AUC:0.776672
+
+
+Epoch:4, Train loss:0.037608, valid loss:0.041845
+Validation AUC:0.793035
+
+
+Epoch:5, Train loss:0.035691, valid loss:0.040537
+Validation AUC:0.804697
+
+
+Epoch:6, Train loss:0.033981, valid loss:0.038446
+Validation AUC:0.803669
+
+
+Epoch:7, Train loss:0.032972, valid loss:0.037834
+Validation AUC:0.823969
+
+
+Epoch:8, Train loss:0.032256, valid loss:0.038026
+Validation AUC:0.820037
+
+
+Epoch:9, Train loss:0.031445, valid loss:0.037760
+Validation AUC:0.813358
+
+
+Epoch:10, Train loss:0.030772, valid loss:0.035702
+Validation AUC:0.824011
+
+
+Epoch:11, Train loss:0.029628, valid loss:0.035075
+Validation AUC:0.830912
+
+
+Epoch:12, Train loss:0.029224, valid loss:0.035204
+Validation AUC:0.835982
+
+
+Epoch:13, Train loss:0.028967, valid loss:0.035010
+Validation AUC:0.838528
+
+
+Epoch:14, Train loss:0.028766, valid loss:0.034267
+Validation AUC:0.837675
+
+
+Epoch:15, Train loss:0.028467, valid loss:0.034659
+Validation AUC:0.838883
+
+
+Epoch:16, Train loss:0.028160, valid loss:0.034245
+Validation AUC:0.839430
+
+
+Epoch:17, Train loss:0.027903, valid loss:0.034998
+Validation AUC:0.836918
+
+
+Epoch:18, Train loss:0.027888, valid loss:0.035304
+Validation AUC:0.839788
+
+
+Epoch:19, Train loss:0.027623, valid loss:0.033872
+Validation AUC:0.839803
+
+
+Epoch:20, Train loss:0.027313, valid loss:0.034251
+Validation AUC:0.835202
+
+
+Epoch:21, Train loss:0.026655, valid loss:0.033647
+Validation AUC:0.842655
+
+
+Epoch:22, Train loss:0.026543, valid loss:0.034039
+Validation AUC:0.842275
+
+
+Epoch:23, Train loss:0.026401, valid loss:0.033821
+Validation AUC:0.835687
+
+
+Epoch:24, Train loss:0.026343, valid loss:0.033457
+Validation AUC:0.843430
+
+
+Epoch:25, Train loss:0.026263, valid loss:0.033415
+Validation AUC:0.840466
+
+
+Epoch:26, Train loss:0.026168, valid loss:0.033406
+Validation AUC:0.839892
+
+
+Epoch:27, Train loss:0.026025, valid loss:0.033785
+Validation AUC:0.843002
+
+
+Epoch:28, Train loss:0.026053, valid loss:0.033143
+Validation AUC:0.844799
+
+
+Epoch:29, Train loss:0.025824, valid loss:0.033697
+Validation AUC:0.843148
+
+
+Epoch:30, Train loss:0.025827, valid loss:0.033152
+Validation AUC:0.844051
+
+
+Epoch:31, Train loss:0.025390, valid loss:0.033326
+Validation AUC:0.844803
+
+
+Epoch:32, Train loss:0.025383, valid loss:0.033614
+Validation AUC:0.844078
+
+
+Epoch:33, Train loss:0.025321, valid loss:0.033118
+Validation AUC:0.842420
+
+
+Epoch:34, Train loss:0.025254, valid loss:0.033326
+Validation AUC:0.841978
+
+
+Epoch:35, Train loss:0.025185, valid loss:0.034017
+Validation AUC:0.841483
+
+
+Epoch:36, Train loss:0.025183, valid loss:0.033357
+Validation AUC:0.844776
+
+
+Epoch:37, Train loss:0.025134, valid loss:0.033229
+Validation AUC:0.843718
+
+
+Epoch:38, Train loss:0.025012, valid loss:0.033375
+Validation AUC:0.841995
+
+
+Epoch:39, Train loss:0.025055, valid loss:0.033176
+Validation AUC:0.843213
+
+
+Epoch:40, Train loss:0.024989, valid loss:0.033164
+Validation AUC:0.843234
+
+
+Epoch:41, Train loss:0.024812, valid loss:0.033134
+Validation AUC:0.842957
+
+
+Epoch:42, Train loss:0.024757, valid loss:0.033305
+Validation AUC:0.843155
+
+
+Epoch:43, Train loss:0.024690, valid loss:0.033289
+Validation AUC:0.844085
+
+
+Epoch:44, Train loss:0.024718, valid loss:0.033127
+Validation AUC:0.844408
+
+
+Epoch:45, Train loss:0.024692, valid loss:0.033109
+Validation AUC:0.844377
+
+
+Epoch:46, Train loss:0.024628, valid loss:0.033205
+Validation AUC:0.843521
+
+
+Epoch:47, Train loss:0.024671, valid loss:0.033105
+Validation AUC:0.844611
+
+
+Epoch:48, Train loss:0.024593, valid loss:0.033230
+Validation AUC:0.842143
+
+
+Epoch:49, Train loss:0.024596, valid loss:0.033103
+Validation AUC:0.843403
+
+
+Epoch:50, Train loss:0.024567, valid loss:0.033415
+Validation AUC:0.843039
+model id: 10 loss 0.02367292179472067
+model id: 10 PR AUC 0.8430390357971191
+training time 15560.466621160507
+the optimal threshold for classification is:  0.5 , with precision/recall 0.830908477306366 0.7961586117744446
+Launcher: Job 11 completed in 15611 seconds.
+Launcher: Task 97 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  17
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  32
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722737, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.155003, valid loss:0.074633
+Validation AUC:0.727461
+
+
+Epoch:2, Train loss:0.062795, valid loss:0.062221
+Validation AUC:0.789271
+
+
+Epoch:3, Train loss:0.056230, valid loss:0.059208
+Validation AUC:0.805024
+
+
+Epoch:4, Train loss:0.051491, valid loss:0.056296
+Validation AUC:0.820159
+
+
+Epoch:5, Train loss:0.049713, valid loss:0.055706
+Validation AUC:0.822638
+
+
+Epoch:6, Train loss:0.047976, valid loss:0.053941
+Validation AUC:0.825099
+
+
+Epoch:7, Train loss:0.046261, valid loss:0.052192
+Validation AUC:0.829544
+
+
+Epoch:8, Train loss:0.045123, valid loss:0.052928
+Validation AUC:0.832206
+
+
+Epoch:9, Train loss:0.044388, valid loss:0.051082
+Validation AUC:0.835880
+
+
+Epoch:10, Train loss:0.043407, valid loss:0.050505
+Validation AUC:0.833445
+
+
+Epoch:11, Train loss:0.040897, valid loss:0.049503
+Validation AUC:0.838254
+
+
+Epoch:12, Train loss:0.040355, valid loss:0.050457
+Validation AUC:0.836932
+
+
+Epoch:13, Train loss:0.039865, valid loss:0.051120
+Validation AUC:0.829905
+
+
+Epoch:14, Train loss:0.039630, valid loss:0.050166
+Validation AUC:0.842092
+
+
+Epoch:15, Train loss:0.039309, valid loss:0.048411
+Validation AUC:0.841152
+
+
+Epoch:16, Train loss:0.038593, valid loss:0.048376
+Validation AUC:0.842936
+
+
+Epoch:17, Train loss:0.038481, valid loss:0.048064
+Validation AUC:0.841905
+
+
+Epoch:18, Train loss:0.038258, valid loss:0.047986
+Validation AUC:0.841007
+
+
+Epoch:19, Train loss:0.037762, valid loss:0.047749
+Validation AUC:0.843674
+
+
+Epoch:20, Train loss:0.037165, valid loss:0.047702
+Validation AUC:0.844746
+
+
+Epoch:21, Train loss:0.035709, valid loss:0.048311
+Validation AUC:0.835904
+
+
+Epoch:22, Train loss:0.035612, valid loss:0.047552
+Validation AUC:0.837336
+
+
+Epoch:23, Train loss:0.035279, valid loss:0.048551
+Validation AUC:0.840238
+
+
+Epoch:24, Train loss:0.035168, valid loss:0.047395
+Validation AUC:0.840403
+
+
+Epoch:25, Train loss:0.034941, valid loss:0.047964
+Validation AUC:0.840159
+
+
+Epoch:26, Train loss:0.034859, valid loss:0.047846
+Validation AUC:0.843574
+
+
+Epoch:27, Train loss:0.034675, valid loss:0.047512
+Validation AUC:0.838773
+
+
+Epoch:28, Train loss:0.034625, valid loss:0.047281
+Validation AUC:0.837872
+
+
+Epoch:29, Train loss:0.034242, valid loss:0.047831
+Validation AUC:0.836939
+
+
+Epoch:30, Train loss:0.034165, valid loss:0.048612
+Validation AUC:0.833770
+
+
+Epoch:31, Train loss:0.033283, valid loss:0.047421
+Validation AUC:0.841826
+
+
+Epoch:32, Train loss:0.033169, valid loss:0.047972
+Validation AUC:0.833004
+
+
+Epoch:33, Train loss:0.033036, valid loss:0.047893
+Validation AUC:0.838085
+
+
+Epoch:34, Train loss:0.032938, valid loss:0.047843
+Validation AUC:0.833166
+
+
+Epoch:35, Train loss:0.032872, valid loss:0.047963
+Validation AUC:0.834613
+
+
+Epoch:36, Train loss:0.032849, valid loss:0.048639
+Validation AUC:0.836524
+
+
+Epoch:37, Train loss:0.032659, valid loss:0.047826
+Validation AUC:0.837589
+
+
+Epoch:38, Train loss:0.032499, valid loss:0.048140
+Validation AUC:0.833335
+
+
+Epoch:39, Train loss:0.032551, valid loss:0.048064
+Validation AUC:0.835861
+
+
+Epoch:40, Train loss:0.032413, valid loss:0.048622
+Validation AUC:0.834678
+
+
+Epoch:41, Train loss:0.031966, valid loss:0.047833
+Validation AUC:0.836188
+
+
+Epoch:42, Train loss:0.031835, valid loss:0.048073
+Validation AUC:0.834071
+
+
+Epoch:43, Train loss:0.031732, valid loss:0.047995
+Validation AUC:0.834219
+
+
+Epoch:44, Train loss:0.031710, valid loss:0.048094
+Validation AUC:0.833105
+
+
+Epoch:45, Train loss:0.031721, valid loss:0.047946
+Validation AUC:0.833625
+
+
+Epoch:46, Train loss:0.031653, valid loss:0.047967
+Validation AUC:0.831327
+
+
+Epoch:47, Train loss:0.031654, valid loss:0.048171
+Validation AUC:0.829934
+
+
+Epoch:48, Train loss:0.031540, valid loss:0.048049
+Validation AUC:0.832993
+
+
+Epoch:49, Train loss:0.031487, valid loss:0.048231
+Validation AUC:0.832245
+
+
+Epoch:50, Train loss:0.031539, valid loss:0.048104
+Validation AUC:0.832471
+model id: 17 loss 0.03485127157447013
+model id: 17 PR AUC 0.8324714303016663
+training time 15567.6268055439
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8046398162841797 0.816604733467102
+Launcher: Job 18 completed in 15614 seconds.
+Launcher: Task 74 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  15
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  16
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722806, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.116891, valid loss:0.067176
+Validation AUC:0.772189
+
+
+Epoch:2, Train loss:0.058587, valid loss:0.059210
+Validation AUC:0.803193
+
+
+Epoch:3, Train loss:0.053180, valid loss:0.055323
+Validation AUC:0.817167
+
+
+Epoch:4, Train loss:0.049985, valid loss:0.052184
+Validation AUC:0.830724
+
+
+Epoch:5, Train loss:0.047574, valid loss:0.053518
+Validation AUC:0.828806
+
+
+Epoch:6, Train loss:0.046734, valid loss:0.051717
+Validation AUC:0.825087
+
+
+Epoch:7, Train loss:0.045349, valid loss:0.050125
+Validation AUC:0.845329
+
+
+Epoch:8, Train loss:0.044128, valid loss:0.052602
+Validation AUC:0.839611
+
+
+Epoch:9, Train loss:0.043246, valid loss:0.048394
+Validation AUC:0.842668
+
+
+Epoch:10, Train loss:0.042438, valid loss:0.047956
+Validation AUC:0.847136
+
+
+Epoch:11, Train loss:0.039159, valid loss:0.047159
+Validation AUC:0.846748
+
+
+Epoch:12, Train loss:0.038299, valid loss:0.048467
+Validation AUC:0.843144
+
+
+Epoch:13, Train loss:0.037858, valid loss:0.045956
+Validation AUC:0.850599
+
+
+Epoch:14, Train loss:0.037015, valid loss:0.046522
+Validation AUC:0.848940
+
+
+Epoch:15, Train loss:0.036822, valid loss:0.054416
+Validation AUC:0.818348
+
+
+Epoch:16, Train loss:0.036504, valid loss:0.046282
+Validation AUC:0.849833
+
+
+Epoch:17, Train loss:0.035904, valid loss:0.047412
+Validation AUC:0.846465
+
+
+Epoch:18, Train loss:0.035561, valid loss:0.048504
+Validation AUC:0.834344
+
+
+Epoch:19, Train loss:0.035047, valid loss:0.049188
+Validation AUC:0.847747
+
+
+Epoch:20, Train loss:0.034679, valid loss:0.048094
+Validation AUC:0.849217
+
+
+Epoch:21, Train loss:0.032521, valid loss:0.047317
+Validation AUC:0.845183
+
+
+Epoch:22, Train loss:0.032117, valid loss:0.047214
+Validation AUC:0.841932
+
+
+Epoch:23, Train loss:0.031892, valid loss:0.046463
+Validation AUC:0.845580
+
+
+Epoch:24, Train loss:0.031584, valid loss:0.046395
+Validation AUC:0.843415
+
+
+Epoch:25, Train loss:0.031332, valid loss:0.046483
+Validation AUC:0.840914
+
+
+Epoch:26, Train loss:0.031274, valid loss:0.047104
+Validation AUC:0.840974
+
+
+Epoch:27, Train loss:0.030798, valid loss:0.047097
+Validation AUC:0.840350
+
+
+Epoch:28, Train loss:0.031036, valid loss:0.047605
+Validation AUC:0.834107
+
+
+Epoch:29, Train loss:0.030430, valid loss:0.047700
+Validation AUC:0.836469
+
+
+Epoch:30, Train loss:0.030206, valid loss:0.048614
+Validation AUC:0.833798
+
+
+Epoch:31, Train loss:0.028956, valid loss:0.048288
+Validation AUC:0.837108
+
+
+Epoch:32, Train loss:0.028869, valid loss:0.048269
+Validation AUC:0.829335
+
+
+Epoch:33, Train loss:0.028738, valid loss:0.048932
+Validation AUC:0.834092
+
+
+Epoch:34, Train loss:0.028596, valid loss:0.048000
+Validation AUC:0.830981
+
+
+Epoch:35, Train loss:0.028405, valid loss:0.048765
+Validation AUC:0.826513
+
+
+Epoch:36, Train loss:0.028332, valid loss:0.049639
+Validation AUC:0.830463
+
+
+Epoch:37, Train loss:0.028248, valid loss:0.049473
+Validation AUC:0.830882
+
+
+Epoch:38, Train loss:0.028044, valid loss:0.049053
+Validation AUC:0.824804
+
+
+Epoch:39, Train loss:0.027995, valid loss:0.049555
+Validation AUC:0.828394
+
+
+Epoch:40, Train loss:0.027883, valid loss:0.048873
+Validation AUC:0.828971
+
+
+Epoch:41, Train loss:0.027159, valid loss:0.049357
+Validation AUC:0.826105
+
+
+Epoch:42, Train loss:0.027042, valid loss:0.049792
+Validation AUC:0.827162
+
+
+Epoch:43, Train loss:0.026992, valid loss:0.049536
+Validation AUC:0.823980
+
+
+Epoch:44, Train loss:0.026900, valid loss:0.049737
+Validation AUC:0.826204
+
+
+Epoch:45, Train loss:0.026832, valid loss:0.050031
+Validation AUC:0.826111
+
+
+Epoch:46, Train loss:0.026746, valid loss:0.050390
+Validation AUC:0.823507
+
+
+Epoch:47, Train loss:0.026751, valid loss:0.050061
+Validation AUC:0.823922
+
+
+Epoch:48, Train loss:0.026652, valid loss:0.050108
+Validation AUC:0.823398
+
+
+Epoch:49, Train loss:0.026603, valid loss:0.050341
+Validation AUC:0.820656
+
+
+Epoch:50, Train loss:0.026506, valid loss:0.050590
+Validation AUC:0.822732
+model id: 15 loss 0.036652601324021816
+model id: 15 PR AUC 0.8227318525314331
+training time 15700.580549240112
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8326771855354309 0.7862453460693359
+Launcher: Job 16 completed in 15746 seconds.
+Launcher: Task 39 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  14
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  16
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.087836, valid loss:0.048197
+Validation AUC:0.737439
+
+
+Epoch:2, Train loss:0.042214, valid loss:0.041824
+Validation AUC:0.777962
+
+
+Epoch:3, Train loss:0.037636, valid loss:0.038573
+Validation AUC:0.799761
+
+
+Epoch:4, Train loss:0.035408, valid loss:0.036550
+Validation AUC:0.822951
+
+
+Epoch:5, Train loss:0.033584, valid loss:0.036708
+Validation AUC:0.818994
+
+
+Epoch:6, Train loss:0.032727, valid loss:0.036045
+Validation AUC:0.818179
+
+
+Epoch:7, Train loss:0.031822, valid loss:0.035185
+Validation AUC:0.828324
+
+
+Epoch:8, Train loss:0.031122, valid loss:0.034043
+Validation AUC:0.837076
+
+
+Epoch:9, Train loss:0.030580, valid loss:0.034522
+Validation AUC:0.835664
+
+
+Epoch:10, Train loss:0.029971, valid loss:0.033524
+Validation AUC:0.839514
+
+
+Epoch:11, Train loss:0.027820, valid loss:0.034477
+Validation AUC:0.828260
+
+
+Epoch:12, Train loss:0.027361, valid loss:0.033459
+Validation AUC:0.851422
+
+
+Epoch:13, Train loss:0.027007, valid loss:0.032247
+Validation AUC:0.850573
+
+
+Epoch:14, Train loss:0.026578, valid loss:0.033042
+Validation AUC:0.840614
+
+
+Epoch:15, Train loss:0.026333, valid loss:0.034380
+Validation AUC:0.853410
+
+
+Epoch:16, Train loss:0.025937, valid loss:0.032095
+Validation AUC:0.847735
+
+
+Epoch:17, Train loss:0.025715, valid loss:0.032125
+Validation AUC:0.847828
+
+
+Epoch:18, Train loss:0.025482, valid loss:0.034090
+Validation AUC:0.841264
+
+
+Epoch:19, Train loss:0.025233, valid loss:0.032347
+Validation AUC:0.841229
+
+
+Epoch:20, Train loss:0.025013, valid loss:0.032814
+Validation AUC:0.841237
+
+
+Epoch:21, Train loss:0.023687, valid loss:0.032070
+Validation AUC:0.847884
+
+
+Epoch:22, Train loss:0.023409, valid loss:0.033024
+Validation AUC:0.841346
+
+
+Epoch:23, Train loss:0.023170, valid loss:0.032006
+Validation AUC:0.847128
+
+
+Epoch:24, Train loss:0.023083, valid loss:0.031862
+Validation AUC:0.849737
+
+
+Epoch:25, Train loss:0.022885, valid loss:0.032291
+Validation AUC:0.847173
+
+
+Epoch:26, Train loss:0.022804, valid loss:0.032030
+Validation AUC:0.843817
+
+
+Epoch:27, Train loss:0.022517, valid loss:0.032960
+Validation AUC:0.846353
+
+
+Epoch:28, Train loss:0.022692, valid loss:0.032858
+Validation AUC:0.839512
+
+
+Epoch:29, Train loss:0.022316, valid loss:0.032190
+Validation AUC:0.842803
+
+
+Epoch:30, Train loss:0.022206, valid loss:0.032310
+Validation AUC:0.844940
+
+
+Epoch:31, Train loss:0.021396, valid loss:0.032207
+Validation AUC:0.843694
+
+
+Epoch:32, Train loss:0.021318, valid loss:0.032231
+Validation AUC:0.846704
+
+
+Epoch:33, Train loss:0.021236, valid loss:0.032771
+Validation AUC:0.839870
+
+
+Epoch:34, Train loss:0.021174, valid loss:0.032386
+Validation AUC:0.842239
+
+
+Epoch:35, Train loss:0.021020, valid loss:0.032683
+Validation AUC:0.841393
+
+
+Epoch:36, Train loss:0.020977, valid loss:0.032918
+Validation AUC:0.838774
+
+
+Epoch:37, Train loss:0.020916, valid loss:0.032949
+Validation AUC:0.840157
+
+
+Epoch:38, Train loss:0.020848, valid loss:0.032752
+Validation AUC:0.838436
+
+
+Epoch:39, Train loss:0.020744, valid loss:0.032626
+Validation AUC:0.841720
+
+
+Epoch:40, Train loss:0.020686, valid loss:0.032741
+Validation AUC:0.837712
+
+
+Epoch:41, Train loss:0.020226, valid loss:0.032559
+Validation AUC:0.839983
+
+
+Epoch:42, Train loss:0.020193, valid loss:0.032841
+Validation AUC:0.836619
+
+
+Epoch:43, Train loss:0.020160, valid loss:0.032701
+Validation AUC:0.838668
+
+
+Epoch:44, Train loss:0.020077, valid loss:0.032770
+Validation AUC:0.838011
+
+
+Epoch:45, Train loss:0.020054, valid loss:0.032913
+Validation AUC:0.836922
+
+
+Epoch:46, Train loss:0.019967, valid loss:0.033259
+Validation AUC:0.832833
+
+
+Epoch:47, Train loss:0.019994, valid loss:0.032986
+Validation AUC:0.834665
+
+
+Epoch:48, Train loss:0.019906, valid loss:0.033205
+Validation AUC:0.834379
+
+
+Epoch:49, Train loss:0.019901, valid loss:0.033046
+Validation AUC:0.835665
+
+
+Epoch:50, Train loss:0.019818, valid loss:0.033372
+Validation AUC:0.834969
+model id: 14 loss 0.02364243067462336
+model id: 14 PR AUC 0.8349685668945312
+training time 15712.027426958084
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8487937450408936 0.7738537788391113
+Launcher: Job 15 completed in 15758 seconds.
+Launcher: Task 19 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  8
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  16
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.109416, valid loss:0.052229
+Validation AUC:0.702700
+
+
+Epoch:2, Train loss:0.042745, valid loss:0.042878
+Validation AUC:0.774987
+
+
+Epoch:3, Train loss:0.037523, valid loss:0.043068
+Validation AUC:0.769786
+
+
+Epoch:4, Train loss:0.034935, valid loss:0.039207
+Validation AUC:0.819212
+
+
+Epoch:5, Train loss:0.033404, valid loss:0.036786
+Validation AUC:0.815577
+
+
+Epoch:6, Train loss:0.032503, valid loss:0.035423
+Validation AUC:0.828185
+
+
+Epoch:7, Train loss:0.031466, valid loss:0.035934
+Validation AUC:0.819949
+
+
+Epoch:8, Train loss:0.030600, valid loss:0.035484
+Validation AUC:0.820804
+
+
+Epoch:9, Train loss:0.030038, valid loss:0.033281
+Validation AUC:0.848170
+
+
+Epoch:10, Train loss:0.029472, valid loss:0.033131
+Validation AUC:0.842248
+
+
+Epoch:11, Train loss:0.027966, valid loss:0.032554
+Validation AUC:0.845839
+
+
+Epoch:12, Train loss:0.027472, valid loss:0.034996
+Validation AUC:0.846777
+
+
+Epoch:13, Train loss:0.027334, valid loss:0.032620
+Validation AUC:0.850383
+
+
+Epoch:14, Train loss:0.026909, valid loss:0.032004
+Validation AUC:0.847562
+
+
+Epoch:15, Train loss:0.026705, valid loss:0.033496
+Validation AUC:0.853268
+
+
+Epoch:16, Train loss:0.026480, valid loss:0.031906
+Validation AUC:0.849566
+
+
+Epoch:17, Train loss:0.026201, valid loss:0.031482
+Validation AUC:0.856003
+
+
+Epoch:18, Train loss:0.026037, valid loss:0.032814
+Validation AUC:0.850080
+
+
+Epoch:19, Train loss:0.025709, valid loss:0.031973
+Validation AUC:0.845947
+
+
+Epoch:20, Train loss:0.025566, valid loss:0.032914
+Validation AUC:0.839318
+
+
+Epoch:21, Train loss:0.024662, valid loss:0.031359
+Validation AUC:0.853128
+
+
+Epoch:22, Train loss:0.024534, valid loss:0.031567
+Validation AUC:0.851302
+
+
+Epoch:23, Train loss:0.024385, valid loss:0.031270
+Validation AUC:0.849202
+
+
+Epoch:24, Train loss:0.024303, valid loss:0.030955
+Validation AUC:0.850920
+
+
+Epoch:25, Train loss:0.024150, valid loss:0.031411
+Validation AUC:0.849520
+
+
+Epoch:26, Train loss:0.024051, valid loss:0.031278
+Validation AUC:0.853158
+
+
+Epoch:27, Train loss:0.023865, valid loss:0.031194
+Validation AUC:0.853118
+
+
+Epoch:28, Train loss:0.024001, valid loss:0.031421
+Validation AUC:0.849943
+
+
+Epoch:29, Train loss:0.023728, valid loss:0.031057
+Validation AUC:0.853231
+
+
+Epoch:30, Train loss:0.023577, valid loss:0.031494
+Validation AUC:0.850016
+
+
+Epoch:31, Train loss:0.023133, valid loss:0.031311
+Validation AUC:0.849385
+
+
+Epoch:32, Train loss:0.023081, valid loss:0.031525
+Validation AUC:0.850656
+
+
+Epoch:33, Train loss:0.023045, valid loss:0.031560
+Validation AUC:0.848420
+
+
+Epoch:34, Train loss:0.022952, valid loss:0.031441
+Validation AUC:0.852398
+
+
+Epoch:35, Train loss:0.022852, valid loss:0.031268
+Validation AUC:0.848904
+
+
+Epoch:36, Train loss:0.022864, valid loss:0.031308
+Validation AUC:0.848358
+
+
+Epoch:37, Train loss:0.022777, valid loss:0.031367
+Validation AUC:0.848332
+
+
+Epoch:38, Train loss:0.022722, valid loss:0.031311
+Validation AUC:0.849568
+
+
+Epoch:39, Train loss:0.022695, valid loss:0.031221
+Validation AUC:0.848260
+
+
+Epoch:40, Train loss:0.022600, valid loss:0.031301
+Validation AUC:0.851054
+
+
+Epoch:41, Train loss:0.022357, valid loss:0.031135
+Validation AUC:0.853293
+
+
+Epoch:42, Train loss:0.022310, valid loss:0.031250
+Validation AUC:0.849494
+
+
+Epoch:43, Train loss:0.022304, valid loss:0.031182
+Validation AUC:0.852453
+
+
+Epoch:44, Train loss:0.022249, valid loss:0.031135
+Validation AUC:0.850424
+
+
+Epoch:45, Train loss:0.022220, valid loss:0.031248
+Validation AUC:0.850105
+
+
+Epoch:46, Train loss:0.022168, valid loss:0.031299
+Validation AUC:0.849114
+
+
+Epoch:47, Train loss:0.022178, valid loss:0.031213
+Validation AUC:0.851665
+
+
+Epoch:48, Train loss:0.022139, valid loss:0.031315
+Validation AUC:0.850479
+
+
+Epoch:49, Train loss:0.022099, valid loss:0.031333
+Validation AUC:0.850738
+
+
+Epoch:50, Train loss:0.022100, valid loss:0.031325
+Validation AUC:0.850810
+model id: 8 loss 0.022192463659766046
+model id: 8 PR AUC 0.850809633731842
+training time 15742.466863155365
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8311938643455505 0.8023543953895569
+Launcher: Job 9 completed in 15789 seconds.
+Launcher: Task 86 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  5
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  32
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722737, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.129155, valid loss:0.069242
+Validation AUC:0.752836
+
+
+Epoch:2, Train loss:0.062191, valid loss:0.061459
+Validation AUC:0.792104
+
+
+Epoch:3, Train loss:0.055902, valid loss:0.062161
+Validation AUC:0.796242
+
+
+Epoch:4, Train loss:0.051986, valid loss:0.059432
+Validation AUC:0.808037
+
+
+Epoch:5, Train loss:0.051615, valid loss:0.056493
+Validation AUC:0.818513
+
+
+Epoch:6, Train loss:0.048930, valid loss:0.055419
+Validation AUC:0.817843
+
+
+Epoch:7, Train loss:0.046872, valid loss:0.053467
+Validation AUC:0.826236
+
+
+Epoch:8, Train loss:0.047036, valid loss:0.060455
+Validation AUC:0.808861
+
+
+Epoch:9, Train loss:0.045784, valid loss:0.051664
+Validation AUC:0.835543
+
+
+Epoch:10, Train loss:0.044940, valid loss:0.051889
+Validation AUC:0.834349
+
+
+Epoch:11, Train loss:0.041695, valid loss:0.050016
+Validation AUC:0.837362
+
+
+Epoch:12, Train loss:0.040956, valid loss:0.051416
+Validation AUC:0.834245
+
+
+Epoch:13, Train loss:0.040417, valid loss:0.055048
+Validation AUC:0.817269
+
+
+Epoch:14, Train loss:0.040295, valid loss:0.049697
+Validation AUC:0.844036
+
+
+Epoch:15, Train loss:0.039983, valid loss:0.052005
+Validation AUC:0.832706
+
+
+Epoch:16, Train loss:0.039281, valid loss:0.048107
+Validation AUC:0.842315
+
+
+Epoch:17, Train loss:0.039282, valid loss:0.048930
+Validation AUC:0.841009
+
+
+Epoch:18, Train loss:0.038401, valid loss:0.049101
+Validation AUC:0.846535
+
+
+Epoch:19, Train loss:0.038212, valid loss:0.048967
+Validation AUC:0.846668
+
+
+Epoch:20, Train loss:0.038059, valid loss:0.047981
+Validation AUC:0.848584
+
+
+Epoch:21, Train loss:0.035385, valid loss:0.048916
+Validation AUC:0.837774
+
+
+Epoch:22, Train loss:0.035235, valid loss:0.048572
+Validation AUC:0.842201
+
+
+Epoch:23, Train loss:0.034846, valid loss:0.048255
+Validation AUC:0.845135
+
+
+Epoch:24, Train loss:0.034680, valid loss:0.048610
+Validation AUC:0.839011
+
+
+Epoch:25, Train loss:0.034546, valid loss:0.048801
+Validation AUC:0.845271
+
+
+Epoch:26, Train loss:0.034134, valid loss:0.047833
+Validation AUC:0.845793
+
+
+Epoch:27, Train loss:0.034000, valid loss:0.048982
+Validation AUC:0.840976
+
+
+Epoch:28, Train loss:0.033827, valid loss:0.047980
+Validation AUC:0.839866
+
+
+Epoch:29, Train loss:0.033447, valid loss:0.049380
+Validation AUC:0.834135
+
+
+Epoch:30, Train loss:0.033346, valid loss:0.048241
+Validation AUC:0.839061
+
+
+Epoch:31, Train loss:0.031793, valid loss:0.048983
+Validation AUC:0.838728
+
+
+Epoch:32, Train loss:0.031701, valid loss:0.049377
+Validation AUC:0.831856
+
+
+Epoch:33, Train loss:0.031434, valid loss:0.049844
+Validation AUC:0.838701
+
+
+Epoch:34, Train loss:0.031369, valid loss:0.049865
+Validation AUC:0.827807
+
+
+Epoch:35, Train loss:0.031286, valid loss:0.049239
+Validation AUC:0.833540
+
+
+Epoch:36, Train loss:0.031030, valid loss:0.050807
+Validation AUC:0.838007
+
+
+Epoch:37, Train loss:0.030916, valid loss:0.050275
+Validation AUC:0.837281
+
+
+Epoch:38, Train loss:0.030740, valid loss:0.049784
+Validation AUC:0.828834
+
+
+Epoch:39, Train loss:0.030814, valid loss:0.049710
+Validation AUC:0.837052
+
+
+Epoch:40, Train loss:0.030474, valid loss:0.050008
+Validation AUC:0.836074
+
+
+Epoch:41, Train loss:0.029788, valid loss:0.049692
+Validation AUC:0.835634
+
+
+Epoch:42, Train loss:0.029625, valid loss:0.050054
+Validation AUC:0.833795
+
+
+Epoch:43, Train loss:0.029523, valid loss:0.049582
+Validation AUC:0.835698
+
+
+Epoch:44, Train loss:0.029459, valid loss:0.049897
+Validation AUC:0.833662
+
+
+Epoch:45, Train loss:0.029457, valid loss:0.049744
+Validation AUC:0.832934
+
+
+Epoch:46, Train loss:0.029340, valid loss:0.050132
+Validation AUC:0.829575
+
+
+Epoch:47, Train loss:0.029303, valid loss:0.050453
+Validation AUC:0.825166
+
+
+Epoch:48, Train loss:0.029236, valid loss:0.050668
+Validation AUC:0.827835
+
+
+Epoch:49, Train loss:0.029064, valid loss:0.050257
+Validation AUC:0.826213
+
+
+Epoch:50, Train loss:0.029108, valid loss:0.050705
+Validation AUC:0.829788
+model id: 5 loss 0.03673566039651632
+model id: 5 PR AUC 0.8297879695892334
+training time 15825.61724948883
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8261916041374207 0.797397792339325
+Launcher: Job 6 completed in 15872 seconds.
+Launcher: Task 54 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  9
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  16
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722806, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.142099, valid loss:0.076802
+Validation AUC:0.715010
+
+
+Epoch:2, Train loss:0.062213, valid loss:0.062503
+Validation AUC:0.784136
+
+
+Epoch:3, Train loss:0.054697, valid loss:0.063526
+Validation AUC:0.791653
+
+
+Epoch:4, Train loss:0.051034, valid loss:0.056563
+Validation AUC:0.806287
+
+
+Epoch:5, Train loss:0.048518, valid loss:0.054869
+Validation AUC:0.814760
+
+
+Epoch:6, Train loss:0.046930, valid loss:0.051993
+Validation AUC:0.828662
+
+
+Epoch:7, Train loss:0.045456, valid loss:0.054916
+Validation AUC:0.831093
+
+
+Epoch:8, Train loss:0.044370, valid loss:0.050961
+Validation AUC:0.839481
+
+
+Epoch:9, Train loss:0.043382, valid loss:0.051890
+Validation AUC:0.817522
+
+
+Epoch:10, Train loss:0.042448, valid loss:0.048511
+Validation AUC:0.839041
+
+
+Epoch:11, Train loss:0.040187, valid loss:0.048192
+Validation AUC:0.837849
+
+
+Epoch:12, Train loss:0.039463, valid loss:0.049038
+Validation AUC:0.835527
+
+
+Epoch:13, Train loss:0.039190, valid loss:0.047961
+Validation AUC:0.842317
+
+
+Epoch:14, Train loss:0.038685, valid loss:0.048142
+Validation AUC:0.839358
+
+
+Epoch:15, Train loss:0.038422, valid loss:0.049618
+Validation AUC:0.833686
+
+
+Epoch:16, Train loss:0.038107, valid loss:0.047747
+Validation AUC:0.842626
+
+
+Epoch:17, Train loss:0.037648, valid loss:0.047384
+Validation AUC:0.844153
+
+
+Epoch:18, Train loss:0.037391, valid loss:0.048439
+Validation AUC:0.830799
+
+
+Epoch:19, Train loss:0.036891, valid loss:0.047972
+Validation AUC:0.844079
+
+
+Epoch:20, Train loss:0.036696, valid loss:0.048216
+Validation AUC:0.841875
+
+
+Epoch:21, Train loss:0.035355, valid loss:0.047020
+Validation AUC:0.838076
+
+
+Epoch:22, Train loss:0.035163, valid loss:0.047034
+Validation AUC:0.841808
+
+
+Epoch:23, Train loss:0.034883, valid loss:0.047086
+Validation AUC:0.844287
+
+
+Epoch:24, Train loss:0.034813, valid loss:0.047013
+Validation AUC:0.840650
+
+
+Epoch:25, Train loss:0.034605, valid loss:0.047019
+Validation AUC:0.839393
+
+
+Epoch:26, Train loss:0.034486, valid loss:0.047156
+Validation AUC:0.839726
+
+
+Epoch:27, Train loss:0.034230, valid loss:0.046903
+Validation AUC:0.841183
+
+
+Epoch:28, Train loss:0.034417, valid loss:0.047192
+Validation AUC:0.835163
+
+
+Epoch:29, Train loss:0.034030, valid loss:0.046954
+Validation AUC:0.839055
+
+
+Epoch:30, Train loss:0.033819, valid loss:0.047452
+Validation AUC:0.839926
+
+
+Epoch:31, Train loss:0.033147, valid loss:0.047221
+Validation AUC:0.840866
+
+
+Epoch:32, Train loss:0.033059, valid loss:0.047429
+Validation AUC:0.833564
+
+
+Epoch:33, Train loss:0.032943, valid loss:0.047868
+Validation AUC:0.839776
+
+
+Epoch:34, Train loss:0.032859, valid loss:0.047553
+Validation AUC:0.827957
+
+
+Epoch:35, Train loss:0.032769, valid loss:0.047415
+Validation AUC:0.836474
+
+
+Epoch:36, Train loss:0.032721, valid loss:0.047698
+Validation AUC:0.838277
+
+
+Epoch:37, Train loss:0.032648, valid loss:0.048196
+Validation AUC:0.836403
+
+
+Epoch:38, Train loss:0.032520, valid loss:0.047421
+Validation AUC:0.834536
+
+
+Epoch:39, Train loss:0.032489, valid loss:0.048037
+Validation AUC:0.837869
+
+
+Epoch:40, Train loss:0.032403, valid loss:0.047465
+Validation AUC:0.834136
+
+
+Epoch:41, Train loss:0.031990, valid loss:0.047453
+Validation AUC:0.833982
+
+
+Epoch:42, Train loss:0.031934, valid loss:0.047749
+Validation AUC:0.831951
+
+
+Epoch:43, Train loss:0.031934, valid loss:0.047536
+Validation AUC:0.834223
+
+
+Epoch:44, Train loss:0.031848, valid loss:0.047686
+Validation AUC:0.833182
+
+
+Epoch:45, Train loss:0.031817, valid loss:0.047662
+Validation AUC:0.834705
+
+
+Epoch:46, Train loss:0.031737, valid loss:0.047777
+Validation AUC:0.834273
+
+
+Epoch:47, Train loss:0.031748, valid loss:0.047574
+Validation AUC:0.832200
+
+
+Epoch:48, Train loss:0.031677, valid loss:0.047747
+Validation AUC:0.831593
+
+
+Epoch:49, Train loss:0.031642, valid loss:0.047856
+Validation AUC:0.829645
+
+
+Epoch:50, Train loss:0.031633, valid loss:0.047824
+Validation AUC:0.832133
+model id: 9 loss 0.03464858792722225
+model id: 9 PR AUC 0.8321328163146973
+training time 15860.826247692108
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8069639801979065 0.8184634447097778
+Launcher: Job 10 completed in 15908 seconds.
+Launcher: Task 85 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  2
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  16
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.079522, valid loss:0.059849
+Validation AUC:0.662033
+
+
+Epoch:2, Train loss:0.040379, valid loss:0.040375
+Validation AUC:0.797232
+
+
+Epoch:3, Train loss:0.036626, valid loss:0.039088
+Validation AUC:0.810626
+
+
+Epoch:4, Train loss:0.035016, valid loss:0.037364
+Validation AUC:0.825262
+
+
+Epoch:5, Train loss:0.033219, valid loss:0.036583
+Validation AUC:0.828368
+
+
+Epoch:6, Train loss:0.032853, valid loss:0.034966
+Validation AUC:0.830175
+
+
+Epoch:7, Train loss:0.032212, valid loss:0.035503
+Validation AUC:0.827634
+
+
+Epoch:8, Train loss:0.031535, valid loss:0.035002
+Validation AUC:0.831080
+
+
+Epoch:9, Train loss:0.030963, valid loss:0.033461
+Validation AUC:0.838989
+
+
+Epoch:10, Train loss:0.030440, valid loss:0.033783
+Validation AUC:0.845719
+
+
+Epoch:11, Train loss:0.027823, valid loss:0.032039
+Validation AUC:0.845602
+
+
+Epoch:12, Train loss:0.027341, valid loss:0.031877
+Validation AUC:0.856674
+
+
+Epoch:13, Train loss:0.027262, valid loss:0.031716
+Validation AUC:0.851735
+
+
+Epoch:14, Train loss:0.026865, valid loss:0.031674
+Validation AUC:0.849872
+
+
+Epoch:15, Train loss:0.026487, valid loss:0.033412
+Validation AUC:0.855840
+
+
+Epoch:16, Train loss:0.026183, valid loss:0.032271
+Validation AUC:0.843854
+
+
+Epoch:17, Train loss:0.025975, valid loss:0.032049
+Validation AUC:0.851082
+
+
+Epoch:18, Train loss:0.025733, valid loss:0.032985
+Validation AUC:0.846646
+
+
+Epoch:19, Train loss:0.025455, valid loss:0.031161
+Validation AUC:0.854032
+
+
+Epoch:20, Train loss:0.025210, valid loss:0.031180
+Validation AUC:0.850825
+
+
+Epoch:21, Train loss:0.023399, valid loss:0.031489
+Validation AUC:0.853188
+
+
+Epoch:22, Train loss:0.023244, valid loss:0.031460
+Validation AUC:0.857597
+
+
+Epoch:23, Train loss:0.022877, valid loss:0.032181
+Validation AUC:0.849854
+
+
+Epoch:24, Train loss:0.022789, valid loss:0.031122
+Validation AUC:0.849366
+
+
+Epoch:25, Train loss:0.022572, valid loss:0.032307
+Validation AUC:0.845000
+
+
+Epoch:26, Train loss:0.022383, valid loss:0.031279
+Validation AUC:0.850775
+
+
+Epoch:27, Train loss:0.022138, valid loss:0.032763
+Validation AUC:0.846166
+
+
+Epoch:28, Train loss:0.022142, valid loss:0.032184
+Validation AUC:0.842933
+
+
+Epoch:29, Train loss:0.021799, valid loss:0.031544
+Validation AUC:0.847644
+
+
+Epoch:30, Train loss:0.021628, valid loss:0.031613
+Validation AUC:0.843780
+
+
+Epoch:31, Train loss:0.020588, valid loss:0.031942
+Validation AUC:0.843863
+
+
+Epoch:32, Train loss:0.020438, valid loss:0.031937
+Validation AUC:0.842859
+
+
+Epoch:33, Train loss:0.020281, valid loss:0.031849
+Validation AUC:0.844491
+
+
+Epoch:34, Train loss:0.020188, valid loss:0.031967
+Validation AUC:0.840604
+
+
+Epoch:35, Train loss:0.020020, valid loss:0.032260
+Validation AUC:0.841264
+
+
+Epoch:36, Train loss:0.019944, valid loss:0.032770
+Validation AUC:0.837498
+
+
+Epoch:37, Train loss:0.019832, valid loss:0.032438
+Validation AUC:0.840339
+
+
+Epoch:38, Train loss:0.019818, valid loss:0.032268
+Validation AUC:0.842642
+
+
+Epoch:39, Train loss:0.019616, valid loss:0.032727
+Validation AUC:0.841179
+
+
+Epoch:40, Train loss:0.019559, valid loss:0.032717
+Validation AUC:0.838147
+
+
+Epoch:41, Train loss:0.018898, valid loss:0.032885
+Validation AUC:0.840018
+
+
+Epoch:42, Train loss:0.018838, valid loss:0.033462
+Validation AUC:0.837439
+
+
+Epoch:43, Train loss:0.018781, valid loss:0.032930
+Validation AUC:0.839885
+
+
+Epoch:44, Train loss:0.018657, valid loss:0.032797
+Validation AUC:0.839204
+
+
+Epoch:45, Train loss:0.018641, valid loss:0.032796
+Validation AUC:0.838067
+
+
+Epoch:46, Train loss:0.018557, valid loss:0.033033
+Validation AUC:0.839963
+
+
+Epoch:47, Train loss:0.018540, valid loss:0.033501
+Validation AUC:0.835007
+
+
+Epoch:48, Train loss:0.018470, valid loss:0.033740
+Validation AUC:0.836243
+
+
+Epoch:49, Train loss:0.018416, valid loss:0.033761
+Validation AUC:0.836935
+
+
+Epoch:50, Train loss:0.018361, valid loss:0.033854
+Validation AUC:0.833717
+model id: 2 loss 0.023984105453233828
+model id: 2 PR AUC 0.8337172269821167
+training time 15950.02146601677
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8292292952537537 0.8032837510108948
+Launcher: Job 3 completed in 15997 seconds.
+Launcher: Task 23 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  23
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  32
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722737, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.118575, valid loss:0.074623
+Validation AUC:0.746676
+
+
+Epoch:2, Train loss:0.065101, valid loss:0.065471
+Validation AUC:0.771661
+
+
+Epoch:3, Train loss:0.057305, valid loss:0.061661
+Validation AUC:0.795340
+
+
+Epoch:4, Train loss:0.055236, valid loss:0.059456
+Validation AUC:0.797702
+
+
+Epoch:5, Train loss:0.054427, valid loss:0.064198
+Validation AUC:0.794840
+
+
+Epoch:6, Train loss:0.051956, valid loss:0.056764
+Validation AUC:0.812909
+
+
+Epoch:7, Train loss:0.051467, valid loss:0.064347
+Validation AUC:0.795707
+
+
+Epoch:8, Train loss:0.050081, valid loss:0.054699
+Validation AUC:0.818343
+
+
+Epoch:9, Train loss:0.049223, valid loss:0.053429
+Validation AUC:0.816512
+
+
+Epoch:10, Train loss:0.048629, valid loss:0.055547
+Validation AUC:0.826669
+
+
+Epoch:11, Train loss:0.044324, valid loss:0.050482
+Validation AUC:0.833506
+
+
+Epoch:12, Train loss:0.043708, valid loss:0.051500
+Validation AUC:0.829073
+
+
+Epoch:13, Train loss:0.043442, valid loss:0.049778
+Validation AUC:0.832735
+
+
+Epoch:14, Train loss:0.043945, valid loss:0.049397
+Validation AUC:0.838421
+
+
+Epoch:15, Train loss:0.042887, valid loss:0.055962
+Validation AUC:0.810538
+
+
+Epoch:16, Train loss:0.042700, valid loss:0.050240
+Validation AUC:0.839423
+
+
+Epoch:17, Train loss:0.042522, valid loss:0.049930
+Validation AUC:0.840299
+
+
+Epoch:18, Train loss:0.041779, valid loss:0.052573
+Validation AUC:0.816117
+
+
+Epoch:19, Train loss:0.041585, valid loss:0.050113
+Validation AUC:0.837172
+
+
+Epoch:20, Train loss:0.041251, valid loss:0.050658
+Validation AUC:0.838055
+
+
+Epoch:21, Train loss:0.038287, valid loss:0.048637
+Validation AUC:0.834185
+
+
+Epoch:22, Train loss:0.038095, valid loss:0.047374
+Validation AUC:0.846655
+
+
+Epoch:23, Train loss:0.037754, valid loss:0.046832
+Validation AUC:0.845275
+
+
+Epoch:24, Train loss:0.037581, valid loss:0.047426
+Validation AUC:0.844478
+
+
+Epoch:25, Train loss:0.037313, valid loss:0.046796
+Validation AUC:0.846981
+
+
+Epoch:26, Train loss:0.036937, valid loss:0.047129
+Validation AUC:0.846244
+
+
+Epoch:27, Train loss:0.036823, valid loss:0.046995
+Validation AUC:0.847938
+
+
+Epoch:28, Train loss:0.036740, valid loss:0.046875
+Validation AUC:0.843299
+
+
+Epoch:29, Train loss:0.036389, valid loss:0.047096
+Validation AUC:0.841756
+
+
+Epoch:30, Train loss:0.036095, valid loss:0.047642
+Validation AUC:0.843521
+
+
+Epoch:31, Train loss:0.034251, valid loss:0.046868
+Validation AUC:0.845542
+
+
+Epoch:32, Train loss:0.034117, valid loss:0.047186
+Validation AUC:0.840441
+
+
+Epoch:33, Train loss:0.033970, valid loss:0.048054
+Validation AUC:0.844241
+
+
+Epoch:34, Train loss:0.033835, valid loss:0.046992
+Validation AUC:0.842039
+
+
+Epoch:35, Train loss:0.033483, valid loss:0.047164
+Validation AUC:0.840610
+
+
+Epoch:36, Train loss:0.033411, valid loss:0.048247
+Validation AUC:0.844661
+
+
+Epoch:37, Train loss:0.033052, valid loss:0.048263
+Validation AUC:0.843195
+
+
+Epoch:38, Train loss:0.032895, valid loss:0.047470
+Validation AUC:0.845155
+
+
+Epoch:39, Train loss:0.032920, valid loss:0.048367
+Validation AUC:0.838415
+
+
+Epoch:40, Train loss:0.032658, valid loss:0.047501
+Validation AUC:0.840594
+
+
+Epoch:41, Train loss:0.031633, valid loss:0.047077
+Validation AUC:0.841771
+
+
+Epoch:42, Train loss:0.031426, valid loss:0.047497
+Validation AUC:0.839572
+
+
+Epoch:43, Train loss:0.031298, valid loss:0.047134
+Validation AUC:0.842475
+
+
+Epoch:44, Train loss:0.031141, valid loss:0.047556
+Validation AUC:0.840515
+
+
+Epoch:45, Train loss:0.031194, valid loss:0.048427
+Validation AUC:0.841418
+
+
+Epoch:46, Train loss:0.030988, valid loss:0.048116
+Validation AUC:0.839497
+
+
+Epoch:47, Train loss:0.031058, valid loss:0.047632
+Validation AUC:0.838071
+
+
+Epoch:48, Train loss:0.030805, valid loss:0.047954
+Validation AUC:0.839056
+
+
+Epoch:49, Train loss:0.030770, valid loss:0.047886
+Validation AUC:0.839556
+
+
+Epoch:50, Train loss:0.030620, valid loss:0.048452
+Validation AUC:0.836532
+model id: 23 loss 0.035103329372676934
+model id: 23 PR AUC 0.836531937122345
+training time 15979.127887010574
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8124323487281799 0.8138166069984436
+Launcher: Job 24 completed in 16025 seconds.
+Launcher: Task 95 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  11
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  32
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722737, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.198895, valid loss:0.087843
+Validation AUC:0.664705
+
+
+Epoch:2, Train loss:0.070338, valid loss:0.069994
+Validation AUC:0.754682
+
+
+Epoch:3, Train loss:0.059459, valid loss:0.061734
+Validation AUC:0.790618
+
+
+Epoch:4, Train loss:0.054258, valid loss:0.058954
+Validation AUC:0.803571
+
+
+Epoch:5, Train loss:0.051355, valid loss:0.055995
+Validation AUC:0.815606
+
+
+Epoch:6, Train loss:0.048954, valid loss:0.055137
+Validation AUC:0.820662
+
+
+Epoch:7, Train loss:0.047237, valid loss:0.054228
+Validation AUC:0.822475
+
+
+Epoch:8, Train loss:0.046239, valid loss:0.053076
+Validation AUC:0.825797
+
+
+Epoch:9, Train loss:0.044991, valid loss:0.053462
+Validation AUC:0.830982
+
+
+Epoch:10, Train loss:0.044059, valid loss:0.051171
+Validation AUC:0.835203
+
+
+Epoch:11, Train loss:0.042161, valid loss:0.050195
+Validation AUC:0.836403
+
+
+Epoch:12, Train loss:0.041494, valid loss:0.049448
+Validation AUC:0.835769
+
+
+Epoch:13, Train loss:0.041120, valid loss:0.049769
+Validation AUC:0.833999
+
+
+Epoch:14, Train loss:0.040742, valid loss:0.048985
+Validation AUC:0.840424
+
+
+Epoch:15, Train loss:0.040259, valid loss:0.049079
+Validation AUC:0.836110
+
+
+Epoch:16, Train loss:0.039867, valid loss:0.049073
+Validation AUC:0.835136
+
+
+Epoch:17, Train loss:0.039547, valid loss:0.049067
+Validation AUC:0.835251
+
+
+Epoch:18, Train loss:0.039304, valid loss:0.048879
+Validation AUC:0.833905
+
+
+Epoch:19, Train loss:0.038879, valid loss:0.049044
+Validation AUC:0.838829
+
+
+Epoch:20, Train loss:0.038585, valid loss:0.049367
+Validation AUC:0.836462
+
+
+Epoch:21, Train loss:0.037610, valid loss:0.048545
+Validation AUC:0.837235
+
+
+Epoch:22, Train loss:0.037383, valid loss:0.048288
+Validation AUC:0.836174
+
+
+Epoch:23, Train loss:0.037172, valid loss:0.049108
+Validation AUC:0.840425
+
+
+Epoch:24, Train loss:0.037090, valid loss:0.048085
+Validation AUC:0.840946
+
+
+Epoch:25, Train loss:0.036943, valid loss:0.048559
+Validation AUC:0.838985
+
+
+Epoch:26, Train loss:0.036824, valid loss:0.049480
+Validation AUC:0.839399
+
+
+Epoch:27, Train loss:0.036669, valid loss:0.048295
+Validation AUC:0.834996
+
+
+Epoch:28, Train loss:0.036701, valid loss:0.047960
+Validation AUC:0.836674
+
+
+Epoch:29, Train loss:0.036315, valid loss:0.048399
+Validation AUC:0.835837
+
+
+Epoch:30, Train loss:0.036260, valid loss:0.047900
+Validation AUC:0.837711
+
+
+Epoch:31, Train loss:0.035697, valid loss:0.047996
+Validation AUC:0.836311
+
+
+Epoch:32, Train loss:0.035639, valid loss:0.048084
+Validation AUC:0.836068
+
+
+Epoch:33, Train loss:0.035575, valid loss:0.048262
+Validation AUC:0.839014
+
+
+Epoch:34, Train loss:0.035469, valid loss:0.048249
+Validation AUC:0.835465
+
+
+Epoch:35, Train loss:0.035393, valid loss:0.048479
+Validation AUC:0.832974
+
+
+Epoch:36, Train loss:0.035359, valid loss:0.048130
+Validation AUC:0.835746
+
+
+Epoch:37, Train loss:0.035247, valid loss:0.047905
+Validation AUC:0.837190
+
+
+Epoch:38, Train loss:0.035101, valid loss:0.048159
+Validation AUC:0.836780
+
+
+Epoch:39, Train loss:0.035145, valid loss:0.048619
+Validation AUC:0.840854
+
+
+Epoch:40, Train loss:0.035081, valid loss:0.048013
+Validation AUC:0.838612
+
+
+Epoch:41, Train loss:0.034792, valid loss:0.048085
+Validation AUC:0.837119
+
+
+Epoch:42, Train loss:0.034703, valid loss:0.048090
+Validation AUC:0.835275
+
+
+Epoch:43, Train loss:0.034624, valid loss:0.047987
+Validation AUC:0.834468
+
+
+Epoch:44, Train loss:0.034639, valid loss:0.048096
+Validation AUC:0.835806
+
+
+Epoch:45, Train loss:0.034624, valid loss:0.048358
+Validation AUC:0.836763
+
+
+Epoch:46, Train loss:0.034538, valid loss:0.048343
+Validation AUC:0.835483
+
+
+Epoch:47, Train loss:0.034562, valid loss:0.048166
+Validation AUC:0.837220
+
+
+Epoch:48, Train loss:0.034484, valid loss:0.048155
+Validation AUC:0.833787
+
+
+Epoch:49, Train loss:0.034459, valid loss:0.048035
+Validation AUC:0.836247
+
+
+Epoch:50, Train loss:0.034440, valid loss:0.048280
+Validation AUC:0.835326
+model id: 11 loss 0.034978729503398594
+model id: 11 PR AUC 0.8353255391120911
+training time 16031.23599767685
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8115134835243225 0.8122676610946655
+Launcher: Job 12 completed in 16078 seconds.
+Launcher: Task 104 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  16
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  32
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.122090, valid loss:0.056335
+Validation AUC:0.669663
+
+
+Epoch:2, Train loss:0.044120, valid loss:0.044450
+Validation AUC:0.760703
+
+
+Epoch:3, Train loss:0.038740, valid loss:0.042876
+Validation AUC:0.772698
+
+
+Epoch:4, Train loss:0.036077, valid loss:0.039915
+Validation AUC:0.798459
+
+
+Epoch:5, Train loss:0.034454, valid loss:0.039498
+Validation AUC:0.798010
+
+
+Epoch:6, Train loss:0.033249, valid loss:0.036477
+Validation AUC:0.824708
+
+
+Epoch:7, Train loss:0.032045, valid loss:0.035791
+Validation AUC:0.829823
+
+
+Epoch:8, Train loss:0.031654, valid loss:0.037194
+Validation AUC:0.817842
+
+
+Epoch:9, Train loss:0.031277, valid loss:0.034835
+Validation AUC:0.837319
+
+
+Epoch:10, Train loss:0.030271, valid loss:0.034535
+Validation AUC:0.841084
+
+
+Epoch:11, Train loss:0.028663, valid loss:0.033969
+Validation AUC:0.838848
+
+
+Epoch:12, Train loss:0.028295, valid loss:0.033998
+Validation AUC:0.847666
+
+
+Epoch:13, Train loss:0.027893, valid loss:0.035111
+Validation AUC:0.844611
+
+
+Epoch:14, Train loss:0.027792, valid loss:0.033575
+Validation AUC:0.838987
+
+
+Epoch:15, Train loss:0.027435, valid loss:0.034913
+Validation AUC:0.846088
+
+
+Epoch:16, Train loss:0.027149, valid loss:0.033568
+Validation AUC:0.840387
+
+
+Epoch:17, Train loss:0.027047, valid loss:0.033042
+Validation AUC:0.844918
+
+
+Epoch:18, Train loss:0.026702, valid loss:0.033107
+Validation AUC:0.846421
+
+
+Epoch:19, Train loss:0.026460, valid loss:0.033226
+Validation AUC:0.844993
+
+
+Epoch:20, Train loss:0.026091, valid loss:0.032790
+Validation AUC:0.842000
+
+
+Epoch:21, Train loss:0.025141, valid loss:0.032931
+Validation AUC:0.846043
+
+
+Epoch:22, Train loss:0.025116, valid loss:0.032965
+Validation AUC:0.838994
+
+
+Epoch:23, Train loss:0.024907, valid loss:0.033013
+Validation AUC:0.839147
+
+
+Epoch:24, Train loss:0.024847, valid loss:0.032297
+Validation AUC:0.844074
+
+
+Epoch:25, Train loss:0.024677, valid loss:0.032903
+Validation AUC:0.838185
+
+
+Epoch:26, Train loss:0.024601, valid loss:0.033127
+Validation AUC:0.838985
+
+
+Epoch:27, Train loss:0.024510, valid loss:0.032718
+Validation AUC:0.842789
+
+
+Epoch:28, Train loss:0.024474, valid loss:0.032374
+Validation AUC:0.843889
+
+
+Epoch:29, Train loss:0.024200, valid loss:0.032796
+Validation AUC:0.845490
+
+
+Epoch:30, Train loss:0.024156, valid loss:0.033051
+Validation AUC:0.841467
+
+
+Epoch:31, Train loss:0.023559, valid loss:0.032610
+Validation AUC:0.840542
+
+
+Epoch:32, Train loss:0.023493, valid loss:0.032923
+Validation AUC:0.842132
+
+
+Epoch:33, Train loss:0.023420, valid loss:0.032707
+Validation AUC:0.839811
+
+
+Epoch:34, Train loss:0.023370, valid loss:0.032828
+Validation AUC:0.842860
+
+
+Epoch:35, Train loss:0.023294, valid loss:0.032610
+Validation AUC:0.839792
+
+
+Epoch:36, Train loss:0.023323, valid loss:0.032662
+Validation AUC:0.839554
+
+
+Epoch:37, Train loss:0.023192, valid loss:0.032402
+Validation AUC:0.841294
+
+
+Epoch:38, Train loss:0.023093, valid loss:0.032891
+Validation AUC:0.838623
+
+
+Epoch:39, Train loss:0.023105, valid loss:0.032938
+Validation AUC:0.835463
+
+
+Epoch:40, Train loss:0.023049, valid loss:0.032881
+Validation AUC:0.838290
+
+
+Epoch:41, Train loss:0.022697, valid loss:0.032560
+Validation AUC:0.840514
+
+
+Epoch:42, Train loss:0.022645, valid loss:0.032884
+Validation AUC:0.837256
+
+
+Epoch:43, Train loss:0.022584, valid loss:0.032752
+Validation AUC:0.840685
+
+
+Epoch:44, Train loss:0.022577, valid loss:0.032617
+Validation AUC:0.840207
+
+
+Epoch:45, Train loss:0.022588, valid loss:0.032618
+Validation AUC:0.838656
+
+
+Epoch:46, Train loss:0.022568, valid loss:0.032590
+Validation AUC:0.840370
+
+
+Epoch:47, Train loss:0.022536, valid loss:0.032854
+Validation AUC:0.835832
+
+
+Epoch:48, Train loss:0.022485, valid loss:0.032665
+Validation AUC:0.840995
+
+
+Epoch:49, Train loss:0.022428, valid loss:0.032835
+Validation AUC:0.839330
+
+
+Epoch:50, Train loss:0.022451, valid loss:0.032868
+Validation AUC:0.838388
+model id: 16 loss 0.023285078985447235
+model id: 16 PR AUC 0.8383879661560059
+training time 16040.214116811752
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8634865283966064 0.7710656523704529
+Launcher: Job 17 completed in 16086 seconds.
+Launcher: Task 50 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  4
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  32
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.098608, valid loss:0.053062
+Validation AUC:0.693503
+
+
+Epoch:2, Train loss:0.044824, valid loss:0.045814
+Validation AUC:0.779748
+
+
+Epoch:3, Train loss:0.039437, valid loss:0.042273
+Validation AUC:0.774736
+
+
+Epoch:4, Train loss:0.036394, valid loss:0.040109
+Validation AUC:0.813103
+
+
+Epoch:5, Train loss:0.034833, valid loss:0.040727
+Validation AUC:0.799753
+
+
+Epoch:6, Train loss:0.033636, valid loss:0.037259
+Validation AUC:0.828068
+
+
+Epoch:7, Train loss:0.033105, valid loss:0.036772
+Validation AUC:0.818944
+
+
+Epoch:8, Train loss:0.032307, valid loss:0.037130
+Validation AUC:0.820002
+
+
+Epoch:9, Train loss:0.032021, valid loss:0.036383
+Validation AUC:0.835538
+
+
+Epoch:10, Train loss:0.031479, valid loss:0.036213
+Validation AUC:0.833336
+
+
+Epoch:11, Train loss:0.029181, valid loss:0.034548
+Validation AUC:0.835736
+
+
+Epoch:12, Train loss:0.028731, valid loss:0.034297
+Validation AUC:0.848305
+
+
+Epoch:13, Train loss:0.028273, valid loss:0.035265
+Validation AUC:0.847525
+
+
+Epoch:14, Train loss:0.028220, valid loss:0.033494
+Validation AUC:0.839281
+
+
+Epoch:15, Train loss:0.027926, valid loss:0.035212
+Validation AUC:0.848350
+
+
+Epoch:16, Train loss:0.027462, valid loss:0.034139
+Validation AUC:0.841195
+
+
+Epoch:17, Train loss:0.027351, valid loss:0.033926
+Validation AUC:0.839383
+
+
+Epoch:18, Train loss:0.027001, valid loss:0.032728
+Validation AUC:0.847898
+
+
+Epoch:19, Train loss:0.026614, valid loss:0.033332
+Validation AUC:0.841529
+
+
+Epoch:20, Train loss:0.026390, valid loss:0.033988
+Validation AUC:0.836591
+
+
+Epoch:21, Train loss:0.025029, valid loss:0.032873
+Validation AUC:0.848745
+
+
+Epoch:22, Train loss:0.024869, valid loss:0.032862
+Validation AUC:0.848671
+
+
+Epoch:23, Train loss:0.024686, valid loss:0.032974
+Validation AUC:0.843179
+
+
+Epoch:24, Train loss:0.024679, valid loss:0.032328
+Validation AUC:0.848658
+
+
+Epoch:25, Train loss:0.024429, valid loss:0.032236
+Validation AUC:0.846173
+
+
+Epoch:26, Train loss:0.024251, valid loss:0.033105
+Validation AUC:0.841605
+
+
+Epoch:27, Train loss:0.024268, valid loss:0.033001
+Validation AUC:0.842473
+
+
+Epoch:28, Train loss:0.024155, valid loss:0.032648
+Validation AUC:0.846690
+
+
+Epoch:29, Train loss:0.023902, valid loss:0.032294
+Validation AUC:0.847191
+
+
+Epoch:30, Train loss:0.023667, valid loss:0.033288
+Validation AUC:0.844489
+
+
+Epoch:31, Train loss:0.022874, valid loss:0.033136
+Validation AUC:0.839323
+
+
+Epoch:32, Train loss:0.022867, valid loss:0.032656
+Validation AUC:0.847755
+
+
+Epoch:33, Train loss:0.022643, valid loss:0.033653
+Validation AUC:0.833903
+
+
+Epoch:34, Train loss:0.022559, valid loss:0.033591
+Validation AUC:0.845103
+
+
+Epoch:35, Train loss:0.022572, valid loss:0.033380
+Validation AUC:0.843157
+
+
+Epoch:36, Train loss:0.022476, valid loss:0.033388
+Validation AUC:0.837478
+
+
+Epoch:37, Train loss:0.022349, valid loss:0.032956
+Validation AUC:0.841907
+
+
+Epoch:38, Train loss:0.022219, valid loss:0.033327
+Validation AUC:0.844911
+
+
+Epoch:39, Train loss:0.022257, valid loss:0.032841
+Validation AUC:0.840234
+
+
+Epoch:40, Train loss:0.022106, valid loss:0.033019
+Validation AUC:0.839093
+
+
+Epoch:41, Train loss:0.021649, valid loss:0.033335
+Validation AUC:0.844639
+
+
+Epoch:42, Train loss:0.021539, valid loss:0.033315
+Validation AUC:0.841377
+
+
+Epoch:43, Train loss:0.021487, valid loss:0.032826
+Validation AUC:0.841693
+
+
+Epoch:44, Train loss:0.021432, valid loss:0.032931
+Validation AUC:0.843821
+
+
+Epoch:45, Train loss:0.021451, valid loss:0.032732
+Validation AUC:0.841130
+
+
+Epoch:46, Train loss:0.021355, valid loss:0.033238
+Validation AUC:0.839757
+
+
+Epoch:47, Train loss:0.021366, valid loss:0.033397
+Validation AUC:0.840960
+
+
+Epoch:48, Train loss:0.021273, valid loss:0.033394
+Validation AUC:0.840225
+
+
+Epoch:49, Train loss:0.021204, valid loss:0.033519
+Validation AUC:0.841595
+
+
+Epoch:50, Train loss:0.021230, valid loss:0.033316
+Validation AUC:0.840535
+model id: 4 loss 0.023602516898377376
+model id: 4 PR AUC 0.8405348658561707
+training time 16064.612873792648
+the optimal threshold for classification is:  0.5 , with precision/recall 0.833655059337616 0.8026641607284546
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  22
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  32
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.094215, valid loss:0.055717
+Validation AUC:0.681087
+
+
+Epoch:2, Train loss:0.047187, valid loss:0.048101
+Validation AUC:0.733815
+
+
+Epoch:3, Train loss:0.042751, valid loss:0.049557
+Validation AUC:0.723519
+
+
+Epoch:4, Train loss:0.040765, valid loss:0.045201
+Validation AUC:0.773907
+
+
+Epoch:5, Train loss:0.039656, valid loss:0.045290
+Validation AUC:0.761132
+
+
+Epoch:6, Train loss:0.038051, valid loss:0.040891
+Validation AUC:0.789264
+
+
+Epoch:7, Train loss:0.036605, valid loss:0.039433
+Validation AUC:0.800250
+
+
+Epoch:8, Train loss:0.035949, valid loss:0.039915
+Validation AUC:0.796668
+
+
+Epoch:9, Train loss:0.036455, valid loss:0.040109
+Validation AUC:0.803308
+
+
+Epoch:10, Train loss:0.035198, valid loss:0.037392
+Validation AUC:0.819064
+
+
+Epoch:11, Train loss:0.032278, valid loss:0.036451
+Validation AUC:0.822841
+
+
+Epoch:12, Train loss:0.031805, valid loss:0.037270
+Validation AUC:0.833725
+
+
+Epoch:13, Train loss:0.031675, valid loss:0.036083
+Validation AUC:0.825307
+
+
+Epoch:14, Train loss:0.031789, valid loss:0.035439
+Validation AUC:0.828790
+
+
+Epoch:15, Train loss:0.031446, valid loss:0.037863
+Validation AUC:0.836655
+
+
+Epoch:16, Train loss:0.031009, valid loss:0.035500
+Validation AUC:0.827859
+
+
+Epoch:17, Train loss:0.030840, valid loss:0.038415
+Validation AUC:0.817223
+
+
+Epoch:18, Train loss:0.030373, valid loss:0.036482
+Validation AUC:0.829596
+
+
+Epoch:19, Train loss:0.030098, valid loss:0.038574
+Validation AUC:0.802358
+
+
+Epoch:20, Train loss:0.030040, valid loss:0.036413
+Validation AUC:0.815023
+
+
+Epoch:21, Train loss:0.028090, valid loss:0.034442
+Validation AUC:0.830673
+
+
+Epoch:22, Train loss:0.027942, valid loss:0.034997
+Validation AUC:0.827767
+
+
+Epoch:23, Train loss:0.027797, valid loss:0.033537
+Validation AUC:0.831778
+
+
+Epoch:24, Train loss:0.027714, valid loss:0.033166
+Validation AUC:0.839702
+
+
+Epoch:25, Train loss:0.027332, valid loss:0.033298
+Validation AUC:0.838047
+
+
+Epoch:26, Train loss:0.027250, valid loss:0.033855
+Validation AUC:0.833208
+
+
+Epoch:27, Train loss:0.027334, valid loss:0.032853
+Validation AUC:0.840560
+
+
+Epoch:28, Train loss:0.027238, valid loss:0.033417
+Validation AUC:0.843021
+
+
+Epoch:29, Train loss:0.026777, valid loss:0.032670
+Validation AUC:0.842460
+
+
+Epoch:30, Train loss:0.026573, valid loss:0.032667
+Validation AUC:0.838924
+
+
+Epoch:31, Train loss:0.025522, valid loss:0.032538
+Validation AUC:0.837993
+
+
+Epoch:32, Train loss:0.025463, valid loss:0.032369
+Validation AUC:0.841178
+
+
+Epoch:33, Train loss:0.025409, valid loss:0.033122
+Validation AUC:0.834922
+
+
+Epoch:34, Train loss:0.025362, valid loss:0.032440
+Validation AUC:0.839060
+
+
+Epoch:35, Train loss:0.025118, valid loss:0.032424
+Validation AUC:0.839683
+
+
+Epoch:36, Train loss:0.025079, valid loss:0.033281
+Validation AUC:0.832778
+
+
+Epoch:37, Train loss:0.024936, valid loss:0.033105
+Validation AUC:0.837857
+
+
+Epoch:38, Train loss:0.024792, valid loss:0.032707
+Validation AUC:0.835839
+
+
+Epoch:39, Train loss:0.024919, valid loss:0.032761
+Validation AUC:0.837441
+
+
+Epoch:40, Train loss:0.024671, valid loss:0.032694
+Validation AUC:0.842489
+
+
+Epoch:41, Train loss:0.024086, valid loss:0.032412
+Validation AUC:0.839436
+
+
+Epoch:42, Train loss:0.023957, valid loss:0.032650
+Validation AUC:0.839671
+
+
+Epoch:43, Train loss:0.023885, valid loss:0.032874
+Validation AUC:0.841688
+
+
+Epoch:44, Train loss:0.023817, valid loss:0.032343
+Validation AUC:0.841052
+
+
+Epoch:45, Train loss:0.023826, valid loss:0.032528
+Validation AUC:0.840324
+
+
+Epoch:46, Train loss:0.023703, valid loss:0.032578
+Validation AUC:0.840639
+
+
+Epoch:47, Train loss:0.023748, valid loss:0.032609
+Validation AUC:0.841856
+
+
+Epoch:48, Train loss:0.023588, valid loss:0.033016
+Validation AUC:0.841197
+
+
+Epoch:49, Train loss:0.023627, valid loss:0.032593
+Validation AUC:0.841252
+
+
+Epoch:50, Train loss:0.023522, valid loss:0.032517
+Validation AUC:0.841816
+model id: 22 loss 0.02303648524155671
+model id: 22 PR AUC 0.8418164253234863
+training time 16065.350110054016
+the optimal threshold for classification is:  0.4 , with precision/recall 0.8106544613838196 0.8249689936637878
+Launcher: Job 5 completed in 16112 seconds.
+Launcher: Task 25 done. Exiting.
+Launcher: Job 23 completed in 16111 seconds.
+Launcher: Task 99 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  3
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  16
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722806, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.104709, valid loss:0.068472
+Validation AUC:0.758971
+
+
+Epoch:2, Train loss:0.060501, valid loss:0.057287
+Validation AUC:0.809723
+
+
+Epoch:3, Train loss:0.054890, valid loss:0.057594
+Validation AUC:0.809340
+
+
+Epoch:4, Train loss:0.052406, valid loss:0.058392
+Validation AUC:0.810070
+
+
+Epoch:5, Train loss:0.050783, valid loss:0.053158
+Validation AUC:0.816811
+
+
+Epoch:6, Train loss:0.048917, valid loss:0.052050
+Validation AUC:0.827828
+
+
+Epoch:7, Train loss:0.048338, valid loss:0.052677
+Validation AUC:0.833083
+
+
+Epoch:8, Train loss:0.046875, valid loss:0.051666
+Validation AUC:0.834183
+
+
+Epoch:9, Train loss:0.046389, valid loss:0.051302
+Validation AUC:0.833881
+
+
+Epoch:10, Train loss:0.045367, valid loss:0.049657
+Validation AUC:0.841434
+
+
+Epoch:11, Train loss:0.041149, valid loss:0.048596
+Validation AUC:0.843329
+
+
+Epoch:12, Train loss:0.040313, valid loss:0.050511
+Validation AUC:0.834402
+
+
+Epoch:13, Train loss:0.039880, valid loss:0.047973
+Validation AUC:0.840482
+
+
+Epoch:14, Train loss:0.039210, valid loss:0.046932
+Validation AUC:0.846608
+
+
+Epoch:15, Train loss:0.038686, valid loss:0.053687
+Validation AUC:0.817917
+
+
+Epoch:16, Train loss:0.038236, valid loss:0.048351
+Validation AUC:0.847402
+
+
+Epoch:17, Train loss:0.038121, valid loss:0.046848
+Validation AUC:0.849077
+
+
+Epoch:18, Train loss:0.037712, valid loss:0.048723
+Validation AUC:0.838236
+
+
+Epoch:19, Train loss:0.037307, valid loss:0.050708
+Validation AUC:0.837419
+
+
+Epoch:20, Train loss:0.036826, valid loss:0.047888
+Validation AUC:0.839016
+
+
+Epoch:21, Train loss:0.034163, valid loss:0.046583
+Validation AUC:0.847422
+
+
+Epoch:22, Train loss:0.033698, valid loss:0.047553
+Validation AUC:0.839279
+
+
+Epoch:23, Train loss:0.033433, valid loss:0.049549
+Validation AUC:0.827528
+
+
+Epoch:24, Train loss:0.032984, valid loss:0.047977
+Validation AUC:0.839977
+
+
+Epoch:25, Train loss:0.032714, valid loss:0.048712
+Validation AUC:0.835702
+
+
+Epoch:26, Train loss:0.032601, valid loss:0.048109
+Validation AUC:0.834878
+
+
+Epoch:27, Train loss:0.032011, valid loss:0.049267
+Validation AUC:0.831724
+
+
+Epoch:28, Train loss:0.032087, valid loss:0.049491
+Validation AUC:0.833629
+
+
+Epoch:29, Train loss:0.031603, valid loss:0.049426
+Validation AUC:0.839946
+
+
+Epoch:30, Train loss:0.031400, valid loss:0.048737
+Validation AUC:0.835429
+
+
+Epoch:31, Train loss:0.029706, valid loss:0.049300
+Validation AUC:0.834341
+
+
+Epoch:32, Train loss:0.029407, valid loss:0.049478
+Validation AUC:0.832711
+
+
+Epoch:33, Train loss:0.029167, valid loss:0.049791
+Validation AUC:0.824031
+
+
+Epoch:34, Train loss:0.029118, valid loss:0.050176
+Validation AUC:0.827169
+
+
+Epoch:35, Train loss:0.028888, valid loss:0.051007
+Validation AUC:0.822567
+
+
+Epoch:36, Train loss:0.028711, valid loss:0.050693
+Validation AUC:0.826716
+
+
+Epoch:37, Train loss:0.028597, valid loss:0.049753
+Validation AUC:0.826947
+
+
+Epoch:38, Train loss:0.028413, valid loss:0.050844
+Validation AUC:0.824093
+
+
+Epoch:39, Train loss:0.028246, valid loss:0.051361
+Validation AUC:0.822532
+
+
+Epoch:40, Train loss:0.028172, valid loss:0.051737
+Validation AUC:0.817740
+
+
+Epoch:41, Train loss:0.027130, valid loss:0.051730
+Validation AUC:0.820343
+
+
+Epoch:42, Train loss:0.027016, valid loss:0.051768
+Validation AUC:0.817915
+
+
+Epoch:43, Train loss:0.026922, valid loss:0.051714
+Validation AUC:0.815625
+
+
+Epoch:44, Train loss:0.026845, valid loss:0.051938
+Validation AUC:0.818884
+
+
+Epoch:45, Train loss:0.026752, valid loss:0.051742
+Validation AUC:0.820147
+
+
+Epoch:46, Train loss:0.026617, valid loss:0.052246
+Validation AUC:0.818004
+
+
+Epoch:47, Train loss:0.026561, valid loss:0.052348
+Validation AUC:0.816997
+
+
+Epoch:48, Train loss:0.026435, valid loss:0.053088
+Validation AUC:0.812007
+
+
+Epoch:49, Train loss:0.026402, valid loss:0.052975
+Validation AUC:0.813935
+
+
+Epoch:50, Train loss:0.026295, valid loss:0.053800
+Validation AUC:0.815494
+model id: 3 loss 0.03897820929573341
+model id: 3 PR AUC 0.8154940605163574
+training time 16205.506239652634
+the optimal threshold for classification is:  0.6 , with precision/recall 0.8001830577850342 0.8125774264335632
+Launcher: Job 4 completed in 16252 seconds.
+Launcher: Task 9 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  7
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  8
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722925, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.109988, valid loss:0.067438
+Validation AUC:0.764408
+
+
+Epoch:2, Train loss:0.057317, valid loss:0.061863
+Validation AUC:0.800262
+
+
+Epoch:3, Train loss:0.051690, valid loss:0.054329
+Validation AUC:0.824323
+
+
+Epoch:4, Train loss:0.048638, valid loss:0.051802
+Validation AUC:0.837993
+
+
+Epoch:5, Train loss:0.046472, valid loss:0.051058
+Validation AUC:0.841739
+
+
+Epoch:6, Train loss:0.045301, valid loss:0.054901
+Validation AUC:0.835116
+
+
+Epoch:7, Train loss:0.043944, valid loss:0.048866
+Validation AUC:0.845521
+
+
+Epoch:8, Train loss:0.043043, valid loss:0.052275
+Validation AUC:0.827723
+
+
+Epoch:9, Train loss:0.042044, valid loss:0.047664
+Validation AUC:0.849391
+
+
+Epoch:10, Train loss:0.040793, valid loss:0.048251
+Validation AUC:0.847368
+
+
+Epoch:11, Train loss:0.037928, valid loss:0.047174
+Validation AUC:0.848615
+
+
+Epoch:12, Train loss:0.037522, valid loss:0.046682
+Validation AUC:0.848842
+
+
+Epoch:13, Train loss:0.036975, valid loss:0.048421
+Validation AUC:0.840025
+
+
+Epoch:14, Train loss:0.036304, valid loss:0.047117
+Validation AUC:0.848103
+
+
+Epoch:15, Train loss:0.035869, valid loss:0.049816
+Validation AUC:0.835285
+
+
+Epoch:16, Train loss:0.035366, valid loss:0.046962
+Validation AUC:0.848797
+
+
+Epoch:17, Train loss:0.035080, valid loss:0.046966
+Validation AUC:0.842444
+
+
+Epoch:18, Train loss:0.034730, valid loss:0.047725
+Validation AUC:0.837971
+
+
+Epoch:19, Train loss:0.034342, valid loss:0.046992
+Validation AUC:0.843859
+
+
+Epoch:20, Train loss:0.033954, valid loss:0.047335
+Validation AUC:0.842689
+
+
+Epoch:21, Train loss:0.032132, valid loss:0.046993
+Validation AUC:0.840363
+
+
+Epoch:22, Train loss:0.031986, valid loss:0.048121
+Validation AUC:0.839409
+
+
+Epoch:23, Train loss:0.031524, valid loss:0.047234
+Validation AUC:0.842469
+
+
+Epoch:24, Train loss:0.031471, valid loss:0.047464
+Validation AUC:0.837455
+
+
+Epoch:25, Train loss:0.031191, valid loss:0.048908
+Validation AUC:0.825832
+
+
+Epoch:26, Train loss:0.031142, valid loss:0.047898
+Validation AUC:0.833212
+
+
+Epoch:27, Train loss:0.030786, valid loss:0.048581
+Validation AUC:0.829831
+
+
+Epoch:28, Train loss:0.030767, valid loss:0.048281
+Validation AUC:0.833394
+
+
+Epoch:29, Train loss:0.030366, valid loss:0.048161
+Validation AUC:0.839219
+
+
+Epoch:30, Train loss:0.030206, valid loss:0.048478
+Validation AUC:0.837565
+
+
+Epoch:31, Train loss:0.029244, valid loss:0.048024
+Validation AUC:0.834793
+
+
+Epoch:32, Train loss:0.029159, valid loss:0.048870
+Validation AUC:0.831448
+
+
+Epoch:33, Train loss:0.029067, valid loss:0.048940
+Validation AUC:0.829948
+
+
+Epoch:34, Train loss:0.028818, valid loss:0.048812
+Validation AUC:0.833183
+
+
+Epoch:35, Train loss:0.028792, valid loss:0.048594
+Validation AUC:0.832924
+
+
+Epoch:36, Train loss:0.028688, valid loss:0.049578
+Validation AUC:0.833788
+
+
+Epoch:37, Train loss:0.028517, valid loss:0.049510
+Validation AUC:0.827387
+
+
+Epoch:38, Train loss:0.028486, valid loss:0.049656
+Validation AUC:0.827157
+
+
+Epoch:39, Train loss:0.028283, valid loss:0.049342
+Validation AUC:0.829058
+
+
+Epoch:40, Train loss:0.028227, valid loss:0.049743
+Validation AUC:0.829304
+
+
+Epoch:41, Train loss:0.027734, valid loss:0.049554
+Validation AUC:0.828827
+
+
+Epoch:42, Train loss:0.027661, valid loss:0.050132
+Validation AUC:0.825277
+
+
+Epoch:43, Train loss:0.027656, valid loss:0.049859
+Validation AUC:0.827990
+
+
+Epoch:44, Train loss:0.027533, valid loss:0.049742
+Validation AUC:0.827934
+
+
+Epoch:45, Train loss:0.027488, valid loss:0.049875
+Validation AUC:0.828515
+
+
+Epoch:46, Train loss:0.027420, valid loss:0.050112
+Validation AUC:0.824361
+
+
+Epoch:47, Train loss:0.027376, valid loss:0.049919
+Validation AUC:0.824191
+
+
+Epoch:48, Train loss:0.027262, valid loss:0.050184
+Validation AUC:0.823552
+
+
+Epoch:49, Train loss:0.027281, valid loss:0.050441
+Validation AUC:0.825379
+
+
+Epoch:50, Train loss:0.027177, valid loss:0.050313
+Validation AUC:0.823074
+model id: 7 loss 0.03645218112929301
+model id: 7 PR AUC 0.8230738043785095
+training time 16254.049885749817
+the optimal threshold for classification is:  0.6 , with precision/recall 0.7929814457893372 0.8330235481262207
+Launcher: Job 8 completed in 16301 seconds.
+Launcher: Task 87 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  20
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  16
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708309, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.077974, valid loss:0.048816
+Validation AUC:0.727178
+
+
+Epoch:2, Train loss:0.044471, valid loss:0.047284
+Validation AUC:0.777766
+
+
+Epoch:3, Train loss:0.041206, valid loss:0.041750
+Validation AUC:0.784338
+
+
+Epoch:4, Train loss:0.039718, valid loss:0.041429
+Validation AUC:0.794865
+
+
+Epoch:5, Train loss:0.038642, valid loss:0.041326
+Validation AUC:0.783188
+
+
+Epoch:6, Train loss:0.037818, valid loss:0.038908
+Validation AUC:0.801897
+
+
+Epoch:7, Train loss:0.036487, valid loss:0.038440
+Validation AUC:0.807066
+
+
+Epoch:8, Train loss:0.035934, valid loss:0.040741
+Validation AUC:0.793530
+
+
+Epoch:9, Train loss:0.036090, valid loss:0.037736
+Validation AUC:0.808690
+
+
+Epoch:10, Train loss:0.035285, valid loss:0.037905
+Validation AUC:0.815822
+
+
+Epoch:11, Train loss:0.031886, valid loss:0.035426
+Validation AUC:0.818235
+
+
+Epoch:12, Train loss:0.031718, valid loss:0.035225
+Validation AUC:0.839062
+
+
+Epoch:13, Train loss:0.031423, valid loss:0.034999
+Validation AUC:0.836897
+
+
+Epoch:14, Train loss:0.031175, valid loss:0.035037
+Validation AUC:0.826258
+
+
+Epoch:15, Train loss:0.030827, valid loss:0.036412
+Validation AUC:0.834645
+
+
+Epoch:16, Train loss:0.030332, valid loss:0.034318
+Validation AUC:0.834225
+
+
+Epoch:17, Train loss:0.030234, valid loss:0.034299
+Validation AUC:0.845886
+
+
+Epoch:18, Train loss:0.030174, valid loss:0.033450
+Validation AUC:0.839920
+
+
+Epoch:19, Train loss:0.030050, valid loss:0.033248
+Validation AUC:0.840865
+
+
+Epoch:20, Train loss:0.029668, valid loss:0.032931
+Validation AUC:0.836414
+
+
+Epoch:21, Train loss:0.027792, valid loss:0.031905
+Validation AUC:0.849328
+
+
+Epoch:22, Train loss:0.027723, valid loss:0.032674
+Validation AUC:0.841524
+
+
+Epoch:23, Train loss:0.027330, valid loss:0.032298
+Validation AUC:0.847114
+
+
+Epoch:24, Train loss:0.027260, valid loss:0.032185
+Validation AUC:0.849024
+
+
+Epoch:25, Train loss:0.027007, valid loss:0.032679
+Validation AUC:0.848589
+
+
+Epoch:26, Train loss:0.026930, valid loss:0.032714
+Validation AUC:0.844549
+
+
+Epoch:27, Train loss:0.026651, valid loss:0.031717
+Validation AUC:0.850060
+
+
+Epoch:28, Train loss:0.026824, valid loss:0.031798
+Validation AUC:0.849864
+
+
+Epoch:29, Train loss:0.026480, valid loss:0.032439
+Validation AUC:0.841783
+
+
+Epoch:30, Train loss:0.026475, valid loss:0.033568
+Validation AUC:0.834084
+
+
+Epoch:31, Train loss:0.025239, valid loss:0.031498
+Validation AUC:0.847730
+
+
+Epoch:32, Train loss:0.025069, valid loss:0.032019
+Validation AUC:0.844153
+
+
+Epoch:33, Train loss:0.025026, valid loss:0.032232
+Validation AUC:0.846789
+
+
+Epoch:34, Train loss:0.024841, valid loss:0.032774
+Validation AUC:0.841133
+
+
+Epoch:35, Train loss:0.024785, valid loss:0.031845
+Validation AUC:0.849566
+
+
+Epoch:36, Train loss:0.024650, valid loss:0.031729
+Validation AUC:0.852795
+
+
+Epoch:37, Train loss:0.024570, valid loss:0.031887
+Validation AUC:0.854718
+
+
+Epoch:38, Train loss:0.024548, valid loss:0.031913
+Validation AUC:0.843827
+
+
+Epoch:39, Train loss:0.024345, valid loss:0.031919
+Validation AUC:0.846978
+
+
+Epoch:40, Train loss:0.024363, valid loss:0.032088
+Validation AUC:0.845216
+
+
+Epoch:41, Train loss:0.023591, valid loss:0.031396
+Validation AUC:0.851760
+
+
+Epoch:42, Train loss:0.023524, valid loss:0.031882
+Validation AUC:0.847411
+
+
+Epoch:43, Train loss:0.023497, valid loss:0.031624
+Validation AUC:0.850066
+
+
+Epoch:44, Train loss:0.023382, valid loss:0.031608
+Validation AUC:0.848460
+
+
+Epoch:45, Train loss:0.023364, valid loss:0.031859
+Validation AUC:0.847497
+
+
+Epoch:46, Train loss:0.023290, valid loss:0.031875
+Validation AUC:0.847412
+
+
+Epoch:47, Train loss:0.023270, valid loss:0.031978
+Validation AUC:0.848779
+
+
+Epoch:48, Train loss:0.023119, valid loss:0.031985
+Validation AUC:0.846747
+
+
+Epoch:49, Train loss:0.023167, valid loss:0.031993
+Validation AUC:0.848343
+
+
+Epoch:50, Train loss:0.023102, valid loss:0.031881
+Validation AUC:0.848062
+model id: 20 loss 0.022585924333808096
+model id: 20 PR AUC 0.8480616211891174
+training time 16402.34145784378
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8325312733650208 0.803903341293335
+Launcher: Job 21 completed in 16448 seconds.
+Launcher: Task 75 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  21
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  16
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722806, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.108244, valid loss:0.073709
+Validation AUC:0.713026
+
+
+Epoch:2, Train loss:0.063310, valid loss:0.066833
+Validation AUC:0.774192
+
+
+Epoch:3, Train loss:0.058497, valid loss:0.058978
+Validation AUC:0.793231
+
+
+Epoch:4, Train loss:0.054528, valid loss:0.064017
+Validation AUC:0.789616
+
+
+Epoch:5, Train loss:0.054278, valid loss:0.058274
+Validation AUC:0.812789
+
+
+Epoch:6, Train loss:0.053767, valid loss:0.057342
+Validation AUC:0.817101
+
+
+Epoch:7, Train loss:0.052743, valid loss:0.056225
+Validation AUC:0.817755
+
+
+Epoch:8, Train loss:0.051268, valid loss:0.056183
+Validation AUC:0.814110
+
+
+Epoch:9, Train loss:0.051482, valid loss:0.057086
+Validation AUC:0.806618
+
+
+Epoch:10, Train loss:0.050503, valid loss:0.058692
+Validation AUC:0.820149
+
+
+Epoch:11, Train loss:0.046021, valid loss:0.051760
+Validation AUC:0.838264
+
+
+Epoch:12, Train loss:0.045460, valid loss:0.056459
+Validation AUC:0.817528
+
+
+Epoch:13, Train loss:0.045202, valid loss:0.051166
+Validation AUC:0.828371
+
+
+Epoch:14, Train loss:0.044615, valid loss:0.050321
+Validation AUC:0.838167
+
+
+Epoch:15, Train loss:0.044067, valid loss:0.053410
+Validation AUC:0.829389
+
+
+Epoch:16, Train loss:0.043606, valid loss:0.050692
+Validation AUC:0.833641
+
+
+Epoch:17, Train loss:0.043474, valid loss:0.050013
+Validation AUC:0.844430
+
+
+Epoch:18, Train loss:0.042955, valid loss:0.050265
+Validation AUC:0.836095
+
+
+Epoch:19, Train loss:0.042804, valid loss:0.049810
+Validation AUC:0.845455
+
+
+Epoch:20, Train loss:0.042416, valid loss:0.049947
+Validation AUC:0.842149
+
+
+Epoch:21, Train loss:0.039501, valid loss:0.049557
+Validation AUC:0.837047
+
+
+Epoch:22, Train loss:0.039228, valid loss:0.049160
+Validation AUC:0.838274
+
+
+Epoch:23, Train loss:0.038642, valid loss:0.050239
+Validation AUC:0.832911
+
+
+Epoch:24, Train loss:0.038606, valid loss:0.048904
+Validation AUC:0.836614
+
+
+Epoch:25, Train loss:0.038235, valid loss:0.049527
+Validation AUC:0.832476
+
+
+Epoch:26, Train loss:0.038139, valid loss:0.047902
+Validation AUC:0.843188
+
+
+Epoch:27, Train loss:0.037897, valid loss:0.052179
+Validation AUC:0.822762
+
+
+Epoch:28, Train loss:0.037625, valid loss:0.049389
+Validation AUC:0.830863
+
+
+Epoch:29, Train loss:0.037132, valid loss:0.048419
+Validation AUC:0.838970
+
+
+Epoch:30, Train loss:0.037172, valid loss:0.049362
+Validation AUC:0.834390
+
+
+Epoch:31, Train loss:0.035234, valid loss:0.048845
+Validation AUC:0.840730
+
+
+Epoch:32, Train loss:0.034839, valid loss:0.048881
+Validation AUC:0.840129
+
+
+Epoch:33, Train loss:0.034735, valid loss:0.049856
+Validation AUC:0.834061
+
+
+Epoch:34, Train loss:0.034623, valid loss:0.049076
+Validation AUC:0.838051
+
+
+Epoch:35, Train loss:0.034313, valid loss:0.049283
+Validation AUC:0.838031
+
+
+Epoch:36, Train loss:0.034018, valid loss:0.049366
+Validation AUC:0.836911
+
+
+Epoch:37, Train loss:0.033801, valid loss:0.048836
+Validation AUC:0.837593
+
+
+Epoch:38, Train loss:0.033777, valid loss:0.049206
+Validation AUC:0.835107
+
+
+Epoch:39, Train loss:0.033524, valid loss:0.049623
+Validation AUC:0.832946
+
+
+Epoch:40, Train loss:0.033434, valid loss:0.049450
+Validation AUC:0.832526
+
+
+Epoch:41, Train loss:0.032229, valid loss:0.049423
+Validation AUC:0.834107
+
+
+Epoch:42, Train loss:0.032142, valid loss:0.049734
+Validation AUC:0.831476
+
+
+Epoch:43, Train loss:0.032033, valid loss:0.049557
+Validation AUC:0.830320
+
+
+Epoch:44, Train loss:0.031806, valid loss:0.049366
+Validation AUC:0.832036
+
+
+Epoch:45, Train loss:0.031720, valid loss:0.050313
+Validation AUC:0.828025
+
+
+Epoch:46, Train loss:0.031589, valid loss:0.050128
+Validation AUC:0.827358
+
+
+Epoch:47, Train loss:0.031547, valid loss:0.050002
+Validation AUC:0.825851
+
+
+Epoch:48, Train loss:0.031435, valid loss:0.050620
+Validation AUC:0.820424
+
+
+Epoch:49, Train loss:0.031337, valid loss:0.050109
+Validation AUC:0.827148
+
+
+Epoch:50, Train loss:0.031202, valid loss:0.051090
+Validation AUC:0.822067
+model id: 21 loss 0.03701506487347863
+model id: 21 PR AUC 0.8220673203468323
+training time 16432.67007136345
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8280690312385559 0.787794291973114
+Launcher: Job 22 completed in 16478 seconds.
+Launcher: Task 88 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  0
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  8
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708308, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.066958, valid loss:0.043527
+Validation AUC:0.769579
+
+
+Epoch:2, Train loss:0.040427, valid loss:0.039830
+Validation AUC:0.794840
+
+
+Epoch:3, Train loss:0.037214, valid loss:0.041664
+Validation AUC:0.785124
+
+
+Epoch:4, Train loss:0.035839, valid loss:0.039273
+Validation AUC:0.819272
+
+
+Epoch:5, Train loss:0.034658, valid loss:0.040136
+Validation AUC:0.796219
+
+
+Epoch:6, Train loss:0.033977, valid loss:0.040386
+Validation AUC:0.791077
+
+
+Epoch:7, Train loss:0.033702, valid loss:0.038536
+Validation AUC:0.802757
+
+
+Epoch:8, Train loss:0.032761, valid loss:0.035663
+Validation AUC:0.819762
+
+
+Epoch:9, Train loss:0.032530, valid loss:0.036778
+Validation AUC:0.829375
+
+
+Epoch:10, Train loss:0.031914, valid loss:0.036885
+Validation AUC:0.818490
+
+
+Epoch:11, Train loss:0.028947, valid loss:0.033072
+Validation AUC:0.845666
+
+
+Epoch:12, Train loss:0.028522, valid loss:0.033234
+Validation AUC:0.844994
+
+
+Epoch:13, Train loss:0.028125, valid loss:0.034456
+Validation AUC:0.831129
+
+
+Epoch:14, Train loss:0.027671, valid loss:0.034155
+Validation AUC:0.846471
+
+
+Epoch:15, Train loss:0.027522, valid loss:0.034114
+Validation AUC:0.843742
+
+
+Epoch:16, Train loss:0.027160, valid loss:0.035003
+Validation AUC:0.832181
+
+
+Epoch:17, Train loss:0.026990, valid loss:0.033745
+Validation AUC:0.839646
+
+
+Epoch:18, Train loss:0.026784, valid loss:0.033448
+Validation AUC:0.847720
+
+
+Epoch:19, Train loss:0.026648, valid loss:0.034121
+Validation AUC:0.837137
+
+
+Epoch:20, Train loss:0.026374, valid loss:0.032985
+Validation AUC:0.844311
+
+
+Epoch:21, Train loss:0.024375, valid loss:0.033522
+Validation AUC:0.845629
+
+
+Epoch:22, Train loss:0.024149, valid loss:0.034490
+Validation AUC:0.847314
+
+
+Epoch:23, Train loss:0.023816, valid loss:0.033754
+Validation AUC:0.842672
+
+
+Epoch:24, Train loss:0.023700, valid loss:0.032831
+Validation AUC:0.848939
+
+
+Epoch:25, Train loss:0.023475, valid loss:0.036652
+Validation AUC:0.837133
+
+
+Epoch:26, Train loss:0.023336, valid loss:0.033698
+Validation AUC:0.841791
+
+
+Epoch:27, Train loss:0.023259, valid loss:0.033628
+Validation AUC:0.848484
+
+
+Epoch:28, Train loss:0.023153, valid loss:0.034075
+Validation AUC:0.842783
+
+
+Epoch:29, Train loss:0.022809, valid loss:0.033729
+Validation AUC:0.842554
+
+
+Epoch:30, Train loss:0.022775, valid loss:0.033818
+Validation AUC:0.839698
+
+
+Epoch:31, Train loss:0.021528, valid loss:0.033629
+Validation AUC:0.839891
+
+
+Epoch:32, Train loss:0.021355, valid loss:0.034210
+Validation AUC:0.834781
+
+
+Epoch:33, Train loss:0.021270, valid loss:0.034184
+Validation AUC:0.837273
+
+
+Epoch:34, Train loss:0.021050, valid loss:0.034710
+Validation AUC:0.835719
+
+
+Epoch:35, Train loss:0.020945, valid loss:0.034676
+Validation AUC:0.835015
+
+
+Epoch:36, Train loss:0.020906, valid loss:0.034476
+Validation AUC:0.838556
+
+
+Epoch:37, Train loss:0.020686, valid loss:0.035202
+Validation AUC:0.835715
+
+
+Epoch:38, Train loss:0.020715, valid loss:0.034902
+Validation AUC:0.835426
+
+
+Epoch:39, Train loss:0.020523, valid loss:0.034755
+Validation AUC:0.836943
+
+
+Epoch:40, Train loss:0.020396, valid loss:0.034605
+Validation AUC:0.834233
+
+
+Epoch:41, Train loss:0.019770, valid loss:0.035079
+Validation AUC:0.833378
+
+
+Epoch:42, Train loss:0.019658, valid loss:0.035750
+Validation AUC:0.830947
+
+
+Epoch:43, Train loss:0.019662, valid loss:0.035220
+Validation AUC:0.832856
+
+
+Epoch:44, Train loss:0.019491, valid loss:0.035027
+Validation AUC:0.831744
+
+
+Epoch:45, Train loss:0.019474, valid loss:0.035719
+Validation AUC:0.837292
+
+
+Epoch:46, Train loss:0.019387, valid loss:0.035977
+Validation AUC:0.829652
+
+
+Epoch:47, Train loss:0.019349, valid loss:0.036197
+Validation AUC:0.830859
+
+
+Epoch:48, Train loss:0.019201, valid loss:0.036506
+Validation AUC:0.828716
+
+
+Epoch:49, Train loss:0.019208, valid loss:0.036157
+Validation AUC:0.831506
+
+
+Epoch:50, Train loss:0.019095, valid loss:0.036540
+Validation AUC:0.826499
+model id: 0 loss 0.025887060656466267
+model id: 0 PR AUC 0.8264989852905273
+training time 16523.536892414093
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8249362111091614 0.801425039768219
+Launcher: Job 1 completed in 16570 seconds.
+Launcher: Task 31 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  12
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  8
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708308, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.070453, valid loss:0.045503
+Validation AUC:0.750914
+
+
+Epoch:2, Train loss:0.039262, valid loss:0.040797
+Validation AUC:0.801242
+
+
+Epoch:3, Train loss:0.036209, valid loss:0.042174
+Validation AUC:0.776514
+
+
+Epoch:4, Train loss:0.034110, valid loss:0.043062
+Validation AUC:0.819129
+
+
+Epoch:5, Train loss:0.032823, valid loss:0.040041
+Validation AUC:0.792510
+
+
+Epoch:6, Train loss:0.032103, valid loss:0.035522
+Validation AUC:0.824809
+
+
+Epoch:7, Train loss:0.031347, valid loss:0.034316
+Validation AUC:0.833333
+
+
+Epoch:8, Train loss:0.030462, valid loss:0.032948
+Validation AUC:0.844382
+
+
+Epoch:9, Train loss:0.030071, valid loss:0.033124
+Validation AUC:0.845012
+
+
+Epoch:10, Train loss:0.029144, valid loss:0.034261
+Validation AUC:0.834073
+
+
+Epoch:11, Train loss:0.026714, valid loss:0.031461
+Validation AUC:0.850843
+
+
+Epoch:12, Train loss:0.026211, valid loss:0.031589
+Validation AUC:0.854895
+
+
+Epoch:13, Train loss:0.025827, valid loss:0.031651
+Validation AUC:0.850345
+
+
+Epoch:14, Train loss:0.025411, valid loss:0.033371
+Validation AUC:0.845781
+
+
+Epoch:15, Train loss:0.025075, valid loss:0.032952
+Validation AUC:0.852387
+
+
+Epoch:16, Train loss:0.024738, valid loss:0.034050
+Validation AUC:0.831589
+
+
+Epoch:17, Train loss:0.024432, valid loss:0.032069
+Validation AUC:0.843182
+
+
+Epoch:18, Train loss:0.024251, valid loss:0.033854
+Validation AUC:0.844811
+
+
+Epoch:19, Train loss:0.023935, valid loss:0.033029
+Validation AUC:0.840982
+
+
+Epoch:20, Train loss:0.023762, valid loss:0.032064
+Validation AUC:0.844829
+
+
+Epoch:21, Train loss:0.021961, valid loss:0.032792
+Validation AUC:0.840845
+
+
+Epoch:22, Train loss:0.021777, valid loss:0.033306
+Validation AUC:0.841549
+
+
+Epoch:23, Train loss:0.021401, valid loss:0.032616
+Validation AUC:0.835531
+
+
+Epoch:24, Train loss:0.021344, valid loss:0.032695
+Validation AUC:0.836706
+
+
+Epoch:25, Train loss:0.021088, valid loss:0.035716
+Validation AUC:0.829213
+
+
+Epoch:26, Train loss:0.020990, valid loss:0.033099
+Validation AUC:0.835917
+
+
+Epoch:27, Train loss:0.020742, valid loss:0.034720
+Validation AUC:0.836543
+
+
+Epoch:28, Train loss:0.020735, valid loss:0.034602
+Validation AUC:0.827353
+
+
+Epoch:29, Train loss:0.020432, valid loss:0.034256
+Validation AUC:0.825821
+
+
+Epoch:30, Train loss:0.020313, valid loss:0.034522
+Validation AUC:0.825064
+
+
+Epoch:31, Train loss:0.019267, valid loss:0.034079
+Validation AUC:0.827882
+
+
+Epoch:32, Train loss:0.019145, valid loss:0.034717
+Validation AUC:0.823996
+
+
+Epoch:33, Train loss:0.019064, valid loss:0.034553
+Validation AUC:0.827709
+
+
+Epoch:34, Train loss:0.018891, valid loss:0.034557
+Validation AUC:0.825474
+
+
+Epoch:35, Train loss:0.018787, valid loss:0.035054
+Validation AUC:0.821825
+
+
+Epoch:36, Train loss:0.018731, valid loss:0.034959
+Validation AUC:0.824514
+
+
+Epoch:37, Train loss:0.018558, valid loss:0.035532
+Validation AUC:0.819443
+
+
+Epoch:38, Train loss:0.018558, valid loss:0.035106
+Validation AUC:0.821090
+
+
+Epoch:39, Train loss:0.018379, valid loss:0.035348
+Validation AUC:0.821989
+
+
+Epoch:40, Train loss:0.018295, valid loss:0.035563
+Validation AUC:0.819893
+
+
+Epoch:41, Train loss:0.017811, valid loss:0.035708
+Validation AUC:0.818059
+
+
+Epoch:42, Train loss:0.017737, valid loss:0.035919
+Validation AUC:0.814676
+
+
+Epoch:43, Train loss:0.017692, valid loss:0.035996
+Validation AUC:0.818495
+
+
+Epoch:44, Train loss:0.017588, valid loss:0.035624
+Validation AUC:0.816622
+
+
+Epoch:45, Train loss:0.017547, valid loss:0.035830
+Validation AUC:0.815938
+
+
+Epoch:46, Train loss:0.017495, valid loss:0.036276
+Validation AUC:0.814669
+
+
+Epoch:47, Train loss:0.017433, valid loss:0.036366
+Validation AUC:0.815950
+
+
+Epoch:48, Train loss:0.017371, valid loss:0.036601
+Validation AUC:0.818282
+
+
+Epoch:49, Train loss:0.017313, valid loss:0.036668
+Validation AUC:0.816100
+
+
+Epoch:50, Train loss:0.017259, valid loss:0.036725
+Validation AUC:0.816122
+model id: 12 loss 0.026018001985820858
+model id: 12 PR AUC 0.81612229347229
+training time 16562.265749692917
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8113383054733276 0.8113383054733276
+Launcher: Job 13 completed in 16609 seconds.
+Launcher: Task 105 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  6
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.0025
+batch size:  8
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708308, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.081098, valid loss:0.049350
+Validation AUC:0.707104
+
+
+Epoch:2, Train loss:0.039445, valid loss:0.042322
+Validation AUC:0.797064
+
+
+Epoch:3, Train loss:0.035527, valid loss:0.039013
+Validation AUC:0.797297
+
+
+Epoch:4, Train loss:0.033422, valid loss:0.037242
+Validation AUC:0.830678
+
+
+Epoch:5, Train loss:0.031981, valid loss:0.036065
+Validation AUC:0.820550
+
+
+Epoch:6, Train loss:0.031120, valid loss:0.035532
+Validation AUC:0.824304
+
+
+Epoch:7, Train loss:0.030304, valid loss:0.034848
+Validation AUC:0.829892
+
+
+Epoch:8, Train loss:0.029552, valid loss:0.034839
+Validation AUC:0.846246
+
+
+Epoch:9, Train loss:0.028962, valid loss:0.033382
+Validation AUC:0.843004
+
+
+Epoch:10, Train loss:0.028175, valid loss:0.032825
+Validation AUC:0.850682
+
+
+Epoch:11, Train loss:0.026347, valid loss:0.031882
+Validation AUC:0.848848
+
+
+Epoch:12, Train loss:0.026030, valid loss:0.032246
+Validation AUC:0.852861
+
+
+Epoch:13, Train loss:0.025705, valid loss:0.032736
+Validation AUC:0.849458
+
+
+Epoch:14, Train loss:0.025286, valid loss:0.033110
+Validation AUC:0.848086
+
+
+Epoch:15, Train loss:0.025048, valid loss:0.033734
+Validation AUC:0.848833
+
+
+Epoch:16, Train loss:0.024809, valid loss:0.032158
+Validation AUC:0.847355
+
+
+Epoch:17, Train loss:0.024519, valid loss:0.031944
+Validation AUC:0.847705
+
+
+Epoch:18, Train loss:0.024397, valid loss:0.033168
+Validation AUC:0.851421
+
+
+Epoch:19, Train loss:0.024041, valid loss:0.033193
+Validation AUC:0.838152
+
+
+Epoch:20, Train loss:0.023871, valid loss:0.032474
+Validation AUC:0.851383
+
+
+Epoch:21, Train loss:0.022669, valid loss:0.032739
+Validation AUC:0.845895
+
+
+Epoch:22, Train loss:0.022545, valid loss:0.032690
+Validation AUC:0.845810
+
+
+Epoch:23, Train loss:0.022251, valid loss:0.032418
+Validation AUC:0.844543
+
+
+Epoch:24, Train loss:0.022247, valid loss:0.031944
+Validation AUC:0.849387
+
+
+Epoch:25, Train loss:0.022022, valid loss:0.032927
+Validation AUC:0.843414
+
+
+Epoch:26, Train loss:0.021950, valid loss:0.032385
+Validation AUC:0.844469
+
+
+Epoch:27, Train loss:0.021780, valid loss:0.032891
+Validation AUC:0.845726
+
+
+Epoch:28, Train loss:0.021750, valid loss:0.032785
+Validation AUC:0.841312
+
+
+Epoch:29, Train loss:0.021496, valid loss:0.033256
+Validation AUC:0.838412
+
+
+Epoch:30, Train loss:0.021382, valid loss:0.032861
+Validation AUC:0.843154
+
+
+Epoch:31, Train loss:0.020756, valid loss:0.032510
+Validation AUC:0.841734
+
+
+Epoch:32, Train loss:0.020684, valid loss:0.033182
+Validation AUC:0.837976
+
+
+Epoch:33, Train loss:0.020660, valid loss:0.033049
+Validation AUC:0.838070
+
+
+Epoch:34, Train loss:0.020519, valid loss:0.033120
+Validation AUC:0.840740
+
+
+Epoch:35, Train loss:0.020423, valid loss:0.033113
+Validation AUC:0.840818
+
+
+Epoch:36, Train loss:0.020420, valid loss:0.033436
+Validation AUC:0.836388
+
+
+Epoch:37, Train loss:0.020279, valid loss:0.033524
+Validation AUC:0.835927
+
+
+Epoch:38, Train loss:0.020285, valid loss:0.033524
+Validation AUC:0.838725
+
+
+Epoch:39, Train loss:0.020154, valid loss:0.033625
+Validation AUC:0.836179
+
+
+Epoch:40, Train loss:0.020072, valid loss:0.033428
+Validation AUC:0.834954
+
+
+Epoch:41, Train loss:0.019797, valid loss:0.033617
+Validation AUC:0.836853
+
+
+Epoch:42, Train loss:0.019723, valid loss:0.033621
+Validation AUC:0.834877
+
+
+Epoch:43, Train loss:0.019731, valid loss:0.033587
+Validation AUC:0.836359
+
+
+Epoch:44, Train loss:0.019644, valid loss:0.033591
+Validation AUC:0.836339
+
+
+Epoch:45, Train loss:0.019641, valid loss:0.033572
+Validation AUC:0.834384
+
+
+Epoch:46, Train loss:0.019565, valid loss:0.034114
+Validation AUC:0.832030
+
+
+Epoch:47, Train loss:0.019535, valid loss:0.033908
+Validation AUC:0.834591
+
+
+Epoch:48, Train loss:0.019489, valid loss:0.034216
+Validation AUC:0.832553
+
+
+Epoch:49, Train loss:0.019465, valid loss:0.033862
+Validation AUC:0.832654
+
+
+Epoch:50, Train loss:0.019429, valid loss:0.034088
+Validation AUC:0.832207
+model id: 6 loss 0.024149970363148233
+model id: 6 PR AUC 0.8322069048881531
+training time 16668.88054561615
+the optimal threshold for classification is:  0.4 , with precision/recall 0.8042042255401611 0.8296158909797668
+Launcher: Job 7 completed in 16716 seconds.
+Launcher: Task 55 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  1
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.01
+batch size:  8
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722925, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.094660, valid loss:0.065401
+Validation AUC:0.776078
+
+
+Epoch:2, Train loss:0.060172, valid loss:0.069926
+Validation AUC:0.763033
+
+
+Epoch:3, Train loss:0.056150, valid loss:0.063233
+Validation AUC:0.793951
+
+
+Epoch:4, Train loss:0.053662, valid loss:0.062252
+Validation AUC:0.787449
+
+
+Epoch:5, Train loss:0.051714, valid loss:0.056708
+Validation AUC:0.814902
+
+
+Epoch:6, Train loss:0.050817, valid loss:0.058147
+Validation AUC:0.802255
+
+
+Epoch:7, Train loss:0.050493, valid loss:0.056317
+Validation AUC:0.808787
+
+
+Epoch:8, Train loss:0.049335, valid loss:0.053680
+Validation AUC:0.826836
+
+
+Epoch:9, Train loss:0.048755, valid loss:0.053105
+Validation AUC:0.830890
+
+
+Epoch:10, Train loss:0.047348, valid loss:0.055037
+Validation AUC:0.826460
+
+
+Epoch:11, Train loss:0.042698, valid loss:0.049875
+Validation AUC:0.841583
+
+
+Epoch:12, Train loss:0.042229, valid loss:0.049277
+Validation AUC:0.845747
+
+
+Epoch:13, Train loss:0.041542, valid loss:0.047147
+Validation AUC:0.849622
+
+
+Epoch:14, Train loss:0.040840, valid loss:0.050188
+Validation AUC:0.831958
+
+
+Epoch:15, Train loss:0.040550, valid loss:0.047554
+Validation AUC:0.857605
+
+
+Epoch:16, Train loss:0.039857, valid loss:0.050628
+Validation AUC:0.837278
+
+
+Epoch:17, Train loss:0.039665, valid loss:0.049055
+Validation AUC:0.839401
+
+
+Epoch:18, Train loss:0.039215, valid loss:0.049333
+Validation AUC:0.835892
+
+
+Epoch:19, Train loss:0.038911, valid loss:0.048855
+Validation AUC:0.844590
+
+
+Epoch:20, Train loss:0.038530, valid loss:0.048324
+Validation AUC:0.845190
+
+
+Epoch:21, Train loss:0.035364, valid loss:0.047719
+Validation AUC:0.846694
+
+
+Epoch:22, Train loss:0.034982, valid loss:0.047243
+Validation AUC:0.845088
+
+
+Epoch:23, Train loss:0.034357, valid loss:0.047855
+Validation AUC:0.838334
+
+
+Epoch:24, Train loss:0.034204, valid loss:0.047432
+Validation AUC:0.845440
+
+
+Epoch:25, Train loss:0.033817, valid loss:0.048892
+Validation AUC:0.834031
+
+
+Epoch:26, Train loss:0.033445, valid loss:0.048356
+Validation AUC:0.841298
+
+
+Epoch:27, Train loss:0.033256, valid loss:0.049432
+Validation AUC:0.831309
+
+
+Epoch:28, Train loss:0.033021, valid loss:0.049984
+Validation AUC:0.829470
+
+
+Epoch:29, Train loss:0.032608, valid loss:0.049781
+Validation AUC:0.838271
+
+
+Epoch:30, Train loss:0.032456, valid loss:0.048871
+Validation AUC:0.837023
+
+
+Epoch:31, Train loss:0.030363, valid loss:0.050608
+Validation AUC:0.838666
+
+
+Epoch:32, Train loss:0.030074, valid loss:0.050943
+Validation AUC:0.835845
+
+
+Epoch:33, Train loss:0.029857, valid loss:0.050261
+Validation AUC:0.833729
+
+
+Epoch:34, Train loss:0.029507, valid loss:0.049938
+Validation AUC:0.836359
+
+
+Epoch:35, Train loss:0.029339, valid loss:0.051035
+Validation AUC:0.829494
+
+
+Epoch:36, Train loss:0.029176, valid loss:0.051110
+Validation AUC:0.836190
+
+
+Epoch:37, Train loss:0.028896, valid loss:0.051358
+Validation AUC:0.821404
+
+
+Epoch:38, Train loss:0.028810, valid loss:0.051505
+Validation AUC:0.828292
+
+
+Epoch:39, Train loss:0.028486, valid loss:0.052079
+Validation AUC:0.824690
+
+
+Epoch:40, Train loss:0.028413, valid loss:0.051695
+Validation AUC:0.818620
+
+
+Epoch:41, Train loss:0.027283, valid loss:0.051438
+Validation AUC:0.822337
+
+
+Epoch:42, Train loss:0.027114, valid loss:0.052404
+Validation AUC:0.821161
+
+
+Epoch:43, Train loss:0.027054, valid loss:0.051885
+Validation AUC:0.824530
+
+
+Epoch:44, Train loss:0.026831, valid loss:0.052341
+Validation AUC:0.822402
+
+
+Epoch:45, Train loss:0.026731, valid loss:0.052933
+Validation AUC:0.822845
+
+
+Epoch:46, Train loss:0.026635, valid loss:0.053222
+Validation AUC:0.820044
+
+
+Epoch:47, Train loss:0.026512, valid loss:0.053097
+Validation AUC:0.815019
+
+
+Epoch:48, Train loss:0.026362, valid loss:0.053406
+Validation AUC:0.818606
+
+
+Epoch:49, Train loss:0.026302, valid loss:0.053940
+Validation AUC:0.814596
+
+
+Epoch:50, Train loss:0.026177, valid loss:0.054154
+Validation AUC:0.814924
+model id: 1 loss 0.0392351442609321
+model id: 1 PR AUC 0.8149244785308838
+training time 16729.024217128754
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8372248411178589 0.7775712609291077
+Launcher: Job 2 completed in 16775 seconds.
+Launcher: Task 18 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  19
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  8
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722925, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.098510, valid loss:0.069852
+Validation AUC:0.745424
+
+
+Epoch:2, Train loss:0.066126, valid loss:0.068754
+Validation AUC:0.746371
+
+
+Epoch:3, Train loss:0.061742, valid loss:0.063728
+Validation AUC:0.781150
+
+
+Epoch:4, Train loss:0.059019, valid loss:0.080879
+Validation AUC:0.760153
+
+
+Epoch:5, Train loss:0.058148, valid loss:0.065116
+Validation AUC:0.775255
+
+
+Epoch:6, Train loss:0.057173, valid loss:0.060051
+Validation AUC:0.789984
+
+
+Epoch:7, Train loss:0.056648, valid loss:0.057855
+Validation AUC:0.800028
+
+
+Epoch:8, Train loss:0.055347, valid loss:0.061121
+Validation AUC:0.785206
+
+
+Epoch:9, Train loss:0.055217, valid loss:0.060057
+Validation AUC:0.792491
+
+
+Epoch:10, Train loss:0.054153, valid loss:0.057160
+Validation AUC:0.813175
+
+
+Epoch:11, Train loss:0.049324, valid loss:0.053786
+Validation AUC:0.819438
+
+
+Epoch:12, Train loss:0.048659, valid loss:0.052539
+Validation AUC:0.827270
+
+
+Epoch:13, Train loss:0.048045, valid loss:0.055081
+Validation AUC:0.818515
+
+
+Epoch:14, Train loss:0.047367, valid loss:0.051766
+Validation AUC:0.822919
+
+
+Epoch:15, Train loss:0.047277, valid loss:0.052813
+Validation AUC:0.830692
+
+
+Epoch:16, Train loss:0.046501, valid loss:0.052894
+Validation AUC:0.826893
+
+
+Epoch:17, Train loss:0.046704, valid loss:0.052745
+Validation AUC:0.826155
+
+
+Epoch:18, Train loss:0.046342, valid loss:0.051290
+Validation AUC:0.827509
+
+
+Epoch:19, Train loss:0.045911, valid loss:0.051536
+Validation AUC:0.833956
+
+
+Epoch:20, Train loss:0.045654, valid loss:0.050887
+Validation AUC:0.834084
+
+
+Epoch:21, Train loss:0.042668, valid loss:0.050680
+Validation AUC:0.830331
+
+
+Epoch:22, Train loss:0.042457, valid loss:0.050682
+Validation AUC:0.824791
+
+
+Epoch:23, Train loss:0.041815, valid loss:0.050141
+Validation AUC:0.831132
+
+
+Epoch:24, Train loss:0.042008, valid loss:0.048762
+Validation AUC:0.834076
+
+
+Epoch:25, Train loss:0.041636, valid loss:0.054063
+Validation AUC:0.815683
+
+
+Epoch:26, Train loss:0.041307, valid loss:0.049539
+Validation AUC:0.835926
+
+
+Epoch:27, Train loss:0.041145, valid loss:0.050852
+Validation AUC:0.831916
+
+
+Epoch:28, Train loss:0.041084, valid loss:0.052370
+Validation AUC:0.818803
+
+
+Epoch:29, Train loss:0.040747, valid loss:0.050621
+Validation AUC:0.832800
+
+
+Epoch:30, Train loss:0.040708, valid loss:0.049621
+Validation AUC:0.835515
+
+
+Epoch:31, Train loss:0.038674, valid loss:0.049120
+Validation AUC:0.836295
+
+
+Epoch:32, Train loss:0.038532, valid loss:0.049148
+Validation AUC:0.833663
+
+
+Epoch:33, Train loss:0.038320, valid loss:0.049180
+Validation AUC:0.833005
+
+
+Epoch:34, Train loss:0.038103, valid loss:0.048464
+Validation AUC:0.835352
+
+
+Epoch:35, Train loss:0.037826, valid loss:0.048808
+Validation AUC:0.838078
+
+
+Epoch:36, Train loss:0.037864, valid loss:0.048882
+Validation AUC:0.835330
+
+
+Epoch:37, Train loss:0.037443, valid loss:0.050672
+Validation AUC:0.826908
+
+
+Epoch:38, Train loss:0.037582, valid loss:0.048961
+Validation AUC:0.832417
+
+
+Epoch:39, Train loss:0.037254, valid loss:0.049198
+Validation AUC:0.833323
+
+
+Epoch:40, Train loss:0.037225, valid loss:0.050398
+Validation AUC:0.827659
+
+
+Epoch:41, Train loss:0.036125, valid loss:0.048623
+Validation AUC:0.834174
+
+
+Epoch:42, Train loss:0.036027, valid loss:0.049336
+Validation AUC:0.830448
+
+
+Epoch:43, Train loss:0.035965, valid loss:0.049013
+Validation AUC:0.830182
+
+
+Epoch:44, Train loss:0.035693, valid loss:0.048637
+Validation AUC:0.834336
+
+
+Epoch:45, Train loss:0.035699, valid loss:0.048717
+Validation AUC:0.831638
+
+
+Epoch:46, Train loss:0.035591, valid loss:0.048806
+Validation AUC:0.830531
+
+
+Epoch:47, Train loss:0.035510, valid loss:0.049283
+Validation AUC:0.830736
+
+
+Epoch:48, Train loss:0.035376, valid loss:0.049888
+Validation AUC:0.824977
+
+
+Epoch:49, Train loss:0.035334, valid loss:0.049104
+Validation AUC:0.831420
+
+
+Epoch:50, Train loss:0.035226, valid loss:0.049389
+Validation AUC:0.830187
+model id: 19 loss 0.035782893526960506
+model id: 19 PR AUC 0.8301870822906494
+training time 16752.81310939789
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8576909899711609 0.7617719769477844
+Launcher: Job 20 completed in 16798 seconds.
+Launcher: Task 76 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  13
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.005
+batch size:  8
+model type:  classifier
+weight of positive event:  2
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.722925, valid loss:0.724504
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.096312, valid loss:0.071804
+Validation AUC:0.757258
+
+
+Epoch:2, Train loss:0.057332, valid loss:0.061657
+Validation AUC:0.800408
+
+
+Epoch:3, Train loss:0.052393, valid loss:0.056311
+Validation AUC:0.811599
+
+
+Epoch:4, Train loss:0.049835, valid loss:0.058644
+Validation AUC:0.816708
+
+
+Epoch:5, Train loss:0.047721, valid loss:0.054196
+Validation AUC:0.831297
+
+
+Epoch:6, Train loss:0.046468, valid loss:0.050733
+Validation AUC:0.839211
+
+
+Epoch:7, Train loss:0.045354, valid loss:0.049882
+Validation AUC:0.837945
+
+
+Epoch:8, Train loss:0.044222, valid loss:0.049530
+Validation AUC:0.849579
+
+
+Epoch:9, Train loss:0.043489, valid loss:0.049332
+Validation AUC:0.841032
+
+
+Epoch:10, Train loss:0.042333, valid loss:0.049849
+Validation AUC:0.838976
+
+
+Epoch:11, Train loss:0.038463, valid loss:0.047136
+Validation AUC:0.846630
+
+
+Epoch:12, Train loss:0.037792, valid loss:0.047047
+Validation AUC:0.844611
+
+
+Epoch:13, Train loss:0.037230, valid loss:0.047356
+Validation AUC:0.841887
+
+
+Epoch:14, Train loss:0.036657, valid loss:0.047238
+Validation AUC:0.842946
+
+
+Epoch:15, Train loss:0.035986, valid loss:0.046296
+Validation AUC:0.849803
+
+
+Epoch:16, Train loss:0.035577, valid loss:0.049954
+Validation AUC:0.837912
+
+
+Epoch:17, Train loss:0.035227, valid loss:0.048050
+Validation AUC:0.842079
+
+
+Epoch:18, Train loss:0.034823, valid loss:0.047399
+Validation AUC:0.840101
+
+
+Epoch:19, Train loss:0.034305, valid loss:0.048157
+Validation AUC:0.845260
+
+
+Epoch:20, Train loss:0.033911, valid loss:0.046560
+Validation AUC:0.843118
+
+
+Epoch:21, Train loss:0.031408, valid loss:0.047464
+Validation AUC:0.839810
+
+
+Epoch:22, Train loss:0.031050, valid loss:0.047923
+Validation AUC:0.834307
+
+
+Epoch:23, Train loss:0.030481, valid loss:0.047679
+Validation AUC:0.837195
+
+
+Epoch:24, Train loss:0.030415, valid loss:0.047636
+Validation AUC:0.840441
+
+
+Epoch:25, Train loss:0.030029, valid loss:0.049754
+Validation AUC:0.825982
+
+
+Epoch:26, Train loss:0.029858, valid loss:0.048291
+Validation AUC:0.836760
+
+
+Epoch:27, Train loss:0.029592, valid loss:0.048589
+Validation AUC:0.835403
+
+
+Epoch:28, Train loss:0.029423, valid loss:0.050215
+Validation AUC:0.824458
+
+
+Epoch:29, Train loss:0.029027, valid loss:0.050442
+Validation AUC:0.834092
+
+
+Epoch:30, Train loss:0.028804, valid loss:0.050662
+Validation AUC:0.828850
+
+
+Epoch:31, Train loss:0.027206, valid loss:0.050330
+Validation AUC:0.832903
+
+
+Epoch:32, Train loss:0.027042, valid loss:0.051478
+Validation AUC:0.829482
+
+
+Epoch:33, Train loss:0.026929, valid loss:0.050878
+Validation AUC:0.829410
+
+
+Epoch:34, Train loss:0.026620, valid loss:0.050928
+Validation AUC:0.826880
+
+
+Epoch:35, Train loss:0.026545, valid loss:0.051700
+Validation AUC:0.825080
+
+
+Epoch:36, Train loss:0.026364, valid loss:0.051663
+Validation AUC:0.819787
+
+
+Epoch:37, Train loss:0.026189, valid loss:0.052779
+Validation AUC:0.813360
+
+
+Epoch:38, Train loss:0.026058, valid loss:0.051920
+Validation AUC:0.823463
+
+
+Epoch:39, Train loss:0.025914, valid loss:0.052366
+Validation AUC:0.822292
+
+
+Epoch:40, Train loss:0.025742, valid loss:0.052570
+Validation AUC:0.818733
+
+
+Epoch:41, Train loss:0.024994, valid loss:0.052847
+Validation AUC:0.818194
+
+
+Epoch:42, Train loss:0.024842, valid loss:0.053218
+Validation AUC:0.815062
+
+
+Epoch:43, Train loss:0.024842, valid loss:0.052917
+Validation AUC:0.817201
+
+
+Epoch:44, Train loss:0.024643, valid loss:0.052915
+Validation AUC:0.816938
+
+
+Epoch:45, Train loss:0.024628, valid loss:0.053807
+Validation AUC:0.814074
+
+
+Epoch:46, Train loss:0.024530, valid loss:0.054109
+Validation AUC:0.812617
+
+
+Epoch:47, Train loss:0.024436, valid loss:0.053915
+Validation AUC:0.807593
+
+
+Epoch:48, Train loss:0.024334, valid loss:0.054175
+Validation AUC:0.810266
+
+
+Epoch:49, Train loss:0.024280, valid loss:0.054330
+Validation AUC:0.809845
+
+
+Epoch:50, Train loss:0.024160, valid loss:0.055023
+Validation AUC:0.811253
+model id: 13 loss 0.03986464948816733
+model id: 13 PR AUC 0.8112526535987854
+training time 16793.18797302246
+the optimal threshold for classification is:  0.7 , with precision/recall 0.8308147192001343 0.7834572196006775
+Launcher: Job 14 completed in 16839 seconds.
+Launcher: Task 5 done. Exiting.
+torch seed 35
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  18
+device:  cpu
+no PDE solver required, input is random:  True
+plot GrainNN verus PDE pointwise error:  False
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 12286 647 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 1 ; output window 1
+input feature dimension:  [('grain', 10), ('joint', 7)]
+hidden dim (layer size):  48 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  50 ; learning rate:  0.02
+batch size:  8
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+Epoch:0, Train loss:0.708308, valid loss:0.708450
+Validation AUC:0.023502
+
+
+Epoch:1, Train loss:0.070259, valid loss:0.047890
+Validation AUC:0.734515
+
+
+Epoch:2, Train loss:0.045895, valid loss:0.051451
+Validation AUC:0.741098
+
+
+Epoch:3, Train loss:0.042564, valid loss:0.043707
+Validation AUC:0.772288
+
+
+Epoch:4, Train loss:0.041576, valid loss:0.042644
+Validation AUC:0.794527
+
+
+Epoch:5, Train loss:0.039759, valid loss:0.041762
+Validation AUC:0.787196
+
+
+Epoch:6, Train loss:0.039195, valid loss:0.044344
+Validation AUC:0.771382
+
+
+Epoch:7, Train loss:0.038795, valid loss:0.040625
+Validation AUC:0.781333
+
+
+Epoch:8, Train loss:0.039066, valid loss:0.042199
+Validation AUC:0.781669
+
+
+Epoch:9, Train loss:0.038024, valid loss:0.043210
+Validation AUC:0.790839
+
+
+Epoch:10, Train loss:0.037586, valid loss:0.044376
+Validation AUC:0.764937
+
+
+Epoch:11, Train loss:0.034138, valid loss:0.037812
+Validation AUC:0.806479
+
+
+Epoch:12, Train loss:0.033633, valid loss:0.036231
+Validation AUC:0.827796
+
+
+Epoch:13, Train loss:0.033361, valid loss:0.037868
+Validation AUC:0.817454
+
+
+Epoch:14, Train loss:0.033001, valid loss:0.037212
+Validation AUC:0.829374
+
+
+Epoch:15, Train loss:0.032794, valid loss:0.037445
+Validation AUC:0.825842
+
+
+Epoch:16, Train loss:0.032571, valid loss:0.038136
+Validation AUC:0.805534
+
+
+Epoch:17, Train loss:0.032365, valid loss:0.036791
+Validation AUC:0.809815
+
+
+Epoch:18, Train loss:0.032283, valid loss:0.037592
+Validation AUC:0.812216
+
+
+Epoch:19, Train loss:0.032170, valid loss:0.036543
+Validation AUC:0.819900
+
+
+Epoch:20, Train loss:0.031920, valid loss:0.036401
+Validation AUC:0.813281
+
+
+Epoch:21, Train loss:0.029980, valid loss:0.034984
+Validation AUC:0.831722
+
+
+Epoch:22, Train loss:0.029930, valid loss:0.034832
+Validation AUC:0.836743
+
+
+Epoch:23, Train loss:0.029524, valid loss:0.034260
+Validation AUC:0.833386
+
+
+Epoch:24, Train loss:0.029566, valid loss:0.034735
+Validation AUC:0.837037
+
+
+Epoch:25, Train loss:0.029268, valid loss:0.036266
+Validation AUC:0.834388
+
+
+Epoch:26, Train loss:0.029239, valid loss:0.034514
+Validation AUC:0.831305
+
+
+Epoch:27, Train loss:0.029139, valid loss:0.034755
+Validation AUC:0.834710
+
+
+Epoch:28, Train loss:0.029143, valid loss:0.034574
+Validation AUC:0.837480
+
+
+Epoch:29, Train loss:0.028860, valid loss:0.034776
+Validation AUC:0.828894
+
+
+Epoch:30, Train loss:0.028776, valid loss:0.034351
+Validation AUC:0.838777
+
+
+Epoch:31, Train loss:0.027687, valid loss:0.033817
+Validation AUC:0.832989
+
+
+Epoch:32, Train loss:0.027540, valid loss:0.034003
+Validation AUC:0.837162
+
+
+Epoch:33, Train loss:0.027515, valid loss:0.033603
+Validation AUC:0.834763
+
+
+Epoch:34, Train loss:0.027263, valid loss:0.033732
+Validation AUC:0.835487
+
+
+Epoch:35, Train loss:0.027143, valid loss:0.033541
+Validation AUC:0.839793
+
+
+Epoch:36, Train loss:0.027139, valid loss:0.033929
+Validation AUC:0.835596
+
+
+Epoch:37, Train loss:0.027025, valid loss:0.034382
+Validation AUC:0.838053
+
+
+Epoch:38, Train loss:0.027033, valid loss:0.033842
+Validation AUC:0.836176
+
+
+Epoch:39, Train loss:0.026893, valid loss:0.033282
+Validation AUC:0.840325
+
+
+Epoch:40, Train loss:0.026805, valid loss:0.034129
+Validation AUC:0.834665
+
+
+Epoch:41, Train loss:0.026220, valid loss:0.033533
+Validation AUC:0.837241
+
+
+Epoch:42, Train loss:0.026108, valid loss:0.033530
+Validation AUC:0.838142
+
+
+Epoch:43, Train loss:0.026157, valid loss:0.033619
+Validation AUC:0.838888
+
+
+Epoch:44, Train loss:0.025973, valid loss:0.033330
+Validation AUC:0.839073
+
+
+Epoch:45, Train loss:0.026013, valid loss:0.033459
+Validation AUC:0.838770
+
+
+Epoch:46, Train loss:0.025886, valid loss:0.033725
+Validation AUC:0.835307
+
+
+Epoch:47, Train loss:0.025838, valid loss:0.034336
+Validation AUC:0.838838
+
+
+Epoch:48, Train loss:0.025796, valid loss:0.033717
+Validation AUC:0.835993
+
+
+Epoch:49, Train loss:0.025771, valid loss:0.033512
+Validation AUC:0.837502
+
+
+Epoch:50, Train loss:0.025708, valid loss:0.033757
+Validation AUC:0.837138
+model id: 18 loss 0.023914985358715057
+model id: 18 PR AUC 0.8371381163597107
+training time 17512.01619029045
+the optimal threshold for classification is:  0.5 , with precision/recall 0.8253021836280823 0.7932156324386597
+Launcher: Job 19 completed in 17558 seconds.
+Launcher: Task 83 done. Exiting.
+Launcher: Done. Job exited without errors

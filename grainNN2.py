@@ -33,7 +33,7 @@ def criterion(data, pred, mask):
 
         loss = torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
              + torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
-        return 10*loss
+        return 100*loss
 
     if args.model_type== 'classifier':
         z = pred['edge_event']
@@ -86,13 +86,14 @@ def train(model, train_loader, test_loader):
 
     test_loss, count = 0, 0
   #  test_acc_dict = defaultdict(float)
-    for data in test_loader:      
-        count += 1
-        data.to(device)
-        pred = model(data.x_dict, data.edge_index_dict)
-        test_loss += float(criterion(data.y_dict, pred, data['mask']))  
-        
-        metric.record(data.y_dict, pred, data['mask'], 0)
+    with torch.no_grad():
+        for data in test_loader:      
+            count += 1
+            data.to(device)
+            pred = model(data.x_dict, data.edge_index_dict)
+            test_loss += float(criterion(data.y_dict, pred, data['mask']))  
+            
+            metric.record(data.y_dict, pred, data['mask'], 0)
    # if args.model_type=='regressor':
    #     regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
    # print(test_acc_dict)
@@ -106,7 +107,11 @@ def train(model, train_loader, test_loader):
     
     metric.epoch_summary()
 
-
+    print('\n')
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('total number of trained parameters ', pytorch_total_params)
+    
+   
     for epoch in range(1, hp.epoch+1):
 
 
@@ -148,7 +153,7 @@ def train(model, train_loader, test_loader):
         test_loss/=count
         
         print('\n')
-        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss)/train0, float(test_loss)/test0 ))
+        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(epoch, float(train_loss), float(test_loss) ))
         train_loss_list.append(float(train_loss))
         test_loss_list.append(float(test_loss))    
         metric.epoch_summary()
@@ -275,7 +280,7 @@ if __name__=='__main__':
     """
     Fit scale of dx for G, R
     
-    """
+    
     
     
     dx_max_gradient_dict = {}
@@ -302,6 +307,7 @@ if __name__=='__main__':
     popt, _ = curve_fit(func, xdata, Dx)
     popt = np.array(popt, dtype='float32')
     hp.GR_fit = torch.from_numpy(popt).to(device)
+    """
    # print(hp.GR_fit) 
    # with open('dx_GR.pkl', 'wb') as outp:
    #     dill.dump(dx_max_gradient_dict, outp)

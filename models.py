@@ -367,9 +367,9 @@ class GrainNN_regressor(nn.Module):
         y_dict['joint'] = torch.tanh(y_dict['joint'])
 
         area = torch.tanh(y_dict['grain'][:, 0]) + x_dict['grain'][:, 3] # darea + area_old is positive  
-        y_dict.update({'grain_event': torch.where(area<1e-6)[0] })
+        y_dict.update({'grain_event': 1*(area<0) })
         
-        area = F.relu(area)
+       # area = F.relu(area)
        # area = F.normalize(area, p=1, dim=-1)
         y_dict['grain'][:, 0] = area - x_dict['grain'][:, 3]
  

@@ -373,7 +373,7 @@ class GrainNN_regressor(nn.Module):
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
         
                 
-        y_dict.update({'grain_event': torch.where(area<1e-2)[0] })
+        y_dict.update({'grain_area': area})
 
             
 

@@ -624,6 +624,14 @@ class GrainHeterograph:
             print('number of positive/negative events', \
                   sum(self.target_dicts['edge_event']>0), sum(self.target_dicts['edge_event']==0))
             
+                
+            self.target_dicts['grain_event'] = np.zeros(len(self.mask['grain']), dtype=int)    
+            for i in range(len(self.mask['grain'])):
+                if self.mask['grain'][i] == 1 and nxt.mask['grain'][i] == 0:
+                    self.target_dicts['grain_event'][i] = 1
+                
+            print('number of grain events', np.sum(self.target_dicts['grain_event']))
+            
             del self.edges
             del self.vertex2joint
                        

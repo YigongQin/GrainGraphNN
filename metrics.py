@@ -42,7 +42,7 @@ class feature_metric:
             p = pred['grain_event']
             y = y_dict['grain_event']  
             
-            qualified_y = torch.where(mask['grain']>0)
+            qualified_y = torch.where(mask['grain'][:,0]>0)
             y = y[qualified_y]
             p = p[qualified_y]
             self.test_prob.append(p)

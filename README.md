@@ -11,7 +11,7 @@ export CUDA=cu102
 CUDA 11
 ```
 export TORCH=1.12.0+cu113
-export CUDA=cu102
+export CUDA=cu113
 ```
 
 ```

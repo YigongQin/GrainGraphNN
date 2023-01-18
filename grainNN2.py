@@ -409,20 +409,22 @@ if __name__=='__main__':
     plt.savefig('loss.png',dpi=600, bbox_inches='tight')
     
 
+    if args.model_type== 'classifier':
+        fig, ax = plt.subplots() 
+        ax.scatter(train.metric.rlist, train.metric.plist)
+        ax.set_ylim(bottom=0.)
+        ax.set_xlim(left=0.)
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('Precision-Recall Plot')
+        plt.savefig('PR.png',dpi=600, bbox_inches='tight')        
     
-    fig, ax = plt.subplots() 
-    ax.scatter(train.metric.rlist, train.metric.plist)
-    ax.set_ylim(bottom=0.)
-    ax.set_xlim(left=0.)
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.title('Precision-Recall Plot')
-    plt.savefig('PR.png',dpi=600, bbox_inches='tight')        
-
-    optim_arg = max(range(len(train.metric.plist)), key=lambda i: train.metric.rlist[i]+train.metric.plist[i])
-    optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.metric.plist)-1), \
-        train.metric.plist[optim_arg], train.metric.rlist[optim_arg]
-    print('the optimal threshold for classification is: ', optim_threshold, ', with precision/recall', float(optim_p), float(optim_r))
+        optim_arg = max(range(len(train.metric.plist)), \
+                        key=lambda i: train.metric.rlist[i]+train.metric.plist[i])
+        optim_threshold, optim_p, optim_r = 1 - optim_arg/(len(train.metric.plist)-1), \
+            train.metric.plist[optim_arg], train.metric.rlist[optim_arg]
+        print('the optimal threshold for classification is: ', optim_threshold, \
+              ', with precision/recall', float(optim_p), float(optim_r))
 
     model.threshold = optim_threshold
 

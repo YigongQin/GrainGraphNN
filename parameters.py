@@ -41,7 +41,7 @@ def regressor(model_id):
 
         
        
-       
+    param_dict['frames'] = 20   
     param_dict['frames'] = param_dict['frames']*Ct+1
 
 

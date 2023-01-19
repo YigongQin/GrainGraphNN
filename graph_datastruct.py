@@ -563,7 +563,7 @@ class GrainHeterograph:
 
     def form_gradient(self, prev, nxt, event_list):
         
-        
+        self.event_list = event_list
         
         """
             
@@ -655,15 +655,15 @@ class GrainHeterograph:
                # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
-        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
+        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], self.span + 0*prev_grad_grain[:,:1], prev_grad_grain))
 
-        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint)) 
+        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], self.span + 0*prev_grad_joint[:,:1], prev_grad_joint)) 
                 
 
         
         for nodes, features in self.features.items():
             self.features[nodes] = self.features[nodes] + self.features_grad[nodes]  
-            assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
+            assert len(self.features[nodes]) + 1 == self.feature_dicts[nodes].shape[1]
 
 
     @staticmethod

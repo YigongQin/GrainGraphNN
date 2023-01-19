@@ -8,7 +8,7 @@ Created on Thu Dec 15 14:55:03 2022
 
 import numpy as np
 import h5py
-import glob, re, os, argparse, dill
+import glob, re, os, argparse, dill, copy
 from collections import defaultdict
 from termcolor import colored
 import matplotlib.pyplot as plt
@@ -808,6 +808,8 @@ if __name__ == '__main__':
             
             success = 0
             
+            traj_copy = copy.deepcopy(traj)
+            
             for snapshot in range(0, traj.frames-args.span, args.span//2):
                 """
                 training data: snapshot -> snapshot + args.span
@@ -836,6 +838,7 @@ if __name__ == '__main__':
                         
                         print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
                         hg = traj.states[snapshot]
+                        hg.span = args.span
                         event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
                         hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
                                          nxt = traj.states[snapshot+args.span], event_list = event_list)
@@ -865,6 +868,7 @@ if __name__ == '__main__':
                     args.span = c
             
             print('calibrated span based on number of events: ' , args.span)
+            traj = traj_copy
 
             for snapshot in range(0, traj.frames-args.span, args.span//2):
                 print('\n')
@@ -876,6 +880,7 @@ if __name__ == '__main__':
                       
                     print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
                     hg = traj.states[snapshot]
+                    hg.span = args.span
                     event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
                     hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
                                      nxt = traj.states[snapshot+args.span], event_list = event_list)

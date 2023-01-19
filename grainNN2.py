@@ -432,7 +432,7 @@ if __name__=='__main__':
         print('the optimal threshold for classification is: ', optim_threshold, \
               ', with precision/recall', float(optim_p), float(optim_r))
 
-    model.threshold = optim_threshold
+        model.threshold = optim_threshold
 
     with open('loss.txt', 'w') as f:
         f.write('epoch, training loss, validation loss\n' )

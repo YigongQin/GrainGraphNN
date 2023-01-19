@@ -87,7 +87,7 @@ class feature_metric:
             
             p, r = grain_class_acc(self.test_prob, self.test_label)
             print('grain event: precision ', p, ', recall: ', r)
-
+            self.test_label, self.test_prob = [], []
     def summary(self):
 
 
@@ -104,6 +104,7 @@ def grain_class_acc(prob, label):
     
     prob = torch.cat(prob)
     y = torch.cat(label)
+    print(sum(y==1), sum(y==0), sum(prob==1), sum(prob==0))
     TruePositive  = sum( (y==1) & (prob==1) )
     FalsePositive = sum( (y==0) & (prob==1) )
     FalseNegative = sum( (y==1) & (prob==0) )

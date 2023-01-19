@@ -759,7 +759,7 @@ if __name__ == '__main__':
     parser.add_argument("--level", type=int, default = 2)
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--gap", type=int, default = 3)
+    parser.add_argument("--regenerate", type=bool, default = False)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -785,17 +785,30 @@ if __name__ == '__main__':
             
             train_samples = []
             
-            traj = graph_trajectory(seed = seed, frames = args.frame)
-          #  traj.update()
-          #  traj.show_data_struct()
-      
-            traj.load_trajectory(rawdat_dir = args.rawdat_dir)
-            #traj.show_data_struct()
+            if args.regenerate:
+              
+                traj = graph_trajectory(seed = seed, frames = args.frame)
+              #  traj.update()
+              #  traj.show_data_struct()
+          
+                traj.load_trajectory(rawdat_dir = args.rawdat_dir)
+                #traj.show_data_struct()
             
-           # with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-           #     dill.dump(traj, outp)
+                with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                    dill.dump(traj, outp)
+            
+            else:
                 
-            for snapshot in range(0, traj.frames-args.span, args.gap):
+                
+                with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'rb') as inp:  
+                    try:
+                        traj = dill.load(inp)
+                    except:
+                        raise EOFError
+            
+            success = 0
+            
+            for snapshot in range(0, traj.frames-args.span, args.span//2):
                 """
                 training data: snapshot -> snapshot + args.span
                 whether data is useful depends on both 
@@ -810,6 +823,7 @@ if __name__ == '__main__':
                     
                 """
                 print('\n')
+                
                 if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
                     if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
                         print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
@@ -825,16 +839,56 @@ if __name__ == '__main__':
                         event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
                         hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
                                          nxt = traj.states[snapshot+args.span], event_list = event_list)
-                        train_samples.append(hg)
+                       # train_samples.append(hg)
+                        
+                        success += 1
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+       
+
+        
+            print('sucess cases: ', success)
+        
        
             G = str(int(10*traj.physical_params['G']))
             R = str(int(10*traj.physical_params['R']))
             edgeE = str(len(set.union(*traj.edge_events)))
             grainE = str(len(set.union(*traj.grain_events)))
+            
+            choices = [6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120]
+            
+            edge_expandstep = 6*360/int(edgeE)
+            grain_expandstep = 6*90/int(grainE)
+            
+            for c in choices:
+                if c < edge_expandstep and c < grain_expandstep:
+                    args.span = c
+            
+            print('calibrated span based on number of events: ' , args.span)
+
+            for snapshot in range(0, traj.frames-args.span, args.span//2):
+                print('\n')
+                
+                if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
+                    if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
+                        print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+                        continue
+                      
+                    print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
+                    hg = traj.states[snapshot]
+                    event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
+                    hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
+                                     nxt = traj.states[snapshot+args.span], event_list = event_list)
+                    train_samples.append(hg)
+                    
+                    success += 1
+                else:
+                    print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+                    
+                    
         
-            with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R + '_edgeE' + edgeE + '_grainE' + grainE + '.pkl', 'wb') as outp:
+            with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R +\
+                      '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
 
 

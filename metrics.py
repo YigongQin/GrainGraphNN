@@ -39,7 +39,7 @@ class feature_metric:
             add('joint', 0)
             add('joint', 1)        
 
-            p = pred['grain_event']
+            p = pred['grain_area']
             y = y_dict['grain_event']  
             
             qualified_y = torch.where(mask['grain'][:,0]>0)
@@ -67,9 +67,9 @@ class feature_metric:
         if self.model_type == 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
-            print('Validation AUC:{:.6f}'.format(self.test_auc)) 
-            self.metric_list.append(float(self.test_auc))
-            self.test_label, self.test_prob = [], []
+           # print('Validation AUC:{:.6f}'.format(self.test_auc)) 
+           # self.metric_list.append(float(self.test_auc))
+           # self.test_label, self.test_prob = [], []
 
 
         if self.model_type == 'regressor':
@@ -85,9 +85,13 @@ class feature_metric:
             self.acc_dicts['grain0err'] = 0
             self.acc_dicts['grain1err'] = 0            
             
-            p, r = grain_class_acc(self.test_prob, self.test_label)
-            print('grain event: precision ', p, ', recall: ', r)
-            self.test_label, self.test_prob = [], []
+            self.test_auc, self.plist, self.rlist= grain_class_acc(self.test_prob, self.test_label)
+           # print('grain event: precision ', p, ', recall: ', r)
+           
+        print('Validation AUC:{:.6f}'.format(self.test_auc)) 
+        self.metric_list.append(float(self.test_auc))        
+        self.test_label, self.test_prob = [], []
+            
     def summary(self):
 
 
@@ -96,23 +100,56 @@ class feature_metric:
            # self.plist = [float(i) for i in self.P_list]
            # self.rlist = [float(i) for i in self.R_list]
         
-        if self.model_type == 'regressor':
-            print('model id:', self.model_id, 'ACCURACY', self.acc_dicts)
+      #  if self.model_type == 'regressor':
+      #      print('model id:', self.model_id, 'ACCURACY', self.acc_dicts)
 
 
 def grain_class_acc(prob, label):
-    
+
+    # use PRAUC
+
     prob = torch.cat(prob)
     y = torch.cat(label)
-    print(sum(y==1), sum(y==0), sum(prob==1), sum(prob==0))
-    TruePositive  = sum( (y==1) & (prob==1) )
-    FalsePositive = sum( (y==0) & (prob==1) )
-    FalseNegative = sum( (y==1) & (prob==0) )
-    Precision = TruePositive/(TruePositive + FalsePositive) 
-    Recall = TruePositive/(TruePositive + FalseNegative)
+
+    AUC = 0
+    intervals = 4
+    P_list, R_list = [], []
+    left_bound = 0
     
-    
-    return Precision, Recall
+    thresholds = [0, 1e-6, 1e-5, 1e-4, 1e-3]
+
+    for i in range(intervals+1): 
+        # the first one is all positive, no negative, recall is one
+        threshold = thresholds[i]  # threshold should increase
+
+       # print(threshold)
+
+        TruePositive  = sum( (y==1) & (prob<threshold) )
+        FalsePositive = sum( (y==0) & (prob<threshold) )
+        FalseNegative = sum( (y==1) & (prob>=threshold) )
+
+
+        if TruePositive + FalsePositive>0 and TruePositive + FalseNegative>0:
+
+            # it's a valid data
+
+            Precision = TruePositive/(TruePositive + FalsePositive) 
+            Recall = TruePositive/(TruePositive + FalseNegative)
+
+            AUC += (Recall-left_bound)*Precision
+            left_bound = Recall
+
+        else:
+            Precision = -1
+            Recall = -1
+
+        P_list.append(Precision)
+        R_list.append(Recall)
+       # print(Precision, Recall, left_bound)
+  # print(Positive, TruePositive, FalsePositive)
+  #  print(Presicion, Recall, F1)
+   # return F1 if Positive else -1
+    return AUC, P_list, R_list
 
 
 

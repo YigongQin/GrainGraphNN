@@ -28,8 +28,8 @@ if __name__=='__main__':
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
     parser.add_argument("--truth_dir", type=str, default='./sameGR/level2/')
-    parser.add_argument("--regressor_id", type=int, default=41)
-    parser.add_argument("--classifier_id", type=int, default=18)
+    parser.add_argument("--regressor_id", type=int, default=14)
+    parser.add_argument("--classifier_id", type=int, default=8)
     parser.add_argument("--use_sample", type=str, default='all')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
@@ -111,7 +111,8 @@ if __name__=='__main__':
     Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id)))
     Cmodel.eval() 
     
-    
+    Rmodel.threshold = 0
+    Cmodel.threshold = 0.5
     
     
     

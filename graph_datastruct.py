@@ -632,8 +632,8 @@ class GrainHeterograph:
                 
             print('number of grain events', np.sum(self.target_dicts['grain_event']))
             
-            del self.edges
-            del self.vertex2joint
+           # del self.edges
+           # del self.vertex2joint
                        
         """
             

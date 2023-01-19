@@ -792,8 +792,8 @@ if __name__ == '__main__':
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             #traj.show_data_struct()
             
-            with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                dill.dump(traj, outp)
+           # with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+           #     dill.dump(traj, outp)
                 
             for snapshot in range(0, traj.frames-args.span, args.gap):
                 """
@@ -829,7 +829,12 @@ if __name__ == '__main__':
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
        
-            with open(args.train_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
+            G = str(int(10*traj.physical_params['G']))
+            R = str(int(10*traj.physical_params['R']))
+            edgeE = str(len(set.union(*traj.edge_events)))
+            grainE = str(len(set.union(*traj.grain_events)))
+        
+            with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R + '_edgeE' + edgeE + '_grainE' + grainE + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
 
 

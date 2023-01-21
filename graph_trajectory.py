@@ -748,6 +748,54 @@ class graph_trajectory(graph):
         # reset the edge_labels, check event at next snapshot
         # self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
+    def GNN_update(self, frame, X_j, mask_j, topogical, edge_index_dict):
+        
+        
+        
+        """
+        Input:
+            updated coordinates of joints, mask (which joint exists), edges
+        Output:
+            self.vertices, self.vertex2joint(& reverse), self.edges
+        """     
+        
+        self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+        
+        self.vertices.clear()
+        for i, coor in enumerate(X_j):
+            if mask_j[i] == 1:
+                self.vertices[i] = coor
+        
+       # for joint, coors in self.vertices.items():
+       #     self.vertices[joint] = X_j[joint]        
+        
+        if topogical:
+            
+            jj_edge = edge_index_dict['joint', 'connect', 'joint']
+            gj_edge = edge_index_dict['grain', 'push', 'joint']
+            
+            print(gj_edge)
+            
+            self.vertex2joint = defaultdict(set)
+            self.edges.clear()
+            
+            for grain, joint in gj_edge.T:
+                self.vertex2joint[joint].add(grain) 
+            
+            for k, v in self.vertex2joint.items():
+                assert len(v)==3, len(v)
+            
+            self.joint2vertex = dict((v, k) for k, v in self.vertex2joint.items())
+
+            self.edges = jj_edge
+        
+        
+        self.update()
+
+
+        
+
+
 if __name__ == '__main__':
 
 

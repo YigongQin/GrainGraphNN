@@ -324,7 +324,8 @@ class GrainNN_regressor(nn.Module):
 
         self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
-
+        
+        self.scaling = {'grain':20, 'joint':5}
       #  self.GR_fit = hyper.GR_fit
 
     def forward(self, x_dict, edge_index_dict):
@@ -366,7 +367,7 @@ class GrainNN_regressor(nn.Module):
         #y_dict['joint'] = dx_scale.view(-1, 1)*torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
         y_dict['joint'] = torch.tanh(y_dict['joint'])
 
-        area = torch.tanh(y_dict['grain'][:, 0])/20 + x_dict['grain'][:, 3] # darea + area_old is positive  
+        area = torch.tanh(y_dict['grain'][:, 0])/self.scaling['grain'] + x_dict['grain'][:, 3] # darea + area_old is positive  
         y_dict.update({'grain_area': area })
         
        # area = F.relu(area)
@@ -397,7 +398,7 @@ class GrainNN_regressor(nn.Module):
         x_dict['joint'][:, -2:] =  y_dict['joint']
         x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]
         
-        return x_dict
+       # return x_dict
 
 
 class GrainNN_classifier(torch.nn.Module):
@@ -465,7 +466,7 @@ class GrainNN_classifier(torch.nn.Module):
         return y_dict
 
 
-    def update(self, x_dict, edge_index_dict, y_dict):            
+    def update(self, x_dict, edge_index_dict, y_dict, mask):            
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -504,7 +505,7 @@ class GrainNN_classifier(torch.nn.Module):
 
         edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)
                                 
-        return x_dict, edge_index_dict
+      #  return x_dict, edge_index_dict
     
     
     @staticmethod

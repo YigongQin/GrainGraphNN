@@ -112,11 +112,11 @@ def grain_class_acc(prob, label):
     y = torch.cat(label)
 
     AUC = 0
-    intervals = 4
+    intervals = 5
     P_list, R_list = [], []
     left_bound = 0
     
-    thresholds = [0, 1e-6, 1e-5, 1e-4, 1e-3]
+    thresholds = [1e-4, 2e-4, 4e-4, 6e-4, 8e-4, 1e-3]
 
     for i in range(intervals+1): 
         # the first one is all positive, no negative, recall is one

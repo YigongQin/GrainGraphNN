@@ -86,7 +86,7 @@ class feature_metric:
             self.acc_dicts['grain1err'] = 0            
             
             self.test_auc, self.plist, self.rlist= grain_class_acc(self.test_prob, self.test_label)
-           # print('grain event: precision ', p, ', recall: ', r)
+            print('grain event: precision ', self.plist, ', recall: ', self.rlist)
            
         print('Validation AUC:{:.6f}'.format(self.test_auc)) 
         self.metric_list.append(float(self.test_auc))        

@@ -240,7 +240,8 @@ class graph_trajectory(graph):
             print('number of grains in pixels %d'%len(cur_grain))
         #    print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
-            
+            assert len(cur_grain)>0, self.seed
+
             if len(cur_joint)!=2*len(cur_grain) or len(miss_case)>0:
                 print(colored('junction find failed', 'red'))
                # print(len(cur_joint), len(cur_grain))
@@ -759,7 +760,7 @@ if __name__ == '__main__':
     parser.add_argument("--level", type=int, default = 2)
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--regenerate", type=bool, default = False)
+    parser.add_argument("--regenerate", type=bool, default = True)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -794,8 +795,8 @@ if __name__ == '__main__':
                 traj.load_trajectory(rawdat_dir = args.rawdat_dir)
                 #traj.show_data_struct()
             
-                with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                    dill.dump(traj, outp)
+                #with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                #    dill.dump(traj, outp)
             
             else:
                 
@@ -860,8 +861,8 @@ if __name__ == '__main__':
             
             choices = [6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120]
             
-            edge_expandstep = 6*360/int(edgeE)
-            grain_expandstep = 6*90/int(grainE)
+            edge_expandstep = 6*360/int(edgeE) if int(edgeE)>0 else 0  
+            grain_expandstep = 6*90/int(grainE) if int(grainE)>0 else 0
             
             for c in choices:
                 if c < edge_expandstep and c < grain_expandstep:

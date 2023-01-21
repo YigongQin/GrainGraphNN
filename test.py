@@ -111,7 +111,7 @@ if __name__=='__main__':
     Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id)))
     Cmodel.eval() 
     
-    Rmodel.threshold = 0
+    Rmodel.threshold = 1e-4
     Cmodel.threshold = 0.5
     
     
@@ -155,7 +155,7 @@ if __name__=='__main__':
 
     traj_list = sorted(glob.glob(args.truth_dir + 'traj*'))
     for case, data in enumerate(test_tensor):
-        print('case %d'%case)
+        print('case', traj_list[case])
      #   print(pred['joint'])
       #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)
        # traj.load_trajectory(rawdat_dir = '.')
@@ -167,9 +167,11 @@ if __name__=='__main__':
                 raise EOFError
 
 
-        for frame in range(hp.frames):
+        for frame in range(1, 6, 121):
             """
             <1> combine two predictions
+                a. Rmodel: joint displacement, grain area change & volume
+                b. Cmodel: edge prob, dx of new verts
             """            
 
             pred = Rmodel(data.x_dict, data.edge_index_dict)
@@ -180,25 +182,30 @@ if __name__=='__main__':
             <2>  update node features
             """
             
-            data.x_dict = Rmodel.update(data.x_dict, pred)
+            Rmodel.update(data.x_dict, pred)
             
             """
             <3> predict events and update features and connectivity
+            
             """            
             
-            data.x_dict, data.edge_index_dict = Cmodel.update(data.x_dict, data.edge_index_dict, pred)
+            pred['grain_event'] = torch.where(pred['grain_area']<Rmodel.threshold)[0]
+            Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask'])
 
  
             """
             <4> evaluate
             """
-            pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+           # print(data['nxt'])
+           # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
             
+            X_j = data.x_dict['joint'][:,:2].detach().numpy()
+            topogical = True
             
-            traj.GNN_update( (data.x_dict['joint'][:,:2]).detach().numpy())
+            traj.GNN_update(frame, X_j, data['mask']['joint'][:,0], topogical, data.edge_index_dict)
            # traj.show_data_struct()
             
             
-            print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
+          #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
           #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
             

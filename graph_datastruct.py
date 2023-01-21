@@ -414,7 +414,7 @@ class graph:
         
         """
         Input: joint2vertex, vertices, edges, 
-        Output: region_coors
+        Output: region_coors, vertex_neighbor
         """
         
         
@@ -524,15 +524,7 @@ class graph:
         self.compute_error_layer()
 
 
-    def GNN_update(self, X: np.ndarray):
-        
-        for joint, coors in self.vertices.items():
-            self.vertices[joint] = X[joint]
-            
-        self.update()
 
-
-        
                 
 class GrainHeterograph:
     def __init__(self):

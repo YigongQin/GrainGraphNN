@@ -658,16 +658,6 @@ class GrainHeterograph:
             assert len(self.features[nodes]) + 1 == self.feature_dicts[nodes].shape[1]
 
 
-    def redundant(self):
-        self.feature_dicts['grain'] = self.feature_dicts['grain'][self.g_active,:]
-        self.feature_dicts['joint'] = self.feature_dicts['joint'][self.j_active,:]
-        self.target_dicts['grain'] = self.target_dicts['grain'][self.g_active,:]
-        self.target_dicts['joint'] = self.target_dicts['joint'][self.j_active,:]        
-        self.mask['grain'] = self.mask['grain'][self.g_active,:]
-        self.mask['joint'] = self.mask['joint'][self.j_active,:]         
-        
-        assert np.all(self.mask['grain']>0)
-
     @staticmethod
     def subtract(b, a, loc):
         

@@ -672,14 +672,7 @@ class graph_trajectory(graph):
         
         s = self.imagesize[0]
         
-        hg.g_active = np.array(list(self.region_center.keys())) - 1
-        hg.j_active = np.array(list(self.vertices.keys()))
-        g_map, j_map = {}, {}
-        for i, idx in enumerate(hg.g_active):
-            g_map[idx] = i
-        for i, idx in enumerate(hg.j_active):
-            j_map[idx] = i        
-        
+
         
         for grain, coor in self.region_center.items():
             grain_state[grain-1, 0] = coor[0]
@@ -716,10 +709,10 @@ class graph_trajectory(graph):
         gj_edge = []
         for grains, joint in self.joint2vertex.items():
             for grain in grains:
-                gj_edge.append([g_map[grain-1], j_map[joint]])
+                gj_edge.append([grain-1, joint])
         
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
-        jj_edge = [[j_map[src], j_map[dst]] for src, dst in self.edges if src>-1 and dst>-1]
+        jj_edge = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
         
         
         hg.feature_dicts.update({'grain':grain_state})
@@ -946,8 +939,7 @@ if __name__ == '__main__':
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
                     
-            for hg in train_samples:
-                hg.redundant()
+                    
         
             with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R +\
                       '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:

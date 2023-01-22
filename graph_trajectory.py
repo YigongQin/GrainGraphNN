@@ -716,9 +716,9 @@ class graph_trajectory(graph):
         gj_edge = []
         for grains, joint in self.joint2vertex.items():
             for grain in grains:
-                gj_edge.append([grain-1, joint])
+                gj_edge.append([g_map[grain-1], j_map[joint]])
         
-        jg_edge = [[j_map[joint], g_map[grain]] for grain, joint in gj_edge]
+        jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[j_map[src], j_map[dst]] for src, dst in self.edges if src>-1 and dst>-1]
         
         

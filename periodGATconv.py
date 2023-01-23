@@ -161,26 +161,17 @@ class PeriodConv(MessagePassing):
                 attention weights for each edge. (default: :obj:`None`)
         """
 
-        H, C = self.heads, self.out_channels
+
 
         if isinstance(x, Tensor):
             x: PairTensor = (x, x)
 
 
 
-        rel_loc = x[0][:,:3] - x[1][:,:3]
-        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
-        x[0] = torch.cat([reloc, x[0][:,3:]], dim=1)
-        
-    #    return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
-    
-    
-        query = self.lin_query(x[1]).view(-1, H, C)
-        key = self.lin_key(x[0]).view(-1, H, C)
-        value = self.lin_value(x[0]).view(-1, H, C)
+
 
         # propagate_type: (query: Tensor, key:Tensor, value: Tensor, edge_attr: OptTensor) # noqa
-        out = self.propagate(edge_index, query=query, key=key, value=value,
+        out = self.propagate(edge_index, x=x,
                              edge_attr=edge_attr, size=None)
 
         alpha = self._alpha
@@ -210,22 +201,34 @@ class PeriodConv(MessagePassing):
             return out
 
 
-    def message(self, query_i: Tensor, key_j: Tensor, value_j: Tensor,
+    def message(self, x_j: Tensor, x_i: Tensor, 
                 edge_attr: OptTensor, index: Tensor, ptr: OptTensor,
                 size_i: Optional[int]) -> Tensor:
-
+        
+        H, C = self.heads, self.out_channels
+        rel_loc = x_j[:,:3] - x_i[:,:3]
+        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+        x_j = torch.cat([reloc, x_j[:,3:]], dim=1)
+        
+    #    return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
+    
+    
+        query = self.lin_query(x_i).view(-1, H, C)
+        key = self.lin_key(x_j).view(-1, H, C)
+        value = self.lin_value(x_j).view(-1, H, C)
+        
         if self.lin_edge is not None:
             assert edge_attr is not None
             edge_attr = self.lin_edge(edge_attr).view(-1, self.heads,
                                                       self.out_channels)
-            key_j = key_j + edge_attr
+            key = key + edge_attr
 
-        alpha = (query_i * key_j).sum(dim=-1) / math.sqrt(self.out_channels)
+        alpha = (query * key).sum(dim=-1) / math.sqrt(self.out_channels)
         alpha = softmax(alpha, index, ptr, size_i)
         self._alpha = alpha
         alpha = F.dropout(alpha, p=self.dropout, training=self.training)
 
-        out = value_j
+        out = value
         if edge_attr is not None:
             out = out + edge_attr
 

@@ -273,8 +273,18 @@ class PeriodConv(MessagePassing):
         alpha = softmax(alpha, index, ptr, size_i)
         self._alpha = alpha
         alpha = F.dropout(alpha, p=self.dropout, training=self.training)
-        return x_j * alpha.unsqueeze(-1)
+      #  return x_j * alpha.unsqueeze(-1)
 
+
+        rel_loc = x_j[:,:3] - x_i[:,:3]
+      #  print(-1*(rel_loc>0.5))
+        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+        
+      #  print(reloc)
+        
+      #  return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
+        return alpha.unsqueeze(-1) * torch.cat([reloc, x_j[:,3:]], dim=1)
+    
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}({self.in_channels}, '
                 f'{self.out_channels}, heads={self.heads})')

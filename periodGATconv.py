@@ -113,7 +113,7 @@ class PeriodConv(MessagePassing):
         concat: bool = True,
         negative_slope: float = 0.2,
         dropout: float = 0.0,
-        add_self_loops: bool = True,
+        add_self_loops: bool = False,
         edge_dim: Optional[int] = None,
         fill_value: Union[float, Tensor, str] = 'mean',
         bias: bool = True,
@@ -286,8 +286,18 @@ class PeriodConv(MessagePassing):
         return alpha
 
 
-    def message(self, x_j: Tensor, alpha: Tensor) -> Tensor:
-        return alpha.unsqueeze(-1) * x_j
+    def message(self, x_i: Tensor, x_j: Tensor, alpha: Tensor) -> Tensor:
+      #  return alpha.unsqueeze(-1) * x_j
+
+
+        rel_loc = x_j[:,:3] - x_i[:,:3]
+      #  print(-1*(rel_loc>0.5))
+        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+        
+      #  print(reloc)
+        return alpha.unsqueeze(-1) * torch.cat([reloc, x_j[:,3:]], dim=1)
+       # return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
+
 
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}({self.in_channels}, '

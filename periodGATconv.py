@@ -20,10 +20,9 @@ from torch_geometric.typing import NoneType  # noqa
 from torch_geometric.typing import Adj, OptPairTensor, OptTensor, Size
 from torch_geometric.utils import add_self_loops, remove_self_loops, softmax
 
-from ..inits import glorot, zeros
+from torch_geometric.nn.inits import glorot, zeros
 
-
-class GATConv(MessagePassing):
+class PeriodConv(MessagePassing):
     r"""The graph attentional operator from the `"Graph Attention Networks"
     <https://arxiv.org/abs/1710.10903>`_ paper
 

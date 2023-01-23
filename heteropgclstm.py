@@ -11,7 +11,9 @@ from torch.nn import Parameter
 from torch_geometric.nn import HeteroConv
 from torch_geometric.nn.inits import glorot
 import torch.nn as nn
-from periodconv import PeriodConv
+#from periodconv import PeriodConv
+from periodGATconv import PeriodConv
+
 
 class HeteroPGCLSTM(torch.nn.Module):
     r"""An implementation similar to the Integrated Graph Convolutional Long Short Term

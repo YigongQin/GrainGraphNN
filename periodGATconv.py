@@ -118,6 +118,8 @@ class PeriodConv(MessagePassing):
         self.lin_key = Linear(in_channels[0], heads * out_channels)
         self.lin_query = Linear(in_channels[1], heads * out_channels)
         self.lin_value = Linear(in_channels[0], heads * out_channels)
+        self.lin_l2 = Linear(heads * out_channels, heads * out_channels, bias=bias)
+        
         if edge_dim is not None:
             self.lin_edge = Linear(edge_dim, heads * out_channels, bias=False)
         else:
@@ -143,6 +145,7 @@ class PeriodConv(MessagePassing):
         self.lin_key.reset_parameters()
         self.lin_query.reset_parameters()
         self.lin_value.reset_parameters()
+        self.lin_l2.reset_parameters()
         if self.edge_dim:
             self.lin_edge.reset_parameters()
         self.lin_skip.reset_parameters()
@@ -165,10 +168,6 @@ class PeriodConv(MessagePassing):
 
         if isinstance(x, Tensor):
             x: PairTensor = (x, x)
-
-
-
-
 
         # propagate_type: (query: Tensor, key:Tensor, value: Tensor, edge_attr: OptTensor) # noqa
         out = self.propagate(edge_index, x=x,
@@ -215,7 +214,7 @@ class PeriodConv(MessagePassing):
     
         query = self.lin_query(x_i).view(-1, H, C)
         key = self.lin_key(x_j).view(-1, H, C)
-        value = self.lin_value(x_j).view(-1, H, C)
+        value = self.lin_l2(F.relu(self.lin_value(x_j).view(-1, H, C)))
         
         if self.lin_edge is not None:
             assert edge_attr is not None

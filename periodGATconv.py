@@ -166,6 +166,15 @@ class PeriodConv(MessagePassing):
         if isinstance(x, Tensor):
             x: PairTensor = (x, x)
 
+
+
+        rel_loc = x[0][:,:3] - x[1][:,:3]
+        reloc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+        x[0] = torch.cat([reloc, x[0][:,3:]], dim=1)
+        
+    #    return self.lin_l2(F.relu(self.lin_l( torch.cat([reloc, x_j[:,3:]], dim=1) )))
+    
+    
         query = self.lin_query(x[1]).view(-1, H, C)
         key = self.lin_key(x[0]).view(-1, H, C)
         value = self.lin_value(x[0]).view(-1, H, C)

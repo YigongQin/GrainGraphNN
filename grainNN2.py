@@ -204,10 +204,13 @@ if __name__=='__main__':
     
     seed = args.seed
     random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
     print('torch seed', seed)
 
     
@@ -277,42 +280,6 @@ if __name__=='__main__':
     hp.metadata = heteroData.metadata()
     
     
-    """
-    Fit scale of dx for G, R
-    
-    
-    
-    
-    dx_max_gradient_dict = {}
-    for data in train_list:
-        G, R = data.feature_dicts['joint'][0][3], data.feature_dicts['joint'][0][4]
-        if (G, R) not in dx_max_gradient_dict:
-            dx_max_gradient_dict[(G, R)] = data.gradient_max['joint']
-        else:
-            dx_max_gradient_dict[(G, R)] = max(dx_max_gradient_dict[(G, R)], data.gradient_max['joint'])
-    
-
-    G, R, Dx = [], [], []
-    
-    for (g, r), dx in dx_max_gradient_dict.items():
-        G.append(g)
-        R.append(r)
-        Dx.append(dx)
-    
-    def func(x, a, b, c):
-        return a + b*x[0] + c*x[1]
-    
-    xdata = np.array([G, R])
-    
-    popt, _ = curve_fit(func, xdata, Dx)
-    popt = np.array(popt, dtype='float32')
-    hp.GR_fit = torch.from_numpy(popt).to(device)
-    """
-   # print(hp.GR_fit) 
-   # with open('dx_GR.pkl', 'wb') as outp:
-   #     dill.dump(dx_max_gradient_dict, outp)
-   # print(dx_max_gradient_dict)
-    
     
     print('==========  data information  =========')
 
@@ -359,11 +326,6 @@ if __name__=='__main__':
    # model = DataParallel(model)
         
     
-   # pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-   # print('total number of trained parameters ', pytorch_total_params)
-   # print('\n')
-    
-
 
     train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
     test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)

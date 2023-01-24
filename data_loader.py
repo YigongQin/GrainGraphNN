@@ -143,12 +143,12 @@ class DynamicHeteroGraphTemporalSignal(object):
             for key, value in mask.items():
                 snapshot['mask'][key] = value            
 
-        """
+        
         if edge_weight_dict:
             for key, value in edge_weight_dict.items():
                 snapshot[key].edge_attr = value
                 
-                
+        """        
         if additional_features:
      
             for feature_name, feature_dict in additional_features.items():

@@ -739,7 +739,7 @@ class graph_trajectory(graph):
       #  if frame>0:
       #      hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
-        
+        assert len(jj_edge) == len(self.edge_len)
         hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)}
         hg.edges = self.edges.copy()
         

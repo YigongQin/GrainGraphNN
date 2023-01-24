@@ -416,7 +416,7 @@ class graph:
         Input: joint2vertex, vertices, edges, 
         Output: region_coors, vertex_neighbor
         """
-        
+        self.edge_len.clear()
         
       #  self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
         self.vertex_neighbor.clear()                    

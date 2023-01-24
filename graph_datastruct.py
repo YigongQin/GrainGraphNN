@@ -166,7 +166,7 @@ class graph:
         self.vertex2joint = defaultdict(set) ## (vertex index, x coordiante, y coordinate)  -> (region1, region2, region3)
         self.vertex_neighbor = defaultdict(set)
         self.edges = []  ## index linkage
-        self.edge_len = []
+       # self.edge_len = []
         self.regions = defaultdict(list) ## index group
         self.region_coors = defaultdict(list)
         self.region_edge = defaultdict(set)
@@ -416,7 +416,7 @@ class graph:
         Input: joint2vertex, vertices, edges, 
         Output: region_coors, vertex_neighbor
         """
-        self.edge_len.clear()
+      #  self.edge_len.clear()
         
       #  self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
         self.vertex_neighbor.clear()                    
@@ -515,7 +515,7 @@ class graph:
                     print(dst, 'not available',src) 
                     print('in', self.vertex2joint[dst])
                                        
-                self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
+               # self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
             
             
 

@@ -13,7 +13,7 @@ from collections import defaultdict
 from termcolor import colored
 import matplotlib.pyplot as plt
 import itertools
-from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction
+from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction, periodic_dist_
 from math import pi
 
 
@@ -707,13 +707,15 @@ class graph_trajectory(graph):
         
         
         gj_edge = []
+        gj_len, jj_len = [], []
         for grains, joint in self.joint2vertex.items():
             for grain in grains:
                 gj_edge.append([grain-1, joint])
+                gj_len.append(periodic_dist_(self.vertices[joint], self.region_center[grain]))
         
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
-        
+        jj_len  = [periodic_dist_(self.vertices[src], self.vertices[dst]) for src, dst in self.edges if src>-1 and dst>-1]
         
         hg.feature_dicts.update({'grain':grain_state})
         hg.feature_dicts.update({'joint':joint_state})
@@ -739,8 +741,10 @@ class graph_trajectory(graph):
       #  if frame>0:
       #      hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
-        assert len(jj_edge) == len(self.edge_len)
-        hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)[:,np.newaxis]}
+        assert len(jj_edge) == len(jj_len)
+        hg.edge_weight_dicts = {hg.edge_type[0]:np.array(gj_len)[:,np.newaxis],
+                                hg.edge_type[1]:np.array(gj_len)[:,np.newaxis],
+                                hg.edge_type[2]:np.array(jj_len)[:,np.newaxis]}
         hg.edges = self.edges.copy()
         
         self.states.append(hg) # states at current time

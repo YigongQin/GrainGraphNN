@@ -740,7 +740,7 @@ class graph_trajectory(graph):
       #      hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
         assert len(jj_edge) == len(self.edge_len)
-        hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)}
+        hg.edge_weight_dicts = {hg.edge_type[2]:np.array(self.edge_len)[:,np.newaxis]}
         hg.edges = self.edges.copy()
         
         self.states.append(hg) # states at current time

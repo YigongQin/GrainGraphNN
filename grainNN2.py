@@ -80,7 +80,7 @@ def train(model, train_loader, test_loader):
         train.y = data.y_dict
         count += 1 #data.batch
         data.to(device)
-        pred = model(data.x_dict, data.edge_index_dict)
+        pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
         train_loss += float(criterion(data.y_dict, pred, data['mask'])) 
     train_loss/=count
 
@@ -90,7 +90,7 @@ def train(model, train_loader, test_loader):
         for data in test_loader:      
             count += 1
             data.to(device)
-            pred = model(data.x_dict, data.edge_index_dict)
+            pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
             test_loss += float(criterion(data.y_dict, pred, data['mask']))  
             
             metric.record(data.y_dict, pred, data['mask'], 0)
@@ -123,7 +123,7 @@ def train(model, train_loader, test_loader):
             data.to(device)
             count += 1
             
-            pred = model(data.x_dict, data.edge_index_dict)
+            pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
          
             loss = criterion(data.y_dict, pred, data['mask'])
              
@@ -144,7 +144,7 @@ def train(model, train_loader, test_loader):
             
                 count += 1
                 data.to(device)
-                pred = model(data.x_dict, data.edge_index_dict)
+                pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
                 test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
                 metric.record(data.y_dict, pred, data['mask'], epoch)
                 

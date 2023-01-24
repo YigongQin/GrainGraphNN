@@ -202,7 +202,7 @@ class SeqGCLSTM(nn.Module):
 
         self.cell_list = nn.ModuleList(cell_list)
 
-    def forward(self, x_dict, edge_index_dict, hidden_state):
+    def forward(self, x_dict, edge_index_dict, edge_attr, hidden_state):
 
        
         """
@@ -239,6 +239,7 @@ class SeqGCLSTM(nn.Module):
             for t in range(seq_len):
                 h, c = self.cell_list[layer_idx](x_dict = cur_layer_x[t],
                                                  edge_index_dict = cur_layer_edge[t],
+                                                 edge_attr = edge_attr,
                                                  h_dict = h,
                                                  c_dict = c)
                 ## output of each cell are dicts h and c 
@@ -328,7 +329,7 @@ class GrainNN_regressor(nn.Module):
         self.scaling = {'grain':20, 'joint':5}
       #  self.GR_fit = hyper.GR_fit
 
-    def forward(self, x_dict, edge_index_dict):
+    def forward(self, x_dict, edge_index_dict, edge_attr):
         
         """
         Making a forward pass.
@@ -343,13 +344,13 @@ class GrainNN_regressor(nn.Module):
                 output channels.
         """        
 
-        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
+        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
         
        # hidden_state = self.gc_encoder(x_dict, edge_index_dict) 
         
        # for i in range(self.out_win):
             
-        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
+        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, edge_attr, hidden_state)
        # hidden_state = self.gclstm_decoder2(x_dict, edge_index_dict, hidden_state)
         
         h_dict, c_dict = hidden_state[-1]

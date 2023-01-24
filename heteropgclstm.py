@@ -48,6 +48,7 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_input_gate_parameters_and_layers(self):
         self.conv_i = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
+                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -58,6 +59,7 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_forget_gate_parameters_and_layers(self):
         self.conv_f = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
+                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_f = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -68,6 +70,7 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_cell_state_parameters_and_layers(self):
         self.conv_c = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
+                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_c = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -78,6 +81,7 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_output_gate_parameters_and_layers(self):
         self.conv_o = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
+                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_o = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -119,34 +123,34 @@ class HeteroPGCLSTM(torch.nn.Module):
             c_dict = {node_type: torch.zeros(X.shape[0], self.out_channels, device = self.device) for node_type, X in x_dict.items()}
         return c_dict
 
-    def _calculate_input_gate(self, x_dict, edge_index_dict, h_dict, c_dict):
+    def _calculate_input_gate(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict):
         h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
-        conv_i = self.conv_i(h_dict, edge_index_dict)
+        conv_i = self.conv_i(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         i_dict = {node_type: conv_i[node_type] for node_type, I in x_dict.items()}
         i_dict = {node_type: I + self.b_i[node_type] for node_type, I in i_dict.items()}
         i_dict = {node_type: torch.sigmoid(I) for node_type, I in i_dict.items()}
         return i_dict
 
-    def _calculate_forget_gate(self, x_dict, edge_index_dict, h_dict, c_dict):
+    def _calculate_forget_gate(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict):
         h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
-        conv_f = self.conv_f(h_dict, edge_index_dict)
+        conv_f = self.conv_f(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         f_dict = {node_type: conv_f[node_type] for node_type, F in x_dict.items()}
         f_dict = {node_type: F + self.b_f[node_type] for node_type, F in f_dict.items()}
         f_dict = {node_type: torch.sigmoid(F) for node_type, F in f_dict.items()}
         return f_dict
 
-    def _calculate_cell_state(self, x_dict, edge_index_dict, h_dict, c_dict, i_dict, f_dict):
+    def _calculate_cell_state(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict, i_dict, f_dict):
         h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
-        conv_c = self.conv_c(h_dict, edge_index_dict)
+        conv_c = self.conv_c(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         t_dict = {node_type: conv_c[node_type] for node_type, T in x_dict.items()}
         t_dict = {node_type: T + self.b_c[node_type] for node_type, T in t_dict.items()}
         t_dict = {node_type: torch.tanh(T) for node_type, T in t_dict.items()}
         c_dict = {node_type: f_dict[node_type] * C + i_dict[node_type] * t_dict[node_type] for node_type, C in c_dict.items()}
         return c_dict
 
-    def _calculate_output_gate(self, x_dict, edge_index_dict, h_dict, c_dict):
+    def _calculate_output_gate(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict):
         h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
-        conv_o = self.conv_o(h_dict, edge_index_dict)
+        conv_o = self.conv_o(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         o_dict = {node_type: conv_o[node_type] for node_type, O in x_dict.items()}
         o_dict = {node_type: O + self.b_o[node_type] for node_type, O in o_dict.items()}
         o_dict = {node_type: torch.sigmoid(O) for node_type, O in o_dict.items()}
@@ -160,6 +164,7 @@ class HeteroPGCLSTM(torch.nn.Module):
         self,
         x_dict,
         edge_index_dict,
+        edge_attr=None,
         h_dict=None,
         c_dict=None,
     ):
@@ -185,10 +190,10 @@ class HeteroPGCLSTM(torch.nn.Module):
 
         h_dict = self._set_hidden_state(x_dict, h_dict)
         c_dict = self._set_cell_state(x_dict, c_dict)
-        i_dict = self._calculate_input_gate(x_dict, edge_index_dict, h_dict, c_dict)
-        f_dict = self._calculate_forget_gate(x_dict, edge_index_dict, h_dict, c_dict)
-        c_dict = self._calculate_cell_state(x_dict, edge_index_dict, h_dict, c_dict, i_dict, f_dict)
-        o_dict = self._calculate_output_gate(x_dict, edge_index_dict, h_dict, c_dict)
+        i_dict = self._calculate_input_gate(x_dict, edge_index_dict, edge_attr, h_dict, c_dict)
+        f_dict = self._calculate_forget_gate(x_dict, edge_index_dict, edge_attr, h_dict, c_dict)
+        c_dict = self._calculate_cell_state(x_dict, edge_index_dict, edge_attr, h_dict, c_dict, i_dict, f_dict)
+        o_dict = self._calculate_output_gate(x_dict, edge_index_dict, edge_attr, h_dict, c_dict)
         h_dict = self._calculate_hidden_state(o_dict, c_dict)
         return h_dict, c_dict
     

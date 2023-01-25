@@ -225,24 +225,47 @@ class HeteroPGC(torch.nn.Module):
         self.bias = bias
         self.device = device
         self._create_parameters_and_layers()
+        self._set_parameters()
 
 
     def _create_input_gate_parameters_and_layers(self):
         self.conv_i = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
+                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
+
+        self.W_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
+                    for node_type, in_channels in self.in_channels_dict.items()})
+        self.b_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(1, self.out_channels))
+                    for node_type in self.in_channels_dict})
 
     def _create_parameters_and_layers(self):
         self._create_input_gate_parameters_and_layers()
 
 
-  
+    def _set_parameters(self):
+        for key in self.W_i:
+            glorot(self.W_i[key])
+        for key in self.b_i:
+            glorot(self.b_i[key])
 
-    def _calculate_hidden_state(self, x_dict, edge_index_dict):
+    def _set_hidden_state(self, x_dict, h_dict):
+        if h_dict is None:
+            h_dict = {node_type: torch.zeros(X.shape[0], self.out_channels, device = self.device) for node_type, X in x_dict.items()}
+        return h_dict
+    
+    def _set_cell_state(self, x_dict, c_dict):
+        if c_dict is None:
+            c_dict = {node_type: torch.zeros(X.shape[0], self.out_channels, device = self.device) for node_type, X in x_dict.items()}
+        return c_dict
+    
+    def _calculate_hidden_state(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict):
   
-        conv_i = self.conv_i(x_dict, edge_index_dict)
+        h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
+        conv_i = self.conv_i(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         i_dict = {node_type: conv_i[node_type] for node_type, I in x_dict.items()}
-        i_dict = {node_type: torch.relu(I) for node_type, I in i_dict.items()}
+        i_dict = {node_type: I + self.b_i[node_type] for node_type, I in i_dict.items()}
+     
         return i_dict
 
 
@@ -250,7 +273,9 @@ class HeteroPGC(torch.nn.Module):
         self,
         x_dict,
         edge_index_dict,
-
+        edge_attr=None,
+        h_dict=None,
+        c_dict=None,
     ):
         """
         Making a forward pass. If the hidden state and cell state
@@ -271,6 +296,7 @@ class HeteroPGC(torch.nn.Module):
             * **c_dict** *(Dictionary where keys=Strings and values=PyTorch Float Tensor)* - Node type and
                 cell state matrix dict for all nodes.
         """
-
-        h_dict = self._calculate_hidden_state(x_dict, edge_index_dict)
-        return h_dict
+        h_dict = self._set_hidden_state(x_dict, h_dict)
+        c_dict = self._set_cell_state(x_dict, c_dict)
+        h_dict = self._calculate_hidden_state(x_dict, edge_index_dict, edge_attr, h_dict, c_dict)
+        return h_dict, c_dict

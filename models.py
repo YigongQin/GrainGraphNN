@@ -301,9 +301,39 @@ class SeqGCLSTM(nn.Module):
         return param
     
     
-
-
+class LSTM(nn.Module):
     
+    def __init__(self, in_channels_dict, out_channels, num_layers, device,
+                 seq_len = 1, bias = True, return_all_layers = False):
+        super().__init__()
+        
+        self.in_channels_dict = in_channels_dict
+        self.out_channels = out_channels
+        self.num_layers = num_layers
+        self.device = device
+        self.seq_len = seq_len
+        self.bias = bias
+        self.return_all_layers = return_all_layers        
+        self.dim = {'joint':2, 'grain':1}
+        
+        self.nn = nn.ModuleDict({node_type: nn.LSTM(input_size=dim, hidden_size=self.out_channels, num_layers=2, batch_first=True) 
+                        for node_type, dim in self.dim.items()}) 
+       
+        
+    def forward(self, x_dict, hidden_state=None):
+        
+    
+
+        dx_dict = {node_type: x_dict[node_type][:,-self.seq_len*dim:].view(-1, self.seq_len, dim)
+             for node_type, dim in self.dim.items()}       
+            
+        y_dict = {node_type: self.nn[node_type](dx_dict[node_type])[0][:,-1,:]
+             for node_type, dim in self.dim.items()}     
+        
+        
+        return y_dict
+        
+        
     
 class GrainNN_regressor(nn.Module):
     """ GrainNN in 3D
@@ -337,11 +367,16 @@ class GrainNN_regressor(nn.Module):
       #  self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
       #                                  self.num_layer, self.metadata, self.device)
 
-        self.linear = nn.ModuleDict({node_type: nn.Linear(self.out_channels, len(targets))
+        self.history = True
+        linear_outchannels = 2*self.out_channels if self.history else self.out_channels
+        
+        self.linear = nn.ModuleDict({node_type: nn.Linear(linear_outchannels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
         
+        self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device)
+        
         self.scaling = {'grain':20, 'joint':5}
-      #  self.GR_fit = hyper.GR_fit
+
 
     def forward(self, x_dict, edge_index_dict, edge_attr):
         
@@ -360,7 +395,6 @@ class GrainNN_regressor(nn.Module):
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
         
-       # hidden_state = self.gc_encoder(x_dict, edge_index_dict) 
         
        # for i in range(self.out_win):
             
@@ -368,7 +402,14 @@ class GrainNN_regressor(nn.Module):
        # hidden_state = self.gclstm_decoder2(x_dict, edge_index_dict, hidden_state)
         
         h_dict, c_dict = hidden_state[-1]
-       # h_dict = hidden_state[-1]    
+
+        
+        history_encoded = self.LSTM(x_dict)
+        
+        if self.history:
+            h_dict = {node_type: torch.cat([h, history_encoded[node_type]], dim=1)
+                      for node_type, h in h_dict.items()}
+        
         y_dict = {node_type: self.linear[node_type](h)
              for node_type, h in h_dict.items()} # apply the linear layer
         
@@ -377,10 +418,9 @@ class GrainNN_regressor(nn.Module):
         GrainNN specific regressor output 
         
         """
-     #   dx_scale = self.GR_fit[0] + self.GR_fit[1]*x_dict['joint'][:, 3] + self.GR_fit[2]*x_dict['joint'][:, 4]  
-        
-        #y_dict['joint'] = dx_scale.view(-1, 1)*torch.tanh(y_dict['joint']) # dx, dy are in the range [-1, 1]
-        y_dict['joint'] = torch.tanh(y_dict['joint'])
+
+
+        y_dict['joint'] = torch.tanh(y_dict['joint'])    # dx, dy are in the range [-1, 1]
 
         area = torch.tanh(y_dict['grain'][:, 0])/self.scaling['grain'] + x_dict['grain'][:, 3] # darea + area_old is positive  
         y_dict.update({'grain_area': area })

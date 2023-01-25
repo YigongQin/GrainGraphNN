@@ -858,54 +858,7 @@ if __name__ == '__main__':
                         traj = dill.load(inp)
                     except:
                         raise EOFError
-            
-            success = 0
-            
-            traj_copy = copy.deepcopy(traj)
-            
-            for snapshot in range(0, traj.frames-args.span, args.span//2):
-                """
-                training data: snapshot -> snapshot + args.span
-                whether data is useful depends on both 
-                <1> regression part:
-                    grain exists at snapshot
-                    triple junction exists at both (shift only)
-                    
-                <2> classification part:
-                    edge exists at both (label 0)
-                    edge switching (label 1)
-                    unknown (mask out)
-                    
-                """
-                print('\n')
-                
-                if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
-                    if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
-                        print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
-                        continue
-                    
-                    if ( args.level == 2 ) \
-                    or ( args.level == 1 and len(traj.grain_events[snapshot+args.span])==0 ) \
-                    or ( args.level == 0 and len(traj.grain_events[snapshot+args.span])==0 and \
-                                             len(traj.edge_events[snapshot+args.span])==0 ):   
-                        
-                        print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
-                        hg = traj.states[snapshot]
-                        hg.span = args.span
-                        event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
-                        hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
-                                         nxt = traj.states[snapshot+args.span], event_list = event_list)
-                       # train_samples.append(hg)
-                        
-                        success += 1
-                else:
-                    print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
-       
 
-        
-            print('sucess cases: ', success)
-        
-       
             G = str(int(10*traj.physical_params['G']))
             R = str(int(10*traj.physical_params['R']))
             edgeE = str(len(set.union(*traj.edge_events)))
@@ -921,8 +874,8 @@ if __name__ == '__main__':
                     args.span = c
             
             print('calibrated span based on number of events: ' , args.span)
-            traj = traj_copy
 
+            success = 0
             for snapshot in range(0, traj.frames-args.span, args.span//2):
                 print('\n')
                 
@@ -943,7 +896,7 @@ if __name__ == '__main__':
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
                     
-                    
+            print('sucess cases: ', success)        
         
             with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R +\
                       '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:

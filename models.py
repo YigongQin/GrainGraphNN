@@ -437,9 +437,9 @@ class GrainNN_classifier(torch.nn.Module):
             
         else:
             
-            self.gclstm_encoder = GC(self.in_channels_dict, self.out_channels,\
+            self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
                                             self.num_layer, self.metadata, self.device)
-            self.gclstm_decoder = GC(self.in_channels_dict, self.out_channels, \
+            self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                             self.num_layer, self.metadata, self.device)
 
 

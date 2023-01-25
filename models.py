@@ -104,14 +104,14 @@ class GC(nn.Module):
         
 
 
-            h = self.cell_list[layer_idx](x_dict = cur_layer_x, \
+            h, c = self.cell_list[layer_idx](x_dict = cur_layer_x, \
                                              edge_index_dict = edge_index_dict)
 
 
             
             cur_layer_x = h
       
-            last_state_list.append(h) # add [h, c] to current output layer 
+            last_state_list.append([h, c]) # add [h, c] to current output layer 
             
 
         if not self.return_all_layers:

@@ -880,21 +880,24 @@ if __name__ == '__main__':
                 print('\n')
                 
                 if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
-                    if snapshot-args.span<0:
-                          prev = None
-                    elif snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
-                        prev = None
-                    else:
-                        prev = traj.states[snapshot-args.span]
+                    if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
+                        print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+                        continue
+                    
+                    if ( args.level == 2 ) \
+                    or ( args.level == 1 and len(traj.grain_events[snapshot+args.span])==0 ) \
+                    or ( args.level == 0 and len(traj.grain_events[snapshot+args.span])==0 and \
+                                             len(traj.edge_events[snapshot+args.span])==0 ):   
                         
-                    print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
-                    hg = traj.states[snapshot]
-                    hg.span = args.span
-                    event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
-                    hg.form_gradient(prev = prev, nxt = traj.states[snapshot+args.span], event_list = event_list)
-                    
-                    success += 1
-                    
+                        print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
+                        hg = traj.states[snapshot]
+                        hg.span = args.span
+                        event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
+                        hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
+                                         nxt = traj.states[snapshot+args.span], event_list = event_list)
+                       # train_samples.append(hg)
+                        
+                        success += 1
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
        
@@ -924,18 +927,16 @@ if __name__ == '__main__':
                 print('\n')
                 
                 if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
-                    if snapshot-args.span<0:
-                        prev = None
-                    elif snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
-                        prev = None
-                    else:
-                        prev = traj.states[snapshot-args.span]
-                    
+                    if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
+                        print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
+                        continue
+                      
                     print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
                     hg = traj.states[snapshot]
                     hg.span = args.span
                     event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
-                    hg.form_gradient(prev = prev, nxt = traj.states[snapshot+args.span], event_list = event_list)
+                    hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
+                                     nxt = traj.states[snapshot+args.span], event_list = event_list)
                     train_samples.append(hg)
                     
                     success += 1

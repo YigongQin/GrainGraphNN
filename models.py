@@ -81,7 +81,7 @@ class GC(nn.Module):
 
         self.cell_list = nn.ModuleList(cell_list)
 
-    def forward(self, x_dict, edge_index_dict):
+    def forward(self, x_dict, edge_index_dict, edge_attr, hidden_state):
 
        
         """
@@ -95,6 +95,9 @@ class GC(nn.Module):
             * **last_state_list** the same dimension of hidden_states
         
         """
+        
+        if hidden_state is None:
+            hidden_state = self._init_hidden(x_dict)
 
         last_state_list = []
 
@@ -102,11 +105,13 @@ class GC(nn.Module):
         for layer_idx in range(self.num_layers):
             
         
-
+            h, c = hidden_state[layer_idx]
 
             h, c = self.cell_list[layer_idx](x_dict = cur_layer_x, \
-                                             edge_index_dict = edge_index_dict)
-
+                                             edge_index_dict = edge_index_dict,
+                                             edge_attr = edge_attr,
+                                             h_dict = h,
+                                             c_dict = c)
 
             
             cur_layer_x = h
@@ -119,8 +124,17 @@ class GC(nn.Module):
             last_state_list = last_state_list[-1:]
 
         return last_state_list # omit the hidden and cell state at intermediate time
+    
 
-
+    def _init_hidden(self, x_dict):
+        ## init the hidden states for every layer
+        init_states = []
+        for i in range(self.num_layers):
+            h = self.cell_list[i]._set_hidden_state(x_dict, None)
+            c = self.cell_list[i]._set_hidden_state(x_dict, None)
+            init_states.append([h, c])
+        return init_states
+    
     @staticmethod
     def _check_kernel_size_consistency(kernel_size):
         if not (isinstance(kernel_size, tuple) or
@@ -423,9 +437,9 @@ class GrainNN_classifier(torch.nn.Module):
             
         else:
             
-            self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
+            self.gclstm_encoder = GC(self.in_channels_dict, self.out_channels,\
                                             self.num_layer, self.metadata, self.device)
-            self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
+            self.gclstm_decoder = GC(self.in_channels_dict, self.out_channels, \
                                             self.num_layer, self.metadata, self.device)
 
 

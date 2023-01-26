@@ -322,10 +322,23 @@ class LSTM(nn.Module):
         
     def forward(self, x_dict, hidden_state=None):
         
-    
+        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
+             for node_type, dim in self.dim.items()}  
 
-        dx_dict = {node_type: x_dict[node_type][:,-self.seq_len*dim:].view(-1, self.seq_len, dim)
-             for node_type, dim in self.dim.items()}       
+        dx_dict = {}
+        for node_type, dim in self.dim.items():
+            
+            feature_list = []
+            
+            for i in range(dim):
+                dx_i = x_dict[node_type][:,-self.seq_len*dim+i::dim]
+                feature_list.append(torch.flip(dx_i, [1]))
+                
+            dx = torch.stack(feature_list, dim=2)
+            dx_dict.update({node_type:dx})
+
+       # dx_dict = {node_type: x_dict[node_type][:,-self.seq_len*dim:].view(-1, self.seq_len, dim)
+       #      for node_type, dim in self.dim.items()}       
             
         y_dict = {node_type: self.nn[node_type](dx_dict[node_type])[0][:,-1,:]
              for node_type, dim in self.dim.items()}     
@@ -353,8 +366,7 @@ class GrainNN_regressor(nn.Module):
         self.out_win = hyper.out_win
         
         self.device = hyper.device
-      #  self.c = hyper.channel_table 
-
+        self.seq_len = hyper.window
         ## networks
 
         self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
@@ -373,7 +385,8 @@ class GrainNN_regressor(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(linear_outchannels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
         
-        self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device)
+        self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
+                         seq_len = self.seq_len)
         
         self.scaling = {'grain':20, 'joint':5}
 
@@ -393,19 +406,17 @@ class GrainNN_regressor(nn.Module):
                 output channels.
         """        
 
+        if self.history:
+            history_encoded = self.LSTM(x_dict)
+
+
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
-        
-        
-       # for i in range(self.out_win):
             
         hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, edge_attr, hidden_state)
-       # hidden_state = self.gclstm_decoder2(x_dict, edge_index_dict, hidden_state)
-        
+
         h_dict, c_dict = hidden_state[-1]
 
-        
-        history_encoded = self.LSTM(x_dict)
-        
+
         if self.history:
             h_dict = {node_type: torch.cat([h, history_encoded[node_type]], dim=1)
                       for node_type, h in h_dict.items()}

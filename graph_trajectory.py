@@ -812,7 +812,8 @@ if __name__ == '__main__':
     parser.add_argument("--level", type=int, default = 2)
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--regenerate", type=bool, default = True)
+    parser.add_argument("--regenerate", type=bool, default = False)
+    parser.add_argument("--prev", type=int, default = 0)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
     args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
@@ -876,9 +877,11 @@ if __name__ == '__main__':
             print('calibrated span based on number of events: ' , args.span)
 
             success = 0
+            cnt = 0
+            success_list = []
             for snapshot in range(0, traj.frames-args.span, args.span//2):
                 print('\n')
-                
+                cnt += 1
                 if traj.save_frame[snapshot] and traj.save_frame[snapshot+args.span]:
                     if snapshot-args.span>=0 and not traj.save_frame[snapshot-args.span]:
                         print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
@@ -892,11 +895,32 @@ if __name__ == '__main__':
                                      nxt = traj.states[snapshot+args.span], event_list = event_list)
                     train_samples.append(hg)
                     
+                    success_list.append(cnt)
                     success += 1
+                    
                 else:
                     print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
                     
             print('sucess cases: ', success)        
+        
+        
+            for idx, hg in enumerate(train_samples):
+
+                frame = success_list[idx]                
+
+                prev_list = []
+                prev_idx_list = []
+                
+                for i in range(1, args.prev+1):
+                    if frame - i in success_list:
+                        prev_idx = success_list.index(frame-i)
+                        prev_list.append(train_samples[prev_idx])
+                        prev_idx_list.append(frame-i)
+                    else:
+                        prev_list.append(None)
+                        prev_idx_list.append(-1)
+                print('history list for %dth graph'%frame, prev_idx_list)
+                hg.append_history(prev_list)
         
             with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R +\
                       '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:

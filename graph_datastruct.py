@@ -636,20 +636,22 @@ class GrainHeterograph:
         
                                      
         if prev is None:
-            prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
-            prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
+            self.prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
+            self.prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
                     
         else:
-            prev_grad_grain = self.targets_scaling['grain']*\
+            self.prev_grad_grain = self.targets_scaling['grain']*\
                 (self.feature_dicts['grain'][:,3:4] - prev.feature_dicts['grain'][:,3:4]) 
-            prev_grad_joint = self.targets_scaling['joint']*\
+            self.prev_grad_joint = self.targets_scaling['joint']*\
                 self.subtract(self.feature_dicts['joint'][:,:2], prev.feature_dicts['joint'][:,:2], 'prev')
                # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
-        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], self.span/120 + 0*prev_grad_grain[:,:1], prev_grad_grain))
+        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], 
+                                                 self.span/120 + 0*self.prev_grad_grain[:,:1], self.prev_grad_grain))
 
-        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], self.span/120 + 0*prev_grad_joint[:,:1], prev_grad_joint)) 
+        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], 
+                                                 self.span/120 + 0*self.prev_grad_joint[:,:1], self.prev_grad_joint)) 
                 
 
         
@@ -669,6 +671,31 @@ class GrainHeterograph:
         if loc == 'next':
             return b[:short_len,:]-a
 
+
+    @staticmethod
+    def fillup(b, a):
+
+        short_len = len(a)
+        
+        return np.concatenate((a, 0*b[short_len:,:]), axis=0)
+        
+    def append_history(self, prev_list):
+        
+        
+        for prev in prev_list:
+            
+            if prev is None:           
+                prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
+                prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]        
+            else:
+                prev_grad_grain = self.fillup(self.prev_grad_grain, prev.prev_grad_grain)
+                prev_grad_joint = self.fillup(self.prev_grad_joint, prev.prev_grad_joint)
+            
+            self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
+            self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint))                                       
+            
+        return
+    
 
 if __name__ == '__main__':
     

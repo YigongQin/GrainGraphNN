@@ -48,7 +48,6 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_input_gate_parameters_and_layers(self):
         self.conv_i = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
-                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -59,7 +58,6 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_forget_gate_parameters_and_layers(self):
         self.conv_f = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
-                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_f = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -70,7 +68,6 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_cell_state_parameters_and_layers(self):
         self.conv_c = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
-                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_c = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
@@ -81,7 +78,6 @@ class HeteroPGCLSTM(torch.nn.Module):
     def _create_output_gate_parameters_and_layers(self):
         self.conv_o = HeteroConv({edge_type: PeriodConv(in_channels=(-1, -1),
                                                       out_channels=self.out_channels,
-                                                      edge_dim=1*(edge_type==('joint', 'connect', 'joint')),
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
         self.W_o = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))

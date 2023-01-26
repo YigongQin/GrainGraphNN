@@ -354,7 +354,7 @@ class GrainNN_regressor(nn.Module):
             hyper: hyper-parameter class
     """
     
-    def __init__(self, hyper):
+    def __init__(self, hyper, history=True):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -379,7 +379,7 @@ class GrainNN_regressor(nn.Module):
       #  self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
       #                                  self.num_layer, self.metadata, self.device)
 
-        self.history = True
+        self.history = history
         linear_outchannels = 2*self.out_channels if self.history else self.out_channels
         
         self.linear = nn.ModuleDict({node_type: nn.Linear(linear_outchannels, len(targets))

@@ -380,13 +380,17 @@ class GrainNN_regressor(nn.Module):
       #                                  self.num_layer, self.metadata, self.device)
 
         self.history = history
+        if self.history:
+            self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
+                             seq_len = self.seq_len)    
+            
+            
         linear_outchannels = 2*self.out_channels if self.history else self.out_channels
         
         self.linear = nn.ModuleDict({node_type: nn.Linear(linear_outchannels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
         
-        self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
-                         seq_len = self.seq_len)
+
         
         self.scaling = {'grain':20, 'joint':5}
 

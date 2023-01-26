@@ -812,7 +812,7 @@ if __name__ == '__main__':
     parser.add_argument("--level", type=int, default = 2)
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--regenerate", type=bool, default = False)
+    parser.add_argument("--regenerate", type=bool, default = True)
     parser.add_argument("--prev", type=int, default = 0)
     args = parser.parse_args()
     args.train_dir = args.train_dir + 'level' + str(args.level) +'/'

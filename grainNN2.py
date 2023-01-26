@@ -185,17 +185,23 @@ if __name__=='__main__':
     parser.add_argument("--model_dir", type=str, default='./model/')
     parser.add_argument("--model_type", type=str, default='regressor')
     parser.add_argument("--use_sample", type=str, default='all')
-    
-    parser.add_argument("--plot_flag", type=bool, default=False)
-    parser.add_argument("--noPDE", type=bool, default=True)
-    parser.add_argument("--transfer", type=bool, default=True)
     parser.add_argument("--regressor_id", type=int, default=14)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
-    parser.add_argument("--edge_attr", type=bool, default=True)
-    parser.add_argument("--history", type=bool, default=True)
+
     
-    parser.add_argument("--models", type=tuple, default=(0, 0))
+    parser.add_argument('--history', dest='history', action='store_true')
+    parser.add_argument('--no-history', dest='history', action='store_false')
+    parser.set_defaults(history=True)
+
+    parser.add_argument('--transfer', dest='transfer', action='store_true')
+    parser.add_argument('--no-transfer', dest='transfer', action='store_false')
+    parser.set_defaults(transfer=True)
+    
+
+
+
+    
     args = parser.parse_args()
     
 
@@ -221,8 +227,6 @@ if __name__=='__main__':
     print('3D grain microstructure evolution')
     print('the model id is: ', model_id)
     print('device: ', args.device)
-    print('no PDE solver required, input is random: ', args.noPDE)
-    print('plot GrainNN verus PDE pointwise error: ', args.plot_flag)
     print('\n')
     
 

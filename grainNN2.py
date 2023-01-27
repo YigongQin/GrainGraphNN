@@ -183,6 +183,7 @@ if __name__=='__main__':
     parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
+    parser.add_argument("--prefix", type=str, default='')
     parser.add_argument("--model_type", type=str, default='regressor')
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--regressor_id", type=int, default=14)
@@ -408,7 +409,7 @@ if __name__=='__main__':
             
     if not os.path.exists(args.model_dir):
         os.makedirs(args.model_dir)                
-    torch.save(model.state_dict(), args.model_dir + args.model_type + str(model_id))
+    torch.save(model.state_dict(), args.model_dir + args.prefix + args.model_type + str(model_id))
 
 
 

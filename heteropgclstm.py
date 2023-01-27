@@ -50,8 +50,6 @@ class HeteroPGCLSTM(torch.nn.Module):
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
-        self.W_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
-                    for node_type, in_channels in self.in_channels_dict.items()})
         self.b_i = nn.ParameterDict({node_type: Parameter(torch.Tensor(1, self.out_channels))
                     for node_type in self.in_channels_dict})
 
@@ -60,8 +58,7 @@ class HeteroPGCLSTM(torch.nn.Module):
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
-        self.W_f = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
-                    for node_type, in_channels in self.in_channels_dict.items()})
+
         self.b_f = nn.ParameterDict({node_type: Parameter(torch.Tensor(1, self.out_channels))
                     for node_type in self.in_channels_dict})
 
@@ -70,8 +67,7 @@ class HeteroPGCLSTM(torch.nn.Module):
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
-        self.W_c = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
-                    for node_type, in_channels in self.in_channels_dict.items()})
+
         self.b_c = nn.ParameterDict({node_type: Parameter(torch.Tensor(1, self.out_channels))
                     for node_type in self.in_channels_dict})
 
@@ -80,8 +76,7 @@ class HeteroPGCLSTM(torch.nn.Module):
                                                       out_channels=self.out_channels,
                                                       bias=self.bias) for edge_type in self.metadata[1]})
 
-        self.W_o = nn.ParameterDict({node_type: Parameter(torch.Tensor(in_channels, self.out_channels))
-                    for node_type, in_channels in self.in_channels_dict.items()})
+
         self.b_o = nn.ParameterDict({node_type: Parameter(torch.Tensor(1, self.out_channels))
                     for node_type in self.in_channels_dict})
 
@@ -92,14 +87,7 @@ class HeteroPGCLSTM(torch.nn.Module):
         self._create_output_gate_parameters_and_layers()
 
     def _set_parameters(self):
-        for key in self.W_i:
-            glorot(self.W_i[key])
-        for key in self.W_f:
-            glorot(self.W_f[key])
-        for key in self.W_c:
-            glorot(self.W_c[key])
-        for key in self.W_o:
-            glorot(self.W_o[key])
+
         for key in self.b_i:
             glorot(self.b_i[key])
         for key in self.b_f:

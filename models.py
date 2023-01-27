@@ -475,7 +475,7 @@ class GrainNN_regressor(nn.Module):
 
 class GrainNN_classifier(torch.nn.Module):
 
-    def __init__(self, hyper, regressor=None):
+    def __init__(self, hyper, regressor=None, history=True):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -486,7 +486,9 @@ class GrainNN_classifier(torch.nn.Module):
         self.metadata = hyper.metadata  # heterogeneous graph structure
         self.out_win = hyper.out_win
         self.device = hyper.device
-
+        self.history = history
+        self.dim = {('grain', 'push', 'joint'):1}
+        
         ## networks
         if regressor:
             self.gclstm_encoder = regressor.gclstm_encoder
@@ -499,17 +501,26 @@ class GrainNN_classifier(torch.nn.Module):
             self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                             self.num_layer, self.metadata, self.device)
 
-
-        self.lin1 = nn.Linear(2*self.out_channels, 2) # predict dx, dy
-        self.lin2 = nn.Linear(2*self.out_channels, 1) # predict probability
+        if self.history:
+            self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
+                             self.dim, seq_len = self.seq_len)
+            
+        linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels 
+        
+        self.lin1 = nn.Linear(linear_outchannels, 2) # predict dx, dy
+        self.lin2 = nn.Linear(linear_outchannels, 1) # predict probability
         self.threshold = 1
         
-    def forward(self, x_dict, edge_index_dict):    
+    def forward(self, x_dict, edge_index_dict, edge_attr):   
     
+        if self.history:
+            history_encoded = self.LSTM(edge_attr['joint', 'connect', 'joint'])
+        
+        edge_attr['joint', 'connect', 'joint'] = edge_attr['joint', 'connect', 'joint'][:, :1]
 
-        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, None) # all layers of [h, c]
+        hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
             
-        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, hidden_state)
+        hidden_state = self.gclstm_decoder(x_dict, edge_index_dict, edge_attr, hidden_state)
         
         h_dict, c_dict = hidden_state[-1]
         
@@ -529,7 +540,9 @@ class GrainNN_classifier(torch.nn.Module):
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
 
         pair_feature = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
-  
+        
+        if self.history:
+            pair_feature = torch.cat([pair_feature, history_encoded], dim = -1)
            
         y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 

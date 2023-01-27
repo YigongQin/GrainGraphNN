@@ -815,8 +815,8 @@ if __name__ == '__main__':
     parser.add_argument("--regenerate", type=bool, default = True)
     parser.add_argument("--prev", type=int, default = 0)
     args = parser.parse_args()
-    args.train_dir = args.train_dir + 'level' + str(args.level) +'/'
-    args.test_dir = args.test_dir + 'level' + str(args.level) +'/'
+
+
     """
     this script generates graph trajectory objects and training/testing data 
     the pde simulaion data is in rawdat_dir

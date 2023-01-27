@@ -304,17 +304,18 @@ class SeqGCLSTM(nn.Module):
 class LSTM(nn.Module):
     
     def __init__(self, in_channels_dict, out_channels, num_layers, device,
-                 seq_len = 1, bias = True, return_all_layers = False):
+                 dim, seq_len = 1, bias = True, return_all_layers = False):
         super().__init__()
         
         self.in_channels_dict = in_channels_dict
         self.out_channels = out_channels
         self.num_layers = num_layers
         self.device = device
+        self.dim = dim
         self.seq_len = seq_len
         self.bias = bias
         self.return_all_layers = return_all_layers        
-        self.dim = {'joint':2, 'grain':1}
+        
         
         self.nn = nn.ModuleDict({node_type: nn.LSTM(input_size=dim, hidden_size=self.out_channels, num_layers=2, batch_first=True) 
                         for node_type, dim in self.dim.items()}) 
@@ -322,8 +323,7 @@ class LSTM(nn.Module):
         
     def forward(self, x_dict, hidden_state=None):
         
-        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
-             for node_type, dim in self.dim.items()}  
+
 
         dx_dict = {}
         for node_type, dim in self.dim.items():
@@ -378,11 +378,11 @@ class GrainNN_regressor(nn.Module):
     
       #  self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
       #                                  self.num_layer, self.metadata, self.device)
-
+        self.dim = {'joint':2, 'grain':1}
         self.history = history
         if self.history:
             self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
-                             seq_len = self.seq_len)    
+                             self.dim, seq_len = self.seq_len)    
             
             
         linear_outchannels = 2*self.out_channels if self.history else self.out_channels
@@ -413,6 +413,8 @@ class GrainNN_regressor(nn.Module):
         if self.history:
             history_encoded = self.LSTM(x_dict)
 
+        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
+             for node_type, dim in self.dim.items()}  
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
             

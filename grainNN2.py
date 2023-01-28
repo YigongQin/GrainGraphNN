@@ -45,6 +45,13 @@ def criterion(data, pred, mask):
         
         classifier = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(hp.weight))
         
+        '''dx, dy for event'''
+        positive = torch.where(y==1)
+        
+        
+        regress_part = torch.mean()
+        
+        
         return classifier(z, y.type(torch.FloatTensor))
     
 

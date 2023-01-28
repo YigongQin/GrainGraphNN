@@ -186,7 +186,7 @@ if __name__=='__main__':
     parser.add_argument("--prefix", type=str, default='')
     parser.add_argument("--model_type", type=str, default='regressor')
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--regressor_id", type=int, default=14)
+    parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
 
@@ -353,7 +353,7 @@ if __name__=='__main__':
             hp_r.device = device
             hp_r.metadata = heteroData.metadata()
             pretrained_model = GrainNN_regressor(hp_r, args.history)
-            pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id)))
+            pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id), map_location=args.device))
             pretrained_model.eval()
             print('transfered learned parameters from regressor')
             model = GrainNN_classifier(hp, pretrained_model)

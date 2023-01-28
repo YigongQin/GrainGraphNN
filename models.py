@@ -475,7 +475,7 @@ class GrainNN_regressor(nn.Module):
 
 class GrainNN_classifier(torch.nn.Module):
 
-    def __init__(self, hyper, regressor=None, history=True):
+    def __init__(self, hyper, regressor=None, history=False):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -485,10 +485,11 @@ class GrainNN_classifier(torch.nn.Module):
         self.num_layer = hyper.layers
         self.metadata = hyper.metadata  # heterogeneous graph structure
         self.out_win = hyper.out_win
+        self.seq_len = hyper.window
         self.device = hyper.device
         self.history = history
-        self.dim = {('grain', 'push', 'joint'):1}
-        
+        # self.dim = {('grain', 'push', 'joint'):1}
+        self.dim = {'joint':2, 'grain':1}
         ## networks
         if regressor:
             self.gclstm_encoder = regressor.gclstm_encoder
@@ -507,8 +508,8 @@ class GrainNN_classifier(torch.nn.Module):
             
         linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels 
         
-        self.lin1 = nn.Linear(linear_outchannels, 2) # predict dx, dy
-        self.lin2 = nn.Linear(linear_outchannels, 1) # predict probability
+        self.lin1 = nn.Linear(linear_outchannels+1, 2) # predict dx, dy
+        self.lin2 = nn.Linear(linear_outchannels+1, 1) # predict probability
         self.threshold = 1
         
     def forward(self, x_dict, edge_index_dict, edge_attr):   
@@ -516,7 +517,9 @@ class GrainNN_classifier(torch.nn.Module):
         if self.history:
             history_encoded = self.LSTM(edge_attr['joint', 'connect', 'joint'])
         
-        edge_attr['joint', 'connect', 'joint'] = edge_attr['joint', 'connect', 'joint'][:, :1]
+        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
+             for node_type, dim in self.dim.items()}
+# edge_attr['joint', 'connect', 'joint'] = edge_attr['joint', 'connect', 'joint'][:, :1]
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
             
@@ -539,7 +542,7 @@ class GrainNN_classifier(torch.nn.Module):
 
         # concatenate features [h_i, h_j], size (|Ejj|, 2*Dh)
 
-        pair_feature = torch.cat([joint_feature[src], joint_feature[dst]], dim=-1)
+        pair_feature = torch.cat([joint_feature[src], joint_feature[dst], edge_attr['joint', 'connect', 'joint']], dim=-1)
         
         if self.history:
             pair_feature = torch.cat([pair_feature, history_encoded], dim = -1)

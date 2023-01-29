@@ -67,6 +67,8 @@ class feature_metric:
         if self.model_type == 'classifier':
          #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
             self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
+            self.plist = [float(i) for i in self.plist]
+            self.rlist = [float(i) for i in self.rlist]
            # print('Validation AUC:{:.6f}'.format(self.test_auc)) 
            # self.metric_list.append(float(self.test_auc))
            # self.test_label, self.test_prob = [], []
@@ -86,6 +88,8 @@ class feature_metric:
             self.acc_dicts['grain1err'] = 0            
             
             self.test_auc, self.plist, self.rlist= grain_class_acc(self.test_prob, self.test_label)
+            self.plist = [float(i) for i in self.plist]
+            self.rlist = [float(i) for i in self.rlist]
             print('grain event: precision ', self.plist, ', recall: ', self.rlist)
            
         print('Validation AUC:{:.6f}'.format(self.test_auc)) 

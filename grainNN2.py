@@ -373,6 +373,10 @@ if __name__=='__main__':
     edge = train.edge
     end = time.time()
     print('training time', end - start)
+
+    if not os.path.exists(args.model_dir):
+        os.makedirs(args.model_dir)                
+    torch.save(model.state_dict(), args.model_dir + args.prefix + args.model_type + str(model_id))
     
     
     fig, ax = plt.subplots() 
@@ -414,9 +418,7 @@ if __name__=='__main__':
         for i in range(len(train_loss_list)):
             f.write("%d  %f  %f\n"%(i, train_loss_list[i], test_loss_list[i]))
             
-    if not os.path.exists(args.model_dir):
-        os.makedirs(args.model_dir)                
-    torch.save(model.state_dict(), args.model_dir + args.prefix + args.model_type + str(model_id))
+
 
 
 

@@ -200,7 +200,7 @@ if __name__=='__main__':
     
     parser.add_argument('--history', dest='history', action='store_true')
     parser.add_argument('--no-history', dest='history', action='store_false')
-    parser.set_defaults(history=True)
+    parser.set_defaults(history=False)
 
     parser.add_argument('--transfer', dest='transfer', action='store_true')
     parser.add_argument('--no-transfer', dest='transfer', action='store_false')

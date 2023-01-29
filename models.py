@@ -8,6 +8,7 @@ Created on Mon Sep 27 11:34:53 2021
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import Parameter
 from heteropgclstm import HeteroPGCLSTM, HeteroPGC
 from heterogclstm import HeteroGCLSTM, HeteroGC
 from graph_datastruct import periodic_move_p
@@ -354,7 +355,7 @@ class GrainNN_regressor(nn.Module):
             hyper: hyper-parameter class
     """
     
-    def __init__(self, hyper, history=True):
+    def __init__(self, hyper, history=False):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -490,10 +491,13 @@ class GrainNN_classifier(torch.nn.Module):
         self.history = history
         # self.dim = {('grain', 'push', 'joint'):1}
         self.dim = {'joint':2, 'grain':1}
+        
+        
         ## networks
         if regressor:
             self.gclstm_encoder = regressor.gclstm_encoder
             self.gclstm_decoder = regressor.gclstm_decoder
+            self.lin1 = regressor.linear['joint']
             
         else:
             
@@ -501,16 +505,16 @@ class GrainNN_classifier(torch.nn.Module):
                                             self.num_layer, self.metadata, self.device)
             self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                             self.num_layer, self.metadata, self.device)
-
+            self.lin1 = nn.Linear(self.out_channels, 2) # predict dx, dy
+            
         if self.history:
             self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
                              self.dim, seq_len = self.seq_len)
             
-        linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels 
-        
-        self.lin1 = nn.Linear(linear_outchannels+1, 2) # predict dx, dy
+         
+        linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels
         self.lin2 = nn.Linear(linear_outchannels+1, 1) # predict probability
-        self.threshold = 1
+        self.threshold = Parameter(torch.tensor(1.0))
         
     def forward(self, x_dict, edge_index_dict, edge_attr):   
     
@@ -549,7 +553,7 @@ class GrainNN_classifier(torch.nn.Module):
            
         y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 
-        y_dict['edge_rotation'] = torch.sigmoid(self.lin1(pair_feature)) - 0.5
+        y_dict['edge_rotation'] = torch.tanh(self.lin1(joint_feature)) 
 
         return y_dict
 

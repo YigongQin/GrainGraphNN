@@ -52,8 +52,8 @@ def criterion(data, pred, mask):
       #  regress_part = torch.mean()
         
         
-        return classifier(z, y.type(torch.FloatTensor))
-    
+      #  return classifier(z, y.type(torch.FloatTensor))
+        return classifier(z, y.float()) 
 
 
 def train(model, train_loader, test_loader):

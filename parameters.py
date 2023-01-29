@@ -46,7 +46,7 @@ def regressor(model_id):
 
 
 
-    param_dict.update({'window':1, 'out_win':1, 'weight_decay':0, 'layers':1, \
+    param_dict.update({'window':3, 'out_win':1, 'weight_decay':0, 'layers':1, \
                        'kernel_size':(3,), 'epoch':50, 'bias':True, 'model_list':[0]})
 
 
@@ -96,9 +96,9 @@ def classifier(model_id):
 
 def classifier_transfered(model_id):
 
-    hp_grid = {'weight':[1, 2],\
-               'batch_size':[8, 16, 32],\
-               'lr':[100e-4, 25e-4, 50e-4, 200e-4]}
+    hp_grid = {'weight':[1],\
+               'batch_size':[32],\
+               'lr':[100e-4, 25e-4, 5e-4]}
                    
     """    
     hp_grid = {'lr_1':[0.01, 0.1, 1],\
@@ -127,8 +127,8 @@ def classifier_transfered(model_id):
        
     param_dict['frames'] = 13
 
-    param_dict.update({'window':1, 'out_win':1, 'layers':1,  'weight_decay':0, 'decay_step':10, \
-                       'layer_size':48, 'kernel_size':(3,), 'epoch':50, 'bias':True, 'model_list':[0]})
+    param_dict.update({'window':3, 'out_win':1, 'layers':1,  'weight_decay':0, 'decay_step':10, \
+                       'layer_size':96, 'kernel_size':(3,), 'epoch':50, 'bias':True, 'model_list':[0]})
 
     param_dict.update({'lr_1':1, 'lr_2':1}) 
     return Param(param_dict)

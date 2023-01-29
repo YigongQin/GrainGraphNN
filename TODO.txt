@@ -1,0 +1,4 @@
+1. Fix initial grain distribution  
+2. Rerun graph generation (bug with 0 grain event)  
+3. clean file heteropgclstm
+4. remove history

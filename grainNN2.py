@@ -20,7 +20,7 @@ from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
 from QoI import data_analysis
 
-def criterion(data, pred, mask):
+def criterion(data, pred, mask, edge_dict):
    # print(torch.log(pred['edge_event']))
    # print(data['edge_event'])
     
@@ -39,6 +39,10 @@ def criterion(data, pred, mask):
         z = pred['edge_event']
         y = data['edge_event']
         
+        edge = edge_dict['joint', 'connect', 'joint'][0]
+        positive_y = torch.where(y==1)
+        positive_x = edge[positive_y]
+        
         qualified_y = torch.where(y>-1)
         y = y[qualified_y]
         z = z[qualified_y]
@@ -47,13 +51,12 @@ def criterion(data, pred, mask):
         
         '''dx, dy for event'''
       #  positive = torch.where(y==1)
+        dx_p = pred['edge_rotation'][positive_x,:]
+        dx_d = data['joint'][positive_x,:]
         
+        regress_part = torch.mean((dx_p-dx_d)**2)
         
-      #  regress_part = torch.mean()
-        
-        
-      #  return classifier(z, y.type(torch.FloatTensor))
-        return classifier(z, y.float()) 
+        return classifier(z, y.float()) + regress_part
 
 
 def train(model, train_loader, test_loader):
@@ -88,7 +91,7 @@ def train(model, train_loader, test_loader):
         count += 1 #data.batch
         data.to(device)
         pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-        train_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+        train_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict)) 
     train_loss/=count
 
     test_loss, count = 0, 0
@@ -98,7 +101,7 @@ def train(model, train_loader, test_loader):
             count += 1
             data.to(device)
             pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-            test_loss += float(criterion(data.y_dict, pred, data['mask']))  
+            test_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict))  
             
             metric.record(data.y_dict, pred, data['mask'], 0)
    # if args.model_type=='regressor':
@@ -132,7 +135,7 @@ def train(model, train_loader, test_loader):
             
             pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
          
-            loss = criterion(data.y_dict, pred, data['mask'])
+            loss = criterion(data.y_dict, pred, data['mask'], data.edge_index_dict)
              
             optimizer.zero_grad()
             loss.backward()
@@ -152,7 +155,7 @@ def train(model, train_loader, test_loader):
                 count += 1
                 data.to(device)
                 pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-                test_loss += float(criterion(data.y_dict, pred, data['mask'])) 
+                test_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict)) 
                 metric.record(data.y_dict, pred, data['mask'], epoch)
                 
   

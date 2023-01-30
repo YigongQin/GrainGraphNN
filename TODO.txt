@@ -3,5 +3,6 @@
 3. clean file heteropgclstm
 4. remove history
 5. history of edges
-6. add span
+6. add span to graph-data file
 7. improve edge rotation
+8. edge attr necessary?

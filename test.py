@@ -118,7 +118,10 @@ if __name__=='__main__':
     Rmodel.threshold = 2e-4 # from P-R plot
     Cmodel.threshold = 0.4
     
-    
+    if device=='cuda':
+        print('use %d GPUs'%torch.cuda.device_count())
+        Rmodel.cuda()  
+        Cmodel.cuda()
     
     print('==========  architecture  ========')
     print('type -- multilayer heterogeous GCLSTM')
@@ -160,6 +163,9 @@ if __name__=='__main__':
 
     traj_list = sorted(glob.glob(args.truth_dir + 'traj*'))
     for case, data in enumerate(test_tensor):
+        
+        data.to(device)
+        
         print('case', datasets[case], traj_list[case])
      #   print(pred['joint'])
       #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)

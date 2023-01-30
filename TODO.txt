@@ -3,3 +3,5 @@
 3. clean file heteropgclstm
 4. remove history
 5. history of edges
+6. add span
+7. improve edge rotation

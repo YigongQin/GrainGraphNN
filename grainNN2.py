@@ -379,7 +379,7 @@ if __name__=='__main__':
 
     if not os.path.exists(args.model_dir):
         os.makedirs(args.model_dir)                
-    torch.save(model.state_dict(), args.model_dir + args.prefix + args.model_type + str(model_id))
+    torch.save(model.state_dict(), args.model_dir + args.prefix + args.model_type + str(model_id) + '.pt')
     
     
     fig, ax = plt.subplots() 

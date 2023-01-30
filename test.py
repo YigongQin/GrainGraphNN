@@ -27,9 +27,9 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./sameGR/level2/')
-    parser.add_argument("--regressor_id", type=int, default=14)
-    parser.add_argument("--classifier_id", type=int, default=8)
+    parser.add_argument("--truth_dir", type=str, default='./test/')
+    parser.add_argument("--regressor_id", type=int, default=0)
+    parser.add_argument("--classifier_id", type=int, default=0)
     parser.add_argument("--use_sample", type=str, default='all')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
@@ -61,18 +61,22 @@ if __name__=='__main__':
     print('************ setup data ***********')
 
         
-    test_list = []
     
-    with open('dataset_test.pkl', 'rb') as inp:  
-        try:
-            test_list = dill.load(inp)
-        except:
-            raise EOFError
+    
             
-    
+    datasets = sorted(glob.glob(args.truth_dir + 'case*'))
+
+    test_list = []
+    for case in datasets:
+        with open(case, 'rb') as inp:  
+            try:
+                test_list = test_list + [dill.load(inp)[0]]
+            except:
+                raise EOFError
+            
     sample = test_list[0]
 
-    if args.use_sample !='all':
+    if args.use_sample != 'all':
         
         test_list = test_list[:int(args.use_sample)]
           
@@ -103,16 +107,16 @@ if __name__=='__main__':
 
 
     Rmodel = GrainNN_regressor(hp)
-    Rmodel.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.regressor_id)))
+    Rmodel.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.regressor_id), map_location=args.device))
     Rmodel.eval() 
     
     
     Cmodel = GrainNN_classifier(hpc, Rmodel)
-    Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id)))
+    Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id), map_location=args.device))
     Cmodel.eval() 
     
-    Rmodel.threshold = 1e-4
-    Cmodel.threshold = 0.5
+    Rmodel.threshold = 2e-4 # from P-R plot
+    Cmodel.threshold = 0.4
     
     
     
@@ -127,6 +131,7 @@ if __name__=='__main__':
         
     print('regressor:')
     print('number of parameters: ')
+    print('threshold: ', Rmodel.threshold)
     print('classifier:')
     print('number of parameters: ')
     print('threshold: ', Cmodel.threshold)
@@ -155,7 +160,7 @@ if __name__=='__main__':
 
     traj_list = sorted(glob.glob(args.truth_dir + 'traj*'))
     for case, data in enumerate(test_tensor):
-        print('case', traj_list[case])
+        print('case', datasets[case], traj_list[case])
      #   print(pred['joint'])
       #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)
        # traj.load_trajectory(rawdat_dir = '.')
@@ -165,17 +170,25 @@ if __name__=='__main__':
                 traj = dill.load(inp)
             except:
                 raise EOFError
-
-
-        for frame in range(1, 6, 121):
+        
+        st_idx = datasets[case].find('span') + 4
+        end_idx = datasets[case].find('.')
+        span = int(datasets[case][st_idx:-4])
+        print('expected span', span)
+        for frame in range(span, 121, span):
+            
+            print('================================')
+            print('prediction progress %f/1.0'%(frame/120))
+           # print(data.x_dict['joint'][:,5])
             """
             <1> combine two predictions
                 a. Rmodel: joint displacement, grain area change & volume
                 b. Cmodel: edge prob, dx of new verts
             """            
-
-            pred = Rmodel(data.x_dict, data.edge_index_dict)
-            pred_c = Cmodel(data.x_dict, data.edge_index_dict)
+            
+            print(data.x_dict['grain'][:,3])
+            pred = Rmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
+            pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
             pred.update(pred_c)
             
             """
@@ -189,8 +202,11 @@ if __name__=='__main__':
             
             """            
             
-            pred['grain_event'] = torch.where(pred['grain_area']<Rmodel.threshold)[0]
-            Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask'])
+            print(pred['grain_area'])
+           # pred['grain_event'] = torch.where(pred['grain_area']<Rmodel.threshold)[0]
+           # pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
+           # print('grain event: ', pred['grain_event'])
+#            Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask'])
 
  
             """

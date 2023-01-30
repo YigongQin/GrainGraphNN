@@ -128,7 +128,7 @@ def classifier_transfered(model_id):
     param_dict['frames'] = 13
 
     param_dict.update({'window':3, 'out_win':1, 'layers':1,  'weight_decay':0, 'decay_step':10, \
-                       'layer_size':96, 'kernel_size':(3,), 'epoch':50, 'bias':True, 'model_list':[0]})
+                       'layer_size':96, 'kernel_size':(3,), 'epoch':20, 'bias':True, 'model_list':[0]})
 
     param_dict.update({'lr_1':1, 'lr_2':1}) 
     return Param(param_dict)

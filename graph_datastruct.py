@@ -528,8 +528,8 @@ class graph:
                 
 class GrainHeterograph:
     def __init__(self):
-        self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
-                         'joint':['x', 'y', 'z', 'G', 'R']}
+        self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'span'],
+                         'joint':['x', 'y', 'z', 'G', 'R', 'span']}
         self.mask = {}
         
         self.features_grad = {'grain':['darea'], 'joint':['dx', 'dy']}
@@ -651,17 +651,22 @@ class GrainHeterograph:
                # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
-        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], 
-                                                 self.span/120 + 0*self.prev_grad_grain[:,:1], self.prev_grad_grain))
+        
+        
+        
+        
+        self.feature_dicts['grain'][:, len(self.features['grain'])-1] = self.span/120 
+        self.feature_dicts['joint'][:, len(self.features['joint'])-1] = self.span/120
+                                                 
+        self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], self.prev_grad_grain))
 
-        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], 
-                                                 self.span/120 + 0*self.prev_grad_joint[:,:1], self.prev_grad_joint)) 
+        self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], self.prev_grad_joint)) 
                 
 
         
         for nodes, features in self.features.items():
             self.features[nodes] = self.features[nodes] + self.features_grad[nodes]  
-            assert len(self.features[nodes]) + 1 == self.feature_dicts[nodes].shape[1]
+            assert len(self.features[nodes]) == self.feature_dicts[nodes].shape[1]
 
 
     @staticmethod

@@ -414,8 +414,8 @@ class GrainNN_regressor(nn.Module):
         if self.history:
             history_encoded = self.LSTM(x_dict)
 
-        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
-             for node_type, dim in self.dim.items()}  
+      #  x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
+      #       for node_type, dim in self.dim.items()}  
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]
             
@@ -521,8 +521,8 @@ class GrainNN_classifier(torch.nn.Module):
         if self.history:
             history_encoded = self.LSTM(edge_attr['joint', 'connect', 'joint'])
         
-        x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
-             for node_type, dim in self.dim.items()}
+      #  x_dict = {node_type: x_dict[node_type][:, :-(self.seq_len-1)*dim]
+      #       for node_type, dim in self.dim.items()}
 # edge_attr['joint', 'connect', 'joint'] = edge_attr['joint', 'connect', 'joint'][:, :1]
 
         hidden_state = self.gclstm_encoder(x_dict, edge_index_dict, edge_attr, None) # all layers of [h, c]

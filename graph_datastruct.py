@@ -592,11 +592,15 @@ class GrainHeterograph:
                       
             self.gradient_max = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
                                    'grain':np.max(np.absolute(self.target_dicts['grain']))}   
-                
-            self.gradient_scale = {'joint':np.mean(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
+            
+            gradscale = np.absolute(self.mask['joint']*self.target_dicts['joint'])
+            gradscale = gradscale[gradscale>0]
+            
+            self.gradient_scale = {'joint':np.mean(gradscale),\
                                    'grain':np.mean(np.absolute(self.target_dicts['grain']))}     
                 
             print('maximum gradient', self.gradient_max)
+            print('average gradient', self.gradient_scale)
             
             assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)
@@ -687,18 +691,18 @@ class GrainHeterograph:
             if prev is None:           
                 prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
                 prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]  
-                prev_edge_len = 0*self.edge_weight_dicts[self.edge_type[2]]
+            #    prev_edge_len = 0*self.edge_weight_dicts[self.edge_type[2]][:,:1]
             else:
                 prev_grad_grain = self.fillup(self.prev_grad_grain, prev.prev_grad_grain)
                 prev_grad_joint = self.fillup(self.prev_grad_joint, prev.prev_grad_joint)
-                prev_edge_len = self.fillup(self.edge_weight_dicts[self.edge_type[2]][:,:1],
-                                            prev.edge_weight_dicts[self.edge_type[2]][:,:1])
+            #    prev_edge_len = self.fillup(self.edge_weight_dicts[self.edge_type[2]][:,:1],
+            #                                prev.edge_weight_dicts[self.edge_type[2]][:,:1])
             
             self.feature_dicts['grain'] = np.hstack((self.feature_dicts['grain'], prev_grad_grain))
             self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], prev_grad_joint))                                       
             
-            self.edge_weight_dicts[self.edge_type[2]] = np.hstack((self.edge_weight_dicts[self.edge_type[2]], 
-                                                                   prev_edge_len))   
+         #   self.edge_weight_dicts[self.edge_type[2]] = np.hstack((self.edge_weight_dicts[self.edge_type[2]], 
+         #                                                          prev_edge_len))   
             
         return
     

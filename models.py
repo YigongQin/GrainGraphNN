@@ -459,17 +459,17 @@ class GrainNN_regressor(nn.Module):
 
 
     
-    @staticmethod
-    def update(x_dict, y_dict):
+
+    def update(self, x_dict, y_dict):
         
         # features
-        x_dict['joint'][:, :2]  += y_dict['joint']
-        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]
+        x_dict['joint'][:, :2]  += y_dict['joint']/self.scaling['joint']
+        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]/self.scaling['grain']
         x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]
         
         # gradients
-        x_dict['joint'][:, -2:] =  y_dict['joint']
-        x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]
+        x_dict['joint'][:, 10:12] =  y_dict['joint']
+        x_dict['grain'][:, 6]  =  y_dict['grain'][:, 0]
         
        # return x_dict
 
@@ -492,12 +492,12 @@ class GrainNN_classifier(torch.nn.Module):
         # self.dim = {('grain', 'push', 'joint'):1}
         self.dim = {'joint':2, 'grain':1}
         
-        
+        linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels
         ## networks
         if regressor:
             self.gclstm_encoder = regressor.gclstm_encoder
             self.gclstm_decoder = regressor.gclstm_decoder
-            self.lin1 = regressor.linear['joint']
+         #   self.lin1 = regressor.linear['joint']
             
         else:
             
@@ -505,16 +505,16 @@ class GrainNN_classifier(torch.nn.Module):
                                             self.num_layer, self.metadata, self.device)
             self.gclstm_decoder = SeqGCLSTM(self.in_channels_dict, self.out_channels, \
                                             self.num_layer, self.metadata, self.device)
-            self.lin1 = nn.Linear(self.out_channels, 2) # predict dx, dy
+            
             
         if self.history:
             self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
                              self.dim, seq_len = self.seq_len)
             
          
-        linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels
+        self.lin1 = nn.Linear(linear_outchannels+1, 2) # predict dx, dy
         self.lin2 = nn.Linear(linear_outchannels+1, 1) # predict probability
-        self.threshold = Parameter(torch.tensor(1.0))
+
         
     def forward(self, x_dict, edge_index_dict, edge_attr):   
     
@@ -553,7 +553,7 @@ class GrainNN_classifier(torch.nn.Module):
            
         y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 
-        y_dict['edge_rotation'] = torch.tanh(self.lin1(joint_feature)) 
+        y_dict['edge_rotation'] = torch.tanh(self.lin1(pair_feature)) 
 
         return y_dict
 

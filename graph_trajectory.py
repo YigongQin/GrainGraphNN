@@ -813,6 +813,7 @@ if __name__ == '__main__':
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
     parser.add_argument("--regenerate", type=bool, default = True)
+    parser.add_argument("--save_traj", type=bool, default = False)
     parser.add_argument("--prev", type=int, default = 0)
     args = parser.parse_args()
 
@@ -847,9 +848,9 @@ if __name__ == '__main__':
           
                 traj.load_trajectory(rawdat_dir = args.rawdat_dir)
                 #traj.show_data_struct()
-            
-                #with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                #    dill.dump(traj, outp)
+                if args.save_traj:
+                    with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                        dill.dump(traj, outp)
             
             else:
                 
@@ -867,8 +868,8 @@ if __name__ == '__main__':
             
             choices = [6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120]
             
-            edge_expandstep = 6*360/int(edgeE) if int(edgeE)>0 else 0  
-            grain_expandstep = 6*90/int(grainE) if int(grainE)>0 else 0
+            edge_expandstep = 6*360/int(edgeE) if int(edgeE)>0 else 1000  
+            grain_expandstep = 6*90/int(grainE) if int(grainE)>0 else 1000
             
             for c in choices:
                 if c < edge_expandstep and c < grain_expandstep:

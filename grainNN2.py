@@ -56,7 +56,7 @@ def criterion(data, pred, mask, edge_dict):
         
         regress_part = torch.mean((dx_p-dx_d)**2)
         
-        return classifier(z, y.float()) + regress_part
+        return classifier(z, y.float()) + 100*regress_part
 
 
 def train(model, train_loader, test_loader):

@@ -107,15 +107,15 @@ if __name__=='__main__':
 
 
     Rmodel = GrainNN_regressor(hp)
-    Rmodel.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.regressor_id), map_location=args.device))
+    Rmodel.load_state_dict(torch.load(args.model_dir + 'regressor' + str(args.regressor_id)+'.pt', map_location=torch.device('cpu')))
     Rmodel.eval() 
     
     
     Cmodel = GrainNN_classifier(hpc, Rmodel)
-    Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id), map_location=args.device))
+   # Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id), map_location=args.device))
     Cmodel.eval() 
     
-    Rmodel.threshold = 2e-4 # from P-R plot
+    Rmodel.threshold = 1e-4 # from P-R plot
     Cmodel.threshold = 0.4
     
     if device=='cuda':
@@ -185,6 +185,11 @@ if __name__=='__main__':
             end_idx = datasets[case].find('.')
             span = int(datasets[case][st_idx:-4])
             print('expected span', span)
+            
+            
+            mask_p = np.ones(len(data.x_dict['joint']), dtype=int)
+            mask_q = torch.ones(len(data.x_dict['grain']), dtype=int)
+            
             for frame in range(span, 121, span):
                 
                 print('================================')
@@ -192,48 +197,77 @@ if __name__=='__main__':
                # print(data.x_dict['joint'][:,5])
                 """
                 <1> combine two predictions
-                    a. Rmodel: joint displacement, grain area change & volume
-                    b. Cmodel: edge prob, dx of new verts
+                    a. Rmodel: dx_p, ds & v
+                    b. Cmodel: p(i,j), dx for p(i,j)>threshold
                 """            
-                print(data.x_dict['grain'][3,:])
-                print(data.x_dict['grain'][:,10])
-                print(data.x_dict['grain'][:,3])
-                print(Rmodel.scaling)
+              #  print(data.x_dict['grain'][3,:])
+              #  print(data.x_dict['grain'][:,10])
+              #  print(data.x_dict['grain'][:,3])
+                
+                
+                
+                
+                
                 pred = Rmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
               #  pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
               #  pred.update(pred_c)
+              #  print(data.x_dict['joint'][:,:2])
                 
                 """
                 <2>  update node features
+                     a. x_p, s
                 """
                 
                 Rmodel.update(data.x_dict, pred)
                 
                 """
                 <3> predict events and update features and connectivity
-                
+                    a. E_pp, E_pq
+                    b. mask_p, mask_q
                 """            
                 
-                print(pred['grain_area'])
-               # pred['grain_event'] = torch.where(pred['grain_area']<Rmodel.threshold)[0]
-               # pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
-               # print('grain event: ', pred['grain_event'])
+               # print(data.x_dict['joint'][:,:2])
+
+                pred['grain_event'] = ((mask_q>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
+                print('grain event: ', pred['grain_event'])
     #            Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask'])
+
     
-     
+    
                 """
-                <4> evaluate
+                <4> form next step input
+                    a. zp, z_q
+                    b. x_q
+                """  
+                
+                data.x_dict['grain'][:, 2] += span/121
+                data.x_dict['joint'][:, 2] += span/121
+                
+                
+                
+                """
+                <5> evaluate
                 """
                # print(data['nxt'])
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
                 
-                X_j = data.x_dict['joint'][:,:2].detach().numpy()
+                X_p = data.x_dict['joint'][:,:2].detach().numpy()
+                
                 topogical = True
                 
-                traj.GNN_update(frame, X_j, data['mask']['joint'][:,0], topogical, data.edge_index_dict)
-               # traj.show_data_struct()
+                traj.GNN_update(frame, X_p, mask_p, topogical, data.edge_index_dict)
+                traj.plot_polygons()
+                traj.show_data_struct()
                 
                 
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
               #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+            
+            
+            
+           
+            
+            
+            
+            
             

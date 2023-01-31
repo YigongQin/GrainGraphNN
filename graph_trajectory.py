@@ -775,23 +775,23 @@ class graph_trajectory(graph):
         
         if topogical:
             
-            jj_edge = edge_index_dict['joint', 'connect', 'joint']
-            gj_edge = edge_index_dict['grain', 'push', 'joint']
-            
-            print(gj_edge)
+            jj_edge = edge_index_dict['joint', 'connect', 'joint'].detach().numpy()
+            gj_edge = edge_index_dict['grain', 'push', 'joint'].detach().numpy()
             
             self.vertex2joint = defaultdict(set)
             self.edges.clear()
             
+            
             for grain, joint in gj_edge.T:
-                self.vertex2joint[joint].add(grain) 
+                self.vertex2joint[joint].add(grain+1) 
+     
             
             for k, v in self.vertex2joint.items():
-                assert len(v)==3, len(v)
+                assert len(v)==3, (k, v)
             
-            self.joint2vertex = dict((v, k) for k, v in self.vertex2joint.items())
-
-            self.edges = jj_edge
+            self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+            self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
+            self.edges = jj_edge.T
         
         
         self.update()

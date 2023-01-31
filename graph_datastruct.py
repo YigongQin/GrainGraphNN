@@ -353,7 +353,7 @@ class graph:
                 alpha = img[i,j,0]*255*255+img[i,j,1]*255+img[i,j,2]   
                 self.alpha_field_dummy[i,j] = alpha 
                 
-        
+        self.compute_error_layer()
      
     def show_data_struct(self):
         
@@ -458,7 +458,10 @@ class graph:
                                 break
                             
                 prev, cur = cur, nxt
-                verts[cur] = periodic_move(verts[cur], verts[prev]) 
+                
+            
+            for i in range(1, len(vert_in_region)):
+                verts[i] = periodic_move(verts[i], verts[i-1]) 
 
                 
             inbound = [True, True]
@@ -521,7 +524,7 @@ class graph:
 
         if init:  
             self.plot_polygons()
-        self.compute_error_layer()
+       # self.compute_error_layer()
 
 
 

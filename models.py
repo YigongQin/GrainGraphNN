@@ -468,7 +468,7 @@ class GrainNN_regressor(nn.Module):
         x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]
         
         # gradients
-        x_dict['joint'][:, 10:12] =  y_dict['joint']
+        x_dict['joint'][:, 6:8] =  y_dict['joint']
         x_dict['grain'][:, 6]  =  y_dict['grain'][:, 0]
         
        # return x_dict

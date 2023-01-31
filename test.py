@@ -29,32 +29,27 @@ if __name__=='__main__':
     parser.add_argument("--model_dir", type=str, default='./model/')
     parser.add_argument("--truth_dir", type=str, default='./test/')
     parser.add_argument("--regressor_id", type=int, default=0)
-    parser.add_argument("--classifier_id", type=int, default=0)
+    parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
-    parser.add_argument("--noPDE", type=bool, default=True)
-    parser.add_argument("--seed", type=int, default=35)
 
+    parser.add_argument('--compare', dest='compare', action='store_true')
+    parser.add_argument('--no-compare', dest='compare', action='store_false')
+    parser.set_defaults(compare=True)
 
     args = parser.parse_args()
     
     device = args.device
     
-    seed = args.seed
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+
     
 
     print('==========  GrainNN specification  =========')
     print('3D grain microstructure evolution')
-    print('device: ', args.device)
-    print('no PDE solver required, input is random: ', args.noPDE)
+    print('device: ', device)
+    print('compare with PDE: ', args.compare)
     print('plot GrainNN verus PDE pointwise error: ', args.plot_flag)
-    print('torch seed', seed)
     print('\n')
     
 
@@ -112,11 +107,11 @@ if __name__=='__main__':
     
     
     Cmodel = GrainNN_classifier(hpc, Rmodel)
-   # Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id), map_location=args.device))
+    Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id)+'.pt', map_location=args.device))
     Cmodel.eval() 
     
     Rmodel.threshold = 1e-4 # from P-R plot
-    Cmodel.threshold = 0.4
+    Cmodel.threshold = 0.6  # from P-R plot
     
     if device=='cuda':
         print('use %d GPUs'%torch.cuda.device_count())
@@ -134,10 +129,10 @@ if __name__=='__main__':
         
     print('regressor:')
     print('number of parameters: ')
-    print('threshold: ', Rmodel.threshold)
+    print('threshold for grain events: ', Rmodel.threshold)
     print('classifier:')
     print('number of parameters: ')
-    print('threshold: ', Cmodel.threshold)
+    print('threshold for edge events: ', Cmodel.threshold)
         
     print('\n')
  
@@ -168,18 +163,24 @@ if __name__=='__main__':
     with torch.no_grad():
         for case, data in enumerate(test_loader):
             
+            start_time = time.time()
+            
+            
             data.to(device)
             
-            print('case', datasets[case], traj_list[case])
-         #   print(pred['joint'])
-          #  traj = graph_trajectory(seed = data.physical_params['seed'], frames = 5)
-           # traj.load_trajectory(rawdat_dir = '.')
-           
-            with open(traj_list[case], 'rb') as inp:  
-                try:
-                    traj = dill.load(inp)
-                except:
-                    raise EOFError
+            print('case', datasets[case])
+            
+            
+            if args.compare:
+                print('load trajectory for case ', case)
+            
+                with open(traj_list[case], 'rb') as inp:  
+                    try:
+                        traj = dill.load(inp)
+                    except:
+                        raise EOFError
+            
+            ''' determine span '''
             
             st_idx = datasets[case].find('span') + 4
             end_idx = datasets[case].find('.')
@@ -187,8 +188,13 @@ if __name__=='__main__':
             print('expected span', span)
             
             
+            ''' intialization '''
+            
             mask_p = np.ones(len(data.x_dict['joint']), dtype=int)
             mask_q = torch.ones(len(data.x_dict['grain']), dtype=int)
+            
+            grain_event_list = []
+            edge_event_list = []       
             
             for frame in range(span, 121, span):
                 
@@ -200,18 +206,12 @@ if __name__=='__main__':
                     a. Rmodel: dx_p, ds & v
                     b. Cmodel: p(i,j), dx for p(i,j)>threshold
                 """            
-              #  print(data.x_dict['grain'][3,:])
-              #  print(data.x_dict['grain'][:,10])
-              #  print(data.x_dict['grain'][:,3])
-                
-                
-                
-                
-                
+
+
                 pred = Rmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-              #  pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-              #  pred.update(pred_c)
-              #  print(data.x_dict['joint'][:,:2])
+                pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
+                pred.update(pred_c)
+
                 
                 """
                 <2>  update node features
@@ -226,14 +226,32 @@ if __name__=='__main__':
                     b. mask_p, mask_q
                 """            
                 
-               # print(data.x_dict['joint'][:,:2])
-
+                grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 pred['grain_event'] = ((mask_q>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
-                print('grain event: ', pred['grain_event'])
-    #            Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask'])
+                
+                grain_event_list.extend(pred['grain_event'].detach().numpy())
+                right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
+                
+                print('grain events: ', pred['grain_event'])
+                print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
+                
+                
+                edge_event_truth = set.union(*traj.edge_events[:frame+1])
+                pairs = Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask']).detach().numpy()
+                
+                pairs = []
+                
+                edge_event_list.extend([tuple(i) for i in pairs])
+                right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
+                
+                print('edge events:', pairs)
+                print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )
+    
 
-    
-    
+                topogical = len(pred['grain_event'])>0 or len(pairs)>0               
+                print('topological changes happens: ', topogical)
+                
+                print('\n')
                 """
                 <4> form next step input
                     a. zp, z_q
@@ -244,27 +262,31 @@ if __name__=='__main__':
                 data.x_dict['joint'][:, 2] += span/121
                 
                 
-                
                 """
                 <5> evaluate
                 """
+                
                # print(data['nxt'])
-               # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+                pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+                print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
+                print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
-                
-                topogical = True
-                
+
                 traj.GNN_update(frame, X_p, mask_p, topogical, data.edge_index_dict)
-                traj.plot_polygons()
-                traj.show_data_struct()
                 
                 
-              #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
-              #  print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
+                
+               # traj.plot_polygons()
+               # traj.show_data_struct()
+                
+                
+
             
             
-            
+            end_time = time.time()
+            print('inference time for case %d'%case, end_time - start_time)            
            
             
             

@@ -8,10 +8,10 @@ Created on Mon Sep 27 11:34:53 2021
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn import Parameter
 from heteropgclstm import HeteroPGCLSTM, HeteroPGC
 from heterogclstm import HeteroGCLSTM, HeteroGC
 from graph_datastruct import periodic_move_p
+import copy
 
 class GC(nn.Module):
 
@@ -495,8 +495,8 @@ class GrainNN_classifier(torch.nn.Module):
         linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels
         ## networks
         if regressor:
-            self.gclstm_encoder = regressor.gclstm_encoder
-            self.gclstm_decoder = regressor.gclstm_decoder
+            self.gclstm_encoder = copy.deepcopy(regressor.gclstm_encoder)
+            self.gclstm_decoder = copy.deepcopy(regressor.gclstm_decoder)
          #   self.lin1 = regressor.linear['joint']
             
         else:
@@ -574,6 +574,7 @@ class GrainNN_classifier(torch.nn.Module):
         ## predict eliminated edge
         L1 = ((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True)
         
+       # print(L1)
 
         """
         E2: Grain elimination
@@ -595,15 +596,15 @@ class GrainNN_classifier(torch.nn.Module):
         E1: Neigbor switching
         """
 
-        edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)
+        pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)
                                 
-      #  return x_dict, edge_index_dict
+        return pairs
     
     
     @staticmethod
     def from_next_edge_index(edge_index_dict, x_dict, prob, elimed_arg, truncate=0):
 
-        print(elimed_arg)
+      #  print(elimed_arg)
         
         
       #  src, dst = edge_event_list
@@ -622,8 +623,7 @@ class GrainNN_classifier(torch.nn.Module):
         
       #  src_edge  = src_edge[indices]
       #  dst_edge  = dst_edge[indices]     
-        pairs = pairs[indices][:-truncate] 
-        
+        pairs = pairs[indices][:-truncate] if truncate>0 else pairs[indices]
         
         
         for p1, p2 in pairs:
@@ -736,7 +736,7 @@ class GrainNN_classifier(torch.nn.Module):
             
         E_qp[0], E_qp[1] = E_pq[1], E_pq[0]       
         
-        return edge_index_dict
+        return pairs
 
 
 def point_in_triangle(t, v1, v2, v3):

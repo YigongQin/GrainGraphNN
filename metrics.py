@@ -69,9 +69,7 @@ class feature_metric:
             self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
             self.plist = [float(i) for i in self.plist]
             self.rlist = [float(i) for i in self.rlist]
-           # print('Validation AUC:{:.6f}'.format(self.test_auc)) 
-           # self.metric_list.append(float(self.test_auc))
-           # self.test_label, self.test_prob = [], []
+            print('edge event: precision ', self.plist, ', recall: ', self.rlist)
 
 
         if self.model_type == 'regressor':
@@ -104,7 +102,8 @@ class feature_metric:
            # self.plist = [float(i) for i in self.P_list]
            # self.rlist = [float(i) for i in self.R_list]
         
-      #  if self.model_type == 'regressor':
+        if self.model_type == 'regressor':
+            print('model id:', self.model_id, 'PR AUC', float(self.test_auc))
       #      print('model id:', self.model_id, 'ACCURACY', self.acc_dicts)
 
 

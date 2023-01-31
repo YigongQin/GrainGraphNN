@@ -56,7 +56,7 @@ def criterion(data, pred, mask, edge_dict):
         
         regress_part = torch.mean((dx_p-dx_d)**2)
         
-        return classifier(z, y.float()) + 100*regress_part
+        return classifier(z, y.float()) #+ 100*regress_part
 
 
 def train(model, train_loader, test_loader):
@@ -363,7 +363,7 @@ if __name__=='__main__':
             hp_r.device = device
             hp_r.metadata = heteroData.metadata()
             pretrained_model = GrainNN_regressor(hp_r, args.history)
-            pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id), map_location=args.device))
+            pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id)+'.pt', map_location=args.device))
             pretrained_model.eval()
             print('transfered learned parameters from regressor')
             model = GrainNN_classifier(hp, pretrained_model)

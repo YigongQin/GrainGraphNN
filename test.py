@@ -233,6 +233,8 @@ if __name__=='__main__':
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 pred['grain_event'] = ((data['mask']['grain']>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
+              #  pred['grain_event'] = torch.tensor([27])
+                
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
                 

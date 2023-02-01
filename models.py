@@ -581,19 +581,20 @@ class GrainNN_classifier(torch.nn.Module):
         """
         for grain in y_dict['grain_event']:
             
-            Np = (E_qp[0]==grain).nonzero().view(-1)
+            Np = E_qp[1][(E_qp[0]==grain).nonzero().view(-1)]
             pairs = torch.combinations(Np, r=2)
             L2 = []
-            
+
             for p1, p2 in pairs:
-                if torch.tensor([p1, p2]) in E_pp and p1<p2:
+                if p1<p2:
                     E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
-                    L2.append(E_index)
-                    if E_index in L1:
-                        L1 = L1[L1!=E_index]
-                        
-            L2 = torch.cat(L2)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
+                    if len(E_index)>0:
+                        L2.append(E_index)
+                        if E_index in L1:
+                            L1 = L1[L1!=E_index]
+                            
+            L2 = torch.cat(L2)          
+            pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
             
             
         """

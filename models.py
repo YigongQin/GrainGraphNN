@@ -570,30 +570,35 @@ class GrainNN_classifier(torch.nn.Module):
 
         check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
       #  print(joint_edge_index[:,check_arg])        
-      #  z[check_arg] = 0.9
-        ## predict eliminated edge
+
+        ''' predict eliminated edge '''
         L1 = ((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True)
         
        # print(L1)
 
         """
-        E2: Grain elimination
+        Grain elimination
         """
         for grain in y_dict['grain_event']:
-            Np = (E_qp[0]==grain).nonzero().view(-1)
+            
+            Np = E_qp[1][(E_qp[0]==grain).nonzero().view(-1)]
             pairs = torch.combinations(Np, r=2)
             L2 = []
+
             for p1, p2 in pairs:
-                if torch.tensor([p1, p2]) in E_pp and p1<p2:
+                if p1<p2:
                     E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
-                    L2.append(E_index)
-                    if E_index in L1:
-                        L1 = L1[L1!=E_index]
-            L2 = torch.cat(L2)
-            edge_index_dict = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
+                    if len(E_index)>0:
+                        L2.append(E_index)
+                        if E_index in L1:
+                            L1 = L1[L1!=E_index]
+                            
+            L2 = torch.cat(L2)          
+            pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
+            
             
         """
-        E1: Neigbor switching
+        Neigbor switching
         """
 
         pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)

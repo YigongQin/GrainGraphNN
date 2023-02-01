@@ -170,15 +170,14 @@ if __name__=='__main__':
             
             print('case', datasets[case])
             
-            
-            if args.compare:
-                print('load trajectory for case ', case)
-            
-                with open(traj_list[case], 'rb') as inp:  
-                    try:
-                        traj = dill.load(inp)
-                    except:
-                        raise EOFError
+        
+            print('load trajectory for case ', case)
+        
+            with open(traj_list[case], 'rb') as inp:  
+                try:
+                    traj = dill.load(inp)
+                except:
+                    raise EOFError
             
             ''' determine span '''
             
@@ -189,9 +188,10 @@ if __name__=='__main__':
             
             
             ''' intialization '''
+            assert np.all(data['mask']['grain'].detach().numpy()>0)
             
-            mask_p = np.ones(len(data.x_dict['joint']), dtype=int)
-            mask_q = torch.ones(len(data.x_dict['grain']), dtype=int)
+            data['mask']['joint'] = 1 + 0*data['mask']['joint']
+           # print(data['mask']['joint'])
             
             grain_event_list = []
             edge_event_list = []       
@@ -215,10 +215,14 @@ if __name__=='__main__':
                 
                 """
                 <2>  update node features
-                     a. x_p, s
+                     a. x_p, s, v
+                     b. z
                 """
                 
                 Rmodel.update(data.x_dict, pred)
+                data.x_dict['grain'][:, 2] += span/121
+                data.x_dict['joint'][:, 2] += span/121
+
                 
                 """
                 <3> predict events and update features and connectivity
@@ -227,7 +231,9 @@ if __name__=='__main__':
                 """            
                 
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
-                pred['grain_event'] = ((mask_q>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
+                pred['grain_event'] = ((data['mask']['grain']>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
+                
+              #  pred['grain_event'] = torch.tensor([27])
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
@@ -239,7 +245,6 @@ if __name__=='__main__':
                 edge_event_truth = set.union(*traj.edge_events[:frame+1])
                 pairs = Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask']).detach().numpy()
                 
-                pairs = []
                 
                 edge_event_list.extend([tuple(i) for i in pairs])
                 right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
@@ -252,38 +257,37 @@ if __name__=='__main__':
                 print('topological changes happens: ', topogical)
                 
                 print('\n')
-                """
-                <4> form next step input
-                    a. zp, z_q
-                    b. x_q
-                """  
-                
-                data.x_dict['grain'][:, 2] += span/121
-                data.x_dict['joint'][:, 2] += span/121
-                
+
+
                 
                 """
-                <5> evaluate
+                <4> evaluate
                 """
                 
                # print(data['nxt'])
                 pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
                 print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
-                print('case %d the error %f at sampled height %d'%(case, traj.error_layer, 0))
-
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
 
-                traj.GNN_update(frame, X_p, mask_p, topogical, data.edge_index_dict)
+                traj.GNN_update(frame, X_p, data['mask']['joint'], topogical, data.edge_index_dict)
                 
                 
-                
-               # traj.plot_polygons()
-               # traj.show_data_struct()
+                if False:
+                    traj.plot_polygons()
+                if args.plot_flag:
+                    traj.show_data_struct()
                 
                 
 
-            
+                """
+                <5> next prediction
+                    a. x_q
+                """
+                for grain, coor in traj.region_center.items():
+                    data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
+                
+                
             
             end_time = time.time()
             print('inference time for case %d'%case, end_time - start_time)            

@@ -170,7 +170,6 @@ class graph:
         self.regions = defaultdict(list) ## index group
         self.region_coors = defaultdict(list)
         self.region_edge = defaultdict(set)
-        self.region_area = defaultdict(float)
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
         self.density = grain_size/lxd
@@ -295,6 +294,28 @@ class graph:
     
       #  vor.filtered_points = seeds
       #  vor.filtered_regions = regions
+   # @njit(parallel=True)
+    def para_pixel(self, img, s):
+        
+        
+        for i in range(s):
+            for j in range(s):
+                ii, jj, = i ,j
+                if img[i,j,2]==0:
+
+                    if img[i+s,j,2]>0:
+                        ii += s
+                    elif img[i,j+s,2]>0:
+                        jj += s
+                    elif img[i+s,j+s,2]>0:
+                        ii += s
+                        jj += s
+                    else:
+                       # pass
+                        raise ValueError(i,j)
+                        
+                self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]         
+
         
     def plot_polygons(self):
         """
@@ -326,33 +347,16 @@ class graph:
 
         img = np.asarray(image)
         
-        for i in range(s):
-            for j in range(s):
-                ii, jj, = i ,j
-                if img[i,j,2]==0:
+        self.para_pixel(img, s)
+                
 
-                    if img[i+s,j,2]>0:
-                        ii += s
-                    elif img[i,j+s,2]>0:
-                        jj += s
-                    elif img[i+s,j+s,2]>0:
-                        ii += s
-                        jj += s
-                    else:
-                       # pass
-                        raise ValueError(i,j)
-                alpha = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]   
-                self.alpha_field[i,j] = alpha 
-                self.region_area[alpha] += 1
-        
-        for k, v in self.region_area.items():
-            self.region_area[k]/=s**2
-        
+        """
         for i in range(2*s):
             for j in range(2*s):
                 alpha = img[i,j,0]*255*255+img[i,j,1]*255+img[i,j,2]   
                 self.alpha_field_dummy[i,j] = alpha 
-                
+        """
+        
         self.compute_error_layer()
      
     def show_data_struct(self):
@@ -504,7 +508,7 @@ class graph:
             self.region_edge[region] = grain_edge
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-        print('num vertices of grains', cnt)
+      #  print('num vertices of grains', cnt)
         print('num edges, junctions', len([i for i in self.edges if i[0]>-1 ]), len(self.joint2vertex))        
         # form edge             
 

@@ -556,7 +556,6 @@ class GrainHeterograph:
         self.edge_index_dicts = {}
         self.edge_weight_dicts = {}
         self.additional_features = {}
-        self.neighbor_dicts = {}
         
         self.physical_params = {}
 
@@ -580,13 +579,13 @@ class GrainHeterograph:
                                          
             self.target_dicts['joint'] = self.targets_scaling['joint']*\
                self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
-               # (nxt.feature_dicts['joint'][:,:2] - self.feature_dicts['joint'][:,:2])
-           # self.target_dicts['edge_event'] = nxt.edge_rotation        
+
             
             self.additional_features['nxt'] = nxt.edge_index_dicts
             
             
 
+            ''' gradients '''
             
             # check if the grain neighbor of the junction is the same
             for i in range(len(self.mask['joint'])):
@@ -614,6 +613,8 @@ class GrainHeterograph:
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
 
             
+            '''edge'''
+
             self.edges = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
             self.target_dicts['edge_event'] = -100*np.ones(len(self.edges), dtype=int)
  
@@ -627,6 +628,31 @@ class GrainHeterograph:
             print('number of positive/negative events', \
                   sum(self.target_dicts['edge_event']>0), sum(self.target_dicts['edge_event']==0))
             
+            
+            edge_pair = []    
+            for i, el in enumerate(self.edge_weight_dicts[self.edge_type[2]][:,0]):
+                if el > -1:
+                    edge_pair.append([el, nxt.edge_weight_dicts[self.edge_type[2]][i,0]])
+            
+            assert len(self.edges) == len(edge_pair)
+            
+            self.mask['edge'] = np.ones(len(self.edges), dtype=int)
+            self.target_dicts['edge_len'] = np.zeros(len(self.edges))
+            
+            for i, (el, el_n) in enumerate(edge_pair):
+                
+                if self.target_dicts['edge_event'][i]>0:
+                    self.target_dicts['edge_len'] = self.targets_scaling['joint']*(-el_n-el)
+            
+                else:
+                    self.target_dicts['edge_len'] = self.targets_scaling['joint']*(el_n-el)
+                
+                if self.target_dicts['edge_event'][i]<0:
+                    self.mask['edge'][i] = 0
+                    
+                
+            '''grain'''    
+                
                 
             self.target_dicts['grain_event'] = np.zeros(len(self.mask['grain']), dtype=int)    
             for i in range(len(self.mask['grain'])):
@@ -649,6 +675,7 @@ class GrainHeterograph:
         if prev is None:
             self.prev_grad_grain = 0*self.feature_dicts['grain'][:,:1]
             self.prev_grad_joint = 0*self.feature_dicts['joint'][:,:2]
+            self.prev_grad_edge  = 0*self.edge_weight_dicts[self.edge_type[2]][:,:1]
                     
         else:
             self.prev_grad_grain = self.targets_scaling['grain']*\
@@ -656,6 +683,8 @@ class GrainHeterograph:
             self.prev_grad_joint = self.targets_scaling['joint']*\
                 self.subtract(self.feature_dicts['joint'][:,:2], prev.feature_dicts['joint'][:,:2], 'prev')
                # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
+            self.prev_grad_edge  = self.targets_scaling['joint']*\
+                self.subtract(self.edge_weight_dicts[self.edge_type[2]][:,:1], prev.edge_weight_dicts[self.edge_type[2]][:,:1], 'prev')
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']
         
@@ -669,6 +698,9 @@ class GrainHeterograph:
 
         self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], self.prev_grad_joint)) 
                 
+        
+        self.edge_weight_dicts[self.edge_type[2]] = np.hstack((self.edge_weight_dicts[self.edge_type[2]], 
+                                                               self.prev_grad_edge)) 
 
         
         for nodes, features in self.features.items():
@@ -696,6 +728,9 @@ class GrainHeterograph:
         return np.concatenate((a, 0*b[short_len:,:]), axis=0)
         
     def append_history(self, prev_list):
+        
+        exist = np.where(self.edge_weight_dicts[self.edge_type[2]][:,0]>-1)[0]
+        self.edge_weight_dicts[self.edge_type[2]] = self.edge_weight_dicts[self.edge_type[2]][exist,:]
         
         
         for prev in prev_list:

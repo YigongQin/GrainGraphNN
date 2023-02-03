@@ -715,7 +715,13 @@ class graph_trajectory(graph):
         
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
-        jj_len  = [periodic_dist_(self.vertices[src], self.vertices[dst]) for src, dst in self.edges if src>-1 and dst>-1]
+        
+        for src, dst in self.edges:
+            if src>-1 and dst>-1:
+                jj_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))
+            else:
+                jj_len.append(-2.0)
+      #  jj_len  = [periodic_dist_(self.vertices[src], self.vertices[dst]) for src, dst in self.edges if src>-1 and dst>-1]
         
         hg.feature_dicts.update({'grain':grain_state})
         hg.feature_dicts.update({'joint':joint_state})
@@ -732,7 +738,7 @@ class graph_trajectory(graph):
             if len(v)>3: print(colored('junction with more than three junction neighbor', 'red'), k)
             assert len(v)==3
         
-        hg.vertex2joint = self.vertex2joint
+        hg.vertex2joint = self.vertex2joint.copy()
 
         
         hg.physical_params = self.physical_params
@@ -741,7 +747,7 @@ class graph_trajectory(graph):
       #  if frame>0:
       #      hg.edge_rotation = np.array(list(self.edge_labels.values()))
 
-        assert len(jj_edge) == len(jj_len)
+      #  assert len(jj_edge) == len(jj_len)
         hg.edge_weight_dicts = {hg.edge_type[0]:np.array(gj_len)[:,np.newaxis],
                                 hg.edge_type[1]:np.array(gj_len)[:,np.newaxis],
                                 hg.edge_type[2]:np.array(jj_len)[:,np.newaxis]}

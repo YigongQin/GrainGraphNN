@@ -612,7 +612,21 @@ class GrainNN_classifier(torch.nn.Module):
     @staticmethod    
     def delete_grain_index(grain, E_pp, E_pq, mask):
         
+        Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
+        assert len(Np) == 2
         
+        ''' find the two to delete p1, p2'''
+        p1, p2 = Np
+        
+        ''' find the two to connect p1_c, p2_c'''
+        
+        ''' remove all the edges connected to p1, p2'''
+        
+        ''' add one edge between p1_c, p2_c'''
+        
+        mask['grain'][grain] = 0
+        mask['joint'][p1] = 0
+        mask['joint'][p2] = 0
         
         return
     

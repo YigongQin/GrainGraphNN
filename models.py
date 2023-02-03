@@ -562,6 +562,7 @@ class GrainNN_classifier(torch.nn.Module):
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
+        E_pq = edge_index_dict['joint', 'pull', 'grain']
         E_qp = edge_index_dict['grain', 'push', 'joint']
 
         src, dst = E_pp[0], E_pp[1]
@@ -581,7 +582,7 @@ class GrainNN_classifier(torch.nn.Module):
         """
         for grain in y_dict['grain_event']:
             
-            Np = E_qp[1][(E_qp[0]==grain).nonzero().view(-1)]
+            Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
             pairs = torch.combinations(Np, r=2)
             L2 = []
 
@@ -594,28 +595,35 @@ class GrainNN_classifier(torch.nn.Module):
                             L1 = L1[L1!=E_index]
                             
             L2 = torch.cat(L2)          
-            pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L2, truncate=2)
+            pairs = self.switching_edge_index(E_pp, E_pq, x_dict, prob, L2, truncate=2)
             
+            self.delete_grain_index(grain, E_pp, E_pq, mask)
             
         """
         Neigbor switching
         """
 
-        pairs = self.from_next_edge_index(edge_index_dict, x_dict, prob, L1)
-                                
+        pairs = self.switching_edge_index(E_pp, E_pq, x_dict, prob, L1)
+        E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
+                        
         return pairs
+
     
+    @staticmethod    
+    def delete_grain_index(grain, E_pp, E_pq, mask):
+        
+        
+        
+        return
     
     @staticmethod
-    def from_next_edge_index(edge_index_dict, x_dict, prob, elimed_arg, truncate=0):
+    def switching_edge_index(E_pp, E_pq, x_dict, prob, elimed_arg, truncate=0):
 
       #  print(elimed_arg)
         
         
       #  src, dst = edge_event_list
-        E_pp = edge_index_dict['joint', 'connect', 'joint']
-        E_pq = edge_index_dict['joint', 'pull', 'grain']
-        E_qp = edge_index_dict['grain', 'push', 'joint']
+
         
         
       #  src_edge = src[elimed_arg]
@@ -739,7 +747,7 @@ class GrainNN_classifier(torch.nn.Module):
       
             
             
-        E_qp[0], E_qp[1] = E_pq[1], E_pq[0]       
+              
         
         return pairs
 

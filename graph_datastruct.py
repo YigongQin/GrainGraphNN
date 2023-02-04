@@ -549,7 +549,7 @@ class GrainHeterograph:
                           ('joint', 'pull', 'grain'), \
                           ('joint', 'connect', 'joint')]
         
-        self.targets_scaling = {'grain':20, 'joint':5}    
+        self.targets_scaling = {'grain':20, 'joint':5, 'edge':3}    
             
         self.feature_dicts = {}
         self.target_dicts = {}
@@ -628,10 +628,10 @@ class GrainHeterograph:
             for i, (el, el_n) in enumerate(edge_pair):
                 
                 if self.target_dicts['edge_event'][i]>0:
-                    self.target_dicts['edge_len'][i] = self.targets_scaling['joint']*(-el_n-el)
+                    self.target_dicts['edge_len'][i] = self.targets_scaling['edge']*(-el_n-el)
             
                 else:
-                    self.target_dicts['edge_len'][i] = self.targets_scaling['joint']*(el_n-el)
+                    self.target_dicts['edge_len'][i] = self.targets_scaling['edge']*(el_n-el)
                 
                 if self.target_dicts['edge_event'][i]<0 or el_n<-1:
                     self.mask['edge'][i] = 0
@@ -693,7 +693,7 @@ class GrainHeterograph:
             self.prev_grad_joint = self.targets_scaling['joint']*\
                 self.subtract(self.feature_dicts['joint'][:,:2], prev.feature_dicts['joint'][:,:2], 'prev')
                # (self.feature_dicts['joint'][:,:2] - prev.feature_dicts['joint'][:,:2])             
-            self.prev_grad_edge  = self.targets_scaling['joint']*\
+            self.prev_grad_edge  = self.targets_scaling['edge']*\
                 self.subtract(self.edge_weight_dicts[self.edge_type[2]][:,:1], prev.edge_weight_dicts[self.edge_type[2]][:,:1], 'prev')
         
         self.feature_dicts['grain'][:,4] *= self.targets_scaling['grain']

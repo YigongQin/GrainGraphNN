@@ -623,15 +623,15 @@ class GrainHeterograph:
             assert len(self.edges) == len(edge_pair)
             
             self.mask['edge'] = np.ones(len(self.edges), dtype=int)
-            self.target_dicts['edge_len'] = np.zeros(len(self.edges))
+            self.target_dicts['edge'] = np.zeros(len(self.edges))
             
             for i, (el, el_n) in enumerate(edge_pair):
                 
                 if self.target_dicts['edge_event'][i]>0:
-                    self.target_dicts['edge_len'][i] = 0.5*self.targets_scaling['joint']*(-el_n-el)
+                    self.target_dicts['edge'][i] = 0.5*self.targets_scaling['joint']*(-el_n-el)
             
                 else:
-                    self.target_dicts['edge_len'][i] = 0.5*self.targets_scaling['joint']*(el_n-el)
+                    self.target_dicts['edge'][i] = 0.5*self.targets_scaling['joint']*(el_n-el)
                 
                 if self.target_dicts['edge_event'][i]<0 or el_n<-1:
                     self.mask['edge'][i] = 0
@@ -654,7 +654,7 @@ class GrainHeterograph:
 
             self.gradient_max = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),
                                  'grain':np.max(np.absolute(self.target_dicts['grain'])),
-                                 'edge':np.max(np.absolute(self.mask['edge']*self.target_dicts['edge_len']))}   
+                                 'edge':np.max(np.absolute(self.mask['edge']*self.target_dicts['edge']))}   
             
             gradscale = np.absolute(self.mask['joint']*self.target_dicts['joint'])
             gradscale = gradscale[gradscale>0]
@@ -668,8 +668,8 @@ class GrainHeterograph:
             assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
                and np.all(self.mask['joint']*self.target_dicts['joint']<1)
             assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
-            assert np.all(self.mask['edge']*self.target_dicts['edge_len']>-1) \
-               and np.all(self.mask['edge']*self.target_dicts['edge_len']<1) 
+            assert np.all(self.mask['edge']*self.target_dicts['edge']>-1) \
+               and np.all(self.mask['edge']*self.target_dicts['edge']<1) 
             
            # del self.edges
            # del self.vertex2joint

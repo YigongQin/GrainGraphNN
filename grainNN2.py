@@ -42,9 +42,7 @@ def criterion(data, pred, mask, edge_dict):
         z = pred['edge_event']
         y = data['edge_event']
         
-        edge = edge_dict['joint', 'connect', 'joint'][0]
-        positive_y = torch.where(y==1)
-        positive_x = edge[positive_y]
+
         
         qualified_y = torch.where(y>-1)
         y = y[qualified_y]
@@ -52,14 +50,26 @@ def criterion(data, pred, mask, edge_dict):
         
         classifier = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(hp.weight))
         
+        """
         '''dx, dy for event'''
+        
+        edge = edge_dict['joint', 'connect', 'joint'][0]
+        positive_y = torch.where(y==1)
+        positive_x = edge[positive_y]
       #  positive = torch.where(y==1)
         dx_p = pred['edge_rotation'][positive_x,:]
         dx_d = data['joint'][positive_x,:]
         
         regress_part = torch.mean((dx_p-dx_d)**2)
+        """
         
-        return classifier(z, y.float()) #+ 100*regress_part
+        if args.edge_len:
+            
+            return classifier(z, y.float()) + 100*torch.mean(mask['edge']*(data['edge_len'] - pred['edge_len'])**2)
+            
+        else:
+        
+            return classifier(z, y.float()) #+ 100*regress_part
 
 
 def train(model, train_loader, test_loader):

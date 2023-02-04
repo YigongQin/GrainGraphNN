@@ -394,7 +394,7 @@ class GrainNN_regressor(nn.Module):
                         for node_type, targets in hyper.targets.items()}) 
         
         if self.edge_len:
-            self.lin1 = nn.Linear(2*linear_outchannels+1, 1)
+            self.lin1 = nn.Linear(2*linear_outchannels+2, 1)
         
         self.scaling = {'grain':20, 'joint':5}
 
@@ -523,8 +523,8 @@ class GrainNN_classifier(torch.nn.Module):
                              self.dim, seq_len = self.seq_len)
             
          
-        self.lin1 = nn.Linear(linear_outchannels+1, 2) # predict dx, dy
-        self.lin2 = nn.Linear(linear_outchannels+1, 1) # predict probability
+        self.lin1 = nn.Linear(linear_outchannels+2, 1) # predict length
+        self.lin2 = nn.Linear(linear_outchannels+2, 1) # predict probability
 
         
     def forward(self, x_dict, edge_index_dict, edge_attr):   
@@ -564,7 +564,7 @@ class GrainNN_classifier(torch.nn.Module):
            
         y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 
-        y_dict['edge_rotation'] = torch.tanh(self.lin1(pair_feature)) 
+        y_dict['edge_len'] = torch.tanh(self.lin1(pair_feature)) 
 
         return y_dict
 

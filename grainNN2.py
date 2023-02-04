@@ -33,6 +33,9 @@ def criterion(data, pred, mask, edge_dict):
 
         loss = torch.mean(mask['joint']*(data['joint'] - pred['joint'])**2) \
              + torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
+             
+        if args.edge_len:
+            loss += torch.mean(mask['edge']*(data['edge_len'] - pred['edge_len'])**2)
         return 100*loss
 
     if args.model_type== 'classifier':

@@ -642,10 +642,10 @@ class GrainHeterograph:
             for i, (el, el_n) in enumerate(edge_pair):
                 
                 if self.target_dicts['edge_event'][i]>0:
-                    self.target_dicts['edge_len'] = self.targets_scaling['joint']*(-el_n-el)
+                    self.target_dicts['edge_len'][i] = self.targets_scaling['joint']*(-el_n-el)
             
                 else:
-                    self.target_dicts['edge_len'] = self.targets_scaling['joint']*(el_n-el)
+                    self.target_dicts['edge_len'][i] = self.targets_scaling['joint']*(el_n-el)
                 
                 if self.target_dicts['edge_event'][i]<0:
                     self.mask['edge'][i] = 0

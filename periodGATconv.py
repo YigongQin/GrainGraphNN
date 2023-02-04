@@ -102,7 +102,10 @@ class PeriodConv(MessagePassing):
         kwargs.setdefault('aggr', 'add')
         super().__init__(node_dim=0, **kwargs)
        # if edge_dim==0: edge_dim=None
-        edge_dim = 1
+        if isinstance(in_channels, int):
+            edge_dim = 2
+        else:
+            edge_dim = 1
 
         self.in_channels = in_channels
         self.out_channels = out_channels

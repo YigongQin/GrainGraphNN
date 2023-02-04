@@ -596,21 +596,7 @@ class GrainHeterograph:
                         self.mask['joint'][i,0] = 0
                       #  print('not matched', i, self.vertex2joint[i])
                       
-            self.gradient_max = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),\
-                                   'grain':np.max(np.absolute(self.target_dicts['grain']))}   
-            
-            gradscale = np.absolute(self.mask['joint']*self.target_dicts['joint'])
-            gradscale = gradscale[gradscale>0]
-            
-            self.gradient_scale = {'joint':np.mean(gradscale),\
-                                   'grain':np.mean(np.absolute(self.target_dicts['grain']))}     
-                
-            print('maximum gradient', self.gradient_max)
-            print('average gradient', self.gradient_scale)
-            
-            assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
-               and np.all(self.mask['joint']*self.target_dicts['joint']<1)
-            assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
+
 
             
             '''edge'''
@@ -647,9 +633,12 @@ class GrainHeterograph:
                 else:
                     self.target_dicts['edge_len'][i] = self.targets_scaling['joint']*(el_n-el)
                 
-                if self.target_dicts['edge_event'][i]<0:
+                if self.target_dicts['edge_event'][i]<0 or el_n<-1:
                     self.mask['edge'][i] = 0
-                    
+            
+
+            
+            
                 
             '''grain'''    
                 
@@ -660,6 +649,27 @@ class GrainHeterograph:
                     self.target_dicts['grain_event'][i] = 1
                 
             print('number of grain events', np.sum(self.target_dicts['grain_event']))
+
+
+
+            self.gradient_max = {'joint':np.max(np.absolute(self.mask['joint']*self.target_dicts['joint'])),
+                                 'grain':np.max(np.absolute(self.target_dicts['grain'])),
+                                 'edge':np.max(np.absolute(self.mask['edge']*self.target_dicts['edge_len']))}   
+            
+            gradscale = np.absolute(self.mask['joint']*self.target_dicts['joint'])
+            gradscale = gradscale[gradscale>0]
+            
+            self.gradient_scale = {'joint':np.mean(gradscale),\
+                                   'grain':np.mean(np.absolute(self.target_dicts['grain']))}     
+                
+            print('maximum gradient', self.gradient_max)
+            print('average gradient', self.gradient_scale)
+            
+            assert np.all(self.mask['joint']*self.target_dicts['joint']>-1) \
+               and np.all(self.mask['joint']*self.target_dicts['joint']<1)
+            assert np.all(self.target_dicts['grain']>-1) and (np.all(self.target_dicts['grain']<1))
+            assert np.all(self.mask['edge']*self.target_dicts['edge_len']>-1) \
+               and np.all(self.mask['edge']*self.target_dicts['edge_len']<1) 
             
            # del self.edges
            # del self.vertex2joint

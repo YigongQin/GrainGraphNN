@@ -35,7 +35,7 @@ def criterion(data, pred, mask, edge_dict):
              + torch.mean(mask['grain']*(data['grain'] - pred['grain'])**2)
              
         if args.edge_len:
-            loss += torch.mean(mask['edge']*(data['edge_len'] - pred['edge_len'])**2)
+            loss += torch.mean(mask['edge']*(data['edge'] - pred['edge'])**2)
         return 100*loss
 
     if args.model_type== 'classifier':
@@ -65,7 +65,7 @@ def criterion(data, pred, mask, edge_dict):
         
         if args.edge_len:
             
-            return classifier(z, y.float()) + 100*torch.mean(mask['edge']*(data['edge_len'] - pred['edge_len'])**2)
+            return classifier(z, y.float()) + 100*torch.mean(mask['edge']*(data['edge'] - pred['edge'])**2)
             
         else:
         

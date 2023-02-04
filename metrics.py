@@ -50,7 +50,8 @@ class feature_metric:
         
         if self.model_type == 'classifier':
 
-            
+            add('edge', 0)            
+
            # PR(y_dict['edge_event'], torch.sigmoid(pred['edge_event']))
             p = pred['edge_event']
             y = y_dict['edge_event']
@@ -65,7 +66,11 @@ class feature_metric:
         
 
         if self.model_type == 'classifier':
-         #   train_auc, P_list, R_list = class_acc(train_prob, train_label)
+            
+            edge_err = 100*math.sqrt(self.acc_dicts['edge0err']/self.acc_dicts['edge0'])
+            print('err, edge len: %2.1f'%(edge_err))
+            self.acc_dicts['edge0err'] = 0
+
             self.test_auc, self.plist, self.rlist = class_acc(self.test_prob, self.test_label)
             self.plist = [float(i) for i in self.plist]
             self.rlist = [float(i) for i in self.rlist]

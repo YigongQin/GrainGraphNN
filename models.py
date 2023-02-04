@@ -462,7 +462,7 @@ class GrainNN_regressor(nn.Module):
             pair_feature = torch.cat([joint_feature[src], joint_feature[dst], edge_attr['joint', 'connect', 'joint']], dim=-1)
     
     
-            y_dict['edge_len'] = torch.tanh(self.lin1(pair_feature)) 
+            y_dict['edge'] = torch.tanh(self.lin1(pair_feature)) 
             
 
         return y_dict            
@@ -564,7 +564,7 @@ class GrainNN_classifier(torch.nn.Module):
            
         y_dict = {'edge_event': self.lin2(pair_feature).view(-1)} # p(i,j), size (Ejj,)
 
-        y_dict['edge_len'] = torch.tanh(self.lin1(pair_feature)) 
+        y_dict['edge'] = torch.tanh(self.lin1(pair_feature)) 
 
         return y_dict
 

@@ -355,7 +355,7 @@ class GrainNN_regressor(nn.Module):
             hyper: hyper-parameter class
     """
     
-    def __init__(self, hyper, history=False):
+    def __init__(self, hyper, history=False, edge_len=False):
         super().__init__()
   
         self.in_channels_dict = {node_type: len(features) 
@@ -368,6 +368,8 @@ class GrainNN_regressor(nn.Module):
         
         self.device = hyper.device
         self.seq_len = hyper.window
+        self.history = history
+        self.edge_len = edge_len
         ## networks
 
         self.gclstm_encoder = SeqGCLSTM(self.in_channels_dict, self.out_channels,\
@@ -380,7 +382,7 @@ class GrainNN_regressor(nn.Module):
       #  self.gc_encoder = GC(self.in_channels_dict, self.out_channels,\
       #                                  self.num_layer, self.metadata, self.device)
         self.dim = {'joint':2, 'grain':1}
-        self.history = history
+        
         if self.history:
             self.LSTM = LSTM(self.in_channels_dict, self.out_channels, self.num_layer, self.device,
                              self.dim, seq_len = self.seq_len)    
@@ -391,7 +393,8 @@ class GrainNN_regressor(nn.Module):
         self.linear = nn.ModuleDict({node_type: nn.Linear(linear_outchannels, len(targets))
                         for node_type, targets in hyper.targets.items()}) 
         
-
+        if self.edge_len:
+            self.lin1 = nn.Linear(2*linear_outchannels+1, 1)
         
         self.scaling = {'grain':20, 'joint':5}
 
@@ -450,8 +453,16 @@ class GrainNN_regressor(nn.Module):
         y_dict['grain'][:, 1] = F.relu(y_dict['grain'][:, 1]) # excess volume predict
         
                 
-        
-
+        if self.edge_len: 
+            joint_feature = h_dict['joint']
+            joint_edge_index = edge_index_dict['joint', 'connect', 'joint']
+            
+            src, dst = joint_edge_index[0], joint_edge_index[1]
+    
+            pair_feature = torch.cat([joint_feature[src], joint_feature[dst], edge_attr['joint', 'connect', 'joint']], dim=-1)
+    
+    
+            y_dict['edge_len'] = torch.tanh(self.lin1(pair_feature)) 
             
 
         return y_dict            

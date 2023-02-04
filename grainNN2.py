@@ -200,10 +200,14 @@ if __name__=='__main__':
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
 
-    
+
     parser.add_argument('--history', dest='history', action='store_true')
     parser.add_argument('--no-history', dest='history', action='store_false')
     parser.set_defaults(history=False)
+    
+    parser.add_argument('--edge_len', dest='edge_len', action='store_true')
+    parser.add_argument('--no-edge_len', dest='edge_len', action='store_false')
+    parser.set_defaults(edge_len=False)
 
     parser.add_argument('--transfer', dest='transfer', action='store_true')
     parser.add_argument('--no-transfer', dest='transfer', action='store_false')
@@ -353,7 +357,7 @@ if __name__=='__main__':
     
     
     if args.model_type== 'regressor':
-        model = GrainNN_regressor(hp, args.history)
+        model = GrainNN_regressor(hp, args.history, args.edge_len)
     if args.model_type== 'classifier':
         
         if args.transfer:
@@ -362,7 +366,7 @@ if __name__=='__main__':
             hp_r.targets = sample.targets
             hp_r.device = device
             hp_r.metadata = heteroData.metadata()
-            pretrained_model = GrainNN_regressor(hp_r, args.history)
+            pretrained_model = GrainNN_regressor(hp_r, args.history, args.edge_len)
             pretrained_model.load_state_dict(torch.load(args.model_dir+'regressor'+str(args.regressor_id)+'.pt', map_location=args.device))
             pretrained_model.eval()
             print('transfered learned parameters from regressor')

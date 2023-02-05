@@ -25,6 +25,15 @@ class feature_metric:
         def add(key, idx):
            # print((( mask[key][:,0]*(data[key][:,idx] - pred[key][:,idx])**2 )))
            # print((( mask[key][:,0]*(data[key][:,idx])**2 )))
+           
+            if idx is None:
+                self.acc_dicts[key+str(0)+'err'] += float(torch.sum( mask[key]*(y_dict[key] - pred[key])**2 ))
+                #print(mask[key])
+                if epoch == 0:
+                    self.acc_dicts[key+str(0)] += float(torch.sum( mask[key] *(y_dict[key])**2 ))                
+                
+                return
+           
             self.acc_dicts[key+str(idx)+'err'] += float(torch.sum( mask[key][:,0]*(y_dict[key][:,idx] - pred[key][:,idx])**2 ))
             #print(mask[key])
             if epoch == 0:
@@ -50,7 +59,7 @@ class feature_metric:
         
         if self.model_type == 'classifier':
 
-            add('edge', 0)            
+            add('edge', None)            
 
            # PR(y_dict['edge_event'], torch.sigmoid(pred['edge_event']))
             p = pred['edge_event']

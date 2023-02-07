@@ -84,7 +84,9 @@ os.system(PVPYTHON_DIR+'pvpython grain.py test.vtk ./ grain')
         
         
         
-        
+"""
+module load qt5 swr oneapi_rk paraview
+"""
         
         
         

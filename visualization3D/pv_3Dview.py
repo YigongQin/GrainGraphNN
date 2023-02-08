@@ -92,7 +92,7 @@ if __name__ == '__main__':
    # Gv = grain_visual(lxd = 20, seed = args.seed, height=20)   
     Gv = grain_visual(seed = args.seed)  
     Gv.load(rawdat_dir=args.rawdat_dir)   
-    args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
+   # args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
     os.system(args.pvpython_dir+'pvpython grain.py test.vtk ./ grain')       
         
         

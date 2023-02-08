@@ -7,3 +7,4 @@ matplotlib
 shapely
 termcolor
 h5py
+mayavi

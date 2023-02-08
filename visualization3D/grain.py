@@ -56,7 +56,7 @@ if args.clip:
     datavtk.Scalars = ['POINTS', 'theta_z']
     datavtk.Value = 42.154137273875
     # Properties modified on datavtk.ClipType
-    datavtk.ClipType.Origin = [10.0, 10.0, 10.0]
+    datavtk.ClipType.Origin = [10.0, 10.0, int(args.surface)]
     datavtk.ClipType.Normal = [0.0, 0.0, 1.0]
 
 

@@ -72,7 +72,9 @@ class grain_visual:
         
         
         print(self.physical_params)
-        write_data(grid, 'test.vtk')
+        self.dataname = 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
+                   +'_R'+str('%2.2f'%self.physical_params['G'])+'.vtk'
+        write_data(grid, self.dataname)
         
 
 if __name__ == '__main__':
@@ -93,8 +95,8 @@ if __name__ == '__main__':
     Gv = grain_visual(seed = args.seed)  
     Gv.load(rawdat_dir=args.rawdat_dir)   
    # args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
-    os.system(args.pvpython_dir+'pvpython grain.py test.vtk ./ grain')       
-        
+    os.system(args.pvpython_dir+'pvpython grain.py '+ Gv.dataname +' ./ ' + Gv.dataname[:-4])       
+   # os.system('rm '+Gv.dataname)    
         
         
 """

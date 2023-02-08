@@ -6,11 +6,11 @@ Created on Mon Feb  6 11:37:04 2023
 @author: yigongqin
 """
 
-import h5py, glob, re, os
+import h5py, glob, re, os, argparse
 from  math import pi
 import numpy as np
 from tvtk.api import tvtk, write_data
-import vtk 
+
 
 
 
@@ -27,7 +27,7 @@ class grain_visual:
         self.height = height
         self.frames = frames # note that frames include the initial condition
         self.physical_params = physical_params
-
+        
 
     def load(self, rawdat_dir: str = './'):
        
@@ -57,12 +57,10 @@ class grain_visual:
         self.physical_params = {'G':float(number_list[3]), 'R':float(number_list[4])}
         self.alpha_pde = np.asarray(f['alpha'])
         top_z = int(self.height/dx)
-        print(self.height, dx, top_z)
+        
         self.alpha_pde = self.alpha_pde.reshape((fnx, fny,fnz),order='F')[1:-1,1:-1, 1:top_z]        
       #  self.alpha_pde[self.alpha_pde == 0] = np.nan
         self.alpha_pde = self.theta_z[self.alpha_pde]/pi*180
-        
-        
         
        # print(self.alpha_pde)
     
@@ -72,15 +70,30 @@ class grain_visual:
         grid.point_data.scalars = self.alpha_pde.ravel(order='F')
         grid.point_data.scalars.name = 'theta_z'
         
-        # Writes legacy ".vtk" format if filename ends with "vtk", otherwise
-        # this will write data using the newer xml-based format.
+        
+        print(self.physical_params)
         write_data(grid, 'test.vtk')
         
+
+if __name__ == '__main__':
+
+
+    parser = argparse.ArgumentParser("create 3D grain plots with paraview")
+
+    parser.add_argument("--rawdat_dir", type=str, default = '../')
+    parser.add_argument("--pvpython_dir", type=str, default = '')
+    
+    parser.add_argument("--seed", type=int, default = 20)
+    parser.add_argument("--lxd", type=int, default = 40)
+    parser.add_argument("--height", type=int, default = 50)
+ 
+    args = parser.parse_args()
         
-Gv = grain_visual(lxd = 20, seed =20, height=20)   
-Gv.load(rawdat_dir='../')   
-PVPYTHON_DIR = '/Applications/ParaView-5.11.0.app/Contents/bin/'
-os.system(PVPYTHON_DIR+'pvpython grain.py test.vtk ./ grain')       
+   # Gv = grain_visual(lxd = 20, seed = args.seed, height=20)   
+    Gv = grain_visual(seed = args.seed)  
+    Gv.load(rawdat_dir=args.rawdat_dir)   
+    args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
+    os.system(args.pvpython_dir+'pvpython grain.py test.vtk ./ grain')       
         
         
         

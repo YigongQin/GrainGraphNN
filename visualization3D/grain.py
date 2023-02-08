@@ -7,9 +7,9 @@
 from paraview.simple import *
 import sys
 
-directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/visualization/'
-directoryOut = '.'
-datasetIn = sys.argv[1] if len(sys.argv)>1 else directoryOut+'test.vtk'
+directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/GrainGraphNN/visualization3D/'
+#directoryOut = '.'
+datasetIn = sys.argv[1] if len(sys.argv)>1 else directoryOut+'seed20_G5.0_R5.0.vtk'
 directoryOut = sys.argv[2] if len(sys.argv)>2 else directoryOut
 imageFilesOut = sys.argv[3] if len(sys.argv)>3 else 'grain'
 print("datasetIn = " + datasetIn)

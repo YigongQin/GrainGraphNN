@@ -39,7 +39,7 @@ class grain_visual:
         self.z = np.asarray(f['z_coordinates']) 
         self.angles = np.asarray(f['angles']) 
         self.theta_z = np.zeros(1 + len(self.angles)//2)
-        self.theta_z[1:] = self.angles[len(self.angles)//2:-1]
+        self.theta_z[1:] = self.angles[len(self.angles)//2+1:]
         
         assert int(self.lxd) == int(self.x[-2])
         
@@ -72,8 +72,9 @@ class grain_visual:
         
         
         print(self.physical_params)
-        self.dataname = 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
-                   +'_R'+str('%2.2f'%self.physical_params['G'])+'.vtk'
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + '.vtk'
+                   #rawdat_dir + 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
+                   #+'_R'+str('%2.2f'%self.physical_params['R'])+'.vtk'
         write_data(grid, self.dataname)
         
 
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("create 3D grain plots with paraview")
 
-    parser.add_argument("--rawdat_dir", type=str, default = '../')
+    parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--pvpython_dir", type=str, default = '')
     
     parser.add_argument("--seed", type=int, default = 20)
@@ -92,10 +93,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
         
    # Gv = grain_visual(lxd = 20, seed = args.seed, height=20)   
-    Gv = grain_visual(seed = args.seed)  
+    Gv = grain_visual(lxd=args.lxd, seed=args.seed, height=args.height)  
     Gv.load(rawdat_dir=args.rawdat_dir)   
    # args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
-    os.system(args.pvpython_dir+'pvpython grain.py '+ Gv.dataname +' ./ ' + Gv.dataname[:-4])       
+   # os.system(args.pvpython_dir+'pvpython grain.py '+ Gv.dataname +' ./ ' + Gv.dataname[:-4])       
    # os.system('rm '+Gv.dataname)    
         
         

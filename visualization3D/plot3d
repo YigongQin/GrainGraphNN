@@ -1,0 +1,1 @@
+for i in {10000..10099}; do echo "pvpython grain.py /work/07428/ygqin/ls6/testGR/ seed${i}"; done > cmdfile

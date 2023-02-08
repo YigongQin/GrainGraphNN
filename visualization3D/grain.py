@@ -8,10 +8,9 @@ from paraview.simple import *
 import sys
 
 directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/GrainGraphNN/visualization3D/'
-#directoryOut = '.'
-datasetIn = sys.argv[1] if len(sys.argv)>1 else directoryOut+'seed20_G5.0_R5.0.vtk'
-directoryOut = sys.argv[2] if len(sys.argv)>2 else directoryOut
-imageFilesOut = sys.argv[3] if len(sys.argv)>3 else 'grain'
+directoryOut = '/scratch/07428/ygqin/graph/GrainGraphNN/visualization3D/'
+datasetIn = sys.argv[1] + sys.argv[2] + '.vtk' 
+imageFilesOut = sys.argv[2] 
 print("datasetIn = " + datasetIn)
 print("directoryOut = " + directoryOut)
 print("imageFilesOut = " + imageFilesOut)
@@ -22,6 +21,13 @@ paraview.simple._DisableFirstRenderCameraReset()
 
 # create a new 'Legacy VTK Reader'
 seed20_G50_R50vtk = LegacyVTKReader(registrationName='test.vtk', FileNames=[datasetIn])
+
+
+# find settings proxy
+colorPalette = GetSettingsProxy('ColorPalette')
+
+# Properties modified on colorPalette
+colorPalette.Text = [0.0, 0.0, 0.0]
 
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
@@ -97,11 +103,6 @@ renderView1.UseColorPaletteForBackground = 0
 # Properties modified on renderView1
 renderView1.Background = [1.0, 1.0, 1.0]
 
-# hide color bar/color legend
-seed20_G50_R50vtkDisplay.SetScalarBarVisibility(renderView1, False)
-
-# show color bar/color legend
-seed20_G50_R50vtkDisplay.SetScalarBarVisibility(renderView1, True)
 
 # get color legend/bar for theta_zLUT in view renderView1
 theta_zLUTColorBar = GetScalarBar(theta_zLUT, renderView1)
@@ -117,7 +118,7 @@ theta_zLUTColorBar.ScalarBarThickness = 32
 layout1 = GetLayout()
 
 # layout/tab size in pixels
-layout1.SetSize(1165, 804)
+layout1.SetSize(1024, 1024)
 
 # current camera placement for renderView1
 renderView1.CameraPosition = [-22.133058935489576, -10.64508851958588, 64.50687193299979]
@@ -125,6 +126,8 @@ renderView1.CameraFocalPoint = [9.999999999999991, 9.999999999999998, 9.88000011
 renderView1.CameraViewUp = [0.19918727129422006, 0.8721825671628037, 0.44679077932704053]
 renderView1.CameraParallelScale = 17.25150434777653
 
+renderView1.ResetCamera()
+
 # save screenshot
-SaveScreenshot(directoryOut+imageFilesOut+'.png', renderView1, ImageResolution=[1165, 804])
+SaveScreenshot(directoryOut+imageFilesOut+'.png', renderView1, ImageResolution=[1024, 1024])
 

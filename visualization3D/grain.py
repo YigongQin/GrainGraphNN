@@ -5,12 +5,31 @@
 
 #### import the simple module from the paraview
 from paraview.simple import *
-import sys
+import sys, argparse
 
-directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/GrainGraphNN/visualization3D/'
-directoryOut = '/scratch/07428/ygqin/graph/GrainGraphNN/visualization3D/'
-datasetIn = sys.argv[1] + sys.argv[2] + '.vtk' 
-imageFilesOut = sys.argv[2] 
+
+
+parser = argparse.ArgumentParser("paraview plot")
+parser.add_argument("--sys", type=str, default = 'ls6')
+parser.add_argument("--data_in", type=str, default = 'seed10000')
+parser.add_argument("--data_dir", type=str, default = '/work/07428/ygqin/ls6/testGR/')
+parser.add_argument("--save_name", type=str, default = '')
+
+parser.add_argument('--clip', dest='clip', action='store_true')
+parser.set_defaults(clip=False)
+parser.add_argument('--cbar', dest='cbar', action='store_true')
+parser.set_defaults(cbar=False)
+parser.add_argument("--surface", type=int, default = 50)    
+args = parser.parse_args()
+    
+if args.sys == 'ls6':
+    directoryOut = '/scratch/07428/ygqin/graph/GrainGraphNN/visualization3D/'
+if args.sys == 'mac':
+    directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/GrainGraphNN/visualization3D/'
+    args.data_dir = directoryOut
+    
+datasetIn = args.data_dir + args.data_in + '.vtk' 
+imageFilesOut = args.data_in + args.save_name
 print("datasetIn = " + datasetIn)
 print("directoryOut = " + directoryOut)
 print("imageFilesOut = " + imageFilesOut)
@@ -20,8 +39,7 @@ print("imageFilesOut = " + imageFilesOut)
 paraview.simple._DisableFirstRenderCameraReset()
 
 # create a new 'Legacy VTK Reader'
-seed20_G50_R50vtk = LegacyVTKReader(registrationName='test.vtk', FileNames=[datasetIn])
-
+datavtk = LegacyVTKReader(registrationName='data.vtk', FileNames=[datasetIn])
 
 # find settings proxy
 colorPalette = GetSettingsProxy('ColorPalette')
@@ -29,46 +47,60 @@ colorPalette = GetSettingsProxy('ColorPalette')
 # Properties modified on colorPalette
 colorPalette.Text = [0.0, 0.0, 0.0]
 
+
+if args.clip:
+    
+    datavtk = Clip(registrationName='datavtk', Input=datavtk)
+    datavtk.ClipType = 'Plane'
+    datavtk.HyperTreeGridClipper = 'Plane'
+    datavtk.Scalars = ['POINTS', 'theta_z']
+    datavtk.Value = 42.154137273875
+    # Properties modified on datavtk.ClipType
+    datavtk.ClipType.Origin = [10.0, 10.0, 10.0]
+    datavtk.ClipType.Normal = [0.0, 0.0, 1.0]
+
+
+
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 
 # show data in view
-seed20_G50_R50vtkDisplay = Show(seed20_G50_R50vtk, renderView1, 'UniformGridRepresentation')
+datavtkDisplay = Show(datavtk, renderView1, 'UniformGridRepresentation')
 
 # trace defaults for the display properties.
-seed20_G50_R50vtkDisplay.Representation = 'Outline'
-seed20_G50_R50vtkDisplay.ColorArrayName = ['POINTS', '']
-seed20_G50_R50vtkDisplay.SelectTCoordArray = 'None'
-seed20_G50_R50vtkDisplay.SelectNormalArray = 'None'
-seed20_G50_R50vtkDisplay.SelectTangentArray = 'None'
-seed20_G50_R50vtkDisplay.OSPRayScaleArray = 'theta_z'
-seed20_G50_R50vtkDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
-seed20_G50_R50vtkDisplay.SelectOrientationVectors = 'None'
-seed20_G50_R50vtkDisplay.ScaleFactor = 2.0
-seed20_G50_R50vtkDisplay.SelectScaleArray = 'theta_z'
-seed20_G50_R50vtkDisplay.GlyphType = 'Arrow'
-seed20_G50_R50vtkDisplay.GlyphTableIndexArray = 'theta_z'
-seed20_G50_R50vtkDisplay.GaussianRadius = 0.1
-seed20_G50_R50vtkDisplay.SetScaleArray = ['POINTS', 'theta_z']
-seed20_G50_R50vtkDisplay.ScaleTransferFunction = 'PiecewiseFunction'
-seed20_G50_R50vtkDisplay.OpacityArray = ['POINTS', 'theta_z']
-seed20_G50_R50vtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
-seed20_G50_R50vtkDisplay.DataAxesGrid = 'GridAxesRepresentation'
-seed20_G50_R50vtkDisplay.PolarAxes = 'PolarAxesRepresentation'
-seed20_G50_R50vtkDisplay.ScalarOpacityUnitDistance = 0.1385685404161374
-seed20_G50_R50vtkDisplay.OpacityArrayName = ['POINTS', 'theta_z']
-seed20_G50_R50vtkDisplay.IsosurfaceValues = [42.154137273875]
-seed20_G50_R50vtkDisplay.SliceFunction = 'Plane'
-seed20_G50_R50vtkDisplay.Slice = 123
+datavtkDisplay.Representation = 'Outline'
+datavtkDisplay.ColorArrayName = ['POINTS', '']
+datavtkDisplay.SelectTCoordArray = 'None'
+datavtkDisplay.SelectNormalArray = 'None'
+datavtkDisplay.SelectTangentArray = 'None'
+datavtkDisplay.OSPRayScaleArray = 'theta_z'
+datavtkDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
+datavtkDisplay.SelectOrientationVectors = 'None'
+datavtkDisplay.ScaleFactor = 2.0
+datavtkDisplay.SelectScaleArray = 'theta_z'
+datavtkDisplay.GlyphType = 'Arrow'
+datavtkDisplay.GlyphTableIndexArray = 'theta_z'
+datavtkDisplay.GaussianRadius = 0.1
+datavtkDisplay.SetScaleArray = ['POINTS', 'theta_z']
+datavtkDisplay.ScaleTransferFunction = 'PiecewiseFunction'
+datavtkDisplay.OpacityArray = ['POINTS', 'theta_z']
+datavtkDisplay.OpacityTransferFunction = 'PiecewiseFunction'
+datavtkDisplay.DataAxesGrid = 'GridAxesRepresentation'
+datavtkDisplay.PolarAxes = 'PolarAxesRepresentation'
+datavtkDisplay.ScalarOpacityUnitDistance = 0.1385685404161374
+datavtkDisplay.OpacityArrayName = ['POINTS', 'theta_z']
+datavtkDisplay.IsosurfaceValues = [42.154137273875]
+datavtkDisplay.SliceFunction = 'Plane'
+datavtkDisplay.Slice = 123
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-seed20_G50_R50vtkDisplay.ScaleTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
+datavtkDisplay.ScaleTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
 
 # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-seed20_G50_R50vtkDisplay.OpacityTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
+datavtkDisplay.OpacityTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
 
 # init the 'Plane' selected for 'SliceFunction'
-seed20_G50_R50vtkDisplay.SliceFunction.Origin = [10.0, 10.0, 9.88]
+datavtkDisplay.SliceFunction.Origin = [10.0, 10.0, 9.88]
 
 # reset view to fit data
 renderView1.ResetCamera(False)
@@ -80,13 +112,13 @@ materialLibrary1 = GetMaterialLibrary()
 renderView1.Update()
 
 # set scalar coloring
-ColorBy(seed20_G50_R50vtkDisplay, ('POINTS', 'theta_z'))
+ColorBy(datavtkDisplay, ('POINTS', 'theta_z'))
 
 # rescale color and/or opacity maps used to include current data range
-seed20_G50_R50vtkDisplay.RescaleTransferFunctionToDataRange(True, False)
+datavtkDisplay.RescaleTransferFunctionToDataRange(True, False)
 
 # show color bar/color legend
-seed20_G50_R50vtkDisplay.SetScalarBarVisibility(renderView1, True)
+datavtkDisplay.SetScalarBarVisibility(renderView1, True)
 
 # get color transfer function/color map for 'theta_z'
 theta_zLUT = GetColorTransferFunction('theta_z')
@@ -95,7 +127,7 @@ theta_zLUT = GetColorTransferFunction('theta_z')
 theta_zPWF = GetOpacityTransferFunction('theta_z')
 
 # change representation type
-seed20_G50_R50vtkDisplay.SetRepresentationType('Surface')
+datavtkDisplay.SetRepresentationType('Surface')
 
 # Properties modified on renderView1
 renderView1.UseColorPaletteForBackground = 0
@@ -114,6 +146,11 @@ theta_zLUTColorBar.CustomLabels = [30.0, 60.0]
 theta_zLUTColorBar.AddRangeLabels = 0
 theta_zLUTColorBar.ScalarBarThickness = 32
 
+
+if args.cbar:
+    datavtkDisplay.SetScalarBarVisibility(renderView1, True)
+else:
+    datavtkDisplay.SetScalarBarVisibility(renderView1, False)
 # get layout
 layout1 = GetLayout()
 

@@ -25,6 +25,7 @@ class grain_visual:
         self.lxd = lxd
         self.seed = seed
         self.height = height
+        self.base_width = 2
         self.frames = frames # note that frames include the initial condition
         self.physical_params = physical_params
         
@@ -51,12 +52,15 @@ class grain_visual:
         print('grid ', fnx, fny, fnz)
         
         
-        number_list=re.findall(r"[-+]?\d*\.\d+|\d+", self.data_file)
-        data_frames = int(number_list[2])+1
+        G = re.search('G(\d+)', self.data_file).group(1)
+        R = re.search('Rmax(\d+)', self.data_file).group(1)
+        data_frames = int(re.search('frames(\d+)', self.data_file).group(1))+1
+        self.physical_params = {'G':G, 'R':R}
+        print(self.physical_params)
         
-        self.physical_params = {'G':float(number_list[3]), 'R':float(number_list[4])}
+        
         self.alpha_pde = np.asarray(f['alpha'])
-        top_z = int(self.height/dx)
+        top_z = int(np.round(self.height/dx))
         
         self.alpha_pde = self.alpha_pde.reshape((fnx, fny,fnz),order='F')[1:-1,1:-1, 1:top_z]        
       #  self.alpha_pde[self.alpha_pde == 0] = np.nan
@@ -71,12 +75,86 @@ class grain_visual:
         grid.point_data.scalars.name = 'theta_z'
         
         
-        print(self.physical_params)
+        
         self.dataname = rawdat_dir + 'seed'+str(self.seed) + '.vtk'
                    #rawdat_dir + 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
                    #+'_R'+str('%2.2f'%self.physical_params['R'])+'.vtk'
         write_data(grid, self.dataname)
         
+
+    def reconstruct(self, rawdat_dir: str = './', span: int = 6, alpha_field = None):
+        
+        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*'))[0]
+        f = h5py.File(self.data_file, 'r')
+        self.x = np.asarray(f['x_coordinates'])
+        self.y = np.asarray(f['y_coordinates'])
+        self.z = np.asarray(f['z_coordinates']) 
+        self.angles = np.asarray(f['angles']) 
+        self.theta_z = np.zeros(1 + len(self.angles)//2)
+        self.theta_z[1:] = self.angles[len(self.angles)//2+1:]
+        
+        assert int(self.lxd) == int(self.x[-2])
+        
+        
+        dx = self.x[1] - self.x[0]
+        
+        self.x /= self.lxd; self.y /= self.lxd; self.z /= self.lxd
+        fnx, fny, fnz = len(self.x), len(self.y), len(self.z)
+        print('grid ', fnx, fny, fnz)
+        
+        
+        G = re.search('G(\d+)', self.data_file).group(1)
+        R = re.search('Rmax(\d+)', self.data_file).group(1)
+        data_frames = int(re.search('frames(\d+)', self.data_file).group(1))+1
+        self.physical_params = {'G':G, 'R':R}
+        print(self.physical_params)
+        
+
+        
+        if alpha_field:
+            self.alpha_pde_frames = alpha_field
+        else:
+            self.alpha_pde_frames = np.asarray(f['cross_sec'])
+            self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,::span]               
+
+        dx_frame = (self.height - self.base_width)/(data_frames - 1)*span
+        print('dx in plance ', dx,' between two planes',  dx_frame)
+        
+        ''' stack the 2 um height '''
+        
+      #  stack_thick = int(self.base_width/dx_frame)
+        
+      #  print('stack layers ', stack_thick)
+        
+      #  base = np.tile(self.alpha_pde_frames[:,:,:1], (1,1,stack_thick))
+     #   self.alpha_pde_frames = np.concatenate([base, self.alpha_pde_frames], axis=-1)
+        
+        top_z = int(np.round((self.height-self.base_width)/dx_frame)) + 1
+        
+        self.alpha_pde_frames = self.alpha_pde_frames[:, :, :top_z]     
+        
+        
+      #  self.alpha_pde[self.alpha_pde == 0] = np.nan
+        self.alpha_pde_frames = self.theta_z[self.alpha_pde_frames]/pi*180
+        
+        
+        print('data shapes', self.alpha_pde_frames.shape)
+
+    
+        grid = tvtk.ImageData(spacing=(dx, dx, dx_frame), origin=(0, 0, 0), 
+                              dimensions=self.alpha_pde_frames.shape)
+        
+        grid.point_data.scalars = self.alpha_pde_frames.ravel(order='F')
+        grid.point_data.scalars.name = 'theta_z'
+        
+        
+        
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'leapz.vtk'
+
+        write_data(grid, self.dataname)      
+        
+        
+         
 
 if __name__ == '__main__':
 
@@ -85,6 +163,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--pvpython_dir", type=str, default = '')
+    parser.add_argument("--mode", type=str, default='truth')
     
     parser.add_argument("--seed", type=int, default = 20)
     parser.add_argument("--lxd", type=int, default = 40)
@@ -94,10 +173,18 @@ if __name__ == '__main__':
         
    # Gv = grain_visual(lxd = 20, seed = args.seed, height=20)   
     Gv = grain_visual(lxd=args.lxd, seed=args.seed, height=args.height)  
-    Gv.load(rawdat_dir=args.rawdat_dir)   
+    if args.mode == 'truth':
+        
+        Gv.load(rawdat_dir=args.rawdat_dir)  
+        
+    elif args.mode == 'reconstruct':
+        Gv.reconstruct(rawdat_dir=args.rawdat_dir)
+    
+    
+    else:
+        raise KeyError
    # args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
-   # os.system(args.pvpython_dir+'pvpython grain.py '+ Gv.dataname +' ./ ' + Gv.dataname[:-4])       
-   # os.system('rm '+Gv.dataname)    
+
         
         
 """

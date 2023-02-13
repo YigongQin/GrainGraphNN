@@ -523,8 +523,8 @@ class GrainNN_classifier(torch.nn.Module):
                              self.dim, seq_len = self.seq_len)
             
          
-        self.lin1 = nn.Linear(linear_outchannels+2, 1) # predict length
-        self.lin2 = nn.Linear(linear_outchannels+2, 1) # predict probability
+        self.lin1 = nn.Linear(linear_outchannels+1, 2) # predict length
+        self.lin2 = nn.Linear(linear_outchannels+1, 1) # predict probability
 
         
     def forward(self, x_dict, edge_index_dict, edge_attr):   
@@ -605,8 +605,9 @@ class GrainNN_classifier(torch.nn.Module):
                         if E_index in L1:
                             L1 = L1[L1!=E_index]
                             
-            L2 = torch.cat(L2)          
-            pairs = self.switching_edge_index(E_pp, E_pq, x_dict, prob, L2, truncate=2)
+            L2 = torch.cat(L2) 
+            print('grain', grain, 'eliminate edges', L2)
+            pairs = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, L2, truncate=2)
             
             self.delete_grain_index(grain, E_pp, E_pq, mask)
             
@@ -614,7 +615,8 @@ class GrainNN_classifier(torch.nn.Module):
         Neigbor switching
         """
 
-        pairs = self.switching_edge_index(E_pp, E_pq, x_dict, prob, L1)
+        pairs = torch.tensor([]) #
+        pairs = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, L1)
         E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
                         
         return pairs
@@ -642,7 +644,7 @@ class GrainNN_classifier(torch.nn.Module):
         return
     
     @staticmethod
-    def switching_edge_index(E_pp, E_pq, x_dict, prob, elimed_arg, truncate=0):
+    def switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, elimed_arg, truncate=0):
 
       #  print(elimed_arg)
         
@@ -666,6 +668,8 @@ class GrainNN_classifier(torch.nn.Module):
         
         for p1, p2 in pairs:
             
+            print(p1, p2)
+            
             # grain neighbors
             p1_qn_index = (E_pq[0]==p1).nonzero().view(-1)
             p1_qn = E_pq[1][ p1_qn_index ]
@@ -680,7 +684,17 @@ class GrainNN_classifier(torch.nn.Module):
             
             
             
+            ''' coordinates of two new vertices '''
+            
+            x_p1 = x_dict['joint'][p1, :2] - y_dict['joint'][p1] 
+            x_p2 = x_dict['joint'][p2, :2] - y_dict['joint'][p2] 
+            x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = rotate_two_points(x_p1, x_p2)
+            y_dict['joint'][p1] = x_dict['joint'][p1, :2] - x_p1
+            y_dict['joint'][p2] = x_dict['joint'][p2, :2] - x_p2
+            
             """
+            <1> approximate with pure rotation
+            <2> improve
             p1_p2 = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
             p2_p1 = ((E_pp[0]==p2)&(E_pp[1]==p1)).nonzero().view(-1)
             
@@ -794,9 +808,16 @@ def point_in_triangle(t, v1, v2, v3):
     
     return not (has_neg & has_pos)
 
-
+def rotate_two_points(x_p1_p, x_p2_p):
+    c_p1p2 = 0.5*( x_p1_p + x_p2_p )
+    x_p1 = x_p1_p - c_p1p2
+    x_p2 = x_p2_p - c_p1p2
+    x_p1[0], x_p1[1] = -x_p1[1], x_p1[0]
+    x_p2[0], x_p2[1] = -x_p2[1], x_p2[0]
+    x_p1 += c_p1p2
+    x_p2 += c_p1p2
      
-
+    return x_p1, x_p2
 """
 
   self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],

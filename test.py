@@ -176,6 +176,7 @@ if __name__=='__main__':
             with open(traj_list[case], 'rb') as inp:  
                 try:
                     traj = dill.load(inp)
+                  #  traj.show_data_struct()
                 except:
                     raise EOFError
             
@@ -231,9 +232,10 @@ if __name__=='__main__':
                 """            
                 
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
+                grain_event_truth = set([i-1 for i in grain_event_truth])
                 pred['grain_event'] = ((data['mask']['grain']>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
-              #  pred['grain_event'] = torch.tensor([27])
+               # pred['grain_event'] = torch.tensor([26])
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
@@ -243,8 +245,10 @@ if __name__=='__main__':
                 
                 
                 edge_event_truth = set.union(*traj.edge_events[:frame+1])
-                pairs = Cmodel.update(data.x_dict, data.edge_index_dict, pred, data['mask']).detach().numpy()
-                
+               # print(edge_event_truth)
+
+                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
+                pairs = pairs.detach().numpy()
                 
                 edge_event_list.extend([tuple(i) for i in pairs])
                 right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
@@ -270,12 +274,12 @@ if __name__=='__main__':
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
 
-                traj.GNN_update(frame, X_p, data['mask']['joint'], topogical, data.edge_index_dict)
+                traj.GNN_update(frame, X_p, data['mask'], topogical, data.edge_index_dict)
                 
                 
-                if False:
+                if True:
                     traj.plot_polygons()
-                if args.plot_flag:
+                if True:
                     traj.show_data_struct()
                 
                 

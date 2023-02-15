@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from heteropgclstm import HeteroPGCLSTM, HeteroPGC
 from heterogclstm import HeteroGCLSTM, HeteroGC
-from graph_datastruct import periodic_move_p
 import copy
 
 class GC(nn.Module):
@@ -569,12 +568,13 @@ class GrainNN_classifier(torch.nn.Module):
         return y_dict
 
 
-    def update(self, x_dict, edge_index_dict, y_dict, mask):            
+    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask):            
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
         E_pq = edge_index_dict['joint', 'pull', 'grain']
         E_qp = edge_index_dict['grain', 'push', 'joint']
+        edge_len = edge_attr['joint', 'connect', 'joint'][:,0]
 
         src, dst = E_pp[0], E_pp[1]
         
@@ -584,9 +584,9 @@ class GrainNN_classifier(torch.nn.Module):
       #  print(joint_edge_index[:,check_arg])        
 
         ''' predict eliminated edge '''
-        L1 = ((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True)
+        L1 = list(((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True))
         
-       # print(L1)
+      
 
         """
         Grain elimination
@@ -602,73 +602,83 @@ class GrainNN_classifier(torch.nn.Module):
                     E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
                     if len(E_index)>0:
                         L2.append(E_index)
-                        if E_index in L1:
-                            L1 = L1[L1!=E_index]
-                            
+                        
             L2 = torch.cat(L2) 
-            print('grain', grain, 'eliminate edges', L2)
-            pairs = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, L2, truncate=2)
+           # print('grain', grain, 'eliminate edges', L2)
+            print('grain', int(grain), ', junction neighbors', Np)
             
-            self.delete_grain_index(grain, E_pp, E_pq, mask)
+                           
+            
+            for E_index in L2:
+                if E_index in L1:
+                    L1.remove(E_index)                
+            
+            sorted_prob, indices= torch.sort(prob[L2], dim=0, descending=True)
+           # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
+            
+            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices[:-2], None) #x_dict['grain'][grain,:2])
+            
+            edge_index_dict['joint', 'connect', 'joint'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
+            E_pp = edge_index_dict['joint', 'connect', 'joint']
+            
             
         """
         Neigbor switching
         """
 
-        pairs = torch.tensor([]) #
-        pairs = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, L1)
+       # pairs = torch.tensor([]) #
+     
+        print('edge switching index', L1)
+        sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
+        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, indices, None)
         E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
-                        
-        return pairs
+        
+
+        pair_list = E_pp.T[L1]
+                
+        return edge_index_dict, pair_list
 
     
     @staticmethod    
     def delete_grain_index(grain, E_pp, E_pq, mask):
         
         Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
-        assert len(Np) == 2
+        assert len(Np) == 2, Np
         
         ''' find the two to delete p1, p2'''
         p1, p2 = Np
-        
+        print('remained vertices to delete', p1, p2)
         ''' find the two to connect p1_c, p2_c'''
+        Np1 = E_pp[1][((E_pp[0]==p1)&(E_pp[1]!=p2)).nonzero().view(-1)][0]
+        Np2 = E_pp[1][((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)][0]
         
+       # print('new connection', Np1, Np2)
         ''' remove all the edges connected to p1, p2'''
         
         ''' add one edge between p1_c, p2_c'''
+        E_pp = torch.cat([E_pp, torch.tensor([[Np1, Np2],[Np1, Np2]])], dim=-1)
         
         mask['grain'][grain] = 0
         mask['joint'][p1] = 0
         mask['joint'][p2] = 0
         
-        return
+        return E_pp
     
     @staticmethod
-    def switching_edge_index(E_pp, E_pq, x_dict, y_dict, prob, elimed_arg, truncate=0):
+    def switching_edge_index(E_pp, E_pq, x_dict, y_dict, elimed_arg, indices, center):
 
-      #  print(elimed_arg)
+    
+        pairs = torch.unique(E_pp.T[elimed_arg][indices].view(-1))
+        save_prev = {}
+        for p in pairs:
+           # x_dict['joint'][p, :2] -= y_dict['joint'][p] 
+            save_prev[int(p)] = x_dict['joint'][p, :2]
         
-        
-      #  src, dst = edge_event_list
-
-        
-        
-      #  src_edge = src[elimed_arg]
-      #  dst_edge = dst[elimed_arg]
-        pairs = E_pp.T
-        pairs = pairs[elimed_arg]
-        ## sort
-        sorted_prob, indices= torch.sort(prob[elimed_arg], dim=0, descending=True)
-        #  print(p, elimed_prob)
-        
-      #  src_edge  = src_edge[indices]
-      #  dst_edge  = dst_edge[indices]     
-        pairs = pairs[indices][:-truncate] if truncate>0 else pairs[indices]
-        
-        
-        for p1, p2 in pairs:
-            
-            print(p1, p2)
+        for index in indices:
+            p1, p2 = E_pp.T[elimed_arg][index]
+     #   for p1, p2 in pairs:
+           # print(E_pp.T[elimed_arg][indices])
+           # print(p1, p2)
             
             # grain neighbors
             p1_qn_index = (E_pq[0]==p1).nonzero().view(-1)
@@ -682,37 +692,11 @@ class GrainNN_classifier(torch.nn.Module):
             p2_pn_index = ((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)
             p2_pn = E_pp[1][ p2_pn_index ]            
             
-            
-            
-            ''' coordinates of two new vertices '''
-            
-            x_p1 = x_dict['joint'][p1, :2] - y_dict['joint'][p1] 
-            x_p2 = x_dict['joint'][p2, :2] - y_dict['joint'][p2] 
-            x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = rotate_two_points(x_p1, x_p2)
-            y_dict['joint'][p1] = x_dict['joint'][p1, :2] - x_p1
-            y_dict['joint'][p2] = x_dict['joint'][p2, :2] - x_p2
-            
-            """
-            <1> approximate with pure rotation
-            <2> improve
-            p1_p2 = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
-            p2_p1 = ((E_pp[0]==p2)&(E_pp[1]==p1)).nonzero().view(-1)
-            
-            x_dict['joint'][p1, :2]  = x_dict['joint'][p1, :2] - y_dict['joint'][p1] + y_dict['edge_rotation'][p1_p2]
-            x_dict['joint'][p2, :2]  = x_dict['joint'][p2, :2] - y_dict['joint'][p2] + y_dict['edge_rotation'][p2_p1]
-            
-            x_dict['joint'][p1, -2:] =  y_dict['edge_rotation'][p1_p2]
-            x_dict['joint'][p2, -2:] =  y_dict['edge_rotation'][p2_p1]
-            
-            """
-            
-            
-            
-            
+                       
             # find two expanding grains and two shrinking grains
             expand_q1 = p1_qn[(1-sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)] # new neighbor for p2
             expand_q2 = p2_qn[(1-sum(p2_qn==i for i in p1_qn)).nonzero(as_tuple=True)] # new neighbor for p1
-        
+         #   print(p1_qn, p2_qn)
             shrink_q1, shrink_q2 = p1_qn[(sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)]
 
             # swap the order
@@ -751,10 +735,43 @@ class GrainNN_classifier(torch.nn.Module):
             
           #  print('\n',p1_pn, p2_pn)
           #  print(p1_pn_index, p2_pn_index)
+            
+            ''' coordinates of two new vertices '''
+            
+            x_p1 = x_dict['joint'][p1, :2] 
+            x_p2 = x_dict['joint'][p2, :2]
+            
+            if center is not None:
+                
+                x_dict['joint'][p1, :2] = periodic_move(center, x_p1)
+                x_dict['joint'][p2, :2] = periodic_move(center, x_p2)
+            else:
+                x_p2_p = periodic_move(x_p2, x_p1)
+                c_p1p2 = 0.5*( x_p1 + x_p2_p )              
+                x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = c_p1p2, periodic_move(c_p1p2, x_p2)  
+            
+            
+          #  x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = rotate_two_points(x_p1, x_p2)
 
-
+            
+            
+            swap = False
             if point_in_triangle(x_dict['joint'][p2,:2], x_dict['joint'][p1,:2], \
-                                 x_dict['joint'][sq1_p1,:2], x_dict['joint'][sq1_p2,:2]):  
+                                 x_dict['joint'][sq1_p1,:2], x_dict['joint'][sq1_p2,:2]): 
+                swap = True
+         #   print(pairs.view(-1))  
+         #   print(sq1_p1, sq1_p2, sq2_p1, sq2_p2)
+            if sq1_p2 in pairs and sq2_p2 not in pairs:
+                swap = False
+            if sq2_p2 in pairs and sq1_p2 not in pairs:
+                swap = True               
+            if sq1_p1 in pairs and sq2_p1 not in pairs:
+                swap = True
+            if sq2_p1 in pairs and sq1_p1 not in pairs:
+                swap = False            
+         #   print(swap)
+                
+            if swap:
                # print('swap')
                 # swap
                 p1_qn_index_sort.reverse()
@@ -767,41 +784,41 @@ class GrainNN_classifier(torch.nn.Module):
 
                 
             # replace joint-grain edges
-          #  print(p1_qn_index_sort, p2_qn_index_sort)
-          #  print(E_pq[1, p1_qn_index_sort[1]], expand_q2)
-          #  print(E_pq[1, p2_qn_index_sort[0]], expand_q1)
+
             E_pq[1, p1_qn_index_sort[1]] = expand_q2 # reject sq2
             E_pq[1, p2_qn_index_sort[0]] = expand_q1
             
-         #   print(E_pp[1, p1_pn_index[1]], sq1_p2)
-         #   print(E_pp[1, p2_pn_index[0]], sq2_p1)            
+     
             # replace joint-joint edges
-            E_pp[1, p1_pn_index[1]] = sq1_p2 # reject sq2_p1
-            E_pp[1, p2_pn_index[0]] = sq2_p1
-            
            # print((sq1_p2, p2),'->', (sq1_p2, p1))
-           # print((sq2_p1, p1),'->', (sq2_p1, p2))              
+           # print((sq2_p1, p1),'->', (sq2_p1, p2))   
+            
+            E_pp[0, p1_pn_index[1]] = p2
+            E_pp[0, p2_pn_index[0]] = p1
+                                
             E_pp[1][ ((E_pp[0]==sq1_p2)&(E_pp[1]==p2)).nonzero().view(-1) ] = p1
             E_pp[1][ ((E_pp[0]==sq2_p1)&(E_pp[1]==p1)).nonzero().view(-1) ] = p2
       
-            
-            
+        
+       # print(save_prev)
+        for p in pairs:
+            y_dict['joint'][p] = x_dict['joint'][p,:2] - save_prev[int(p)]           
               
         
-        return pairs
+
 
 
 def point_in_triangle(t, v1, v2, v3):
     sign = lambda a, b, c: (a[0] - c[0])*(b[1] - c[1]) - \
                            (b[0] - c[0])*(a[1] - c[1])
    # print(v1, t)
-    periodic_move_p(v1, t)
-    periodic_move_p(v2, t)
-    periodic_move_p(v3, t)
+    v1_m = periodic_move(v1, t)
+    v2_m = periodic_move(v2, t)
+    v3_m = periodic_move(v3, t)
   #  print(t, v1, v2, v3)
-    d1 = sign(t, v1, v2)
-    d2 = sign(t, v2, v3)
-    d3 = sign(t, v3, v1)
+    d1 = sign(t, v1_m, v2_m)
+    d2 = sign(t, v2_m, v3_m)
+    d3 = sign(t, v3_m, v1_m)
 
     has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
     has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
@@ -809,15 +826,39 @@ def point_in_triangle(t, v1, v2, v3):
     return not (has_neg & has_pos)
 
 def rotate_two_points(x_p1_p, x_p2_p):
-    c_p1p2 = 0.5*( x_p1_p + x_p2_p )
+    
+    x_p2_p_m = periodic_move(x_p2_p, x_p1_p)
+    
+    c_p1p2 = 0.5*( x_p1_p + x_p2_p_m )
     x_p1 = x_p1_p - c_p1p2
-    x_p2 = x_p2_p - c_p1p2
-    x_p1[0], x_p1[1] = -x_p1[1], x_p1[0]
-    x_p2[0], x_p2[1] = -x_p2[1], x_p2[0]
+    x_p2 = x_p2_p_m - c_p1p2
+    
+    x_p1[0], x_p1[1] = 0, 0 #-x_p1[1], x_p1[0]
+    x_p2[0], x_p2[1] = 0, 0 #-x_p2[1], x_p2[0]
     x_p1 += c_p1p2
     x_p2 += c_p1p2
-     
+    
+    x_p2 = periodic_move(x_p2, x_p2_p)
+    
     return x_p1, x_p2
+
+
+
+def periodic_move(p, pc):
+    x,  y  = p
+    xc, yc = pc
+
+    rel_x = x - xc
+    rel_y = y - yc
+    x += -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
+    y += -1*(rel_y>0.5) + 1*(rel_y<-0.5) 
+    
+    
+    assert -0.5<x - xc<0.5
+    assert -0.5<y - yc<0.5
+    return torch.tensor([x, y])
+
+
 """
 
   self.features = {'grain':['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz'],
@@ -861,4 +902,17 @@ def rot90(data, symmetry, rot):
         
         data.y_dict['joint'][:,0], data.y_dict['joint'][:,1]   = -data.y_dict['joint'][:,1], data.y_dict['joint'][:,0]  
         
+"""
+"""
+<1> approximate with pure rotation
+<2> improve
+p1_p2 = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
+p2_p1 = ((E_pp[0]==p2)&(E_pp[1]==p1)).nonzero().view(-1)
+
+x_dict['joint'][p1, :2]  = x_dict['joint'][p1, :2] - y_dict['joint'][p1] + y_dict['edge_rotation'][p1_p2]
+x_dict['joint'][p2, :2]  = x_dict['joint'][p2, :2] - y_dict['joint'][p2] + y_dict['edge_rotation'][p2_p1]
+
+x_dict['joint'][p1, -2:] =  y_dict['edge_rotation'][p1_p2]
+x_dict['joint'][p2, -2:] =  y_dict['edge_rotation'][p2_p1]
+
 """

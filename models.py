@@ -501,6 +501,7 @@ class GrainNN_classifier(torch.nn.Module):
         self.history = history
         # self.dim = {('grain', 'push', 'joint'):1}
         self.dim = {'joint':2, 'grain':1}
+        self.scaling = {'grain':20, 'joint':5}
         
         linear_outchannels = 3*self.out_channels if self.history else 2*self.out_channels
         ## networks
@@ -591,19 +592,32 @@ class GrainNN_classifier(torch.nn.Module):
         """
         Grain elimination
         """
+        
+        
         for grain in y_dict['grain_event']:
             
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
             pairs = torch.combinations(Np, r=2)
             L2 = []
+            Nq = []
 
             for p1, p2 in pairs:
                 if p1<p2:
                     E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
                     if len(E_index)>0:
                         L2.append(E_index)
-                        
-            L2 = torch.cat(L2) 
+                        Nq1 = E_pq[1][((E_pq[0]==p1)&(E_pq[1]!=grain)).nonzero().view(-1)]
+                        Nq2 = E_pq[1][((E_pq[0]==p2)&(E_pq[1]!=grain)).nonzero().view(-1)]
+                        if Nq1[0] in Nq2:
+                            Nq.append(Nq1[0])
+                        elif Nq1[1] in Nq2:
+                            Nq.append(Nq1[1])
+                        else: 
+                            raise KeyError
+                            
+            L2 = torch.cat(L2)
+            
+           # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
             print('grain', int(grain), ', junction neighbors', Np)
             
@@ -613,10 +627,20 @@ class GrainNN_classifier(torch.nn.Module):
                 if E_index in L1:
                     L1.remove(E_index)                
             
-            sorted_prob, indices= torch.sort(prob[L2], dim=0, descending=True)
+            
+            grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
+           # print(grain_sort_index)
+           # print(prob[L2])
+            L2 = L2[grain_sort_index[:-2]]
+            
+            sorted_prob, indices = torch.sort(prob[L2], dim=0, descending=True)
+           # print('orientation', x_dict['grain'][Nq, 7])
+           # print('prob', prob[L2])
+            
+           # sorted_prob, indices= torch.sort((x_dict['grain'][Nq, 7]-sq2)**2, dim=0)
            # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
             
-            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices[:-2], None) #x_dict['grain'][grain,:2])
+            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices, None) #x_dict['grain'][grain,:2])
             
             edge_index_dict['joint', 'connect', 'joint'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -647,7 +671,7 @@ class GrainNN_classifier(torch.nn.Module):
         
         ''' find the two to delete p1, p2'''
         p1, p2 = Np
-        print('remained vertices to delete', p1, p2)
+      #  print('remained vertices to delete', p1, p2)
         ''' find the two to connect p1_c, p2_c'''
         Np1 = E_pp[1][((E_pp[0]==p1)&(E_pp[1]!=p2)).nonzero().view(-1)][0]
         Np2 = E_pp[1][((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)][0]
@@ -664,14 +688,14 @@ class GrainNN_classifier(torch.nn.Module):
         
         return E_pp
     
-    @staticmethod
-    def switching_edge_index(E_pp, E_pq, x_dict, y_dict, elimed_arg, indices, center):
+
+    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, indices, center):
 
     
         pairs = torch.unique(E_pp.T[elimed_arg][indices].view(-1))
         save_prev = {}
         for p in pairs:
-           # x_dict['joint'][p, :2] -= y_dict['joint'][p] 
+            x_dict['joint'][p, :2] -= y_dict['joint'][p]/self.scaling['joint'] 
             save_prev[int(p)] = x_dict['joint'][p, :2]
         
         for index in indices:
@@ -802,8 +826,8 @@ class GrainNN_classifier(torch.nn.Module):
         
        # print(save_prev)
         for p in pairs:
-            y_dict['joint'][p] = x_dict['joint'][p,:2] - save_prev[int(p)]           
-              
+            y_dict['joint'][p] = self.scaling['joint']*(x_dict['joint'][p,:2] - save_prev[int(p)])           
+            x_dict['joint'][p, 6:8] =  y_dict['joint'][p]  
         
 
 

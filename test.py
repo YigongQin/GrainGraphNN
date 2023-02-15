@@ -27,7 +27,7 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./test/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
@@ -233,9 +233,15 @@ if __name__=='__main__':
                 
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 grain_event_truth = set([i-1 for i in grain_event_truth])
-                pred['grain_event'] = ((data['mask']['grain']>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
-               # pred['grain_event'] = torch.tensor([26])
+                print(grain_event_truth)
+               # print(data['mask']['grain'].shape, pred['grain_area'].shape)
+                
+                pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
+                
+                pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
+                
+               # pred['grain_event'] = torch.tensor([228, 39, 70, 89])
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
@@ -278,6 +284,7 @@ if __name__=='__main__':
                 
                 
                 if True:
+                    traj.raise_err = False
                     traj.plot_polygons()
                 if True:
                     traj.show_data_struct()

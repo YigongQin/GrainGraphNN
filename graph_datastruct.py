@@ -367,55 +367,39 @@ class graph:
     def show_data_struct(self):
         
 
+        fig, ax = plt.subplots(1, 4, figsize=(20, 5))
         
-        fig, ax = plt.subplots(2, 3, figsize=(15, 10))
-        
-        vertices = list(self.vertices.values())
-        x, y = zip(*vertices)
-        ax[0,0].scatter(list(x), list(y), s=5)
-        ax[0,0].axis("equal")
-        ax[0,0].set_title('Vertices'+str(len(self.vertex_neighbor)))
-        #ax[0].set_xlim(0,1)
-        #ax[0].set_ylim(0,1)
-        #ax[0].set_xticks([])
-        #ax[0].set_yticks([])
+        Q, V, E = len(self.regions), len(self.vertex_neighbor), len(self.edges)
+
         
         for coors in self.region_coors.values():
             for i in range(len(coors)):
                 cur = coors[i]
                 nxt = coors[i+1] if i<len(coors)-1 else coors[0]
-                ax[0,1].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
+                ax[0].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
                 
         x, y = zip(*self.region_center.values())     
     
-        ax[0,1].scatter(list(x), list(y), c = 'k')
-        ax[0,1].axis("equal")
-        ax[0,1].set_title('Edges'+str(len(self.edges)))
-        #ax[1].set_xticks([])
-        #ax[1].set_yticks([])
+        ax[0].scatter(list(x), list(y), c = 'k')
+        ax[0].axis("equal")
+        ax[0].set_title('(Q, V, E)=(%d, %d, %d)'%(Q, V, E))
 
         
-        view_size = int(0.6*self.alpha_field_dummy.shape[0])
-        field = self.alpha_field_dummy[:view_size,:view_size]
-        field = self.theta_z[field]
-        ax[0,2].imshow((field/pi*180)*(field>0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[0,2].set_xticks([])
-        ax[0,2].set_yticks([])
-        ax[0,2].set_title('Grains'+str(len(self.regions))) 
-
-        ax[1,0].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[1,0].set_xticks([])
-        ax[1,0].set_yticks([])
-        ax[1,0].set_title('vertex model reconstructed') 
-        ax[1,1].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[1,1].set_xticks([])
-        ax[1,1].set_yticks([])
-        ax[1,1].set_title('pde')         
+        ax[1].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1].set_xticks([])
+        ax[1].set_yticks([])
+        ax[1].set_title('reconstructed') 
         
-        ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
-        ax[1,2].set_xticks([])
-        ax[1,2].set_yticks([])
-        ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')                 
+        ax[2].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[2].set_xticks([])
+        ax[2].set_yticks([])
+        ax[2].set_title('phase field')         
+        
+        ax[3].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
+        ax[3].set_xticks([])
+        ax[3].set_yticks([])
+        ax[3].set_title('error'+'%d'%(self.error_layer*100)+'%')           
+              
         
         if self.save:
             plt.savefig('./voronoi.png', dpi=400)
@@ -797,5 +781,56 @@ if __name__ == '__main__':
           #  g1.show_data_struct() 
                
 
+"""
+        fig, ax = plt.subplots(2, 3, figsize=(15, 10))
+        
+        vertices = list(self.vertices.values())
+        x, y = zip(*vertices)
+        ax[0,0].scatter(list(x), list(y), s=5)
+        ax[0,0].axis("equal")
+        ax[0,0].set_title('Vertices'+str(len(self.vertex_neighbor)))
+        #ax[0].set_xlim(0,1)
+        #ax[0].set_ylim(0,1)
+        #ax[0].set_xticks([])
+        #ax[0].set_yticks([])
+        
+        for coors in self.region_coors.values():
+            for i in range(len(coors)):
+                cur = coors[i]
+                nxt = coors[i+1] if i<len(coors)-1 else coors[0]
+                ax[0,1].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
+                
+        x, y = zip(*self.region_center.values())     
+    
+        ax[0,1].scatter(list(x), list(y), c = 'k')
+        ax[0,1].axis("equal")
+        ax[0,1].set_title('Edges'+str(len(self.edges)))
+        #ax[1].set_xticks([])
+        #ax[1].set_yticks([])
 
+        
+        view_size = int(0.6*self.alpha_field_dummy.shape[0])
+        field = self.alpha_field_dummy[:view_size,:view_size]
+        field = self.theta_z[field]
+        ax[0,2].imshow((field/pi*180)*(field>0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[0,2].set_xticks([])
+        ax[0,2].set_yticks([])
+        ax[0,2].set_title('Grains'+str(len(self.regions))) 
+
+        ax[1,0].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1,0].set_xticks([])
+        ax[1,0].set_yticks([])
+        ax[1,0].set_title('vertex model reconstructed') 
+        ax[1,1].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1,1].set_xticks([])
+        ax[1,1].set_yticks([])
+        ax[1,1].set_title('pde')         
+        
+        ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
+        ax[1,2].set_xticks([])
+        ax[1,2].set_yticks([])
+        ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')   
+        
+        
+"""
 

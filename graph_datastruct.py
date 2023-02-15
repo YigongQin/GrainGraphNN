@@ -179,6 +179,9 @@ class graph:
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
+        self.raise_err = True
+        self.save = False
+        
         randInit = True
         
         if randInit:
@@ -311,8 +314,10 @@ class graph:
                         ii += s
                         jj += s
                     else:
-                       # pass
-                        raise ValueError(i,j)
+                        if self.raise_err:
+                            raise ValueError(i,j)
+                        else: 
+                            pass
                         
                 self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]         
 
@@ -411,8 +416,9 @@ class graph:
         ax[1,2].set_xticks([])
         ax[1,2].set_yticks([])
         ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')                 
-               
-        plt.savefig('./voronoi.png', dpi=400)
+        
+        if self.save:
+            plt.savefig('./voronoi.png', dpi=400)
        
     def update(self, init = False):
         
@@ -709,8 +715,8 @@ class GrainHeterograph:
         self.feature_dicts['joint'] = np.hstack((self.feature_dicts['joint'], self.prev_grad_joint)) 
                 
         
-        self.edge_weight_dicts[self.edge_type[2]] = np.hstack((self.edge_weight_dicts[self.edge_type[2]], 
-                                                               self.prev_grad_edge)) 
+      #  self.edge_weight_dicts[self.edge_type[2]] = np.hstack((self.edge_weight_dicts[self.edge_type[2]], 
+      #                                                         self.prev_grad_edge)) 
 
         
         for nodes, features in self.features.items():

@@ -289,7 +289,7 @@ if __name__=='__main__':
                 if True:
                     traj.raise_err = False
                     traj.plot_polygons()
-                if True:
+                if False:
                     traj.show_data_struct()
                 
                 
@@ -302,8 +302,20 @@ if __name__=='__main__':
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
                 
+                for edge_type, index in data.edge_index_dict.items():
+                    
+                    src, dst = edge_type[0], edge_type[-1]
+                    src_idx, dst_idx = index[0], index[-1]
+                    
+                    src_x = data.x_dict[src][src_idx,:2]
+                    dst_x = data.x_dict[dst][dst_idx,:2]
+                    
+                    rel_loc = src_x - dst_x
+                    rel_loc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
+                    data.edge_attr_dict[edge_type] = torch.sqrt(rel_loc[:,0]**2 + rel_loc[:,1]**2).view(-1,1)
+                    
+                   # print(data.edge_attr_dict[edge_type][:,0])
                 
-            
             end_time = time.time()
             print('inference time for case %d'%case, end_time - start_time)            
            

@@ -786,13 +786,14 @@ class graph_trajectory(graph):
             
             jj_edge = edge_index_dict['joint', 'connect', 'joint'].detach().numpy()
             gj_edge = edge_index_dict['grain', 'push', 'joint'].detach().numpy()
+            #print(jj_edge.shape, gj_edge.shape)
             
             self.vertex2joint = defaultdict(set)
             self.edges.clear()
             
             
             for grain, joint in gj_edge.T:
-                if mask_g[grain]>0 and mask_j[joint]>0:
+              #  if mask_g[grain]>0 and mask_j[joint]>0:
                     self.vertex2joint[joint].add(grain+1) 
      
             
@@ -802,7 +803,7 @@ class graph_trajectory(graph):
             self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
             self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
            # print(len(jj_edge[0]))
-            self.edges = [[i,j] for i, j in jj_edge.T if mask_j[i] and mask_j[j]]
+            self.edges = jj_edge.T #[[i,j] for i, j in jj_edge.T if mask_j[i] and mask_j[j]]
         
         
         self.update()

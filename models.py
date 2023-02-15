@@ -574,8 +574,8 @@ class GrainNN_classifier(torch.nn.Module):
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
         E_pq = edge_index_dict['joint', 'pull', 'grain']
-        E_qp = edge_index_dict['grain', 'push', 'joint']
-        edge_len = edge_attr['joint', 'connect', 'joint'][:,0]
+    #    E_qp = edge_index_dict['grain', 'push', 'joint']
+     #   edge_len = edge_attr['joint', 'connect', 'joint'][:,0]
 
         src, dst = E_pp[0], E_pp[1]
         
@@ -592,7 +592,7 @@ class GrainNN_classifier(torch.nn.Module):
         """
         Grain elimination
         """
-        
+        self.elim = {'grain':[], 'joint':[]}
         
         for grain in y_dict['grain_event']:
             
@@ -659,16 +659,31 @@ class GrainNN_classifier(torch.nn.Module):
         sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
         L1 = L1[indices]
         self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None)
-        E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
         
-
-        pair_list = E_pp.T[L1]
+        switching_list = E_pp.T[L1]
+        
+        edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.cleanup(E_pp, E_pq)
+        
+        edge_index_dict['grain', 'push', 'joint'] = torch.flip(edge_index_dict['joint', 'pull', 'grain'], dims=[0])
+       # E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
+        
+        
                 
-        return edge_index_dict, pair_list
+        return edge_index_dict, switching_list
 
-    
-    @staticmethod    
-    def delete_grain_index(grain, E_pp, E_pq, mask):
+
+    def cleanup(self, E_pp, E_pq):
+        
+        for grain in self.elim['grain']:
+            E_pq = E_pq[:, (E_pq[1]!=grain).nonzero().view(-1)]
+        
+        for joint in self.elim['joint']:
+            E_pq = E_pq[:, (E_pq[0]!=joint).nonzero().view(-1)]
+            E_pp = E_pp[:, (E_pp[0]!=joint).nonzero().view(-1)]
+            E_pp = E_pp[:, (E_pp[1]!=joint).nonzero().view(-1)]
+        return E_pp, E_pq
+        
+    def delete_grain_index(self, grain, E_pp, E_pq, mask):
         
         Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
         assert len(Np) == 2, Np
@@ -689,6 +704,11 @@ class GrainNN_classifier(torch.nn.Module):
         mask['grain'][grain] = 0
         mask['joint'][p1] = 0
         mask['joint'][p2] = 0
+        
+        
+        self.elim['grain'].append(grain)
+        self.elim['joint'].append(p1)
+        self.elim['joint'].append(p2)
         
         return E_pp
     

@@ -27,7 +27,7 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/1frame/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
@@ -278,7 +278,7 @@ if __name__=='__main__':
                 """
                 
                # print(data['nxt'])
-                pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
+               # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
@@ -297,6 +297,7 @@ if __name__=='__main__':
                 """
                 <5> next prediction
                     a. x_q
+                    b. edge, edge_attr
                 """
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)

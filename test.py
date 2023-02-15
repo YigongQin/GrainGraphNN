@@ -31,6 +31,7 @@ if __name__=='__main__':
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
+    parser.add_argument("--seed", type=str, default='')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
 
@@ -59,7 +60,7 @@ if __name__=='__main__':
     
     
             
-    datasets = sorted(glob.glob(args.truth_dir + 'case*'))
+    datasets = sorted(glob.glob(args.truth_dir + 'case' + args.seed + '*'))
 
     test_list = []
     for case in datasets:
@@ -156,7 +157,7 @@ if __name__=='__main__':
     
     """      
 
-    traj_list = sorted(glob.glob(args.truth_dir + 'traj*'))
+    traj_list = sorted(glob.glob(args.truth_dir + 'traj'+ args.seed + '*'))
     
     test_loader = DataLoader(test_tensor, shuffle=False)
     
@@ -167,6 +168,8 @@ if __name__=='__main__':
             
             
             data.to(device)
+            print('\n')
+            print('================================')
             
             print('case', datasets[case])
             
@@ -199,8 +202,8 @@ if __name__=='__main__':
             
             for frame in range(span, 121, span):
                 
-                print('================================')
-                print('prediction progress %1.2f/1.0'%(frame/120))
+                
+                print('******* prediction progress %1.2f/1.0 ********'%(frame/120))
                # print(data.x_dict['joint'][:,5])
                 """
                 <1> combine two predictions
@@ -234,19 +237,19 @@ if __name__=='__main__':
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 grain_event_truth = set([i-1 for i in grain_event_truth])
                 
-                print(grain_event_truth)
+                print('true grain events: ', grain_event_truth)
                # print(data['mask']['grain'].shape, pred['grain_area'].shape)
                 
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
                 
-               # pred['grain_event'] = torch.tensor([228, 39, 70, 89])
+               # pred['grain_event'] = torch.tensor([42, 93])
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
                 
-                print('grain events: ', pred['grain_event'])
+                print('predicted grain events: ', pred['grain_event'])
                 print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
                 
                 
@@ -266,7 +269,7 @@ if __name__=='__main__':
                 topogical = len(pred['grain_event'])>0 or len(pairs)>0               
                 print('topological changes happens: ', topogical)
                 
-                print('\n')
+           #     print('\n')
 
 
                 
@@ -276,7 +279,7 @@ if __name__=='__main__':
                 
                # print(data['nxt'])
                 pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
-                print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
+              #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
 

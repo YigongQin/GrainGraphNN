@@ -585,7 +585,7 @@ class GrainNN_classifier(torch.nn.Module):
       #  print(joint_edge_index[:,check_arg])        
 
         ''' predict eliminated edge '''
-        L1 = list(((prob>self.threshold)&(src<dst)).nonzero(as_tuple=True))
+        L1 = ((prob>self.threshold)&(src<dst)).nonzero().view(-1)
         
       
 
@@ -621,31 +621,33 @@ class GrainNN_classifier(torch.nn.Module):
            # print('grain', grain, 'eliminate edges', L2)
             print('grain', int(grain), ', junction neighbors', Np)
             
-                           
             
-            for E_index in L2:
-                if E_index in L1:
-                    L1.remove(E_index)                
+           # grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
             
-            
-            grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
+            sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
            # print(grain_sort_index)
            # print(prob[L2])
-            L2 = L2[grain_sort_index[:-2]]
+           # L2 = L2[grain_sort_index[:-2]]
             
-            sorted_prob, indices = torch.sort(prob[L2], dim=0, descending=True)
+           # sorted_prob, indices = torch.sort(prob[L2], dim=0, descending=True)
            # print('orientation', x_dict['grain'][Nq, 7])
            # print('prob', prob[L2])
             
            # sorted_prob, indices= torch.sort((x_dict['grain'][Nq, 7]-sq2)**2, dim=0)
            # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
             
-            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices, None) #x_dict['grain'][grain,:2])
+            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices[:-2], None) #x_dict['grain'][grain,:2])
             
             edge_index_dict['joint', 'connect', 'joint'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
             
-            
+
+            for E_index in L2:
+               # print(E_index, L1)
+                if E_index in L1:
+                    L1 = L1[L1!=E_index]
+                    
+                    
         """
         Neigbor switching
         """

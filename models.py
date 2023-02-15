@@ -625,6 +625,7 @@ class GrainNN_classifier(torch.nn.Module):
            # grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
+            L2 = L2[indices[:-2]]
            # print(grain_sort_index)
            # print(prob[L2])
            # L2 = L2[grain_sort_index[:-2]]
@@ -636,7 +637,7 @@ class GrainNN_classifier(torch.nn.Module):
            # sorted_prob, indices= torch.sort((x_dict['grain'][Nq, 7]-sq2)**2, dim=0)
            # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
             
-            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, indices[:-2], None) #x_dict['grain'][grain,:2])
+            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None) #x_dict['grain'][grain,:2])
             
             edge_index_dict['joint', 'connect', 'joint'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -656,7 +657,8 @@ class GrainNN_classifier(torch.nn.Module):
      
         print('edge switching index', L1)
         sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
-        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, indices, None)
+        L1 = L1[indices]
+        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None)
         E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
         
 
@@ -691,16 +693,16 @@ class GrainNN_classifier(torch.nn.Module):
         return E_pp
     
 
-    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, indices, center):
+    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, center):
 
     
-        pairs = torch.unique(E_pp.T[elimed_arg][indices].view(-1))
+        pairs = torch.unique(E_pp.T[elimed_arg].view(-1))
         save_prev = {}
         for p in pairs:
             x_dict['joint'][p, :2] -= y_dict['joint'][p]/self.scaling['joint'] 
             save_prev[int(p)] = x_dict['joint'][p, :2]
         
-        for index in indices:
+        for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
      #   for p1, p2 in pairs:
            # print(E_pp.T[elimed_arg][indices])

@@ -473,13 +473,13 @@ class GrainNN_regressor(nn.Module):
     def update(self, x_dict, y_dict):
         
         # features
-        x_dict['joint'][:, :2]  += y_dict['joint']/self.scaling['joint']
-        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]/self.scaling['grain']
-        x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]
+        x_dict['joint'][:, :2]  += y_dict['joint']/self.scaling['joint']  # junction movement -> (x,y)
+        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]/self.scaling['grain']  # grain area change -> s
+        x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]  # extra volume v
         
         # gradients
-        x_dict['joint'][:, 6:8] =  y_dict['joint']
-        x_dict['grain'][:, 6]  =  y_dict['grain'][:, 0]
+        x_dict['joint'][:, 6:8] =  y_dict['joint']  # dx, dy
+        x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]  # ds
         
        # return x_dict
 

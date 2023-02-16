@@ -758,7 +758,7 @@ class graph_trajectory(graph):
         # reset the edge_labels, check event at next snapshot
         # self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
-    def GNN_update(self, frame, X_j, mask, topogical, edge_index_dict):
+    def GNN_update(self, frame, X_j, mask, topo, edge_index_dict):
         
         
         
@@ -782,7 +782,7 @@ class graph_trajectory(graph):
        # for joint, coors in self.vertices.items():
        #     self.vertices[joint] = X_j[joint]        
         
-        if topogical:
+        if topo:
             
             jj_edge = edge_index_dict['joint', 'connect', 'joint'].detach().numpy()
             gj_edge = edge_index_dict['grain', 'push', 'joint'].detach().numpy()
@@ -803,8 +803,9 @@ class graph_trajectory(graph):
             self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
             self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
            # print(len(jj_edge[0]))
-            self.edges = jj_edge.T #[[i,j] for i, j in jj_edge.T if mask_j[i] and mask_j[j]]
+            self.edges = [[i,j] for i, j in jj_edge.T] #[[i,j] for i, j in jj_edge.T if mask_j[i] and mask_j[j]]
         
+
         
         self.update()
 

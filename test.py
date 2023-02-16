@@ -27,11 +27,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/1frame/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/mid/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='')
+    parser.add_argument("--seed", type=str, default='1429')
     
     parser.add_argument("--plot_flag", type=bool, default=False)
 
@@ -192,11 +192,14 @@ if __name__=='__main__':
             
             
             ''' intialization '''
-            assert np.all(data['mask']['grain'].detach().numpy()>0)
-            
+            assert np.all(data['mask']['grain'][:,0].detach().numpy()>0)
+
             data['mask']['joint'] = 1 + 0*data['mask']['joint']
-           # print(data['mask']['joint'])
-            
+
+            X_p = data.x_dict['joint'][:,:2].detach().numpy()
+            traj.GNN_update(0, X_p, data['mask'], True, data.edge_index_dict)
+                
+                
             grain_event_list = []
             edge_event_list = []       
             
@@ -204,13 +207,12 @@ if __name__=='__main__':
                 
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/120))
-               # print(data.x_dict['joint'][:,5])
+
                 """
                 <1> combine two predictions
                     a. Rmodel: dx_p, ds & v
                     b. Cmodel: p(i,j), dx for p(i,j)>threshold
                 """            
-
 
                 pred = Rmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
                 pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
@@ -244,7 +246,7 @@ if __name__=='__main__':
                 
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
                 
-               # pred['grain_event'] = torch.tensor([42, 93])
+                #if frame>100: pred['grain_event'] = torch.tensor([50, 93, 87, 99])
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
@@ -266,8 +268,8 @@ if __name__=='__main__':
                 print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )
     
 
-                topogical = len(pred['grain_event'])>0 or len(pairs)>0               
-                print('topological changes happens: ', topogical)
+                topo = len(pred['grain_event'])>0 or len(pairs)>0               
+                print('topological changes happens: ', topo)
                 
            #     print('\n')
 
@@ -283,13 +285,13 @@ if __name__=='__main__':
                 
                 X_p = data.x_dict['joint'][:,:2].detach().numpy()
 
-                traj.GNN_update(frame, X_p, data['mask'], topogical, data.edge_index_dict)
+                traj.GNN_update(frame, X_p, data['mask'], topo, data.edge_index_dict)
                 
                 
                 if True:
                     traj.raise_err = False
                     traj.plot_polygons()
-                if False:
+                if True:
                     traj.show_data_struct()
                 
                 
@@ -302,6 +304,7 @@ if __name__=='__main__':
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
                 
+                data.edge_attr_dict = {}
                 for edge_type, index in data.edge_index_dict.items():
                     
                     src, dst = edge_type[0], edge_type[-1]
@@ -312,9 +315,11 @@ if __name__=='__main__':
                     
                     rel_loc = src_x - dst_x
                     rel_loc = -1*(rel_loc>0.5) + 1*(rel_loc<-0.5) + rel_loc
-                    data.edge_attr_dict[edge_type] = torch.sqrt(rel_loc[:,0]**2 + rel_loc[:,1]**2).view(-1,1)
-                    
-                   # print(data.edge_attr_dict[edge_type][:,0])
+                    rel_loc = torch.sqrt(rel_loc[:,0]**2 + rel_loc[:,1]**2).view(-1,1)
+            
+                    data.edge_attr_dict[edge_type] = rel_loc
+ 
+
                 
             end_time = time.time()
             print('inference time for case %d'%case, end_time - start_time)            

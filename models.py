@@ -648,6 +648,9 @@ class GrainNN_classifier(torch.nn.Module):
         print('edge switching index', L1)
         sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
         L1 = L1[indices]
+        for E_index in L1:
+             if E_pp[0, E_index] == -1:
+                 L1 = L1[L1!=E_index]
         self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None)
         
         switching_list = E_pp.T[L1]
@@ -726,7 +729,7 @@ class GrainNN_classifier(torch.nn.Module):
         
         for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
-  
+
            # print(E_pp.T[elimed_arg])
            # print(p1, p2)
             

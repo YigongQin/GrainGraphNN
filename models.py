@@ -577,14 +577,12 @@ class GrainNN_classifier(torch.nn.Module):
     #    E_qp = edge_index_dict['grain', 'push', 'joint']
      #   edge_len = edge_attr['joint', 'connect', 'joint'][:,0]
 
-        src, dst = E_pp[0], E_pp[1]
-        
-        prob = torch.sigmoid(y_dict['edge_event'])
 
-        check_arg = [] #[45,67,134] #[45,67,78,112,125,134]
-      #  print(joint_edge_index[:,check_arg])        
 
         ''' predict eliminated edge '''
+        
+        src, dst = E_pp[0], E_pp[1]
+        prob = torch.sigmoid(y_dict['edge_event'])
         L1 = ((prob>self.threshold)&(src<dst)).nonzero().view(-1)
         
       
@@ -623,22 +621,11 @@ class GrainNN_classifier(torch.nn.Module):
            # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
             print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
-            
-            
-           # grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
+
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
             L2 = L2[indices[:-2]]
-           # print(grain_sort_index)
-           # print(prob[L2])
-           # L2 = L2[grain_sort_index[:-2]]
-            
-           # sorted_prob, indices = torch.sort(prob[L2], dim=0, descending=True)
-           # print('orientation', x_dict['grain'][Nq, 7])
-           # print('prob', prob[L2])
-            
-           # sorted_prob, indices= torch.sort((x_dict['grain'][Nq, 7]-sq2)**2, dim=0)
-           # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
+
             
             self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None) #x_dict['grain'][grain,:2])
             
@@ -709,7 +696,7 @@ class GrainNN_classifier(torch.nn.Module):
         ''' remove all the edges connected to p1, p2'''
         
         ''' add one edge between p1_c, p2_c'''
-        E_pp = torch.cat([E_pp, torch.tensor([[Np1, Np2],[Np1, Np2]])], dim=-1)
+        E_pp = torch.cat([E_pp, torch.tensor([[Np1, Np2],[Np2, Np1]])], dim=-1)
         
         mask['grain'][grain] = 0
         mask['joint'][p1] = 0
@@ -739,8 +726,8 @@ class GrainNN_classifier(torch.nn.Module):
         
         for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
-     #   for p1, p2 in pairs:
-           # print(E_pp.T[elimed_arg][indices])
+  
+           # print(E_pp.T[elimed_arg])
            # print(p1, p2)
             
             # grain neighbors
@@ -978,4 +965,15 @@ x_dict['joint'][p2, :2]  = x_dict['joint'][p2, :2] - y_dict['joint'][p2] + y_dic
 x_dict['joint'][p1, -2:] =  y_dict['edge_rotation'][p1_p2]
 x_dict['joint'][p2, -2:] =  y_dict['edge_rotation'][p2_p1]
 
+
+           # print(grain_sort_index)
+           # print(prob[L2])
+           # L2 = L2[grain_sort_index[:-2]]
+            
+           # sorted_prob, indices = torch.sort(prob[L2], dim=0, descending=True)
+           # print('orientation', x_dict['grain'][Nq, 7])
+           # print('prob', prob[L2])
+            
+           # sorted_prob, indices= torch.sort((x_dict['grain'][Nq, 7]-sq2)**2, dim=0)
+           # sorted_prob, indices= torch.sort(edge_len[L2], dim=0)
 """

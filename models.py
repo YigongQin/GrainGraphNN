@@ -588,38 +588,41 @@ class GrainNN_classifier(torch.nn.Module):
         L1 = ((prob>self.threshold)&(src<dst)).nonzero().view(-1)
         
       
-
+        
         """
         Grain elimination
         """
         self.elim = {'grain':[], 'joint':[]}
         
         for grain in y_dict['grain_event']:
-            
+           # print(((E_pp[0]==59)&(E_pp[1]==115)).nonzero().view(-1))
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
             pairs = torch.combinations(Np, r=2)
             L2 = []
             Nq = []
 
+           # print(pairs)
             for p1, p2 in pairs:
-                if p1<p2:
-                    E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
-                    if len(E_index)>0:
-                        L2.append(E_index)
-                        Nq1 = E_pq[1][((E_pq[0]==p1)&(E_pq[1]!=grain)).nonzero().view(-1)]
-                        Nq2 = E_pq[1][((E_pq[0]==p2)&(E_pq[1]!=grain)).nonzero().view(-1)]
-                        if Nq1[0] in Nq2:
-                            Nq.append(Nq1[0])
-                        elif Nq1[1] in Nq2:
-                            Nq.append(Nq1[1])
-                        else: 
-                            raise KeyError
+                if p1>p2:
+                    p1, p2 = p2, p1
+                E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
+                if len(E_index)>0:
+                  #  print(p1, p2)
+                    L2.append(E_index)
+                    Nq1 = E_pq[1][((E_pq[0]==p1)&(E_pq[1]!=grain)).nonzero().view(-1)]
+                    Nq2 = E_pq[1][((E_pq[0]==p2)&(E_pq[1]!=grain)).nonzero().view(-1)]
+                    if Nq1[0] in Nq2:
+                        Nq.append(Nq1[0])
+                    elif Nq1[1] in Nq2:
+                        Nq.append(Nq1[1])
+                    else: 
+                        raise KeyError
                             
             L2 = torch.cat(L2)
-            
+            Nq = torch.tensor(Nq)
            # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
-            print('grain', int(grain), ', junction neighbors', Np)
+            print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
             
             
            # grain_sort_index = torch.argsort(( torch.arccos(x_dict['grain'][Nq, 7]) - torch.pi/4)**2)
@@ -639,9 +642,9 @@ class GrainNN_classifier(torch.nn.Module):
             
             self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None) #x_dict['grain'][grain,:2])
             
-            edge_index_dict['joint', 'connect', 'joint'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
+            edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
-            
+            E_pq = edge_index_dict['joint', 'pull', 'grain']
 
             for E_index in L2:
                # print(E_index, L1)
@@ -673,7 +676,7 @@ class GrainNN_classifier(torch.nn.Module):
 
 
     def cleanup(self, E_pp, E_pq):
-        
+        """
         for grain in self.elim['grain']:
             E_pq = E_pq[:, (E_pq[1]!=grain).nonzero().view(-1)]
         
@@ -681,6 +684,13 @@ class GrainNN_classifier(torch.nn.Module):
             E_pq = E_pq[:, (E_pq[0]!=joint).nonzero().view(-1)]
             E_pp = E_pp[:, (E_pp[0]!=joint).nonzero().view(-1)]
             E_pp = E_pp[:, (E_pp[1]!=joint).nonzero().view(-1)]
+            
+        """
+        
+        E_pq = E_pq[:, (E_pq[0]!=-1).nonzero().view(-1)]
+        E_pp = E_pp[:, (E_pp[0]!=-1).nonzero().view(-1)]
+        
+        
         return E_pp, E_pq
         
     def delete_grain_index(self, grain, E_pp, E_pq, mask):
@@ -705,12 +715,17 @@ class GrainNN_classifier(torch.nn.Module):
         mask['joint'][p1] = 0
         mask['joint'][p2] = 0
         
+        E_pq[:, (E_pq[1]==grain).nonzero().view(-1)] = -1
         
-        self.elim['grain'].append(grain)
-        self.elim['joint'].append(p1)
-        self.elim['joint'].append(p2)
+        for joint in [p1, p2]:
+            E_pq[:, (E_pq[0]==joint).nonzero().view(-1)] = -1
+            E_pp[:, (E_pp[0]==joint).nonzero().view(-1)] = -1
+            E_pp[:, (E_pp[1]==joint).nonzero().view(-1)] = -1
+       # self.elim['grain'].append(grain)
+       # self.elim['joint'].append(p1)
+       # self.elim['joint'].append(p2)
         
-        return E_pp
+        return E_pp, E_pq
     
 
     def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, center):

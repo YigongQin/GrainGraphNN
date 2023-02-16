@@ -936,7 +936,7 @@ if __name__ == '__main__':
                 print('history list for %dth graph'%frame, prev_idx_list)
                 hg.append_history(prev_list)
         
-            with open(args.train_dir + 'case' + str(seed) + '_G' + G + '_R' + R +\
+            with open(args.train_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
                       '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
 
@@ -957,7 +957,7 @@ if __name__ == '__main__':
             hg0.form_gradient(prev = None, nxt = None)
             test_samples.append(hg0)
           #  hg0.graph = graph(seed = seed)
-            with open(args.test_dir + 'case' + str(seed) + '.pkl', 'wb') as outp:
+            with open(args.test_dir + 'seed' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
      
         

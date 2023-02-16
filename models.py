@@ -620,7 +620,7 @@ class GrainNN_classifier(torch.nn.Module):
             Nq = torch.tensor(Nq)
            # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
-            print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
+           # print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
 
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])

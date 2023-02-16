@@ -180,7 +180,7 @@ class graph:
         self.error_layer = 0
         
         self.raise_err = True
-        self.save = False
+        self.save = None
         
         randInit = True
         
@@ -402,7 +402,7 @@ class graph:
               
         
         if self.save:
-            plt.savefig('./voronoi.png', dpi=400)
+            plt.savefig(self.save, dpi=400)
        
     def update(self, init = False):
         

@@ -27,17 +27,20 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/mid/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/1frame/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='1429')
+    parser.add_argument("--seed", type=str, default='')
+    parser.add_argument("--save_fig", type=int, default=0)
     
-    parser.add_argument("--plot_flag", type=bool, default=False)
-
-    parser.add_argument('--compare', dest='compare', action='store_true')
+    parser.add_argument("--no-plot", dest='plot', action='store_false')
+    parser.set_defaults(plot=True)
+    
     parser.add_argument('--no-compare', dest='compare', action='store_false')
     parser.set_defaults(compare=True)
+    
+        
 
     args = parser.parse_args()
     
@@ -50,7 +53,7 @@ if __name__=='__main__':
     print('3D grain microstructure evolution')
     print('device: ', device)
     print('compare with PDE: ', args.compare)
-    print('plot GrainNN verus PDE pointwise error: ', args.plot_flag)
+    print('plot GrainNN verus PDE pointwise error: ', args.plot)
     print('\n')
     
 
@@ -114,6 +117,11 @@ if __name__=='__main__':
     Rmodel.threshold = 1e-4 # from P-R plot
     Cmodel.threshold = 0.6  # from P-R plot
     
+    ''' PF simulation (training data) setup '''
+    init_z = 2
+    final_z = 50
+    frame_all = 120
+    
     if device=='cuda':
         print('use %d GPUs'%torch.cuda.device_count())
         Rmodel.cuda()  
@@ -171,10 +179,10 @@ if __name__=='__main__':
             print('\n')
             print('================================')
             
-            print('case', datasets[case])
+            print('seed', datasets[case])
             
         
-            print('load trajectory for case ', case)
+            
         
             with open(traj_list[case], 'rb') as inp:  
                 try:
@@ -182,6 +190,9 @@ if __name__=='__main__':
                   #  traj.show_data_struct()
                 except:
                     raise EOFError
+            
+            grain_seed = traj.physical_params['seed']
+            print('load trajectory for seed ', grain_seed)
             
             ''' determine span '''
             
@@ -198,16 +209,22 @@ if __name__=='__main__':
 
             X_p = data.x_dict['joint'][:,:2].detach().numpy()
             traj.GNN_update(0, X_p, data['mask'], True, data.edge_index_dict)
+            if args.plot:
+                traj.show_data_struct()
                 
+            if args.save_fig>0:
+                traj.save = 'seed' + str(grain_seed) + 'z' + str(0) + '.png'
+                traj.show_data_struct()
                 
             grain_event_list = []
             edge_event_list = []       
             
-            for frame in range(span, 121, span):
+            for frame in range(span, frame_all+1, span):
                 
                 
-                print('******* prediction progress %1.2f/1.0 ********'%(frame/120))
-
+                print('******* prediction progress %1.2f/1.0 ********'%(frame/frame_all))
+                height = int(init_z + frame/frame_all*(final_z-init_z) )
+                
                 """
                 <1> combine two predictions
                     a. Rmodel: dx_p, ds & v
@@ -226,8 +243,8 @@ if __name__=='__main__':
                 """
                 
                 Rmodel.update(data.x_dict, pred)
-                data.x_dict['grain'][:, 2] += span/121
-                data.x_dict['joint'][:, 2] += span/121
+                data.x_dict['grain'][:, 2] += span/(frame_all+1)
+                data.x_dict['joint'][:, 2] += span/(frame_all+1)
 
                 
                 """
@@ -240,7 +257,7 @@ if __name__=='__main__':
                 grain_event_truth = set([i-1 for i in grain_event_truth])
                 
                 print('true grain events: ', grain_event_truth)
-               # print(data['mask']['grain'].shape, pred['grain_area'].shape)
+
                 
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
@@ -256,7 +273,7 @@ if __name__=='__main__':
                 
                 
                 edge_event_truth = set.union(*traj.edge_events[:frame+1])
-               # print(edge_event_truth)
+              
 
                 data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
                 pairs = pairs.detach().numpy()
@@ -264,16 +281,13 @@ if __name__=='__main__':
                 edge_event_list.extend([tuple(i) for i in pairs])
                 right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
                 
-                print('edge events:', pairs)
-                print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )
+              #  print('edge events:', pairs)
+              #  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )
     
 
                 topo = len(pred['grain_event'])>0 or len(pairs)>0               
                 print('topological changes happens: ', topo)
                 
-           #     print('\n')
-
-
                 
                 """
                 <4> evaluate
@@ -288,11 +302,19 @@ if __name__=='__main__':
                 traj.GNN_update(frame, X_p, data['mask'], topo, data.edge_index_dict)
                 
                 
-                if True:
+                if args.compare:
                     traj.raise_err = False
                     traj.plot_polygons()
-                if True:
+                    
+                if args.plot:
                     traj.show_data_struct()
+                    
+                if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
+                    
+                    traj.save = 'seed' + str(grain_seed) + 'z' + str(height) + '.png'
+                    traj.show_data_struct()
+
+                    
                 
                 
 
@@ -303,7 +325,7 @@ if __name__=='__main__':
                 """
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
-                
+
                 data.edge_attr_dict = {}
                 for edge_type, index in data.edge_index_dict.items():
                     
@@ -322,7 +344,7 @@ if __name__=='__main__':
 
                 
             end_time = time.time()
-            print('inference time for case %d'%case, end_time - start_time)            
+            print('inference time for seed %d'%grain_seed, end_time - start_time)            
            
             
             

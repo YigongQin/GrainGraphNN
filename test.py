@@ -34,8 +34,8 @@ if __name__=='__main__':
     parser.add_argument("--seed", type=str, default='')
     parser.add_argument("--save_fig", type=int, default=0)
     
-    parser.add_argument("--no-plot", dest='plot', action='store_false')
-    parser.set_defaults(plot=True)
+    parser.add_argument("--plot", dest='plot', action='store_true')
+    parser.set_defaults(plot=False)
     
     parser.add_argument('--no-compare', dest='compare', action='store_false')
     parser.set_defaults(compare=True)
@@ -213,7 +213,7 @@ if __name__=='__main__':
                 traj.show_data_struct()
                 
             if args.save_fig>0:
-                traj.save = 'seed' + str(grain_seed) + 'z' + str(0) + '.png'
+                traj.save = 'seed' + str(grain_seed) + '_z' + str(0) + '.png'
                 traj.show_data_struct()
                 
             grain_event_list = []
@@ -310,8 +310,8 @@ if __name__=='__main__':
                     traj.show_data_struct()
                     
                 if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
-                    
-                    traj.save = 'seed' + str(grain_seed) + 'z' + str(height) + '.png'
+                    p_err = int(np.round(traj.error_layer*100))
+                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err) + '.png'
                     traj.show_data_struct()
 
                     

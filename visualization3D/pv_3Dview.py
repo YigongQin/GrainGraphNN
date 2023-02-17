@@ -176,7 +176,7 @@ class grain_visual:
         
       #  self.alpha_pde[self.alpha_pde == 0] = np.nan
         self.alpha_pde_frames = traj.theta_z[self.alpha_pde_frames]/pi*180
-        
+        layer_truth = traj.theta_z[layer_truth]/pi*180
         
         print('data shapes', self.alpha_pde_frames.shape)
 
@@ -184,29 +184,25 @@ class grain_visual:
         grid = tvtk.ImageData(spacing=(dx, dx, dx_frame), origin=(0, 0, 0), 
                               dimensions=self.alpha_pde_frames.shape)
         
+    
         grid.point_data.scalars = self.alpha_pde_frames.ravel(order='F')
         grid.point_data.scalars.name = 'theta_z'
         
-        
         self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'graph.vtk'
-
         write_data(grid, self.dataname) 
 
-        
- 
-        grid = tvtk.ImageData(spacing=(dx, dx, dx_frame), origin=(0, 0, 0), 
-                              dimensions=self.alpha_pde_frames.shape)
-        
 
-        grid.point_data.scalars = err.ravel(order='F')
+        grid.point_data.scalars = layer_truth.ravel(order='F') 
         grid.point_data.scalars.name = 'theta_z'
         
-        
-        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'err.vtk'
-
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'leapz.vtk'
         write_data(grid, self.dataname) 
 
-
+        grid.point_data.scalars = err.ravel(order='F')  
+        grid.point_data.scalars.name = 'theta_z'
+        
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'err.vtk'
+        write_data(grid, self.dataname) 
 
 if __name__ == '__main__':
 

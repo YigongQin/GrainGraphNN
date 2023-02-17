@@ -8,7 +8,6 @@ Created on Sun Jan 15 21:22:44 2023
 
 import argparse, time, dill, random, os, glob
 import numpy as np
-import matplotlib.pyplot as plt
 import torch
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
@@ -18,7 +17,7 @@ from parameters import regressor, classifier_transfered
 from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
 from QoI import data_analysis
-
+from visualization3D.pv_3Dview import grain_visual
 
 if __name__=='__main__':
     
@@ -218,6 +217,7 @@ if __name__=='__main__':
                 
             grain_event_list = []
             edge_event_list = []       
+            alpha_field_list = [traj.alpha_field.T.copy()]
             
             for frame in range(span, frame_all+1, span):
                 
@@ -256,7 +256,7 @@ if __name__=='__main__':
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 grain_event_truth = set([i-1 for i in grain_event_truth])
                 
-                print('true grain events: ', grain_event_truth)
+                print('true grain events: ', sorted(list(grain_event_truth)))
 
                 
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
@@ -268,7 +268,7 @@ if __name__=='__main__':
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
                 
-                print('predicted grain events: ', pred['grain_event'])
+                print('predicted grain events: ', sorted(grain_event_list))
                 print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
                 
                 
@@ -305,6 +305,7 @@ if __name__=='__main__':
                 if args.compare:
                     traj.raise_err = False
                     traj.plot_polygons()
+                    alpha_field_list.append(traj.alpha_field.T.copy())
                     
                 if args.plot:
                     traj.show_data_struct()
@@ -346,8 +347,9 @@ if __name__=='__main__':
             end_time = time.time()
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
            
-            
-            
-            
+            if args.compare:
+                Gv = grain_visual(seed=grain_seed, height=final_z) 
+                traj.frame_all = frame_all
+                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
             

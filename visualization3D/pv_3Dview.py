@@ -82,7 +82,7 @@ class grain_visual:
         write_data(grid, self.dataname)
         
 
-    def reconstruct(self, rawdat_dir: str = './', span: int = 6, alpha_field = None):
+    def reconstruct(self, rawdat_dir: str = './', span: int = 6, alpha_field_list = None):
         
         self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*'))[0]
         f = h5py.File(self.data_file, 'r')
@@ -111,8 +111,8 @@ class grain_visual:
         
 
         
-        if alpha_field:
-            self.alpha_pde_frames = alpha_field
+        if alpha_field_list:
+            self.alpha_pde_frames = np.stack(alpha_field_list, axis=2)
         else:
             self.alpha_pde_frames = np.asarray(f['cross_sec'])
             self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,::span]               
@@ -120,14 +120,7 @@ class grain_visual:
         dx_frame = (self.height - self.base_width)/(data_frames - 1)*span
         print('dx in plance ', dx,' between two planes',  dx_frame)
         
-        ''' stack the 2 um height '''
-        
-      #  stack_thick = int(self.base_width/dx_frame)
-        
-      #  print('stack layers ', stack_thick)
-        
-      #  base = np.tile(self.alpha_pde_frames[:,:,:1], (1,1,stack_thick))
-     #   self.alpha_pde_frames = np.concatenate([base, self.alpha_pde_frames], axis=-1)
+
         
         top_z = int(np.round((self.height-self.base_width)/dx_frame)) + 1
         
@@ -154,7 +147,66 @@ class grain_visual:
         write_data(grid, self.dataname)      
         
         
-         
+    def graph_recon(self, traj, rawdat_dir='./', span = 6, alpha_field_list = None):
+        
+
+ 
+        fnx, fny, fnz = len(traj.x), len(traj.y), len(traj.z)
+        print('grid ', fnx, fny, fnz)
+        dx = self.lxd/(fnx-3)
+
+        data_frames = traj.frame_all+1
+
+        self.alpha_pde_frames = np.stack(alpha_field_list, axis=2)
+        layer_truth = traj.alpha_pde_frames[:, :, ::span] 
+           
+
+        dx_frame = (self.height - self.base_width)/(data_frames - 1)*span
+        print('dx in plance ', dx,' between two planes',  dx_frame)
+        
+        
+        top_z = int(np.round((self.height-self.base_width)/dx_frame)) + 1
+
+        
+        self.alpha_pde_frames = self.alpha_pde_frames[:, :, :top_z]     
+        layer_truth = layer_truth[:, :, :top_z]
+
+        err = 90*(self.alpha_pde_frames!=layer_truth)        
+        
+        
+      #  self.alpha_pde[self.alpha_pde == 0] = np.nan
+        self.alpha_pde_frames = traj.theta_z[self.alpha_pde_frames]/pi*180
+        
+        
+        print('data shapes', self.alpha_pde_frames.shape)
+
+    
+        grid = tvtk.ImageData(spacing=(dx, dx, dx_frame), origin=(0, 0, 0), 
+                              dimensions=self.alpha_pde_frames.shape)
+        
+        grid.point_data.scalars = self.alpha_pde_frames.ravel(order='F')
+        grid.point_data.scalars.name = 'theta_z'
+        
+        
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'graph.vtk'
+
+        write_data(grid, self.dataname) 
+
+        
+ 
+        grid = tvtk.ImageData(spacing=(dx, dx, dx_frame), origin=(0, 0, 0), 
+                              dimensions=self.alpha_pde_frames.shape)
+        
+
+        grid.point_data.scalars = err.ravel(order='F')
+        grid.point_data.scalars.name = 'theta_z'
+        
+        
+        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'err.vtk'
+
+        write_data(grid, self.dataname) 
+
+
 
 if __name__ == '__main__':
 
@@ -192,4 +244,11 @@ module load qt5 swr oneapi_rk paraview
 """
         
         
-        
+''' stack the 2 um height '''
+   
+#  stack_thick = int(self.base_width/dx_frame)
+  
+#  print('stack layers ', stack_thick)
+  
+#  base = np.tile(self.alpha_pde_frames[:,:,:1], (1,1,stack_thick))
+#   self.alpha_pde_frames = np.concatenate([base, self.alpha_pde_frames], axis=-1)

@@ -14,6 +14,8 @@ parser.add_argument("--sys", type=str, default = 'ls6')
 parser.add_argument("--data_in", type=str, default = 'seed10000')
 parser.add_argument("--data_dir", type=str, default = '/work/07428/ygqin/ls6/testGR/')
 parser.add_argument("--save_name", type=str, default = '')
+parser.add_argument("--upthresh", type=str, default = 'None')
+parser.add_argument("--lowthresh", type=str, default = 'None')
 
 parser.add_argument('--clip', dest='clip', action='store_true')
 parser.set_defaults(clip=False)
@@ -60,12 +62,25 @@ if args.clip:
     datavtk.ClipType.Normal = [0.0, 0.0, 1.0]
 
 
+threshold1 = Threshold(registrationName='Threshold1', Input=datavtk)
+threshold1.Scalars = ['POINTS', 'theta_z']
+threshold1.UpperThreshold = 90
+threshold1.LowerThreshold = 0
+
+if args.upthresh!='None':
+    threshold1.UpperThreshold = float(args.upthresh)
+
+if args.lowthresh!='None':
+    threshold1.LowerThreshold = float(args.lowthresh)
 
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 
 # show data in view
 datavtkDisplay = Show(datavtk, renderView1, 'UniformGridRepresentation')
+
+if args.upthresh!='None' or args.lowthresh!='None':
+    datavtkDisplay= Show(threshold1, renderView1, 'UnstructuredGridRepresentation')
 
 # trace defaults for the display properties.
 datavtkDisplay.Representation = 'Outline'
@@ -89,9 +104,7 @@ datavtkDisplay.DataAxesGrid = 'GridAxesRepresentation'
 datavtkDisplay.PolarAxes = 'PolarAxesRepresentation'
 datavtkDisplay.ScalarOpacityUnitDistance = 0.1385685404161374
 datavtkDisplay.OpacityArrayName = ['POINTS', 'theta_z']
-datavtkDisplay.IsosurfaceValues = [42.154137273875]
-datavtkDisplay.SliceFunction = 'Plane'
-datavtkDisplay.Slice = 123
+
 
 # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
 datavtkDisplay.ScaleTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
@@ -100,7 +113,7 @@ datavtkDisplay.ScaleTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.
 datavtkDisplay.OpacityTransferFunction.Points = [0.75957012975, 0.0, 0.5, 0.0, 83.548704418, 1.0, 0.5, 0.0]
 
 # init the 'Plane' selected for 'SliceFunction'
-datavtkDisplay.SliceFunction.Origin = [10.0, 10.0, 9.88]
+
 
 # reset view to fit data
 renderView1.ResetCamera(False)
@@ -122,10 +135,10 @@ datavtkDisplay.SetScalarBarVisibility(renderView1, True)
 
 # get color transfer function/color map for 'theta_z'
 theta_zLUT = GetColorTransferFunction('theta_z')
-
+theta_zLUT.RescaleTransferFunction(0.0, 90.0)
 # get opacity transfer function/opacity map for 'theta_z'
 theta_zPWF = GetOpacityTransferFunction('theta_z')
-
+theta_zPWF.RescaleTransferFunction(0.0, 90.0)
 # change representation type
 datavtkDisplay.SetRepresentationType('Surface')
 

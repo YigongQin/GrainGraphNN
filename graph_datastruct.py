@@ -398,7 +398,8 @@ class graph:
         ax[3].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
         ax[3].set_xticks([])
         ax[3].set_yticks([])
-        ax[3].set_title('error'+'%d'%(self.error_layer*100)+'%')           
+        p_err = int(np.round(self.error_layer*100))
+        ax[3].set_title('error'+'%d'%(p_err)+'%')           
               
         
         if self.save:

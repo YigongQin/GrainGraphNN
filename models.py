@@ -621,13 +621,13 @@ class GrainNN_classifier(torch.nn.Module):
            # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
            # print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
-
+            assert len(Nq)==len(Np), grain
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
             L2 = L2[indices[:-2]]
 
             
-            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None) #x_dict['grain'][grain,:2])
+            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None, avoid_elim=False) #x_dict['grain'][grain,:2])
             
             edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -643,22 +643,26 @@ class GrainNN_classifier(torch.nn.Module):
         Neigbor switching
         """
 
-       # pairs = torch.tensor([]) #
-     
-        print('edge switching index', L1)
+        
         sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
         L1 = L1[indices]
+
         for E_index in L1:
              if E_pp[0, E_index] == -1:
                  L1 = L1[L1!=E_index]
-        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None)
+
+        print('edge switching index', L1)
+       # print(E_pp.T[L1])
+
+        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None, avoid_elim=True)
         
         switching_list = E_pp.T[L1]
+       # print(switching_list)
         
         edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.cleanup(E_pp, E_pq)
         
         edge_index_dict['grain', 'push', 'joint'] = torch.flip(edge_index_dict['joint', 'pull', 'grain'], dims=[0])
-       # E_qp[0], E_qp[1] = E_pq[1], E_pq[0]         
+      
         
         
                 
@@ -718,7 +722,7 @@ class GrainNN_classifier(torch.nn.Module):
         return E_pp, E_pq
     
 
-    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, center):
+    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, center, avoid_elim):
 
     
         pairs = torch.unique(E_pp.T[elimed_arg].view(-1))
@@ -751,6 +755,7 @@ class GrainNN_classifier(torch.nn.Module):
             expand_q2 = p2_qn[(1-sum(p2_qn==i for i in p1_qn)).nonzero(as_tuple=True)] # new neighbor for p1
          #   print(p1_qn, p2_qn)
             shrink_q1, shrink_q2 = p1_qn[(sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)]
+            
 
             # swap the order
             p1_qn_index_sort = [p1_qn_index[i] for i in range(3) if p1_qn[i]==shrink_q1 ] + \
@@ -785,7 +790,8 @@ class GrainNN_classifier(torch.nn.Module):
             sq1_p1, sq2_p1 = p1_pn
             sq1_p2, sq2_p2 = p2_pn
             
-            
+            if avoid_elim and (sq1_p1==sq1_p2 or sq2_p1==sq2_p2):
+                continue
           #  print('\n',p1_pn, p2_pn)
           #  print(p1_pn_index, p2_pn_index)
             

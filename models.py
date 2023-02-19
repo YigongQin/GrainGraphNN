@@ -592,9 +592,15 @@ class GrainNN_classifier(torch.nn.Module):
         """
         self.elim = {'grain':[], 'joint':[]}
         
+        unexpected_elim = []
+        
         for grain in y_dict['grain_event']:
            # print(((E_pp[0]==59)&(E_pp[1]==115)).nonzero().view(-1))
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
+            
+            if len(Np)==0:
+                continue
+            
             pairs = torch.combinations(Np, r=2)
             L2 = []
             Nq = []
@@ -628,7 +634,7 @@ class GrainNN_classifier(torch.nn.Module):
 
             
             force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, elim_grain=grain) #x_dict['grain'][grain,:2])
-            
+            unexpected_elim.extend(force_elim)
                              
             
             edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
@@ -646,7 +652,11 @@ class GrainNN_classifier(torch.nn.Module):
                # print(E_index, L1)
                 if E_index in L1:
                     L1 = L1[L1!=E_index]
-                    
+        
+        if len(unexpected_elim)>0:
+            unexpected_elim = torch.tensor(unexpected_elim)
+            y_dict['grain_event'] = torch.cat([y_dict['grain_event'], unexpected_elim])            
+        
                     
         """
         Neigbor switching
@@ -803,7 +813,7 @@ class GrainNN_classifier(torch.nn.Module):
 
                 
             if elim_grain is None and (sq1_p1==sq1_p2 or sq2_p1==sq2_p2):
-                print('edge cannot affect grain', sq1_p1, sq1_p2, sq2_p1,sq2_p2)
+               # print('edge cannot affect grain', sq1_p1, sq1_p2, sq2_p1,sq2_p2)
                 continue  
             
             if sq1_p1==sq1_p2:

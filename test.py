@@ -26,11 +26,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/1frame/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='')
+    parser.add_argument("--seed", type=str, default='10002')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -265,7 +265,11 @@ if __name__=='__main__':
                 
                 #if frame>100: pred['grain_event'] = torch.tensor([50, 93, 87, 99])
                 #if frame==7*span: pred['grain_event'] = pred['grain_event'][:-3]
+
+                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
+                pairs = pairs.detach().numpy()
                 
+
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
                 
@@ -274,11 +278,7 @@ if __name__=='__main__':
                 
                 
                 edge_event_truth = set.union(*traj.edge_events[:frame+1])
-              
 
-                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
-                pairs = pairs.detach().numpy()
-                
                 edge_event_list.extend([tuple(i) for i in pairs])
                 right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
                 

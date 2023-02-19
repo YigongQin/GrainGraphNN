@@ -627,12 +627,21 @@ class GrainNN_classifier(torch.nn.Module):
             L2 = L2[indices[:-2]]
 
             
-            self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, None, avoid_elim=False) #x_dict['grain'][grain,:2])
+            force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, elim_grain=grain) #x_dict['grain'][grain,:2])
+            
+                             
             
             edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
             E_pp = edge_index_dict['joint', 'connect', 'joint']
             E_pq = edge_index_dict['joint', 'pull', 'grain']
 
+            if len(force_elim)>0:
+                print('force eliminated grains', force_elim)
+                for fg in force_elim:
+                    edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
+                    E_pp = edge_index_dict['joint', 'connect', 'joint']
+                    E_pq = edge_index_dict['joint', 'pull', 'grain']
+                    
             for E_index in L2:
                # print(E_index, L1)
                 if E_index in L1:
@@ -653,8 +662,9 @@ class GrainNN_classifier(torch.nn.Module):
 
         print('edge switching index', L1)
        # print(E_pp.T[L1])
-
-        self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1,  None, avoid_elim=True)
+            
+        force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, elim_grain=None)
+        #    assert len(force_elim)==0
         
         switching_list = E_pp.T[L1]
        # print(switching_list)
@@ -694,7 +704,7 @@ class GrainNN_classifier(torch.nn.Module):
         
         ''' find the two to delete p1, p2'''
         p1, p2 = Np
-      #  print('remained vertices to delete', p1, p2)
+        #print('remained vertices to delete', p1, p2)
         ''' find the two to connect p1_c, p2_c'''
         Np1 = E_pp[1][((E_pp[0]==p1)&(E_pp[1]!=p2)).nonzero().view(-1)][0]
         Np2 = E_pp[1][((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)][0]
@@ -722,9 +732,9 @@ class GrainNN_classifier(torch.nn.Module):
         return E_pp, E_pq
     
 
-    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, center, avoid_elim):
+    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, elim_grain):
 
-    
+        force_elim = []
         pairs = torch.unique(E_pp.T[elimed_arg].view(-1))
         save_prev = {}
         for p in pairs:
@@ -734,7 +744,7 @@ class GrainNN_classifier(torch.nn.Module):
         for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
 
-           # print(E_pp.T[elimed_arg])
+            #print(E_pp.T[elimed_arg])
            # print(p1, p2)
             
             # grain neighbors
@@ -748,8 +758,7 @@ class GrainNN_classifier(torch.nn.Module):
             p1_pn = E_pp[1][ p1_pn_index ]
             p2_pn_index = ((E_pp[0]==p2)&(E_pp[1]!=p1)).nonzero().view(-1)
             p2_pn = E_pp[1][ p2_pn_index ]            
-            
-                       
+                        
             # find two expanding grains and two shrinking grains
             expand_q1 = p1_qn[(1-sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)] # new neighbor for p2
             expand_q2 = p2_qn[(1-sum(p2_qn==i for i in p1_qn)).nonzero(as_tuple=True)] # new neighbor for p1
@@ -787,11 +796,23 @@ class GrainNN_classifier(torch.nn.Module):
                 p2_pn = [p2_pn[1], p2_pn[0]]
                 p2_pn_index = [p2_pn_index[1], p2_pn_index[0]]   
 
+
             sq1_p1, sq2_p1 = p1_pn
             sq1_p2, sq2_p2 = p2_pn
             
-            if avoid_elim and (sq1_p1==sq1_p2 or sq2_p1==sq2_p2):
-                continue
+
+                
+            if elim_grain is None and (sq1_p1==sq1_p2 or sq2_p1==sq2_p2):
+                print('edge cannot affect grain', sq1_p1, sq1_p2, sq2_p1,sq2_p2)
+                continue  
+            
+            if sq1_p1==sq1_p2:
+                if shrink_q1!=elim_grain:
+                    force_elim.append(shrink_q1)
+                
+            if sq2_p1==sq2_p2:
+                if shrink_q2!=elim_grain:
+                    force_elim.append(shrink_q2)            
           #  print('\n',p1_pn, p2_pn)
           #  print(p1_pn_index, p2_pn_index)
             
@@ -800,14 +821,9 @@ class GrainNN_classifier(torch.nn.Module):
             x_p1 = x_dict['joint'][p1, :2] 
             x_p2 = x_dict['joint'][p2, :2]
             
-            if center is not None:
-                
-                x_dict['joint'][p1, :2] = periodic_move(center, x_p1)
-                x_dict['joint'][p2, :2] = periodic_move(center, x_p2)
-            else:
-                x_p2_p = periodic_move(x_p2, x_p1)
-                c_p1p2 = 0.5*( x_p1 + x_p2_p )              
-                x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = c_p1p2, periodic_move(c_p1p2, x_p2)  
+            x_p2_p = periodic_move(x_p2, x_p1)
+            c_p1p2 = 0.5*( x_p1 + x_p2_p )              
+            x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = c_p1p2, periodic_move(c_p1p2, x_p2)  
             
             
           #  x_dict['joint'][p1, :2], x_dict['joint'][p2, :2] = rotate_two_points(x_p1, x_p2)
@@ -820,13 +836,14 @@ class GrainNN_classifier(torch.nn.Module):
                 swap = True
          #   print(pairs.view(-1))  
          #   print(sq1_p1, sq1_p2, sq2_p1, sq2_p2)
-            if sq1_p2 in pairs and sq2_p2 not in pairs:
+            nxt = torch.unique(E_pp.T[elimed_arg][index:].view(-1))
+            if sq1_p2 in nxt and sq2_p2 not in nxt:
                 swap = False
-            if sq2_p2 in pairs and sq1_p2 not in pairs:
+            if sq2_p2 in nxt and sq1_p2 not in nxt:
                 swap = True               
-            if sq1_p1 in pairs and sq2_p1 not in pairs:
+            if sq1_p1 in nxt and sq2_p1 not in nxt:
                 swap = True
-            if sq2_p1 in pairs and sq1_p1 not in pairs:
+            if sq2_p1 in nxt and sq1_p1 not in nxt:
                 swap = False            
          #   print(swap)
                 
@@ -840,8 +857,10 @@ class GrainNN_classifier(torch.nn.Module):
                 
                 sq1_p1, sq2_p1 = sq2_p1, sq1_p1
                 sq1_p2, sq2_p2 = sq2_p2, sq1_p2
+            
 
-                
+            
+              
             # replace joint-grain edges
 
             E_pq[1, p1_qn_index_sort[1]] = expand_q2 # reject sq2
@@ -858,14 +877,14 @@ class GrainNN_classifier(torch.nn.Module):
             E_pp[1][ ((E_pp[0]==sq1_p2)&(E_pp[1]==p2)).nonzero().view(-1) ] = p1
             E_pp[1][ ((E_pp[0]==sq2_p1)&(E_pp[1]==p1)).nonzero().view(-1) ] = p2
       
-        
+       # print(E_pp.T[elimed_arg])
        # print(save_prev)
         for p in pairs:
             y_dict['joint'][p] = self.scaling['joint']*(x_dict['joint'][p,:2] - save_prev[int(p)])           
             x_dict['joint'][p, 6:8] =  y_dict['joint'][p]  
         
 
-
+        return force_elim
 
 def point_in_triangle(t, v1, v2, v3):
     sign = lambda a, b, c: (a[0] - c[0])*(b[1] - c[1]) - \

@@ -514,8 +514,10 @@ class graph:
                     print('in', self.vertex2joint[dst])
                                        
                # self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
-            
-            
+       # print('edge vertices', len(self.vertex_neighbor))    
+        for v, n in self.vertex_neighbor.items():
+            if len(n)!=3:
+                raise ValueError((v,n))
 
         if init:  
             self.plot_polygons()

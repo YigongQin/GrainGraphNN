@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import itertools
 from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction, periodic_dist_
 from math import pi
-
+from collections import Counter
 
 def relative_angle(p1, p2):
     
@@ -796,16 +796,35 @@ class graph_trajectory(graph):
               #  if mask_g[grain]>0 and mask_j[joint]>0:
                     self.vertex2joint[joint].add(grain+1) 
      
-            
+            """
+            print(len(jj_edge.T), len(gj_edge.T), len(self.vertex2joint))
             for k, v in self.vertex2joint.items():
                 assert len(v)==3, (k, v)
+            
+            tri = {i:tuple(j) for i,j in self.vertex2joint.items()}    
+            
+            counts = Counter(tri.values())
+             
+            # Create a new dictionary with only the keys whose value has a count greater than 1
+            result = {k: v for k, v in tri.items() if counts[v] > 1}  
+            print(result)
+            
+            """
+            
             
             self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
             self.vertex2joint = dict((v, k) for k, v in self.joint2vertex.items())
            # print(len(jj_edge[0]))
             self.edges = [[i,j] for i, j in jj_edge.T] #[[i,j] for i, j in jj_edge.T if mask_j[i] and mask_j[j]]
-        
-
+            
+            
+            """
+            print(len(self.edges), len(gj_edge.T), len(self.vertex2joint), len(self.joint2vertex))
+            edges = [tuple(i) for i in self.edges]
+            links = [tuple(i) for i in gj_edge.T]
+            print('dup in jj edges', [(item, count) for item, count in Counter(edges).items() if count > 1])
+            print('dup in gj edges', [(item, count) for item, count in Counter(links).items() if count > 1])
+            """
         
         self.update()
 

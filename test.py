@@ -62,7 +62,7 @@ if __name__=='__main__':
     
     
             
-    datasets = sorted(glob.glob(args.truth_dir + 'case' + args.seed + '*'))
+    datasets = sorted(glob.glob(args.truth_dir + 'seed' + args.seed + '*'))
 
     test_list = []
     for case in datasets:
@@ -264,6 +264,7 @@ if __name__=='__main__':
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
                 
                 #if frame>100: pred['grain_event'] = torch.tensor([50, 93, 87, 99])
+                #if frame==7*span: pred['grain_event'] = pred['grain_event'][:-3]
                 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
@@ -350,6 +351,6 @@ if __name__=='__main__':
             if args.compare:
                 Gv = grain_visual(seed=grain_seed, height=final_z) 
                 traj.frame_all = frame_all
-                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+              #  Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
             

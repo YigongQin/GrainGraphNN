@@ -179,7 +179,7 @@ class graph:
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
-        self.raise_err = False
+        self.raise_err = True
         self.save = None
         
         randInit = True
@@ -231,18 +231,18 @@ class graph:
         vor = Voronoi(mirrored_seeds)     
     
        # regions = []
-        reordered_regions = set()
+       # reordered_regions = []
        # vertices = []
         vert_map = {}
         vert_count = 0
-       # edge_count = 0
+        edge_count = 0
         alpha = 0
        # edges = []
         
         for region in vor.regions:
             flag = True
             inboundpoints = 0
-           # upper_bound = 2 if self.BC == 'periodic' else 1
+            upper_bound = 2 if self.BC == 'periodic' else 1
             for index in region:
                 if index == -1:
                     flag = False
@@ -250,7 +250,7 @@ class graph:
                 else:
                     x = vor.vertices[index, 0]
                     y = vor.vertices[index, 1]
-                    if x<=-0.5-eps or y<=-0.5-eps or x>=1.5+eps or y>=1.5+eps:
+                    if x<=-eps or y<=-eps or x>=upper_bound+eps or y>=upper_bound+eps:
                         flag = False
                         break
                     if x<=1+eps and y<=1+eps:
@@ -260,14 +260,14 @@ class graph:
                         
             if region != [] and flag:
                 polygon =  Polygon(vor.vertices[region]) 
-               # if inboundpoints ==0 and not polygon.contains(Point(1,1)): continue
+                if inboundpoints ==0 and not polygon.contains(Point(1,1)): continue
                 '''
                 valid region propertities
                 '''
                 
             #    regions.append(region)
                 reordered_region = []
-                
+                alpha += 1 
 
                 
                 for index in region:
@@ -282,31 +282,18 @@ class graph:
                         vert_count += 1
                     else:
                         reordered_region.append(vert_map[point])
-                
-                if tuple(sorted(reordered_region)) not in reordered_regions:
-                    reordered_regions.add(tuple(sorted(reordered_region)))
-
-                else:
-                    continue
-
-                alpha += 1                           
-              #  sorted_vert = reordered_region    
+                                          
+                sorted_vert = reordered_region    
                 for i in range(len(reordered_region)):
 
                     self.vertex2joint[reordered_region[i]].add(alpha)  
+                    
                     """
                     cur = sorted_vert[i]
                     nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
                     self.edges.update({edge_count:[cur, nxt]})
                     edge_count += 1
-                    """                    
-                    
-        for k, v in self.vertex2joint.items():
-            if len(v)!=3:
-                print(k, v)
-                
-                
-
+                    """
     
       #  vor.filtered_points = seeds
       #  vor.filtered_regions = regions
@@ -512,8 +499,6 @@ class graph:
             self.region_edge[region] = grain_edge
            # self.edges.update(tent_edge)
               #  self.edges.add((link[1],link[0]))
-       # if cnt!=edge_count:
-        print(cnt, edge_count)
       #  print('num vertices of grains', cnt)
         print('num edges, junctions', len([i for i in self.edges if i[0]>-1 ]), len(self.joint2vertex))        
         # form edge             
@@ -532,8 +517,7 @@ class graph:
        # print('edge vertices', len(self.vertex_neighbor))    
         for v, n in self.vertex_neighbor.items():
             if len(n)!=3:
-                print((v,n))
-               # raise ValueError((v,n))
+                raise ValueError((v,n))
 
         if init:  
             self.plot_polygons()
@@ -778,11 +762,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Generate heterograph data")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--seed", type=int, default = 1)
+    parser.add_argument("--level", type=int, default = 0)
 
     args = parser.parse_args()        
         
     if args.mode == 'check':
-        seed = 1401
+        seed = 8
         g1 = graph(lxd = 40, seed=seed) 
         g1.show_data_struct()
 
@@ -793,8 +778,62 @@ if __name__ == '__main__':
             print('\n')
             print('test seed', seed)
 
-            g1 = graph(lxd = 40, seed=seed) 
+            g1 = graph(lxd = 20, seed=seed) 
 
 
           #  g1.show_data_struct() 
+               
+
+"""
+        fig, ax = plt.subplots(2, 3, figsize=(15, 10))
+        
+        vertices = list(self.vertices.values())
+        x, y = zip(*vertices)
+        ax[0,0].scatter(list(x), list(y), s=5)
+        ax[0,0].axis("equal")
+        ax[0,0].set_title('Vertices'+str(len(self.vertex_neighbor)))
+        #ax[0].set_xlim(0,1)
+        #ax[0].set_ylim(0,1)
+        #ax[0].set_xticks([])
+        #ax[0].set_yticks([])
+        
+        for coors in self.region_coors.values():
+            for i in range(len(coors)):
+                cur = coors[i]
+                nxt = coors[i+1] if i<len(coors)-1 else coors[0]
+                ax[0,1].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
+                
+        x, y = zip(*self.region_center.values())     
+    
+        ax[0,1].scatter(list(x), list(y), c = 'k')
+        ax[0,1].axis("equal")
+        ax[0,1].set_title('Edges'+str(len(self.edges)))
+        #ax[1].set_xticks([])
+        #ax[1].set_yticks([])
+
+        
+        view_size = int(0.6*self.alpha_field_dummy.shape[0])
+        field = self.alpha_field_dummy[:view_size,:view_size]
+        field = self.theta_z[field]
+        ax[0,2].imshow((field/pi*180)*(field>0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[0,2].set_xticks([])
+        ax[0,2].set_yticks([])
+        ax[0,2].set_title('Grains'+str(len(self.regions))) 
+
+        ax[1,0].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1,0].set_xticks([])
+        ax[1,0].set_yticks([])
+        ax[1,0].set_title('vertex model reconstructed') 
+        ax[1,1].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1,1].set_xticks([])
+        ax[1,1].set_yticks([])
+        ax[1,1].set_title('pde')         
+        
+        ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
+        ax[1,2].set_xticks([])
+        ax[1,2].set_yticks([])
+        ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')   
+        
+        
+"""
 

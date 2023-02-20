@@ -653,9 +653,7 @@ class GrainNN_classifier(torch.nn.Module):
                 if E_index in L1:
                     L1 = L1[L1!=E_index]
         
-        if len(unexpected_elim)>0:
-            unexpected_elim = torch.tensor(unexpected_elim)
-            y_dict['grain_event'] = torch.cat([y_dict['grain_event'], unexpected_elim])            
+        
         
                     
         """
@@ -688,7 +686,12 @@ class GrainNN_classifier(torch.nn.Module):
             print('find remaining two-side grains', fg)
             edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
             E_pp = edge_index_dict['joint', 'connect', 'joint']
-            E_pq = edge_index_dict['joint', 'pull', 'grain']        
+            E_pq = edge_index_dict['joint', 'pull', 'grain']   
+            
+        unexpected_elim.extend(remain_twoside)    
+        if len(unexpected_elim)>0:
+            unexpected_elim = torch.tensor(unexpected_elim)
+            y_dict['grain_event'] = torch.cat([y_dict['grain_event'], unexpected_elim])    
        # assert torch.all(counts>2)
        # print(switching_list)
         

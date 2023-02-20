@@ -795,11 +795,11 @@ class graph_trajectory(graph):
             for grain, joint in gj_edge.T:
               #  if mask_g[grain]>0 and mask_j[joint]>0:
                     self.vertex2joint[joint].add(grain+1) 
-     
-            """
-            print(len(jj_edge.T), len(gj_edge.T), len(self.vertex2joint))
+
             for k, v in self.vertex2joint.items():
                 assert len(v)==3, (k, v)
+            """
+            print(len(jj_edge.T), len(gj_edge.T), len(self.vertex2joint))
             
             tri = {i:tuple(j) for i,j in self.vertex2joint.items()}    
             

@@ -30,7 +30,7 @@ if __name__=='__main__':
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='10002')
+    parser.add_argument("--seed", type=str, default='10048')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -313,7 +313,7 @@ if __name__=='__main__':
                     
                 if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
                     p_err = int(np.round(traj.error_layer*100))
-                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err) + '.png'
+                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimg'+str(right_pred_q)+'_' + str(len(grain_event_truth)) + '.png'
                     traj.show_data_struct()
 
                     

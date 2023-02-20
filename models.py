@@ -677,6 +677,19 @@ class GrainNN_classifier(torch.nn.Module):
         #    assert len(force_elim)==0
         
         switching_list = E_pp.T[L1]
+        
+        ''' ensure there is no two-side grain '''
+        
+        grains, counts = torch.unique(E_pq[1,:], return_counts=True)
+        
+        remain_twoside = grains[counts<=2]
+        
+        for fg in remain_twoside:
+            print('find remaining two-side grains', fg)
+            edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
+            E_pp = edge_index_dict['joint', 'connect', 'joint']
+            E_pq = edge_index_dict['joint', 'pull', 'grain']        
+       # assert torch.all(counts>2)
        # print(switching_list)
         
         edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.cleanup(E_pp, E_pq)

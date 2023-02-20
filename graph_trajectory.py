@@ -683,7 +683,7 @@ class graph_trajectory(graph):
                 grain_state[grain-1, 3] = 0
             grain_mask[grain-1, 0] = 1
 
-        grain_state[:, 2] = frame/self.frames
+        grain_state[:, 2] = frame/(self.frames-1)
 
       #  grain_state[:, 3] = np.array(list(self.area_counts.values())) /s**2
         if frame>0:
@@ -701,7 +701,7 @@ class graph_trajectory(graph):
             joint_state[joint, 1] = coor[1]
             joint_mask[joint, 0] = 1
         
-        joint_state[:, 2] = frame/self.frames
+        joint_state[:, 2] = frame/(self.frames-1)
         joint_state[:, 3] = 1 - self.physical_params['G']/10 #1 - np.log10(self.physical_params['G'])/2
         joint_state[:, 4] = self.physical_params['R']/2
         
@@ -900,11 +900,11 @@ if __name__ == '__main__':
             
             choices = [6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120]
             
-            edge_expandstep = 6*360/int(edgeE) if int(edgeE)>0 else 1000  
+   
             grain_expandstep = 6*90/int(grainE) if int(grainE)>0 else 1000
             
             for c in choices:
-                if c < edge_expandstep and c < grain_expandstep:
+                if c < grain_expandstep:
                     args.span = c
             
             print('calibrated span based on number of events: ' , args.span)
@@ -924,8 +924,14 @@ if __name__ == '__main__':
                     hg = traj.states[snapshot]
                     hg.span = args.span
                     event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
+                    elim_list = []
+                    for checkpoint in range(snapshot+1, snapshot+args.span+1):
+                        if len(traj.grain_events[checkpoint])>0:
+                            for grain in traj.grain_events[checkpoint]:
+                                elim_list.append([grain-1, args.span/(checkpoint-snapshot)])
+                                
                     hg.form_gradient(prev = None if snapshot-args.span<0 else traj.states[snapshot-args.span], \
-                                     nxt = traj.states[snapshot+args.span], event_list = event_list)
+                                     nxt = traj.states[snapshot+args.span], event_list = event_list, elim_list = elim_list)
                     train_samples.append(hg)
                     
                     success_list.append(cnt)

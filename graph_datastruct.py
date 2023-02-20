@@ -552,7 +552,7 @@ class GrainHeterograph:
         
         self.physical_params = {}
 
-    def form_gradient(self, prev, nxt, event_list):
+    def form_gradient(self, prev, nxt, event_list, elim_list):
         
         self.event_list = event_list
         
@@ -567,6 +567,11 @@ class GrainHeterograph:
         
             darea = nxt.feature_dicts['grain'][:,3:4] - self.feature_dicts['grain'][:,3:4]
             
+            
+            for grain, scaleup in elim_list:
+                assert darea[grain]<0
+                darea[grain] *= scaleup
+            
             self.target_dicts['grain'] = self.targets_scaling['grain']*\
                 np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
                                          
@@ -574,7 +579,7 @@ class GrainHeterograph:
                self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
 
             
-            self.additional_features['nxt'] = nxt.edge_index_dicts
+          #  self.additional_features['nxt'] = nxt.edge_index_dicts
             
             
 

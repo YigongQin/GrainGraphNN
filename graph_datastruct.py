@@ -20,8 +20,8 @@ newcolors[0, :] = ly
 newcmp = ListedColormap(newcolors)
 from scipy.spatial import Voronoi
 from math import pi
-from shapely.geometry.polygon import Polygon
-from shapely.geometry import Point
+#from shapely.geometry.polygon import Polygon
+#from shapely.geometry import Point
 from collections import defaultdict
 import math
 import argparse
@@ -179,7 +179,7 @@ class graph:
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
-        self.raise_err = True
+        self.raise_err = False
         self.save = None
         
         randInit = True
@@ -231,18 +231,18 @@ class graph:
         vor = Voronoi(mirrored_seeds)     
     
        # regions = []
-       # reordered_regions = []
+        reordered_regions = set()
        # vertices = []
         vert_map = {}
         vert_count = 0
-        edge_count = 0
+       # edge_count = 0
         alpha = 0
        # edges = []
         
         for region in vor.regions:
             flag = True
             inboundpoints = 0
-            upper_bound = 2 if self.BC == 'periodic' else 1
+           # upper_bound = 2 if self.BC == 'periodic' else 1
             for index in region:
                 if index == -1:
                     flag = False
@@ -250,7 +250,7 @@ class graph:
                 else:
                     x = vor.vertices[index, 0]
                     y = vor.vertices[index, 1]
-                    if x<=-eps or y<=-eps or x>=upper_bound+eps or y>=upper_bound+eps:
+                    if x<=-0.5-eps or y<=-0.5-eps or x>=1.5+eps or y>=1.5+eps:
                         flag = False
                         break
                     if x<=1+eps and y<=1+eps:
@@ -259,15 +259,15 @@ class graph:
             
                         
             if region != [] and flag:
-                polygon =  Polygon(vor.vertices[region]) 
-                if inboundpoints ==0 and not polygon.contains(Point(1,1)): continue
+               # polygon =  Polygon(vor.vertices[region]) 
+               # if inboundpoints ==0 and not polygon.contains(Point(1,1)): continue
                 '''
                 valid region propertities
                 '''
                 
             #    regions.append(region)
                 reordered_region = []
-                alpha += 1 
+                
 
                 
                 for index in region:
@@ -282,18 +282,31 @@ class graph:
                         vert_count += 1
                     else:
                         reordered_region.append(vert_map[point])
-                                          
-                sorted_vert = reordered_region    
+                
+                if tuple(sorted(reordered_region)) not in reordered_regions:
+                    reordered_regions.add(tuple(sorted(reordered_region)))
+
+                else:
+                    continue
+
+                alpha += 1                           
+              #  sorted_vert = reordered_region    
                 for i in range(len(reordered_region)):
 
                     self.vertex2joint[reordered_region[i]].add(alpha)  
-                    
                     """
                     cur = sorted_vert[i]
                     nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
                     self.edges.update({edge_count:[cur, nxt]})
                     edge_count += 1
-                    """
+                    """                    
+                    
+        for k, v in self.vertex2joint.items():
+            if len(v)!=3:
+                print(k, v)
+                
+                
+
     
       #  vor.filtered_points = seeds
       #  vor.filtered_regions = regions
@@ -314,13 +327,14 @@ class graph:
                         ii += s
                         jj += s
                     else:
+                        print('wrong', self.seed)
                         if self.raise_err:
                             raise ValueError(i,j)
                         else: 
                             pass
                         
                 self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]         
-
+        assert np.all(self.alpha_field>0), self.seed
         
     def plot_polygons(self):
         """
@@ -517,7 +531,8 @@ class graph:
        # print('edge vertices', len(self.vertex_neighbor))    
         for v, n in self.vertex_neighbor.items():
             if len(n)!=3:
-                raise ValueError((v,n))
+                print((v,n))
+               # raise ValueError((v,n))
 
         if init:  
             self.plot_polygons()
@@ -566,12 +581,11 @@ class GrainHeterograph:
 
         
             darea = nxt.feature_dicts['grain'][:,3:4] - self.feature_dicts['grain'][:,3:4]
-            
-            
+
             for grain, scaleup in elim_list:
-                assert darea[grain]<0
-                darea[grain] *= scaleup
-            
+                if darea[grain]<=0:
+                    darea[grain] *= scaleup
+
             self.target_dicts['grain'] = self.targets_scaling['grain']*\
                 np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
                                          
@@ -579,7 +593,7 @@ class GrainHeterograph:
                self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
 
             
-          #  self.additional_features['nxt'] = nxt.edge_index_dicts
+            self.additional_features['nxt'] = nxt.edge_index_dicts
             
             
 
@@ -767,78 +781,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Generate heterograph data")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--seed", type=int, default = 1)
-    parser.add_argument("--level", type=int, default = 0)
 
     args = parser.parse_args()        
         
     if args.mode == 'check':
-        seed = 8
+        seed = 749
         g1 = graph(lxd = 40, seed=seed) 
         g1.show_data_struct()
 
     
     if args.mode == 'instance':
         
-        for seed in range(300):
+        for seed in range(args.seed*12, (args.seed+1)*12):
             print('\n')
             print('test seed', seed)
 
-            g1 = graph(lxd = 20, seed=seed) 
+            g1 = graph(lxd = 40, seed=seed) 
 
 
           #  g1.show_data_struct() 
-               
-
-"""
-        fig, ax = plt.subplots(2, 3, figsize=(15, 10))
-        
-        vertices = list(self.vertices.values())
-        x, y = zip(*vertices)
-        ax[0,0].scatter(list(x), list(y), s=5)
-        ax[0,0].axis("equal")
-        ax[0,0].set_title('Vertices'+str(len(self.vertex_neighbor)))
-        #ax[0].set_xlim(0,1)
-        #ax[0].set_ylim(0,1)
-        #ax[0].set_xticks([])
-        #ax[0].set_yticks([])
-        
-        for coors in self.region_coors.values():
-            for i in range(len(coors)):
-                cur = coors[i]
-                nxt = coors[i+1] if i<len(coors)-1 else coors[0]
-                ax[0,1].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
-                
-        x, y = zip(*self.region_center.values())     
-    
-        ax[0,1].scatter(list(x), list(y), c = 'k')
-        ax[0,1].axis("equal")
-        ax[0,1].set_title('Edges'+str(len(self.edges)))
-        #ax[1].set_xticks([])
-        #ax[1].set_yticks([])
-
-        
-        view_size = int(0.6*self.alpha_field_dummy.shape[0])
-        field = self.alpha_field_dummy[:view_size,:view_size]
-        field = self.theta_z[field]
-        ax[0,2].imshow((field/pi*180)*(field>0), origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[0,2].set_xticks([])
-        ax[0,2].set_yticks([])
-        ax[0,2].set_title('Grains'+str(len(self.regions))) 
-
-        ax[1,0].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[1,0].set_xticks([])
-        ax[1,0].set_yticks([])
-        ax[1,0].set_title('vertex model reconstructed') 
-        ax[1,1].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
-        ax[1,1].set_xticks([])
-        ax[1,1].set_yticks([])
-        ax[1,1].set_title('pde')         
-        
-        ax[1,2].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
-        ax[1,2].set_xticks([])
-        ax[1,2].set_yticks([])
-        ax[1,2].set_title('error'+'%d'%(self.error_layer*100)+'%')   
-        
-        
-"""
 

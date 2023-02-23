@@ -157,10 +157,11 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
         
 class graph:
     def __init__(self, lxd: float = 20, seed: int = 1, noise: float = 0.01):
-        mesh_size, grain_size = 0.08, 4
+        self.mesh_size, self.ini_grain_size = 0.08, 4
+        self.ini_height, self.final_height = 2, 50
         self.lxd = lxd
         self.seed = seed
-        s = int(lxd/mesh_size)+1
+        s = int(lxd/self.mesh_size)+1
         self.imagesize = (s, s)
         self.vertices = defaultdict(list) ## vertices coordinates
         self.vertex2joint = defaultdict(set) ## (vertex index, x coordiante, y coordinate)  -> (region1, region2, region3)
@@ -172,7 +173,7 @@ class graph:
         self.region_edge = defaultdict(set)
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
-        self.density = grain_size/lxd
+        self.density = self.ini_grain_size/lxd
         self.noise = noise/lxd
         self.BC = 'periodic'
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
@@ -221,6 +222,15 @@ class graph:
             self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
 
     
+    def layer_grain_distribution(self):
+        
+        grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2
+        grain_size = np.sqrt(4*grain_area/pi)
+        mu = np.mean(grain_size)
+        std = np.std(grain_size)
+        print(np.max(grain_size), np.min(grain_size))
+        return mu, std
+
     def compute_error_layer(self):
         self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
         print('pointwise error at current layer: ', self.error_layer)
@@ -772,8 +782,8 @@ if __name__ == '__main__':
     args = parser.parse_args()        
         
     if args.mode == 'check':
-        seed = 8
-        g1 = graph(lxd = 40, seed=seed) 
+        seed = 102
+        g1 = graph(lxd = 160, seed=seed) 
         g1.show_data_struct()
 
     

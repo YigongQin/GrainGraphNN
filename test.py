@@ -30,7 +30,7 @@ if __name__=='__main__':
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='10048')
+    parser.add_argument("--seed", type=str, default='10003')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -206,8 +206,8 @@ if __name__=='__main__':
 
             data['mask']['joint'] = 1 + 0*data['mask']['joint']
 
-            X_p = data.x_dict['joint'][:,:2].detach().numpy()
-            traj.GNN_update(0, X_p, data['mask'], True, data.edge_index_dict)
+           # X_p = data.x_dict['joint'][:,:2].detach().numpy()
+            traj.GNN_update(0, data.x_dict, data['mask'], True, data.edge_index_dict)
             if args.plot:
                 traj.show_data_struct()
                 
@@ -218,6 +218,8 @@ if __name__=='__main__':
             grain_event_list = []
             edge_event_list = []       
             alpha_field_list = [traj.alpha_field.T.copy()]
+           # traj.area_traj = traj.area_traj[:1]
+            traj.span = span
             
             for frame in range(span, frame_all+1, span):
                 
@@ -298,9 +300,8 @@ if __name__=='__main__':
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
                 
-                X_p = data.x_dict['joint'][:,:2].detach().numpy()
-
-                traj.GNN_update(frame, X_p, data['mask'], topo, data.edge_index_dict)
+                
+                traj.GNN_update(frame, data.x_dict, data['mask'], topo, data.edge_index_dict)
                 
                 
                 if args.compare:
@@ -316,10 +317,9 @@ if __name__=='__main__':
                     traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimg'+str(right_pred_q)+'_' + str(len(grain_event_truth)) + '.png'
                     traj.show_data_struct()
 
-                    
-                
-                
 
+
+                
                 """
                 <5> next prediction
                     a. x_q
@@ -349,6 +349,8 @@ if __name__=='__main__':
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
            
             if args.compare:
+              #  traj.qoi(mode='graph', compare=True)
+                
                 Gv = grain_visual(seed=grain_seed, height=final_z) 
                 traj.frame_all = frame_all
               #  Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)

@@ -337,14 +337,15 @@ class graph:
                         ii += s
                         jj += s
                     else:
-                        print('wrong', self.seed)
+                       # print('wrong', self.seed)
                         if self.raise_err:
                             raise ValueError(i,j)
                         else: 
                             pass
                         
-                self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]         
-        assert np.all(self.alpha_field>0), self.seed
+                self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]    
+        if self.raise_err:
+            assert np.all(self.alpha_field>0), self.seed
         
     def plot_polygons(self):
         """
@@ -404,7 +405,7 @@ class graph:
                 
         x, y = zip(*self.region_center.values())     
     
-        ax[0].scatter(list(x), list(y), c = 'k')
+      #  ax[0].scatter(list(x), list(y), c = 'k')
         ax[0].axis("equal")
         ax[0].set_title('(Q, V, E)=(%d, %d, %d)'%(Q, V, E))
 
@@ -592,9 +593,9 @@ class GrainHeterograph:
         
             darea = nxt.feature_dicts['grain'][:,3:4] - self.feature_dicts['grain'][:,3:4]
 
-            for grain, scaleup in elim_list:
-                if darea[grain]<=0:
-                    darea[grain] *= scaleup
+           # for grain, scaleup in elim_list:
+           #     if darea[grain]<=0:
+           #         darea[grain] *= scaleup
 
             self.target_dicts['grain'] = self.targets_scaling['grain']*\
                 np.hstack((darea, nxt.feature_dicts['grain'][:,4:5]))
@@ -603,7 +604,7 @@ class GrainHeterograph:
                self.subtract(nxt.feature_dicts['joint'][:,:2], self.feature_dicts['joint'][:,:2], 'next')
 
             
-            self.additional_features['nxt'] = nxt.edge_index_dicts
+           # self.additional_features['nxt'] = nxt.edge_index_dicts
             
             
 
@@ -797,7 +798,7 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 749
-        g1 = graph(lxd = 40, seed=seed) 
+        g1 = graph(lxd = 160, seed=seed) 
 
         g1.show_data_struct()
 

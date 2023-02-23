@@ -43,6 +43,68 @@ class graph_trajectory(graph):
         self.states = []
         self.physical_params = physical_params
         self.save_frame = [True]*self.frames
+        
+        self.area_traj = []
+        
+    def volume(self, mode, time=-1):
+        
+        s = self.imagesize[0]
+        self.deltaH = (self.final_height-self.ini_height)/self.mesh_size/(self.frames-1)
+        
+        if mode == 'truth':
+            
+            self.grain_volume = self.totalV_frames[:,time].copy()
+            scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(self.final_height/self.mesh_size+1)
+            
+            self.grain_volume = self.grain_volume/scale_surface
+            self.grain_volume = self.grain_volume*self.mesh_size**3
+            
+            return
+
+        if mode == 'layer':
+            
+            '''  '''
+            
+            self.grain_volume = self.extraV_frames[:,time].copy() 
+          
+        
+        if mode == 'graph':
+            
+            self.grain_volume = self.extraV.copy()
+            self.deltaH = self.deltaH*self.span
+            assert len(self.area_traj) == 1 + (self.frames)//self.span
+
+        for area_counts in self.area_traj[1:-1]:
+            for grain, area in area_counts.items():
+                self.grain_volume[grain-1] += self.deltaH*area
+        
+        for grain, area in self.area_traj[-1].items():
+            self.grain_volume[grain-1] += self.deltaH*area/2
+        for grain, area in self.area_traj[0].items():
+            self.grain_volume[grain-1] += (1+self.ini_height/self.mesh_size+self.deltaH/2)*area              
+            
+        self.grain_volume = self.grain_volume*self.mesh_size**3
+        
+        
+        
+    def qoi(self, mode='layer', compare=False):
+        
+        self.volume(mode)
+        grain_size = np.cbrt(3*self.grain_volume/(4*pi))
+        self.d_mu = np.mean(grain_size)
+        self.d_std = np.std(grain_size)      
+        bins = np.arange(10+1)
+        
+        dis, _ = np.histogram(grain_size , bins, density=True)
+
+        if compare:
+            self.volume('truth')
+            grain_size_t = np.cbrt(3*self.grain_volume/(4*pi))
+            d_mu_t = np.mean(grain_size_t)
+            err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
+            print('average grain size , err', err_d)
+            dis, _ =  np.histogram(grain_size_t, bins, density=True)
+            
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -61,15 +123,20 @@ class graph_trajectory(graph):
         assert len(self.x) -2 == self.imagesize[0]
         assert len(self.y) -2 == self.imagesize[1]  
         
-        number_list=re.findall(r"[-+]?\d*\.\d+|\d+", self.data_file)
-        data_frames = int(number_list[2])+1
+
+
+        G = re.search('G(\d+\.\d+)', self.data_file).group(1)
+        R = re.search('Rmax(\d+\.\d+)', self.data_file).group(1)
+        data_frames = int(re.search('frames(\d+)', self.data_file).group(1))+1
         
-        self.physical_params = {'G':float(number_list[3]), 'R':float(number_list[4])}
+        self.physical_params = {'G':float(G), 'R':float(R)}
         self.alpha_pde_frames = np.asarray(f['cross_sec'])
         self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,:]        
         
         self.extraV_frames = np.asarray(f['extra_area'])
         self.extraV_frames = self.extraV_frames.reshape((self.num_regions, data_frames), order='F')        
+        self.totalV_frames = np.asarray(f['total_area'])
+        self.totalV_frames = self.totalV_frames.reshape((self.num_regions, data_frames), order='F')   
      
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
@@ -198,6 +265,7 @@ class graph_trajectory(graph):
             self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
             cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
+            self.area_traj.append(self.area_counts)
            # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
            # cur_grain = set(cur_grain)
             
@@ -683,7 +751,7 @@ class graph_trajectory(graph):
                 grain_state[grain-1, 3] = 0
             grain_mask[grain-1, 0] = 1
 
-        grain_state[:, 2] = frame/(self.frames-1)
+        grain_state[:, 2] = frame/self.frames
 
       #  grain_state[:, 3] = np.array(list(self.area_counts.values())) /s**2
         if frame>0:
@@ -701,7 +769,7 @@ class graph_trajectory(graph):
             joint_state[joint, 1] = coor[1]
             joint_mask[joint, 0] = 1
         
-        joint_state[:, 2] = frame/(self.frames-1)
+        joint_state[:, 2] = frame/self.frames
         joint_state[:, 3] = 1 - self.physical_params['G']/10 #1 - np.log10(self.physical_params['G'])/2
         joint_state[:, 4] = self.physical_params['R']/2
         
@@ -758,7 +826,7 @@ class graph_trajectory(graph):
         # reset the edge_labels, check event at next snapshot
         # self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
-    def GNN_update(self, frame, X_j, mask, topo, edge_index_dict):
+    def GNN_update(self, frame, x_dict, mask, topo, edge_index_dict):
         
         
         
@@ -768,9 +836,13 @@ class graph_trajectory(graph):
         Output:
             self.vertices, self.vertex2joint(& reverse), self.edges
         """     
-        
-        mask_j = mask['joint']
-        mask_g = mask['grain']
+ 
+        X_j = x_dict['joint'][:,:2].detach().numpy()
+        X_g = x_dict['grain'][:,3:5].detach().numpy()      
+ 
+    
+        mask_j = mask['joint'][:,0]
+        mask_g = mask['grain'][:,0].detach().numpy()
         
         self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
         
@@ -778,9 +850,18 @@ class graph_trajectory(graph):
         for i, coor in enumerate(X_j):
             if mask_j[i] == 1:
                 self.vertices[i] = coor
+
+                    
+        ''' qoi '''      
+        area_counts = {}
+        for idx, area in enumerate(X_g[:,0]):
+            if mask_g[idx]>0:
+                area_counts[idx+1] = area*self.imagesize[0]**2
         
-       # for joint, coors in self.vertices.items():
-       #     self.vertices[joint] = X_j[joint]        
+        self.extraV = mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*self.imagesize[0]**3
+#        self.area_traj.append(area_counts)
+                
+       
         
         if topo:
             
@@ -900,11 +981,11 @@ if __name__ == '__main__':
             
             choices = [6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 120]
             
-   
+            edge_expandstep = 6*360/int(edgeE) if int(edgeE)>0 else 1000
             grain_expandstep = 6*90/int(grainE) if int(grainE)>0 else 1000
             
             for c in choices:
-                if c < grain_expandstep:
+                if c < edge_expandstep and c < grain_expandstep:
                     args.span = c
             
             print('calibrated span based on number of events: ' , args.span)

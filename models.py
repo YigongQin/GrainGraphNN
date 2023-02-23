@@ -627,7 +627,7 @@ class GrainNN_classifier(torch.nn.Module):
            # print(Nq)
            # print('grain', grain, 'eliminate edges', L2)
            # print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
-            assert len(Nq)==len(Np), grain
+            assert len(Nq)==len(Np) or len(Np)==2, (grain, Np, Nq)
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
             L2 = L2[indices[:-2]]

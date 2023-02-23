@@ -156,7 +156,7 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
 
         
 class graph:
-    def __init__(self, lxd: float = 20, seed: int = 1, noise: float = 0.01):
+    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01):
         self.mesh_size, self.ini_grain_size = 0.08, 4
         self.ini_height, self.final_height = 2, 50
         self.lxd = lxd
@@ -174,13 +174,13 @@ class graph:
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
         self.density = self.ini_grain_size/lxd
-        self.noise = noise/lxd
+        self.noise = noise/lxd/(lxd/40)
         self.BC = 'periodic'
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
-        self.raise_err = True
+        self.raise_err = False
         self.save = None
         
         randInit = True

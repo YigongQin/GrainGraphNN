@@ -180,7 +180,7 @@ class graph:
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
-        self.raise_err = False
+        self.raise_err = True
         self.save = None
         
         randInit = True

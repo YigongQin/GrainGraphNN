@@ -927,7 +927,7 @@ if __name__ == '__main__':
     parser.add_argument("--span", type=int, default = 6)
     parser.add_argument("--lxd", type=int, default = 40)
     parser.add_argument("--regenerate", type=bool, default = True)
-    parser.add_argument("--save_traj", type=bool, default = False)
+    parser.add_argument("--save_traj", type=bool, default = True)
     parser.add_argument("--prev", type=int, default = 0)
     args = parser.parse_args()
 
@@ -1067,8 +1067,9 @@ if __name__ == '__main__':
           #  hg0.graph = graph(seed = seed)
             with open(args.test_dir + 'seed' + str(seed) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
-     
-        
+            if args.save_traj:
+                    with open(args.test_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                        dill.dump(traj, outp)        
     if args.mode == 'check':
         seed = 220
       #  g1 = graph(lxd = 20, seed=1) 

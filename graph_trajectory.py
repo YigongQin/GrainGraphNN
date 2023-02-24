@@ -1067,7 +1067,7 @@ if __name__ == '__main__':
             G = str(int(10*traj.physical_params['G']))
             R = str(int(10*traj.physical_params['R']))
           #  hg0.graph = graph(seed = seed)
-            with open(args.test_dir + 'seed' + str(seed) + + '_G' + G + '_R' + R + \
+            with open(args.test_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
                       '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
             if args.save_traj:

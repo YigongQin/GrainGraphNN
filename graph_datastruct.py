@@ -799,7 +799,7 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 54320
-        g1 = graph(lxd = 80, seed=seed) 
+        g1 = graph(lxd = 120, seed=seed) 
 
         g1.show_data_struct()
 

@@ -103,8 +103,18 @@ class graph_trajectory(graph):
             d_mu_t = np.mean(grain_size_t)
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)
-            dis, _ =  np.histogram(grain_size_t, bins, density=True)
+            dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
             
+            fig, ax = plt.subplots(1,1,figsize=(5,5))
+        
+            ax.plot(dis_t, 'b', label='truth')
+            ax.plot(dis, 'r--', label='GNN')
+            ax.set_xlim(0, 10)
+            ax.set_xlabel(r'$d\ (\mu m)$')
+            ax.set_ylabel(r'$P$')
+            ax.legend()  
+            
+            plt.savefig('qoi.png', dpi=400)
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -859,7 +869,7 @@ class graph_trajectory(graph):
                 area_counts[idx+1] = area*self.imagesize[0]**2
         
         self.extraV = mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*self.imagesize[0]**3
-#        self.area_traj.append(area_counts)
+        self.area_traj.append(area_counts)
                 
        
         

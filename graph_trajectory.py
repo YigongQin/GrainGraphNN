@@ -1064,8 +1064,11 @@ if __name__ == '__main__':
             hg0.span = args.span
             hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
             test_samples.append(hg0)
+            G = str(int(10*traj.physical_params['G']))
+            R = str(int(10*traj.physical_params['R']))
           #  hg0.graph = graph(seed = seed)
-            with open(args.test_dir + 'seed' + str(seed) + '.pkl', 'wb') as outp:
+            with open(args.test_dir + 'seed' + str(seed) + + '_G' + G + '_R' + R + \
+                      '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
             if args.save_traj:
                     with open(args.test_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:

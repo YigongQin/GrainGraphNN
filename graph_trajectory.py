@@ -1054,14 +1054,15 @@ if __name__ == '__main__':
             os.makedirs(args.test_dir) 
         
     # creating testing dataset
-        for seed in [1]:
+        for seed in [args.seed]:
             
             test_samples = []
             
-            traj = graph_trajectory(seed = seed, frames = 1, physical_params={'G':5, 'R':1})
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = 1, physical_params={'G':10, 'R':2})
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]
-            hg0.form_gradient(prev = None, nxt = None)
+            hg0.span = args.span
+            hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
             test_samples.append(hg0)
           #  hg0.graph = graph(seed = seed)
             with open(args.test_dir + 'seed' + str(seed) + '.pkl', 'wb') as outp:

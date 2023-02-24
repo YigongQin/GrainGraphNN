@@ -19,6 +19,23 @@ from metrics import feature_metric, edge_error_metric
 from QoI import data_analysis
 from visualization3D.pv_3Dview import grain_visual
 
+
+
+
+def scale_feature_patchs(factor, x_dict, edge_attr_dict):
+    
+    
+    reverse_map = None
+    
+    
+    
+    return reverse_map
+
+
+
+
+
+
 if __name__=='__main__':
     
 
@@ -39,7 +56,8 @@ if __name__=='__main__':
     parser.add_argument('--no-compare', dest='compare', action='store_false')
     parser.set_defaults(compare=True)
     
-        
+    parser.add_argument("--domain_factor", type=int, default=1)   
+    parser.add_argument("--size_factor", type=int, default=1)
 
     args = parser.parse_args()
     
@@ -171,16 +189,11 @@ if __name__=='__main__':
     with torch.no_grad():
         for case, data in enumerate(test_loader):
             
-            start_time = time.time()
-            
-            
-            data.to(device)
+
             print('\n')
             print('================================')
             
             print('seed', datasets[case])
-            
-        
             
         
             with open(traj_list[case], 'rb') as inp:  
@@ -199,6 +212,9 @@ if __name__=='__main__':
             end_idx = datasets[case].find('.')
             span = int(datasets[case][st_idx:-4])
             print('expected span', span)
+            traj.span = span
+            
+            
             
             
             ''' intialization '''
@@ -219,7 +235,15 @@ if __name__=='__main__':
             edge_event_list = []       
             alpha_field_list = [traj.alpha_field.T.copy()]
            # traj.area_traj = traj.area_traj[:1]
-            traj.span = span
+
+            
+            start_time = time.time()
+            
+            if args.domain_factor>1:
+                reverse_map = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
+            
+            
+            data.to(device)
             
             for frame in range(span, frame_all+1, span):
                 

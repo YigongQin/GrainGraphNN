@@ -738,7 +738,7 @@ class graph_trajectory(graph):
         grain_mask = np.zeros((self.num_regions, 1), dtype=int)
         joint_mask = np.zeros((self.num_vertices, 1), dtype=int)
         
-        s = self.imagesize[0]
+        s = int(np.round(self.patch_size/self.mesh_size))+1
         
 
         

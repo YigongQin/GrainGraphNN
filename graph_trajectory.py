@@ -925,6 +925,7 @@ if __name__ == '__main__':
     parser.add_argument("--level", type=int, default = 2)
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
+    parser.add_argument("--lxd", type=int, default = 40)
     parser.add_argument("--regenerate", type=bool, default = True)
     parser.add_argument("--save_traj", type=bool, default = False)
     parser.add_argument("--prev", type=int, default = 0)
@@ -955,7 +956,7 @@ if __name__ == '__main__':
             
             if args.regenerate:
               
-                traj = graph_trajectory(seed = seed, frames = args.frame)
+                traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame)
               #  traj.update()
               #  traj.show_data_struct()
           

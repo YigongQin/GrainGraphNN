@@ -159,6 +159,7 @@ class graph:
     def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01):
         self.mesh_size, self.ini_grain_size = 0.08, 4
         self.ini_height, self.final_height = 2, 50
+        self.patch_size = 40
         self.lxd = lxd
         self.seed = seed
         s = int(lxd/self.mesh_size)+1
@@ -174,7 +175,7 @@ class graph:
         self.region_center = defaultdict(list)
        # self.region_coors = [] ## region corner coordinates
         self.density = self.ini_grain_size/lxd
-        self.noise = noise/lxd/(lxd/40)
+        self.noise = noise/lxd/(lxd/self.patch_size)
         self.BC = 'periodic'
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
         self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
@@ -797,8 +798,8 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 749
-        g1 = graph(lxd = 160, seed=seed) 
+        seed = 54320
+        g1 = graph(lxd = 80, seed=seed) 
 
         g1.show_data_struct()
 

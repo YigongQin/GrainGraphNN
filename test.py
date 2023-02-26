@@ -24,12 +24,25 @@ from visualization3D.pv_3Dview import grain_visual
 
 def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     
+    '''scale edge len'''
+    for edge_type in edge_attr_dict:
+        edge_attr_dict[edge_type] *= factor
     
-    reverse_map = None
+    assert torch.all(x_dict['joint'][:,:2]>=0) and torch.all(x_dict['joint'][:,:2]<=1)
+    assert torch.all(x_dict['grain'][:,:2]>=0) 
+    print('coordinates in bound')
     
     
+    x_dict['grain'][:,:2] *= factor
+    x_dict['joint'][:,:2] *= factor
     
-    return reverse_map
+    domain_offset = torch.floor(x_dict['joint'][:,:2])
+    
+    x_dict['grain'][:,:2] = x_dict['grain'][:,:2]%1
+    x_dict['joint'][:,:2] = x_dict['joint'][:,:2] - domain_offset
+    
+
+    return domain_offset
 
 
 
@@ -43,11 +56,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
+    parser.add_argument("--truth_dir", type=str, default='./patchs/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='10003')
+    parser.add_argument("--seed", type=str, default='0')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -234,18 +247,18 @@ if __name__=='__main__':
             grain_event_list = []
             edge_event_list = []       
             alpha_field_list = [traj.alpha_field.T.copy()]
-           # traj.area_traj = traj.area_traj[:1]
+            traj.area_traj = traj.area_traj[:1]
 
             
             start_time = time.time()
             
             if args.domain_factor>1:
-                reverse_map = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
+                domain_offset = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
             
             
             data.to(device)
             
-            for frame in range(span, frame_all+1, span):
+            for frame in range(span, 2*span+1, span):
                 
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/frame_all))
@@ -323,9 +336,14 @@ if __name__=='__main__':
                # print(data['nxt'])
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
-                
-                
-                traj.GNN_update(frame, data.x_dict, data['mask'], topo, data.edge_index_dict)
+                X = {k:v.clone() for k, v in data.x_dict.items()}
+                if args.domain_factor>1:
+                    
+                    X['joint'][:,:2] =  (X['joint'][:,:2] + domain_offset)/args.domain_factor
+                    
+                # assert torch.all(pred['joint']<0.2)
+                # assert torch.all(X['joint'][:,:2]<1.5)
+                traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
                 
                 
                 if args.compare:
@@ -351,6 +369,9 @@ if __name__=='__main__':
                 """
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
+                    if args.domain_factor>1:
+                        data.x_dict['grain'][grain-1, :2] = (data.x_dict['grain'][grain-1, :2]*args.domain_factor)%1
+
 
                 data.edge_attr_dict = {}
                 for edge_type, index in data.edge_index_dict.items():
@@ -373,7 +394,7 @@ if __name__=='__main__':
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
            
             if args.compare:
-              #  traj.qoi(mode='graph', compare=True)
+                traj.qoi(mode='graph', compare=True)
                 
                 Gv = grain_visual(seed=grain_seed, height=final_z) 
                 traj.frame_all = frame_all

@@ -247,6 +247,8 @@ if __name__=='__main__':
             grain_event_list = []
             edge_event_list = []       
             alpha_field_list = [traj.alpha_field.T.copy()]
+            
+            layer_err_list = [traj.error_layer]
             traj.area_traj = traj.area_traj[:1]
 
             
@@ -344,7 +346,7 @@ if __name__=='__main__':
                 # assert torch.all(pred['joint']<0.2)
                 # assert torch.all(X['joint'][:,:2]<1.5)
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
-                
+                layer_err_list.append(traj.error_layer)
                 
                 if args.compare:
                     traj.raise_err = False
@@ -355,7 +357,8 @@ if __name__=='__main__':
                     traj.show_data_struct()
                     
                 if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
-                    p_err = int(np.round(traj.error_layer*100))
+                    p_err = sum(layer_err_list)/len(layer_err_list)
+                    p_err = int(np.round(p_err*100))
                     traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimg'+str(right_pred_q)+'_' + str(len(grain_event_truth)) + '.png'
                     traj.show_data_struct()
 

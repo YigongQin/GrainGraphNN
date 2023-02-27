@@ -258,7 +258,7 @@ if __name__=='__main__':
             
             data.to(device)
             
-            for frame in range(span, 2*span+1, span):
+            for frame in range(span, frame_all+1, span):
                 
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/frame_all))

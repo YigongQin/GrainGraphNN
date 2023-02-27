@@ -359,7 +359,7 @@ if __name__=='__main__':
                 if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
                     p_err = sum(layer_err_list)/len(layer_err_list)
                     p_err = int(np.round(p_err*100))
-                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimg'+str(right_pred_q)+'_' + str(len(grain_event_truth)) + '.png'
+                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
                     traj.show_data_struct()
 
 

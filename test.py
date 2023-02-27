@@ -56,11 +56,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./patchs/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='0')
+    parser.add_argument("--seed", type=str, default='10077')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -293,39 +293,20 @@ if __name__=='__main__':
                     a. E_pp, E_pq
                     b. mask_p, mask_q
                 """            
-                
-                grain_event_truth = set.union(*traj.grain_events[:frame+1])
-                grain_event_truth = set([i-1 for i in grain_event_truth])
-                
-                print('true grain events: ', sorted(list(grain_event_truth)))
-
-                
+           
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
                 
-                #if frame>100: pred['grain_event'] = torch.tensor([50, 93, 87, 99])
-                #if frame==7*span: pred['grain_event'] = pred['grain_event'][:-3]
 
                 data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
                 pairs = pairs.detach().numpy()
                 
 
-                grain_event_list.extend(pred['grain_event'].detach().numpy())
-                right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
+                grain_event_list.extend(pred['grain_event'].detach().numpy())               
                 
                 print('predicted grain events: ', sorted(grain_event_list))
-                print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
-                
-                
-                edge_event_truth = set.union(*traj.edge_events[:frame+1])
 
-                edge_event_list.extend([tuple(i) for i in pairs])
-                right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))
-                
-              #  print('edge events:', pairs)
-              #  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )
-    
 
                 topo = len(pred['grain_event'])>0 or len(pairs)>0               
                 print('topological changes happens: ', topo)
@@ -346,21 +327,43 @@ if __name__=='__main__':
                 # assert torch.all(pred['joint']<0.2)
                 # assert torch.all(X['joint'][:,:2]<1.5)
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
-                layer_err_list.append(traj.error_layer)
+                
                 
                 if args.compare:
+                    ''' quantify the image error '''
+                    
+                    grain_event_truth = set.union(*traj.grain_events[:frame+1])
+                    grain_event_truth = set([i-1 for i in grain_event_truth])
+                    
+                    print('true grain events: ', sorted(list(grain_event_truth)))                    
+                    
+                    right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
+                    
+                    print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
+                                        
+                    edge_event_truth = set.union(*traj.edge_events[:frame+1])
+    
+                    edge_event_list.extend([tuple(i) for i in pairs])
+                    right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))                    
+                    
+                    #  print('edge events:', pairs)
+                    #  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )                    
+                    
                     traj.raise_err = False
                     traj.plot_polygons()
+                    
+                    layer_err_list.append(traj.error_layer)
                     alpha_field_list.append(traj.alpha_field.T.copy())
                     
-                if args.plot:
-                    traj.show_data_struct()
                     
-                if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
-                    p_err = sum(layer_err_list)/len(layer_err_list)
-                    p_err = int(np.round(p_err*100))
-                    traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
-                    traj.show_data_struct()
+                    if args.plot:
+                        traj.show_data_struct()
+                        
+                    if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
+                        p_err = sum(layer_err_list)/len(layer_err_list)
+                        p_err = int(np.round(p_err*100))
+                        traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
+                        traj.show_data_struct()
 
 
 
@@ -395,12 +398,13 @@ if __name__=='__main__':
                 
             end_time = time.time()
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
-           
+            
+            traj.qoi(mode='graph', compare=True)
             if args.compare:
-                traj.qoi(mode='graph', compare=True)
+               # traj.qoi(mode='graph', compare=True)
                 
                 Gv = grain_visual(seed=grain_seed, height=final_z) 
                 traj.frame_all = frame_all
-              #  Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+               # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
             

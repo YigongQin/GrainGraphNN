@@ -668,7 +668,7 @@ class GrainNN_classifier(torch.nn.Module):
              if E_pp[0, E_index] == -1:
                  L1 = L1[L1!=E_index]
 
-        print('edge switching index', L1)
+       # print('edge switching index', L1)
        # print(E_pp.T[L1])
             
         force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, elim_grain=None)

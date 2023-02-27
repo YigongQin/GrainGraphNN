@@ -12,6 +12,7 @@ import glob, re, os, argparse, dill, copy
 from collections import defaultdict
 from termcolor import colored
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 24})
 import itertools
 from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction, periodic_dist_
 from math import pi
@@ -105,7 +106,7 @@ class graph_trajectory(graph):
             print('average grain size , err', err_d)
             dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
             
-            fig, ax = plt.subplots(1,1,figsize=(5,5))
+            fig, ax = plt.subplots(1,1,figsize=(6,6))
         
             ax.plot(dis_t, 'b', label='truth')
             ax.plot(dis, 'r--', label='GNN')
@@ -114,7 +115,7 @@ class graph_trajectory(graph):
             ax.set_ylabel(r'$P$')
             ax.legend()  
             
-            plt.savefig('qoi.png', dpi=400)
+            plt.savefig('qoi.png', dpi=400, bbox_inches='tight')
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -849,7 +850,9 @@ class graph_trajectory(graph):
  
         X_j = x_dict['joint'][:,:2].detach().numpy()
         X_g = x_dict['grain'][:,3:5].detach().numpy()      
- 
+
+       # print(np.all(X_j<1.5))
+       # assert np.all(X_j<1.5) and np.all(X_j>-0.5)
     
         mask_j = mask['joint'][:,0]
         mask_g = mask['grain'][:,0].detach().numpy()

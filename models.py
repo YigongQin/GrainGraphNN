@@ -954,13 +954,13 @@ def periodic_move(p, pc):
 
     rel_x = x - xc
     rel_y = y - yc
-    x += -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
-    y += -1*(rel_y>0.5) + 1*(rel_y<-0.5) 
+    a = x -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
+    b = y -1*(rel_y>0.5) + 1*(rel_y<-0.5) 
     
     
-    assert -0.5<x - xc<0.5
-    assert -0.5<y - yc<0.5
-    return torch.tensor([x, y])
+    assert -0.5<a - xc<0.5
+    assert -0.5<b - yc<0.5
+    return torch.tensor([a, b])
 
 
 """

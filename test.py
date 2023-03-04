@@ -56,11 +56,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
+    parser.add_argument("--truth_dir", type=str, default='./patchs/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='10077')
+    parser.add_argument("--seed", type=str, default='0')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -399,6 +399,7 @@ if __name__=='__main__':
             end_time = time.time()
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
             
+            traj.frames = frame_all + 1
             traj.qoi(mode='graph', compare=True)
             if args.compare:
                # traj.qoi(mode='graph', compare=True)

@@ -866,12 +866,13 @@ class graph_trajectory(graph):
 
                     
         ''' qoi '''      
+        s = (self.patch_size/self.mesh_size)+1
         area_counts = {}
         for idx, area in enumerate(X_g[:,0]):
             if mask_g[idx]>0:
-                area_counts[idx+1] = area*self.imagesize[0]**2
+                area_counts[idx+1] = area*s**2
         
-        self.extraV = mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*self.imagesize[0]**3
+        self.extraV = mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*s**3
         self.area_traj.append(area_counts)
                 
        

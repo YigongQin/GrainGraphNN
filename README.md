@@ -22,11 +22,11 @@ pip3 install -r requirements.txt
 ## Usage
 training
 ```
-python3 grainNN2.py --mode=train
+python3 grainNN2.py --model_type=regressor --model_id=0 --device=cuda
 ```
 
 testing
 
 ```
-python3 grainNN2.py --mode=test
+python3 test.py --seed=0
 ```

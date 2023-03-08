@@ -166,5 +166,5 @@ renderView1.CameraParallelScale = 17.25150434777653
 renderView1.ResetCamera()
 
 # save screenshot
-SaveScreenshot(directoryOut+imageFilesOut+'.png', renderView1, ImageResolution=[1024, 1024])
+SaveScreenshot(directoryOut+imageFilesOut+'.pdf', renderView1, ImageResolution=[1024, 1024])
 

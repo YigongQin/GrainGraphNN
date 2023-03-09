@@ -36,6 +36,7 @@ class graph_trajectory(graph):
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition
+        self.load_frames = self.frames
         self.joint_traj = []
         self.edge_events = []
         self.grain_events = []
@@ -933,10 +934,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Generate heterograph trajectory")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
-    parser.add_argument("--train_dir", type=str, default = './sameGR/')
-    parser.add_argument("--test_dir", type=str, default = './test/')
+    parser.add_argument("--save_dir", type=str, default = './all/')
     parser.add_argument("--seed", type=int, default = 1)
-    parser.add_argument("--level", type=int, default = 2)
+    parser.add_argument("--G", type=float, default = 10)
+    parser.add_argument("--R", type=float, default = 2)
+    
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
     parser.add_argument("--lxd", type=int, default = 40)
@@ -949,20 +951,17 @@ if __name__ == '__main__':
     """
     this script generates graph trajectory objects and training/testing data 
     the pde simulaion data is in rawdat_dir
-    train_dir: processed data for training
-    test_dir: processed data for testing
+    save_dir: save graph data to dir
     seed: realization seed, each graph trajectory relates to one pde simulation
-    level: 0: regression 
-           1: regression + classification 
-           2: regression + classification + mask 
+
     """
     
     
     
     if args.mode == 'train':
     
-        if not os.path.exists(args.train_dir):
-            os.makedirs(args.train_dir)
+        if not os.path.exists(args.save_dir):
+            os.makedirs(args.save_dir)
   
         for seed in [args.seed]:
             
@@ -977,13 +976,13 @@ if __name__ == '__main__':
                 traj.load_trajectory(rawdat_dir = args.rawdat_dir)
                 #traj.show_data_struct()
                 if args.save_traj:
-                    with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                    with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
                         dill.dump(traj, outp)
             
             else:
                 
                 
-                with open(args.train_dir + 'traj' + str(seed) + '.pkl', 'rb') as inp:  
+                with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'rb') as inp:  
                     try:
                         traj = dill.load(inp)
                     except:
@@ -1016,7 +1015,7 @@ if __name__ == '__main__':
                         print(colored('irregular data ignored, frame','red'), snapshot, ' -> ', snapshot+args.span)
                         continue
                       
-                    print('save frame %d -> %d, event level %d'%(snapshot, snapshot+args.span, args.level))
+                    print('save frame %d -> %d'%(snapshot, snapshot+args.span))
                     hg = traj.states[snapshot]
                     hg.span = args.span
                     event_list = set.union(*traj.edge_events[snapshot+1:snapshot+args.span+1])
@@ -1057,36 +1056,43 @@ if __name__ == '__main__':
                 print('history list for %dth graph'%frame, prev_idx_list)
                 hg.append_history(prev_list)
         
-            with open(args.train_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
+            with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
                       '_edgeE' + edgeE + '_grainE' + grainE + '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(train_samples, outp)
 
 
 
     if args.mode == 'test':   
-        if not os.path.exists(args.test_dir):
-            os.makedirs(args.test_dir) 
+        if not os.path.exists(args.save_dir):
+            os.makedirs(args.save_dir) 
         
     # creating testing dataset
         for seed in [args.seed]:
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = 1, physical_params={'G':10, 'R':2})
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, \
+                                    physical_params={'G':float(args.G), 'R':float(args.R)})
+            traj.load_frames = 1
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]
             hg0.span = args.span
             hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
+            hg0.append_history([])
             test_samples.append(hg0)
+            
             G = str(int(10*traj.physical_params['G']))
             R = str(int(10*traj.physical_params['R']))
           #  hg0.graph = graph(seed = seed)
-            with open(args.test_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
+            with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
                       '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
+                
             if args.save_traj:
-                    with open(args.test_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                        dill.dump(traj, outp)        
+                    with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                        dill.dump(traj, outp)   
+                        
+                        
     if args.mode == 'check':
         seed = 220
       #  g1 = graph(lxd = 20, seed=1) 
@@ -1094,19 +1100,7 @@ if __name__ == '__main__':
         traj = graph_trajectory(seed = seed, frames = 120)
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
-    if args.mode == 'instance':
-        
-        for seed in range(20):
-            print('\n')
-            print('test seed', seed)
-            try:
-                g1 = graph(lxd = 20, seed=seed) 
-            except:    
-                print('seed %d failed with noise 0.01, try 0'%seed)
-                g1 = graph(lxd = 20, seed=seed, noise = 0.0)
 
-            g1.show_data_struct() 
-            
 
 
 

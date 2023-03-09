@@ -162,7 +162,7 @@ class graph_trajectory(graph):
         prev_joint = {k:[0,0,100] for k, v in self.joint2vertex.items()}
         prev_grain = set(np.arange(self.num_regions)+1)
         
-        for frame in range(self.frames):
+        for frame in range(self.load_frames):
            
             
             print('load frame %d'%frame)

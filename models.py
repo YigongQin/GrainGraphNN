@@ -598,6 +598,7 @@ class GrainNN_classifier(torch.nn.Module):
            # print(((E_pp[0]==59)&(E_pp[1]==115)).nonzero().view(-1))
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
             
+            
             if len(Np)==0:
                 continue
             
@@ -654,7 +655,18 @@ class GrainNN_classifier(torch.nn.Module):
                     L1 = L1[L1!=E_index]
         
         
+        ''' ensure there is no two-side grain '''
         
+        grains, counts = torch.unique(E_pq[1,:], return_counts=True)
+        
+        remain_twoside = grains[counts<=2]
+        
+        for fg in remain_twoside:
+            print('find remaining two-side grains', fg)
+            edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
+            E_pp = edge_index_dict['joint', 'connect', 'joint']
+            E_pq = edge_index_dict['joint', 'pull', 'grain']   
+                  
                     
         """
         Neigbor switching
@@ -670,7 +682,7 @@ class GrainNN_classifier(torch.nn.Module):
 
        # print('edge switching index', L1)
        # print(E_pp.T[L1])
-            
+
         force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, elim_grain=None)
         #    assert len(force_elim)==0
         
@@ -839,7 +851,7 @@ class GrainNN_classifier(torch.nn.Module):
             if sq2_p1==sq2_p2:
                 if shrink_q2!=elim_grain:
                     force_elim.append(shrink_q2)            
-          #  print('\n',p1_pn, p2_pn)
+           # print('\n',p1_pn, p2_pn)
           #  print(p1_pn_index, p2_pn_index)
             
             ''' coordinates of two new vertices '''

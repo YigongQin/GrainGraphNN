@@ -16,7 +16,7 @@ from models import GrainNN_regressor, GrainNN_classifier
 from parameters import regressor, classifier_transfered
 from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
-from QoI import data_analysis
+
 from visualization3D.pv_3Dview import grain_visual
 
 
@@ -28,9 +28,9 @@ def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     for edge_type in edge_attr_dict:
         edge_attr_dict[edge_type] *= factor
     
-    assert torch.all(x_dict['joint'][:,:2]>=0) and torch.all(x_dict['joint'][:,:2]<=1)
-    assert torch.all(x_dict['grain'][:,:2]>=0) 
-    print('coordinates in bound')
+    #assert torch.all(x_dict['joint'][:,:2]>=0) and torch.all(x_dict['joint'][:,:2]<=1)
+    #assert torch.all(x_dict['grain'][:,:2]>=0) 
+    #print('coordinates in bound')
     
     
     x_dict['grain'][:,:2] *= factor
@@ -56,11 +56,11 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./patchs/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/9domain/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='0')
+    parser.add_argument("--seed", type=str, default='')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')

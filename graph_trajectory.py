@@ -37,7 +37,8 @@ class graph_trajectory(graph):
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition
         self.load_frames = self.frames
-        self.joint_traj = []
+        self.match_graph = True
+
         self.edge_events = []
         self.grain_events = []
         
@@ -166,6 +167,25 @@ class graph_trajectory(graph):
            
             
             print('load frame %d'%frame)
+
+            ''' check grain information'''
+            
+            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+            self.area_counts = dict(zip(cur_grain, counts))
+            self.area_traj.append(self.area_counts)
+           # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
+            cur_grain = set(cur_grain)
+
+            eliminated_grains = prev_grain - cur_grain
+
+            self.grain_events.append(eliminated_grains)
+            prev_grain = cur_grain
+            
+            
+            if frame>0 and not self.match_graph: continue
+            
+            ''' check junction information'''
             
             cur_joint = defaultdict(list)
             quadraples = defaultdict(list)
@@ -272,23 +292,6 @@ class graph_trajectory(graph):
             
 
 
-            ''' check grain information'''
-            
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
-            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
-            self.area_counts = dict(zip(cur_grain, counts))
-            self.area_traj.append(self.area_counts)
-           # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
-           # cur_grain = set(cur_grain)
-            
-            grain_set = set()
-            for k in cur_joint.keys():
-                grain_set.update(set(k))
-
-            cur_grain = grain_set
-
-            eliminated_grains = prev_grain - cur_grain
-            
             
             if len(cur_joint)<2*len(cur_grain):
                 total_missing, candidates, miss_case  = check_connectivity(cur_joint)
@@ -318,14 +321,13 @@ class graph_trajectory(graph):
                     
             print('case missed', miss_case)
             print('number of grains in pixels %d'%len(cur_grain))
-        #    print('number of grains junction %d'%len(grain_set))
             print('number of junctions %d'%len(cur_joint))
             assert len(cur_grain)>0, self.seed
 
             if len(cur_joint)!=2*len(cur_grain) or len(miss_case)>0:
                 print(colored('junction find failed', 'red'))
                # print(len(cur_joint), len(cur_grain))
-                self.grain_events.append(set())
+              #  self.grain_events.append(set())
                 self.edge_events.append(set()) 
                 self.save_frame[frame] = False
                 self.form_states_tensor(frame)
@@ -334,27 +336,17 @@ class graph_trajectory(graph):
                # exit()
                 continue
             
- 
-            self.joint_traj.append(cur_joint)
+
             prev_joint = cur_joint            
-            prev_grain = cur_grain
-            
-          #  print('estimated number of junction-junction links %d'%jj_link) 
-            # when it approaches the end, 3*junction is not accurate
-           # self.edge_labels = {(src, dst):0 for src, dst in self.edges if src>-1}
-           # for grain in eliminated_grains:
-           #     for pair in self.region_edge[grain]:
-           #         self.edge_labels[(pair[0], pair[1])] = -100
-           #         self.edge_labels[(pair[1], pair[0])] = -100                                 
-            
+           
+  
             self.vertex_matching(frame, cur_joint, eliminated_grains)
         
             self.update()
             self.form_states_tensor(frame)
           #  if self.error_layer>0.08:
           #      self.save_frame[frame] = False
-          #  if len(self.edges)!=6*len(cur_grain):
-          #      self.save_frame[frame] = False
+
                 
             if self.show == True:
                 self.show_data_struct()   
@@ -368,7 +360,7 @@ class graph_trajectory(graph):
       
         print('\n')
         print('summary of event from frame %d to frame %d'%(frame-1, frame))
-      #  cur_joint = self.joint_traj[frame]
+
 
 
         def add_edge_event(old_junction_i, old_junction_j):
@@ -677,7 +669,7 @@ class graph_trajectory(graph):
          #   assert len(old_vert) == 2
 
             
-        self.grain_events.append(eliminated_grains)
+        
         self.edge_events.append(switching_edges)    
         print('number of E2 %d, number of E1 %d'%(len(eliminated_grains), len(switching_edges)//2))
 
@@ -1101,127 +1093,4 @@ if __name__ == '__main__':
         traj.load_trajectory(rawdat_dir = args.rawdat_dir)
     
 
-
-
-
-"""
-l = list(self.edges.values())
-e_key = list(self.edges.keys())
-idx = l.index([vert_old_i, N_i[1]])
-self.edges[e_key[idx]] = [vert_old_i, N_j[1]]
-idx = l.index([vert_old_j, N_j[1]])
-self.edges[e_key[idx]] = [vert_old_j, N_i[1]]  
-
-idx = l.index([N_i[1], vert_old_i])
-self.edges[e_key[idx]] = [N_j[1], vert_old_i]
-idx = l.index([N_j[1], vert_old_j])
-self.edges[e_key[idx]] = [N_i[1], vert_old_j]  
-"""
-            
-            
-"""
-
-
-        def ns_last_vert(j1, i1, i2, q):
-
-            j2 = set(q) - set(j1)
-            j2.add(list(set(i1)-set(i2))[0])
-            j2.add(list(set(i2)-set(i1))[0])
-
-            return tuple(sorted(list(j2)))
-        
-        
-if left_over!= -1:
-    for q, joints in quadraples_new.items():
-        for i in old_joint:
-            if set(i).issubset(set(q)):            
-                add_vert = ns_last_vert(i, joints[0], joints[1], q)
-                
-                self.joint2vertex[add_vert] = left_over
-                if i in old_joint: old_joint.remove(i)
-                if joints[0] in new_joint: new_joint.remove(joints[0])
-                if joints[1] in new_joint: new_joint.remove(joints[1])                           
-                perform_switching(add_vert, i, joints[0], joints[1])
-
-
-
-case = 0 
-for q, joints in quadraples.items():
-    for j in new_joint:
-        if set(j).issubset(set(q)) and not case:
-            add_vert = ns_last_vert(j, joints[0], joints[1], q)
-           # print(old_joint, joints[0], joints[1])
-            add_edge_event(joints[0], joints[1])
-            perform_switching(joints[0], joints[1], j, add_vert)
-            old_joint.append(add_vert)
-            case = 1
-
-quadraples = quadruple_(old_joint)
-quadraples_new = quadruple_(new_joint)
-
-switching_event = set(quadraples.keys()).intersection(set(quadraples_new.keys()))
-
-for e2 in switching_event:
-    
-    old_junction_i, old_junction_j = quadraples[e2]
-    new_junction_i, new_junction_j = quadraples_new[e2]
-
-    perform_switching(old_junction_i, old_junction_j, new_junction_i, new_junction_j)    
-
-            
-
-            
-            
-if len(old_joint)>0:
-    print(colored('match not finisehd','red'))
-
-"""
-            
-            
-        
-"""
-old_map, new_map = match()            
-for elm_grain, junction in gg_merged.items():
- 
-    old_vert = []
-    todelete = set()
-    toadd = []
-#    junction = set()
-    for k, v in self.joint2vertex.items():
-        
-        if len(set(elm_grain).intersection(set(k)))>0:
-     #       junction.update(set(k))
-            old_vert.append(v)
-            todelete.add(k)
   
-    '''remove vertices connect to elim grains'''  
-    print(elm_grain,'th grain eliminated with no. of sides %d'%len(todelete), junction)
-    for k in todelete:
-        del self.joint2vertex[k]   
-        
-    
-    for k, v in new_map.items():
-        if set(k).issubset(junction):# and k not in self.joint2vertex:      
-            toadd.append(k)                    
-  
-    
-      #  left_over = old_vert[-1]
-    diff = len(old_vert) - len(toadd) - 2
-    neigh = []
-    '''find missing vertices'''
-    for k, v in new_map.items():
-        if len( set(k).intersection(junction) ) == 2:
-            neigh.append([periodic_dist_(self.region_center[elm_grain[0]], v), k])
-            
-    neigh = sorted(neigh)
-    for i in range(diff):
-        toadd.append(neigh[-i-1][1])
-    
-  #  print(toadd)
-    ''' add vertices '''       
-    for i in range(len(toadd)):
-        self.joint2vertex[toadd[i]] = old_vert[i]
-        print('the new joint', toadd[i], 'inherit the vert', old_vert[i])
-        del new_map[toadd[i]]
-    
-"""            

@@ -728,8 +728,8 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [i[1] for i in events], 'b')
         ax.plot(z_sam, [i[2] for i in events], 'r')
         ax.plot(z_sam, [i[3] for i in events], 'r--')
-        ax.set_xlabel(r'$z\ (\mu m)$')
-        ax.set_ylabel('# grain events')
+        ax.set_xlabel(r'$z_i\ (\mu m)$')
+        ax.set_ylabel('# grain eliminations')
         ax.legend(['truth', 'GNN', 'GNN TP'])        
         plt.savefig(str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
 

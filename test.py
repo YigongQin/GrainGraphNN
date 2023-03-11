@@ -245,7 +245,8 @@ if __name__=='__main__':
                 traj.show_data_struct()
                 
             grain_event_list = []
-            edge_event_list = []       
+            edge_event_list = []  
+            grain_acc_list = []
             alpha_field_list = [traj.alpha_field.T.copy()]
             
             layer_err_list = [traj.error_layer]
@@ -328,27 +329,20 @@ if __name__=='__main__':
                 # assert torch.all(X['joint'][:,:2]<1.5)
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
                 
+             
+                grain_event_truth = set.union(*traj.grain_events[:frame+1])
+                grain_event_truth = set([i-1 for i in grain_event_truth])
+
+                right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
+                grain_acc_list.append((height, len(grain_event_truth), len(grain_event_list), right_pred_q))
+                
+                print('true grain events: ', sorted(list(grain_event_truth))) 
+                print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) ) 
+                
                 
                 if args.compare:
                     ''' quantify the image error '''
-                    
-                    grain_event_truth = set.union(*traj.grain_events[:frame+1])
-                    grain_event_truth = set([i-1 for i in grain_event_truth])
-                    
-                    print('true grain events: ', sorted(list(grain_event_truth)))                    
-                    
-                    right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))
-                    
-                    print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) )
-                                        
-                    edge_event_truth = set.union(*traj.edge_events[:frame+1])
-    
-                    edge_event_list.extend([tuple(i) for i in pairs])
-                    right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))                    
-                    
-                    #  print('edge events:', pairs)
-                    #  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )                    
-                    
+  
                     traj.raise_err = False
                     traj.plot_polygons()
                     
@@ -366,8 +360,6 @@ if __name__=='__main__':
                         traj.show_data_struct()
 
 
-
-                
                 """
                 <5> next prediction
                     a. x_q
@@ -399,8 +391,9 @@ if __name__=='__main__':
             end_time = time.time()
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
             
-            traj.frames = frame_all + 1
+           # traj.frames = frame_all + 1
             traj.qoi(mode='graph', compare=True)
+            traj.event_acc(grain_acc_list)
             if args.compare:
                # traj.qoi(mode='graph', compare=True)
                 
@@ -408,4 +401,15 @@ if __name__=='__main__':
                 traj.frame_all = frame_all
                # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
-            
+'''
+                    
+#  edge_event_truth = set.union(*traj.edge_events[:frame+1])
+
+#  edge_event_list.extend([tuple(i) for i in pairs])
+#  right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))                    
+
+#  print('edge events:', pairs)
+#  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )                    
+                  
+
+'''            

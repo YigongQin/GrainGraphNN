@@ -117,7 +117,8 @@ class graph_trajectory(graph):
             ax.set_ylabel(r'$P$')
             ax.legend()  
             
-            plt.savefig('qoi.png', dpi=400, bbox_inches='tight')
+            plt.savefig(str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
+
 
     def load_trajectory(self, rawdat_dir: str = './'):
        
@@ -719,8 +720,17 @@ class graph_trajectory(graph):
                 else:
                     self.edges[i] = [-1, -1]
 
-                            
-
+    @staticmethod                        
+    def event_acc(events):
+        
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        z_sam = [i[0] for i in events]
+        ax.plot(z_sam, [i[1] for i in events])
+        ax.plot(z_sam, [i[2] for i in events])
+        ax.plot(z_sam, [i[3] for i in events])
+        ax.set_xlabel(r'$z\ (\mu m)$')
+        ax.set_ylabel('# grain events')
+        ax.legend(['truth', 'GNN', 'GNN TP'])        
 
 
     def show_events(self):
@@ -1065,7 +1075,7 @@ if __name__ == '__main__':
             
             traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, \
                                     physical_params={'G':float(args.G), 'R':float(args.R)})
-            traj.load_frames = 1
+            traj.match_graph = False
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]
             hg0.span = args.span

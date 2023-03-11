@@ -720,18 +720,18 @@ class graph_trajectory(graph):
                 else:
                     self.edges[i] = [-1, -1]
 
-    @staticmethod                        
-    def event_acc(events):
+                        
+    def event_acc(self, events):
         
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
         z_sam = [i[0] for i in events]
-        ax.plot(z_sam, [i[1] for i in events])
-        ax.plot(z_sam, [i[2] for i in events])
-        ax.plot(z_sam, [i[3] for i in events])
+        ax.plot(z_sam, [i[1] for i in events], 'b')
+        ax.plot(z_sam, [i[2] for i in events], 'r')
+        ax.plot(z_sam, [i[3] for i in events], 'r--')
         ax.set_xlabel(r'$z\ (\mu m)$')
         ax.set_ylabel('# grain events')
         ax.legend(['truth', 'GNN', 'GNN TP'])        
-
+        plt.savefig(str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
 
     def show_events(self):
         
@@ -936,7 +936,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Generate heterograph trajectory")
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
-    parser.add_argument("--save_dir", type=str, default = './all/')
+    parser.add_argument("--save_dir", type=str, default = './')
     parser.add_argument("--seed", type=int, default = 1)
     parser.add_argument("--G", type=float, default = 10)
     parser.add_argument("--R", type=float, default = 2)

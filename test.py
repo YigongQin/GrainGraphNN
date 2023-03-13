@@ -249,7 +249,7 @@ if __name__=='__main__':
             grain_acc_list = []
             alpha_field_list = [traj.alpha_field.T.copy()]
             
-            layer_err_list = [traj.error_layer]
+            layer_err_list = [(init_z, traj.error_layer)]
             traj.area_traj = traj.area_traj[:1]
 
             
@@ -346,7 +346,7 @@ if __name__=='__main__':
                     traj.raise_err = False
                     traj.plot_polygons()
                     
-                    layer_err_list.append(traj.error_layer)
+                    layer_err_list.append((height, traj.error_layer))
                     alpha_field_list.append(traj.alpha_field.T.copy())
                     
                     
@@ -354,7 +354,7 @@ if __name__=='__main__':
                         traj.show_data_struct()
                         
                     if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
-                        p_err = sum(layer_err_list)/len(layer_err_list)
+                        p_err = sum([i[1] for i in layer_err_list])/len(layer_err_list)
                         p_err = int(np.round(p_err*100))
                         traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
                         traj.show_data_struct()
@@ -395,7 +395,7 @@ if __name__=='__main__':
             traj.qoi(mode='graph', compare=True)
             traj.event_acc(grain_acc_list)
             if args.compare:
-               # traj.qoi(mode='graph', compare=True)
+                traj.layer_err(layer_err_list)
                 
                 Gv = grain_visual(seed=grain_seed, height=final_z) 
                 traj.frame_all = frame_all

@@ -117,7 +117,7 @@ class graph_trajectory(graph):
             ax.set_ylabel(r'$P$')
             ax.legend()  
             
-            plt.savefig(str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
+            plt.savefig('seed'+str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
 
 
     def load_trajectory(self, rawdat_dir: str = './'):
@@ -731,7 +731,17 @@ class graph_trajectory(graph):
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel('# grain eliminations')
         ax.legend(['truth', 'GNN', 'GNN TP'])        
-        plt.savefig(str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
+        plt.savefig('seed'+str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
+
+    def layer_err(self, events):
+        
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        z_sam = [i[0] for i in events]
+        ax.plot(z_sam, [i[1] for i in events], 'b')
+        ax.set_xlabel(r'$z_i\ (\mu m)$')
+        ax.set_ylabel('MR')
+       # ax.legend(['truth', 'GNN', 'GNN TP'])        
+        plt.savefig('seed'+str(self.seed)+'_layer_err.png', dpi=400, bbox_inches='tight')
 
     def show_events(self):
         

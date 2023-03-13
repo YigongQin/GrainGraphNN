@@ -11,6 +11,7 @@ import glob, re, os, argparse
 import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
+plt.rcParams.update({'font.size': 24})
 
 if __name__ == '__main__':
     
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     fig, ax = plt.subplots(1,1,figsize=(6,6))
-    bins = np.arange(10+1)
+    bins = np.arange(10+1)/2
     files = glob.glob(args.rawdat_dir + '/*seed0*')
     
     for file in files:
@@ -29,7 +30,7 @@ if __name__ == '__main__':
         f = h5py.File(file, 'r')
         totalV_frames = np.asarray(f['total_area'])
         
-        num_grains = re.search('grains(\d+\.\d+)', file).group(1)
+        num_grains = int(re.search('grains(\d+)', file).group(1))
         totalV_frames = totalV_frames.reshape((num_grains, args.frame), order='F')  
         grain_volume = totalV_frames[:,-1].copy()
      #   scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(self.final_height/self.mesh_size+1)

@@ -47,6 +47,8 @@ qoi_dict['R_max'] = max(qoi_dict['Rmax'])
 qoi_dict['G'] = [(i-qoi_dict['G_min'])/(qoi_dict['G_max']-qoi_dict['G_min']) for i in qoi_dict['G']]
 qoi_dict['R'] = [(i-qoi_dict['R_min'])/(qoi_dict['R_max']-qoi_dict['R_min']) for i in qoi_dict['Rmax']]
 
+del qoi_dict['Rmax']
+
 print(qoi_dict)
 
 with open('GR_train_grid.pkl', 'wb') as outp:

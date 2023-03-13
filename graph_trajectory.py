@@ -17,6 +17,7 @@ import itertools
 from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction, periodic_dist_
 from math import pi
 from collections import Counter
+from scipy.interpolate import griddata
 
 def relative_angle(p1, p2):
     
@@ -1083,19 +1084,30 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, \
-                                    physical_params={'G':float(args.G), 'R':float(args.R)})
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame)
             traj.match_graph = False
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]
-            hg0.span = args.span
+
+            with open('GR_train_grid.pkl', 'rb') as inp:  
+                try:
+                    GR_grid = dill.load(inp)
+                except:
+                    raise EOFError
+            
+            G_ = (traj.physical_params['G'] - GR_grid['G_min'])/(GR_grid['G_max'] - GR_grid['G_min'])
+            R_ = (traj.physical_params['R'] - GR_grid['R_min'])/(GR_grid['R_max'] - GR_grid['R_min'])
+            hg0.span = griddata(np.array([GR_grid['G'], GR_grid['R']]).T, np.array(GR_grid['span']), (G_, R_), method='nearest')
+            
+           # hg0.span = args.span
             hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
             hg0.append_history([])
             test_samples.append(hg0)
             
             G = str(int(10*traj.physical_params['G']))
             R = str(int(10*traj.physical_params['R']))
-          #  hg0.graph = graph(seed = seed)
+
+
             with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
                       '_span' + str(args.span) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
@@ -1114,3 +1126,4 @@ if __name__ == '__main__':
     
 
   
+# physical_params={'G':float(args.G), 'R':float(args.R)}

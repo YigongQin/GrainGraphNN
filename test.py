@@ -147,10 +147,7 @@ if __name__=='__main__':
     Rmodel.threshold = 1e-4 # from P-R plot
     Cmodel.threshold = 0.6  # from P-R plot
     
-    ''' PF simulation (training data) setup '''
-    init_z = 2
-    final_z = 50
-    frame_all = 120
+    train_frames = 120
     
     if device=='cuda':
         print('use %d GPUs'%torch.cuda.device_count())
@@ -249,7 +246,7 @@ if __name__=='__main__':
             grain_acc_list = []
             alpha_field_list = [traj.alpha_field.T.copy()]
             
-            layer_err_list = [(init_z, traj.error_layer)]
+            layer_err_list = [(traj.ini_height, traj.error_layer)]
             traj.area_traj = traj.area_traj[:1]
 
             
@@ -261,14 +258,14 @@ if __name__=='__main__':
             
             data.to(device)
             
-            for frame in range(span, frame_all+1, span):
+            for frame in range(span, traj.frames, span):
                 
                 
-                print('******* prediction progress %1.2f/1.0 ********'%(frame/frame_all))
-                height = int(init_z + frame/frame_all*(final_z-init_z) )
+                print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
+                height = int(traj.ini_height + frame/(traj.frames - 1)*(traj.final_height-traj.ini_height) )
                 
                 """
-                <1> combine two predictions
+                <1> combine predictions from regressor and classifier
                     a. Rmodel: dx_p, ds & v
                     b. Cmodel: p(i,j), dx for p(i,j)>threshold
                 """            
@@ -285,10 +282,14 @@ if __name__=='__main__':
                 """
                 
                 Rmodel.update(data.x_dict, pred)
-                data.x_dict['grain'][:, 2] += span/(frame_all+1)
-                data.x_dict['joint'][:, 2] += span/(frame_all+1)
+                data.x_dict['grain'][:, 2] += span/(train_frames + 1)
+                data.x_dict['joint'][:, 2] += span/(train_frames + 1)
 
-                
+                ''' for time extrapolation, prevent z exceeding 1'''
+                if data.x_dict['grain'][0, 2] > train_frames/(train_frames + 1):
+                    data.x_dict['grain'][:, 2] = train_frames/(train_frames + 1)         
+                    data.x_dict['joint'][:, 2] = train_frames/(train_frames + 1)
+
                 """
                 <3> predict events and update features and connectivity
                     a. E_pp, E_pq
@@ -325,8 +326,7 @@ if __name__=='__main__':
                     
                     X['joint'][:,:2] =  (X['joint'][:,:2] + domain_offset)/args.domain_factor
                     
-                # assert torch.all(pred['joint']<0.2)
-                # assert torch.all(X['joint'][:,:2]<1.5)
+ 
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
                 
              
@@ -353,7 +353,7 @@ if __name__=='__main__':
                     if args.plot:
                         traj.show_data_struct()
                         
-                    if args.save_fig>1 and frame%(frame_all//(args.save_fig-1))==0:
+                    if args.save_fig>1 and frame%((traj.frames - 1)//(args.save_fig-1))==0:
                         p_err = sum([i[1] for i in layer_err_list])/len(layer_err_list)
                         p_err = int(np.round(p_err*100))
                         traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
@@ -397,8 +397,8 @@ if __name__=='__main__':
             if args.compare:
                 traj.layer_err(layer_err_list)
                 
-                Gv = grain_visual(seed=grain_seed, height=final_z) 
-                traj.frame_all = frame_all
+                Gv = grain_visual(seed=grain_seed, height=traj.final_height) 
+               # traj.frame_all = frame_all
                # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
 '''
@@ -412,4 +412,7 @@ if __name__=='__main__':
 #  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )                    
                   
 
+    init_z = 2
+    final_z = 50
+    frame_all = 120
 '''            

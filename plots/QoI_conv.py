@@ -22,9 +22,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     fig, ax = plt.subplots(1,1,figsize=(6,6))
-    bins = np.arange(10+1)/2
-    files = glob.glob(args.rawdat_dir + '/*seed0*')
-    
+    bins = 11 #np.arange(0, 20+1)
+    upbound = 10
+    files = sorted(glob.glob(args.rawdat_dir + '/*seed0*'))
+    cnt = 0 
     for file in files:
         print(file)
         f = h5py.File(file, 'r')
@@ -36,15 +37,16 @@ if __name__ == '__main__':
      #   scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(self.final_height/self.mesh_size+1)
         
       #  self.grain_volume = self.grain_volume/scale_surface
-        mesh_size = 0.08
+        mesh_size = 0.08 if cnt==0 else 0.04
+        cnt += 1
         grain_volume = grain_volume*mesh_size**3
         grain_size_t = np.cbrt(3*grain_volume/(4*pi))
 
-        dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
-    
-        ax.plot(dis_t)
+        dis_t, _ =  np.histogram(grain_size_t, bins=bins, range=(0,upbound),density=True)
+        d = np.arange(0, upbound+upbound/(bins-1), upbound/(bins-1))
+        ax.plot(d, dis_t)
         
-    ax.set_xlim(0, 10)
+    ax.set_xlim(0, 12)
     ax.set_xlabel(r'$d\ (\mu m)$')
     ax.set_ylabel(r'$P$')
     ax.legend()  

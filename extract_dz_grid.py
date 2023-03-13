@@ -6,7 +6,7 @@ Created on Mon Mar 13 11:48:06 2023
 @author: yigongqin
 """
 
-import glob, re
+import glob, re, dill
 import matplotlib.pyplot as plt
 rawdat_dir = '../FGR/'
 graph_dir= './all/'
@@ -29,7 +29,7 @@ for i in range(1443):
             element = float(re.search(qoi+'(\d+\.\d+)', file).group(1))
         qoi_dict[qoi].append(element)
         #print(element) 
-print(qoi_dict)
+#
 print([len(i) for k, i in qoi_dict.items()])
 
 fig, ax = plt.subplots(figsize=(4,4))
@@ -38,3 +38,16 @@ ax.set_xlabel(r'$G\ (K/\mu m)$')
 ax.set_ylabel(r'$R\ (m/s) $')
 plt.savefig('dz_grid.pdf',bbox_inches='tight')
 
+qoi_dict['G_min'] = min(qoi_dict['G'])
+qoi_dict['G_max'] = max(qoi_dict['G'])  
+
+qoi_dict['R_min'] = min(qoi_dict['Rmax'])
+qoi_dict['R_max'] = max(qoi_dict['Rmax'])  
+
+qoi_dict['G'] = [(i-qoi_dict['G_min'])/(qoi_dict['G_max']-qoi_dict['G_min']) for i in qoi_dict['G']]
+qoi_dict['R'] = [(i-qoi_dict['R_min'])/(qoi_dict['R_max']-qoi_dict['R_min']) for i in qoi_dict['Rmax']]
+
+print(qoi_dict)
+
+with open('GR_train_grid.pkl', 'wb') as outp:
+    dill.dump(qoi_dict, outp)   

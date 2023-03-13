@@ -8,14 +8,16 @@ Created on Mon Feb 27 10:49:10 2023
 
 import glob, re
 
-rawdat_dir = '.'
+rawdat_dir = '.' #'bc/round3/'
 files = glob.glob(rawdat_dir + '/seed*z50*')
-qoi_dict = {'elimp':[], '_t':[]}
+qoi_dict = {'elimp':[], '_t':[], 'err':[]}
 
 for data_file in files:
     for qoi in qoi_dict:
-        element = int(re.search(qoi+'\d+)', data_file).group(1))
+        element = int(re.search(qoi+'(\d+)', data_file).group(1))
         qoi_dict[qoi].append(element)
         
 print(qoi_dict)
 print(sum(qoi_dict['elimp']))
+print(sum(qoi_dict['_t']))
+print(sum(qoi_dict['err']))

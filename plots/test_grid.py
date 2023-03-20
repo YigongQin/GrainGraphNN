@@ -19,6 +19,8 @@ for seed in range(10000, 10100) :
     R_.append(R)
     
 fig, ax = plt.subplots(figsize=(4,4))
-ax.scatter(G_, R_)
+ax.scatter(G_, R_, c='k')
 ax.set_xlabel(r'$G\ (K/\mu m)$')
 ax.set_ylabel(r'$R\ (m/s) $')
+plt.savefig('testGR.pdf',bbox_inches='tight')
+

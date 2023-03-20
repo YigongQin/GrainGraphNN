@@ -1109,7 +1109,7 @@ if __name__ == '__main__':
 
 
             with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
-                      '_span' + str(args.span) + '.pkl', 'wb') as outp:
+                      '_span' + str(hg0.span) + '.pkl', 'wb') as outp:
                 dill.dump(test_samples, outp)
                 
             if args.save_traj:

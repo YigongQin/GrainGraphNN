@@ -1,0 +1,127 @@
+==========  GrainNN specification  =========
+3D grain microstructure evolution
+the model id is:  1
+device:  cuda
+
+
+************ setup data ***********
+==========  data information  =========
+number of train, validation, test runs 38461 2025 0
+GrainNN frames:  13
+features:  [('grain', ['x', 'y', 'z', 'area', 'extraV', 'cosx', 'sinx', 'cosz', 'sinz', 'span', 'darea']), ('joint', ['x', 'y', 'z', 'G', 'R', 'span', 'dx', 'dy'])]
+targets:  [('grain', ['darea', 'extraV']), ('joint', ['dx', 'dy'])]
+heteroData metadata (['grain', 'joint', 'edge_event', 'grain_event', 'mask'], [('grain', 'push', 'joint'), ('joint', 'pull', 'grain'), ('joint', 'connect', 'joint')])
+nodes in samples [('grain', 114), ('joint', 228)]
+edges in samples [(('grain', 'push', 'joint'), 684), (('joint', 'pull', 'grain'), 684), (('joint', 'connect', 'joint'), 684)]
+
+
+************ setup model ***********
+==========  architecture  ========
+type -- multilayer heterogeous GCLSTM
+input window 3 ; output window 1
+input feature dimension:  [('grain', 11), ('joint', 8)]
+hidden dim (layer size):  96 ; number of layers (for both encoder and decoder):  1
+
+
+************ training specification ***********
+epochs:  20 ; learning rate:  0.0025
+batch size:  32
+model type:  classifier
+weight of positive event:  1
+schedueler step:  10
+
+
+transfered learned parameters from regressor
+use 1 GPUs
+Epoch:0, Train loss:0.699999, valid loss:0.700011
+Validation AUC:0.027843
+
+
+total number of trained parameters  1204806
+
+
+Epoch:1, Train loss:0.051632, valid loss:0.026333
+Validation AUC:0.856884
+
+
+Epoch:2, Train loss:0.024718, valid loss:0.023085
+Validation AUC:0.881467
+
+
+Epoch:3, Train loss:0.022352, valid loss:0.021436
+Validation AUC:0.891563
+
+
+Epoch:4, Train loss:0.020946, valid loss:0.020366
+Validation AUC:0.901557
+
+
+Epoch:5, Train loss:0.020051, valid loss:0.020381
+Validation AUC:0.896771
+
+
+Epoch:6, Train loss:0.019116, valid loss:0.019209
+Validation AUC:0.905581
+
+
+Epoch:7, Train loss:0.018403, valid loss:0.019162
+Validation AUC:0.904736
+
+
+Epoch:8, Train loss:0.017691, valid loss:0.018405
+Validation AUC:0.911031
+
+
+Epoch:9, Train loss:0.017167, valid loss:0.017982
+Validation AUC:0.915952
+
+
+Epoch:10, Train loss:0.016535, valid loss:0.017497
+Validation AUC:0.922204
+
+
+Epoch:11, Train loss:0.015414, valid loss:0.016705
+Validation AUC:0.922496
+
+
+Epoch:12, Train loss:0.015067, valid loss:0.016803
+Validation AUC:0.920702
+
+
+Epoch:13, Train loss:0.014763, valid loss:0.016712
+Validation AUC:0.919542
+
+
+Epoch:14, Train loss:0.014537, valid loss:0.016775
+Validation AUC:0.920826
+
+
+Epoch:15, Train loss:0.014293, valid loss:0.016458
+Validation AUC:0.920615
+
+
+Epoch:16, Train loss:0.013998, valid loss:0.016676
+Validation AUC:0.918391
+
+
+Epoch:17, Train loss:0.013816, valid loss:0.016436
+Validation AUC:0.920428
+
+
+Epoch:18, Train loss:0.013568, valid loss:0.016255
+Validation AUC:0.923868
+
+
+Epoch:19, Train loss:0.013388, valid loss:0.017009
+Validation AUC:0.915107
+
+
+Epoch:20, Train loss:0.013169, valid loss:0.016105
+Validation AUC:0.923392
+model id: 1 loss 0.016104979236843064
+model id: 1 PR AUC 0.9233918786048889
+training time 10220.031023740768
+the optimal threshold for classification is:  0.6 , with precision/recall 0.912868857383728 0.8695521354675293
+Launcher: Job 2 completed in 10302 seconds.
+Launcher: Task 3 done. Exiting.
+Launcher: Done. Job exited without errors

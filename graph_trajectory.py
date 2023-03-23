@@ -124,7 +124,7 @@ class graph_trajectory(graph):
     def load_trajectory(self, rawdat_dir: str = './'):
        
         
-        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*'))[0]
+        self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*.h5'))[0]
         f = h5py.File(self.data_file, 'r')
         self.x = np.asarray(f['x_coordinates'])
         self.y = np.asarray(f['y_coordinates'])
@@ -349,8 +349,9 @@ class graph_trajectory(graph):
           #  if self.error_layer>0.08:
           #      self.save_frame[frame] = False
 
-                
-            if self.show == True:
+            if frame%24==0:    
+            #if self.show == True:
+                self.save = 'data_seed'+str(self.seed)+'_frame'+str(frame)+'.png'
                 self.show_data_struct()   
                 
             print('====================================')  

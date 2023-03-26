@@ -56,11 +56,12 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/9domain/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--seed", type=str, default='')
+    parser.add_argument("--stop_frame", type=int, default='0')
+    parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -93,7 +94,7 @@ if __name__=='__main__':
     
     
             
-    datasets = sorted(glob.glob(args.truth_dir + 'seed' + args.seed + '*'))
+    datasets = sorted(glob.glob(args.truth_dir + 'seed' + args.seed + '*.pkl'))
 
     test_list = []
     for case in datasets:
@@ -240,7 +241,11 @@ if __name__=='__main__':
             if args.save_fig>0:
                 traj.save = 'seed' + str(grain_seed) + '_z' + str(0) + '.png'
                 traj.show_data_struct()
-                
+            
+            if args.stop_frame>0:
+                traj.frames = args.stop_frame
+            traj.final_height = traj.ini_height + (traj.frames -1)/train_frames*(traj.final_height-traj.ini_height)
+            
             grain_event_list = []
             edge_event_list = []  
             grain_acc_list = []
@@ -399,7 +404,7 @@ if __name__=='__main__':
                 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height) 
                # traj.frame_all = frame_all
-               # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
 '''
                     

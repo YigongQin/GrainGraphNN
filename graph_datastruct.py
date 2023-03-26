@@ -393,7 +393,7 @@ class graph:
     def show_data_struct(self):
         
 
-        fig, ax = plt.subplots(1, 4, figsize=(20, 5))
+        fig, ax = plt.subplots(1, 4, figsize=(20, 5), gridspec_kw={'width_ratios': [1, 1, 1, 1], 'height_ratios': [1]})
         
         Q, V, E = len(self.regions), len(self.vertex_neighbor), len(self.edges)
 
@@ -408,24 +408,26 @@ class graph:
     
       #  ax[0].scatter(list(x), list(y), c = 'k')
         ax[0].axis("equal")
-        ax[0].set_title('(Q, V, E)=(%d, %d, %d)'%(Q, V, E))
-
+        ax[0].axis('off')
+       # ax[0].set_title('(Q, V, E)=(%d, %d, %d)'%(Q, V, E))
+       # ax[0].set_title('Graph')
+        ax[0].set_frame_on(False)
         
         ax[1].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
         ax[1].set_xticks([])
         ax[1].set_yticks([])
-        ax[1].set_title('reconstructed') 
+      #  ax[1].set_title('GrainGNN') 
         
         ax[2].imshow(self.theta_z[self.alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
         ax[2].set_xticks([])
         ax[2].set_yticks([])
-        ax[2].set_title('phase field')         
+       # ax[2].set_title('Phase field')         
         
         ax[3].imshow(1*(self.alpha_pde!=self.alpha_field),cmap='Reds',origin='lower')
         ax[3].set_xticks([])
         ax[3].set_yticks([])
         p_err = int(np.round(self.error_layer*100))
-        ax[3].set_title('error'+'%d'%(p_err)+'%')           
+      #  ax[3].set_title('error'+'%d'%(p_err)+'%')           
               
         
         if self.save:

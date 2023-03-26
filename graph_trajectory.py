@@ -109,9 +109,9 @@ class graph_trajectory(graph):
             print('average grain size , err', err_d)
             dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
             
-            fig, ax = plt.subplots(1,1,figsize=(6,6))
+            fig, ax = plt.subplots(1,1,figsize=(5,5))
         
-            ax.plot(dis_t, 'b', label='truth')
+            ax.plot(dis_t, 'b', label='PF')
             ax.plot(dis, 'r--', label='GNN')
             ax.set_xlim(0, 10)
             ax.set_xlabel(r'$d\ (\mu m)$')
@@ -732,7 +732,7 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [i[3] for i in events], 'r--')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel('# grain eliminations')
-        ax.legend(['truth', 'GNN', 'GNN TP'])        
+        ax.legend(['PF', 'GNN', 'GNN TP'])        
         plt.savefig('seed'+str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
 
     def layer_err(self, events):

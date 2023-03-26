@@ -117,7 +117,7 @@ class grain_visual:
             self.alpha_pde_frames = np.asarray(f['cross_sec'])
             self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,::span]               
 
-        dx_frame = (self.height - self.base_width)/(data_frames - 1)*span
+        dx_frame = (50 - self.base_width)/(data_frames - 1)*span
         print('dx in plance ', dx,' between two planes',  dx_frame)
         
 
@@ -155,7 +155,7 @@ class grain_visual:
         print('grid ', fnx, fny, fnz)
         dx = self.lxd/(fnx-3)
 
-        data_frames = traj.frame_all+1
+        data_frames = traj.frames
 
         self.alpha_pde_frames = np.stack(alpha_field_list, axis=2)
         layer_truth = traj.alpha_pde_frames[:, :, ::span] 
@@ -165,7 +165,7 @@ class grain_visual:
         print('dx in plance ', dx,' between two planes',  dx_frame)
         
         
-        top_z = int(np.round((self.height-self.base_width)/dx_frame)) + 1
+        top_z = int(np.round((50-self.base_width)/dx_frame)) + 1
 
         
         self.alpha_pde_frames = self.alpha_pde_frames[:, :, :top_z]     
@@ -198,11 +198,11 @@ class grain_visual:
         self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'leapz.vtk'
         write_data(grid, self.dataname) 
 
-        grid.point_data.scalars = err.ravel(order='F')  
-        grid.point_data.scalars.name = 'theta_z'
+       # grid.point_data.scalars = err.ravel(order='F')  
+       # grid.point_data.scalars.name = 'theta_z'
         
-        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'err.vtk'
-        write_data(grid, self.dataname) 
+       # self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'err.vtk'
+       # write_data(grid, self.dataname) 
 
 if __name__ == '__main__':
 
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     
     else:
         raise KeyError
-   # args.pvpython_dir = '/Applications/ParaView-5.11.0.app/Contents/bin/'
+   # args.pvpython_dir = '/Applications/ParaView-5.10.1.app/Contents/bin/'
 
         
         

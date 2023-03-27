@@ -267,7 +267,7 @@ if __name__=='__main__':
                 
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
-                height = int(traj.ini_height + frame/(traj.frames - 1)*(traj.final_height-traj.ini_height) )
+                height = traj.ini_height + frame/(traj.frames - 1)*(traj.final_height-traj.ini_height) 
                 
                 """
                 <1> combine predictions from regressor and classifier
@@ -399,12 +399,14 @@ if __name__=='__main__':
            # traj.frames = frame_all + 1
             traj.qoi(mode='graph', compare=True)
             traj.event_acc(grain_acc_list)
+            
             if args.compare:
                 traj.layer_err(layer_err_list)
+                np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
                 
-                Gv = grain_visual(seed=grain_seed, height=traj.final_height) 
+                Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
                # traj.frame_all = frame_all
-                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+               # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
 '''
                     

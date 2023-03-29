@@ -193,7 +193,7 @@ class graph:
             
                 self.random_voronoi()
                 self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-                self.alpha_pde = self.alpha_field
+                self.alpha_pde = self.alpha_field.copy()
                 self.update(init=True)
             
             except:
@@ -202,7 +202,7 @@ class graph:
                 self.vertex2joint = defaultdict(set)
                 self.random_voronoi()
                 self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-                self.alpha_pde = self.alpha_field
+                self.alpha_pde = self.alpha_field.copy()
                 self.update(init=True)            
             
             self.num_regions = len(self.regions)
@@ -318,35 +318,6 @@ class graph:
                 
                 
 
-    
-      #  vor.filtered_points = seeds
-      #  vor.filtered_regions = regions
-   # @njit(parallel=True)
-    def para_pixel(self, img, s):
-        
-        
-        for i in range(s):
-            for j in range(s):
-                ii, jj, = i ,j
-                if img[i,j,2]==0:
-
-                    if img[i+s,j,2]>0:
-                        ii += s
-                    elif img[i,j+s,2]>0:
-                        jj += s
-                    elif img[i+s,j+s,2]>0:
-                        ii += s
-                        jj += s
-                    else:
-                       # print('wrong', self.seed)
-                        if self.raise_err:
-                            raise ValueError(i,j)
-                        else: 
-                            pass
-                        
-                self.alpha_field[i,j] = img[ii,jj,0]*255*255+img[ii,jj,1]*255+img[ii,jj,2]    
-        if self.raise_err:
-            assert np.all(self.alpha_field>0), self.seed
         
     def plot_polygons(self):
         """
@@ -376,18 +347,18 @@ class graph:
             if len(p)>1:
                 draw.polygon(p, fill=orientation) 
 
-        img = np.asarray(image)
-        
-        self.para_pixel(img, s)
-                
+        img = np.array(image, dtype=int)
 
-        """
-        for i in range(2*s):
-            for j in range(2*s):
-                alpha = img[i,j,0]*255*255+img[i,j,1]*255+img[i,j,2]   
-                self.alpha_field_dummy[i,j] = alpha 
-        """
-        
+        img = img[:,:,0]*255*255 + img[:,:,1]*255 + img[:,:,2]
+
+        img = np.stack([img[:s,:s] ,img[s:,:s] ,img[:s,s:] ,img[s:,s:] ])
+
+       # self.para_pixel(img, s)
+        self.alpha_field = np.max(img, axis=0)    
+
+        if self.raise_err:
+            assert np.all(self.alpha_field>0), self.seed
+            
         self.compute_error_layer()
      
     def show_data_struct(self):
@@ -801,7 +772,7 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 0
-        g1 = graph(lxd = 40, seed=seed) 
+        g1 = graph(lxd = 120, seed=seed) 
 
         g1.show_data_struct()
 

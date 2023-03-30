@@ -949,9 +949,9 @@ if __name__ == '__main__':
     parser.add_argument("--mode", type=str, default = 'check')
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--save_dir", type=str, default = './')
-    parser.add_argument("--seed", type=int, default = 1)
-    parser.add_argument("--G", type=float, default = 10)
-    parser.add_argument("--R", type=float, default = 2)
+    parser.add_argument("--seed", type=int, default = 0)
+    parser.add_argument("--G", type=float, default = 2)
+    parser.add_argument("--R", type=float, default = 0.4)
     
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
@@ -1116,7 +1116,48 @@ if __name__ == '__main__':
             if args.save_traj:
                     with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
                         dill.dump(traj, outp)   
-                        
+
+    if args.mode == 'generate':   
+        if not os.path.exists(args.save_dir):
+            os.makedirs(args.save_dir) 
+        
+    # creating testing dataset
+        for seed in [args.seed]:
+            
+            test_samples = []
+            
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
+            
+            traj.form_states_tensor(0)
+
+            hg0 = traj.states[0]
+
+            with open('GR_train_grid.pkl', 'rb') as inp:  
+                try:
+                    GR_grid = dill.load(inp)
+                except:
+                    raise EOFError
+            
+            G_ = (traj.physical_params['G'] - GR_grid['G_min'])/(GR_grid['G_max'] - GR_grid['G_min'])
+            R_ = (traj.physical_params['R'] - GR_grid['R_min'])/(GR_grid['R_max'] - GR_grid['R_min'])
+            hg0.span = griddata(np.array([GR_grid['G'], GR_grid['R']]).T, np.array(GR_grid['span']), (G_, R_), method='nearest')
+            
+           # hg0.span = args.span
+            hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
+            hg0.append_history([])
+            test_samples.append(hg0)
+            
+            G = str(int(10*traj.physical_params['G']))
+            R = str(int(10*traj.physical_params['R']))
+
+
+            with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
+                      '_span' + str(hg0.span) + '.pkl', 'wb') as outp:
+                dill.dump(test_samples, outp)
+                
+            if args.save_traj:
+                    with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
+                        dill.dump(traj, outp)                         
                         
     if args.mode == 'check':
         seed = 220

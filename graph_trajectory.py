@@ -1127,8 +1127,10 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
-            
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, noise = 0, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
+            cur_grain, counts = np.unique(traj.alpha_field, return_counts=True)
+            traj.area_counts = dict(zip(cur_grain, counts))
+            traj.area_traj.append(traj.area_counts)            
             traj.form_states_tensor(0)
 
             hg0 = traj.states[0]

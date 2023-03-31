@@ -595,7 +595,9 @@ class GrainNN_classifier(torch.nn.Module):
         unexpected_elim = []
         
         for grain in y_dict['grain_event']:
-           # print(((E_pp[0]==59)&(E_pp[1]==115)).nonzero().view(-1))
+   
+           # print(grain)         
+   
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
             
             
@@ -638,16 +640,17 @@ class GrainNN_classifier(torch.nn.Module):
             unexpected_elim.extend(force_elim)
                              
             
-            edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
-            E_pp = edge_index_dict['joint', 'connect', 'joint']
-            E_pq = edge_index_dict['joint', 'pull', 'grain']
-
-            if len(force_elim)>0:
-                print('force eliminated grains', force_elim)
-                for fg in force_elim:
-                    edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
-                    E_pp = edge_index_dict['joint', 'connect', 'joint']
-                    E_pq = edge_index_dict['joint', 'pull', 'grain']
+           # edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(grain, E_pp, E_pq, mask)
+           # E_pp = edge_index_dict['joint', 'connect', 'joint']
+           # E_pq = edge_index_dict['joint', 'pull', 'grain']
+            force_elim.insert(0,grain)
+            if len(force_elim)>1:
+                print('force eliminated grains', force_elim[1:])
+                
+            for fg in force_elim:
+                edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
+                E_pp = edge_index_dict['joint', 'connect', 'joint']
+                E_pq = edge_index_dict['joint', 'pull', 'grain']
                     
             for E_index in L2:
                # print(E_index, L1)

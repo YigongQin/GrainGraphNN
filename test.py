@@ -234,7 +234,7 @@ if __name__=='__main__':
             data['mask']['joint'] = 1 + 0*data['mask']['joint']
 
            # X_p = data.x_dict['joint'][:,:2].detach().numpy()
-            traj.GNN_update(0, data.x_dict, data['mask'], True, data.edge_index_dict)
+            traj.GNN_update(0, data.x_dict, data['mask'], True, data.edge_index_dict, args.compare)
             if args.plot:
                 traj.show_data_struct()
                 
@@ -332,7 +332,7 @@ if __name__=='__main__':
                     X['joint'][:,:2] =  (X['joint'][:,:2] + domain_offset)/args.domain_factor
                     
  
-                traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict)
+                traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict, args.compare)
                 
              
                 grain_event_truth = set.union(*traj.grain_events[:frame+1])

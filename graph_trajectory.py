@@ -852,7 +852,7 @@ class graph_trajectory(graph):
         # reset the edge_labels, check event at next snapshot
         # self.edge_labels = {(src, dst):0 for src, dst in jj_edge} 
 
-    def GNN_update(self, frame, x_dict, mask, topo, edge_index_dict):
+    def GNN_update(self, frame, x_dict, mask, topo, edge_index_dict, compare):
         
         
         
@@ -872,7 +872,8 @@ class graph_trajectory(graph):
         mask_j = mask['joint'][:,0]
         mask_g = mask['grain'][:,0].detach().numpy()
         
-        self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+        if compare:
+            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
         
         self.vertices.clear()
         for i, coor in enumerate(X_j):

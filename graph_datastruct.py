@@ -178,7 +178,7 @@ class graph:
         self.noise = noise/lxd/(lxd/self.patch_size)
         self.BC = 'periodic'
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
-        self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
+      #  self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
         self.raise_err = False
@@ -311,7 +311,22 @@ class graph:
                     self.edges.update({edge_count:[cur, nxt]})
                     edge_count += 1
                     """                    
-                    
+        
+        ''' deal with quadraples '''            
+        
+        
+        for k, v in self.vertex2joint.copy().items():
+            if len(v)>3:
+                num_k = len(v)-3     
+                grains = list(v)
+                self.vertex2joint[k] = set(grains[:3])
+
+                """
+                num_vertices = len(self.vertex2joint)
+                self.vertex2joint[num_vertices] = set(grains[0:2]+grains[3])
+                self.vertices[num_vertices] = self.vertices[k]
+                """
+        
         for k, v in self.vertex2joint.items():
             if len(v)!=3:
                 print(k, v)
@@ -428,6 +443,7 @@ class graph:
                 self.region_coors[region].append(self.vertices[v])
         cnt = 0
         edge_count = 0
+
         for region, verts in self.region_coors.items():
             if len(verts)<=1: continue
         #    assert len(verts)>1, ('one vertex is not a grain ', region, self.regions[region])
@@ -435,23 +451,11 @@ class graph:
             moved_region = []
 
             vert_in_region = self.regions[region]
+  
+            
             grain_edge = set()
 
-            prev, cur = 0, 0
-            for i in range(len(vert_in_region)):
-                
-                for nxt in range(len(vert_in_region)): 
-                    if nxt!=prev:
-                        if init:
-                            if linked_edge_by_junction(self.vertex2joint[vert_in_region[cur]], \
-                                                    self.vertex2joint[vert_in_region[nxt]]):
-                               break
-                          
-                        else:
-                            if [vert_in_region[cur], vert_in_region[nxt]] in self.edges:
-                                break
-                            
-                prev, cur = cur, nxt
+
                 
             
             for i in range(1, len(vert_in_region)):
@@ -772,9 +776,9 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 0
-        g1 = graph(lxd = 120, seed=seed) 
+        g1 = graph(lxd = 400, seed=seed) 
 
-        g1.show_data_struct()
+       # g1.show_data_struct()
 
     
     if args.mode == 'instance':

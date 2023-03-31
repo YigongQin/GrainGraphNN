@@ -56,12 +56,12 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/generate/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
-    parser.add_argument("--seed", type=str, default='10020')
+    parser.add_argument("--seed", type=str, default='0')
     parser.add_argument("--save_fig", type=int, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -253,7 +253,8 @@ if __name__=='__main__':
             
             layer_err_list = [(traj.ini_height, traj.error_layer)]
             traj.area_traj = traj.area_traj[:1]
-
+            if len(traj.grain_events)==0:
+                traj.grain_events = [set()]*traj.frames
             
             start_time = time.time()
             

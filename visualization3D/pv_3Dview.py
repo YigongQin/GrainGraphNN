@@ -158,7 +158,7 @@ class grain_visual:
         data_frames = traj.frames
 
         self.alpha_pde_frames = np.stack(alpha_field_list, axis=2)
-        layer_truth = traj.alpha_pde_frames[:, :, ::span] 
+       # layer_truth = traj.alpha_pde_frames[:, :, ::span] 
            
 
         dx_frame = (self.height - self.base_width)/(data_frames - 1)*span
@@ -169,14 +169,14 @@ class grain_visual:
 
         
         self.alpha_pde_frames = self.alpha_pde_frames[:, :, :top_z]     
-        layer_truth = layer_truth[:, :, :top_z]
+      #  layer_truth = layer_truth[:, :, :top_z]
 
-        err = 90*(self.alpha_pde_frames!=layer_truth)        
+      #  err = 90*(self.alpha_pde_frames!=layer_truth)        
         
         
       #  self.alpha_pde[self.alpha_pde == 0] = np.nan
         self.alpha_pde_frames = traj.theta_z[self.alpha_pde_frames]/pi*180
-        layer_truth = traj.theta_z[layer_truth]/pi*180
+      #  layer_truth = traj.theta_z[layer_truth]/pi*180
         
         print('data shapes', self.alpha_pde_frames.shape)
 
@@ -192,11 +192,11 @@ class grain_visual:
         write_data(grid, self.dataname) 
 
 
-        grid.point_data.scalars = layer_truth.ravel(order='F') 
-        grid.point_data.scalars.name = 'theta_z'
+      #  grid.point_data.scalars = layer_truth.ravel(order='F') 
+      #  grid.point_data.scalars.name = 'theta_z'
         
-        self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'leapz.vtk'
-        write_data(grid, self.dataname) 
+       # self.dataname = rawdat_dir + 'seed'+str(self.seed) + 'leapz.vtk'
+       # write_data(grid, self.dataname) 
 
        # grid.point_data.scalars = err.ravel(order='F')  
        # grid.point_data.scalars.name = 'theta_z'

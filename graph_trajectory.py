@@ -101,6 +101,12 @@ class graph_trajectory(graph):
         
         dis, _ = np.histogram(grain_size , bins, density=True)
 
+        fig, ax = plt.subplots(1,1,figsize=(5,5))
+        ax.plot(dis, 'r--', label='GNN')
+        ax.set_xlim(0, 10)
+        ax.set_xlabel(r'$d\ (\mu m)$')
+        ax.set_ylabel(r'$P$')     
+        
         if compare:
             self.volume('truth')
             grain_size_t = np.cbrt(3*self.grain_volume/(4*pi))
@@ -108,17 +114,12 @@ class graph_trajectory(graph):
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)
             dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
-            
-            fig, ax = plt.subplots(1,1,figsize=(5,5))
-        
+
             ax.plot(dis_t, 'b', label='PF')
-            ax.plot(dis, 'r--', label='GNN')
-            ax.set_xlim(0, 10)
-            ax.set_xlabel(r'$d\ (\mu m)$')
-            ax.set_ylabel(r'$P$')
-            ax.legend()  
-            
-            plt.savefig('seed'+str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
+
+        ax.legend(fontsize=15)  
+        
+        plt.savefig('seed'+str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
 
 
     def load_trajectory(self, rawdat_dir: str = './'):

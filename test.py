@@ -63,6 +63,9 @@ if __name__=='__main__':
     parser.add_argument("--stop_frame", type=int, default='0')
     parser.add_argument("--seed", type=str, default='0')
     parser.add_argument("--save_fig", type=int, default=0)
+    parser.add_argument("--domain_factor", type=int, default=10)   
+    parser.add_argument("--size_factor", type=int, default=1)
+
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -70,8 +73,8 @@ if __name__=='__main__':
     parser.add_argument('--no-compare', dest='compare', action='store_false')
     parser.set_defaults(compare=True)
     
-    parser.add_argument("--domain_factor", type=int, default=1)   
-    parser.add_argument("--size_factor", type=int, default=1)
+    parser.add_argument('--no-reconstruct', dest='reconstruct', action='store_false')
+    parser.set_defaults(reconstruct=True)
 
     args = parser.parse_args()
     
@@ -224,7 +227,7 @@ if __name__=='__main__':
             span = int(datasets[case][st_idx:-4])
             print('expected span', span)
             traj.span = span
-            
+            traj.raise_err = False
             
             
             
@@ -346,16 +349,15 @@ if __name__=='__main__':
                 print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) ) 
                 
                 
+                if args.reconstruct:
+                    traj.plot_polygons()
+                    alpha_field_list.append(traj.alpha_field.T.copy())
+                
                 if args.compare:
                     ''' quantify the image error '''
-  
-                    traj.raise_err = False
-                    traj.plot_polygons()
-                    
+
                     layer_err_list.append((height, traj.error_layer))
-                    alpha_field_list.append(traj.alpha_field.T.copy())
-                    
-                    
+  
                     if args.plot:
                         traj.show_data_struct()
                         
@@ -398,16 +400,32 @@ if __name__=='__main__':
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
             
            # traj.frames = frame_all + 1
-            traj.qoi(mode='graph', compare=True)
+            
             traj.event_acc(grain_acc_list)
             
             if args.compare:
+                
+                traj.qoi(mode='graph', compare=True)
+                
                 traj.layer_err(layer_err_list)
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
                 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
-               # traj.frame_all = frame_all
-               # Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+
+                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+            
+            else:
+                
+                traj.qoi(mode='graph', compare=False)
+                
+                
+                traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)
+                traj.y = traj.x
+                traj.z = np.arange(-traj.mesh_size, traj.final_height+2*traj.mesh_size, traj.mesh_size)
+                
+                Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
+
+                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
 '''
                     

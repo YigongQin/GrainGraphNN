@@ -255,6 +255,7 @@ if __name__=='__main__':
             grain_event_list = []
             edge_event_list = []  
             grain_acc_list = []
+            traj.plot_polygons()
             alpha_field_list = [traj.alpha_field.T.copy()]
             
             layer_err_list = [(traj.ini_height, traj.error_layer)]

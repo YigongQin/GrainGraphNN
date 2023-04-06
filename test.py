@@ -56,19 +56,22 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/generate/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
-    parser.add_argument("--seed", type=str, default='0')
+    parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
-    parser.add_argument("--domain_factor", type=int, default=10)   
+    parser.add_argument("--domain_factor", type=int, default=1)   
     parser.add_argument("--size_factor", type=int, default=1)
 
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
+
+    parser.add_argument("--plot3D", dest='plot3D', action='store_true')
+    parser.set_defaults(plot3D=False)
     
     parser.add_argument('--no-compare', dest='compare', action='store_false')
     parser.set_defaults(compare=True)
@@ -411,8 +414,8 @@ if __name__=='__main__':
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
                 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
-
-                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+                if args.plot3D:
+                    Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
             else:
                 
@@ -424,8 +427,8 @@ if __name__=='__main__':
                 traj.z = np.arange(-traj.mesh_size, traj.final_height+2*traj.mesh_size, traj.mesh_size)
                 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
-
-                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+                if args.plot3D:
+                    Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
 '''
                     

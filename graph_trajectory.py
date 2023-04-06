@@ -18,6 +18,7 @@ from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_
 from math import pi
 from collections import Counter
 from scipy.interpolate import griddata
+from scipy import stats
 
 def relative_angle(p1, p2):
     
@@ -106,7 +107,7 @@ class graph_trajectory(graph):
         ax.set_xlim(0, 10)
         ax.set_xlabel(r'$d\ (\mu m)$')
         ax.set_ylabel(r'$P$')     
-        
+        KS = 0 
         if compare:
             self.volume('truth')
             grain_size_t = np.cbrt(3*self.grain_volume/(4*pi))
@@ -114,12 +115,14 @@ class graph_trajectory(graph):
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)
             dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
-
+            KS = stats.ks_2samp(grain_size, grain_size_t)[0]
+            KS = round(KS, 3)
+            print('KS stats', KS)
             ax.plot(dis_t, 'b', label='PF')
 
         ax.legend(fontsize=15)  
         
-        plt.savefig('seed'+str(self.seed)+'_size_dis.png', dpi=400, bbox_inches='tight')
+        plt.savefig('seed'+str(self.seed)+'_size_dis' + '_KS' + str(KS) +'.png', dpi=400, bbox_inches='tight')
 
 
     def load_trajectory(self, rawdat_dir: str = './'):
@@ -733,7 +736,7 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [i[3] for i in events], 'r--')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel('# grain eliminations')
-        ax.legend(['PF', 'GNN', 'GNN TP'])        
+        ax.legend(['PF', 'GNN', 'GNN TP'], fontsize=15)        
         plt.savefig('seed'+str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
 
     def layer_err(self, events):

@@ -314,18 +314,18 @@ class graph:
         
         ''' deal with quadraples '''            
         
-        
+        """
         for k, v in self.vertex2joint.copy().items():
             if len(v)>3:
                 num_k = len(v)-3     
                 grains = list(v)
                 self.vertex2joint[k] = set(grains[:3])
-
-                """
-                num_vertices = len(self.vertex2joint)
-                self.vertex2joint[num_vertices] = set(grains[0:2]+grains[3])
-                self.vertices[num_vertices] = self.vertices[k]
-                """
+        """
+        """
+        num_vertices = len(self.vertex2joint)
+        self.vertex2joint[num_vertices] = set(grains[0:2]+grains[3])
+        self.vertices[num_vertices] = self.vertices[k]
+        """
         
         for k, v in self.vertex2joint.items():
             if len(v)!=3:
@@ -373,7 +373,7 @@ class graph:
 
         if self.raise_err:
             assert np.all(self.alpha_field>0), self.seed
-            
+        assert np.all(self.alpha_field>0), self.seed    
         self.compute_error_layer()
      
     def show_data_struct(self):
@@ -776,9 +776,9 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 0
-        g1 = graph(lxd = 400, seed=seed) 
+        g1 = graph(lxd = 80, seed=seed) 
 
-       # g1.show_data_struct()
+        g1.show_data_struct()
 
     
     if args.mode == 'instance':

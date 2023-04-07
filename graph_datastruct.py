@@ -373,7 +373,7 @@ class graph:
 
         if self.raise_err:
             assert np.all(self.alpha_field>0), self.seed
-        assert np.all(self.alpha_field>0), self.seed    
+   
         self.compute_error_layer()
      
     def show_data_struct(self):

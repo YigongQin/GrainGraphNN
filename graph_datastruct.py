@@ -152,12 +152,48 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
     return points, in_points
 
 
+def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
+    # Assemble a hexagonal lattice
+    rows, cols = int(1/dx), int(1/dx)
+    print('cols and rows of grains: ', cols, rows)
+    points = []
+    in_points = []
+    randNoise = np.random.rand(rows*cols,2)
+    count = 0
+    for row in range(rows*cols):
+  
+            
+            x = randNoise[count,0]
+            y = randNoise[count,1]
+            
+            if in_bound(x, y):
+              in_points.append([x,y])
+              points.append([x,y])
+              if BC == 'noflux':
+                  points.append([-x,y])
+                  points.append([x,-y])
+                  points.append([2-x,y])
+                  points.append([x,2-y])
+              if BC == 'periodic':
+                  points.append([x+1,y])
+                  points.append([x-1,y])
+                  points.append([x,y+1])
+                  points.append([x,y-1])                  
+                  points.append([x+1,y+1])
+                  points.append([x-1,y-1])
+                  points.append([x-1,y+1])
+                  points.append([x+1,y-1])                     
+            count+=1
+    return points, in_points
+
 
 
         
 class graph:
-    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01):
-        self.mesh_size, self.ini_grain_size = 0.08, 4
+    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, grains = 100):
+        self.mesh_size = 0.08
+        self.estimate_grains = grains
+        self.ini_grain_size = 40/np.sqrt(self.estimate_grains)
         self.ini_height, self.final_height = 2, 50
         self.patch_size = 40
         self.lxd = lxd
@@ -181,7 +217,7 @@ class graph:
       #  self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
-        self.raise_err = False
+        self.raise_err = True
         self.save = None
         
         randInit = True
@@ -209,7 +245,7 @@ class graph:
             self.num_vertices = len(self.vertices)
             self.num_edges = len(self.edges)
             
-            cur_grain, counts = np.unique(self.alpha_pde, return_counts=True)
+            cur_grain, counts = np.unique(self.alpha_field, return_counts=True)
             self.area_counts = dict(zip(cur_grain, counts))
 
             
@@ -222,14 +258,17 @@ class graph:
             self.theta_x[1:] = np.arctan2(uy, ux)%(pi/2)
             self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
 
-    
+        self.layer_grain_distribution()    
+
     def layer_grain_distribution(self):
         
-        grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2
-        grain_size = np.sqrt(4*grain_area/pi)
+        grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2*self.ini_height
+        grain_size = np.cbrt(3*grain_area/4/pi)
+       
         mu = np.mean(grain_size)
         std = np.std(grain_size)
-        print(np.max(grain_size), np.min(grain_size))
+        print('initial size distribution', mu, std)
+        print('max and min', np.max(grain_size), np.min(grain_size))
         return mu, std
 
     def compute_error_layer(self):
@@ -238,7 +277,7 @@ class graph:
     
     def random_voronoi(self):
 
-        mirrored_seeds, seeds = hexagonal_lattice(dx=self.density, noise = self.noise, BC = self.BC)
+        mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC)
         vor = Voronoi(mirrored_seeds)     
     
        # regions = []
@@ -775,10 +814,10 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 0
-        g1 = graph(lxd = 80, seed=seed) 
+        seed = 10001
+        g1 = graph(lxd = 80, seed=seed, grains = 400) 
 
-        g1.show_data_struct()
+       # g1.show_data_struct()
 
     
     if args.mode == 'instance':

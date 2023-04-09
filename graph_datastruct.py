@@ -19,6 +19,7 @@ ly = np.array([255/256, 255/256, 255/256, 1])
 newcolors[0, :] = ly
 newcmp = ListedColormap(newcolors)
 from scipy.spatial import Voronoi
+from scipy.stats import truncnorm
 from math import pi
 #from shapely.geometry.polygon import Polygon
 #from shapely.geometry import Point
@@ -190,7 +191,8 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
 
         
 class graph:
-    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, grains = 100):
+    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, \
+                 grains: int = 100, heat_rot: float = 0):
         self.mesh_size = 0.08
         self.estimate_grains = grains
         self.ini_grain_size = 40/np.sqrt(self.estimate_grains)
@@ -256,7 +258,13 @@ class graph:
             self.theta_x = np.zeros(1 + self.num_regions)
             self.theta_z = np.zeros(1 + self.num_regions)
             self.theta_x[1:] = np.arctan2(uy, ux)%(pi/2)
-            self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
+            if heat_rot>0:
+                low, up = 0, pi/2
+                mean, sd = heat_rot, 0.4
+                gen = truncnorm((low - mean) / sd, (up - mean) / sd, loc=mean, scale=sd)
+                self.theta_z[1:] = gen.rvs(self.num_regions)
+            else:
+                self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
 
         self.layer_grain_distribution()    
 
@@ -815,7 +823,7 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 10001
-        g1 = graph(lxd = 80, seed=seed, grains = 400) 
+        g1 = graph(lxd = 120, seed=seed, heat_rot=0.7) 
 
        # g1.show_data_struct()
 

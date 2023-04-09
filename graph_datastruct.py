@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
+plt.rcParams.update({'font.size': 24})
 coolwarm = cm.get_cmap('coolwarm', 256)
 newcolors = coolwarm(np.linspace(0, 1, 256*100))
 ly = np.array([255/256, 255/256, 255/256, 1])
@@ -192,7 +193,7 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
         
 class graph:
     def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, \
-                 grains: int = 100, heat_rot: float = 0):
+                 grains: int = 100, heat_rot: float = -1):
         self.mesh_size = 0.08
         self.estimate_grains = grains
         self.ini_grain_size = 40/np.sqrt(self.estimate_grains)
@@ -258,7 +259,7 @@ class graph:
             self.theta_x = np.zeros(1 + self.num_regions)
             self.theta_z = np.zeros(1 + self.num_regions)
             self.theta_x[1:] = np.arctan2(uy, ux)%(pi/2)
-            if heat_rot>0:
+            if heat_rot>-0.5:
                 low, up = 0, pi/2
                 mean, sd = heat_rot, 0.4
                 gen = truncnorm((low - mean) / sd, (up - mean) / sd, loc=mean, scale=sd)
@@ -277,7 +278,33 @@ class graph:
         std = np.std(grain_size)
         print('initial size distribution', mu, std)
         print('max and min', np.max(grain_size), np.min(grain_size))
-        return mu, std
+        
+        self.ini_grain_dis = grain_size
+
+    def plot_grain_distribution(self):
+        bins = np.arange(0,6,0.5)
+        
+        dis, bin_edge = np.histogram(self.ini_grain_dis, bins=bins, density=True)
+        bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
+        fig, ax = plt.subplots(1,1,figsize=(5,5))
+        ax.plot(bin_edge, dis*np.diff(bin_edge)[0], 'b', label='GNN')
+        ax.set_xlim(0, 5)
+        ax.set_xlabel(r'$d\ (\mu m)$')
+        ax.set_ylabel(r'$P$')  
+      #  ax.legend(fontsize=15)  
+        plt.savefig('seed'+str(self.seed)+'_ini_size_dis' +'.png', dpi=400, bbox_inches='tight')
+
+        bins = np.arange(0,90,10)
+        
+        fig, ax = plt.subplots(1,1,figsize=(5,5))
+        ax.hist(self.theta_z[1:]*180/pi, bins, density=False, facecolor='g', alpha=0.75, edgecolor='black')
+        ax.set_xlim(0, 90)
+        ax.set_xlabel(r'$\theta_z$')
+       # ax.set_ylabel(r'$P$')  
+      #  ax.legend(fontsize=15)  
+        plt.savefig('seed'+str(self.seed)+'_ini_orien_dis' +'.png', dpi=400, bbox_inches='tight')
+
+
 
     def compute_error_layer(self):
         self.error_layer = np.sum(self.alpha_pde!=self.alpha_field)/len(self.alpha_pde.flatten())
@@ -822,11 +849,11 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 10001
-        g1 = graph(lxd = 120, seed=seed, heat_rot=0.7) 
+        seed = 40001
+        g1 = graph(lxd = 80, seed=seed, heat_rot=0) 
 
-       # g1.show_data_struct()
-
+        g1.show_data_struct()
+        g1.plot_grain_distribution()
     
     if args.mode == 'instance':
         

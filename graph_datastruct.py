@@ -195,10 +195,11 @@ class graph:
     def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, \
                  grains: int = 100, heat_rot: float = -1):
         self.mesh_size = 0.08
-        self.estimate_grains = grains
-        self.ini_grain_size = 40/np.sqrt(self.estimate_grains)
-        self.ini_height, self.final_height = 2, 50
         self.patch_size = 40
+        self.estimate_grains = grains
+        self.ini_grain_size = self.patch_size/np.sqrt(self.estimate_grains)
+        self.ini_height, self.final_height = 2, 50
+        
         self.lxd = lxd
         self.seed = seed
         s = int(lxd/self.mesh_size)+1
@@ -312,7 +313,7 @@ class graph:
     
     def random_voronoi(self):
 
-        mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC)
+        mirrored_seeds, seeds = hexagonal_lattice(dx=self.density, noise = self.noise, BC = self.BC)
         vor = Voronoi(mirrored_seeds)     
     
        # regions = []
@@ -389,16 +390,31 @@ class graph:
         ''' deal with quadraples '''            
         
         """
+        ''' deal with quadraples '''            
+        self.quadraples = []
+        reordered_regions = dict({v:k for k, v in reordered_regions.items()})
         for k, v in self.vertex2joint.copy().items():
             if len(v)>3:
-                num_k = len(v)-3     
                 grains = list(v)
-                self.vertex2joint[k] = set(grains[:3])
-        """
-        """
-        num_vertices = len(self.vertex2joint)
-        self.vertex2joint[num_vertices] = set(grains[0:2]+grains[3])
-        self.vertices[num_vertices] = self.vertices[k]
+                print(k,grains)
+                num_vertices = len(self.vertex2joint)
+                v.remove(grains[0])
+
+                self.vertex2joint[num_vertices] = v.copy()
+                v.add(grains[0])
+                self.vertices[num_vertices] = self.vertices[k]
+                first = grains[0]
+                n1 = reordered_regions[first]
+                for test_grains in grains[3:4]:
+                   # print(n1, test_grains, reordered_regions[test_grains])
+                    if len(set(n1).intersection(set(reordered_regions[test_grains])))==1:
+                        remove_grain = test_grains
+                      #  print(remove_grain)
+                        break
+                remove_grain = 55
+                v.remove(remove_grain)
+                self.vertex2joint[k] = v.copy()
+                print(self.vertex2joint[150], self.vertex2joint[229])
         """
         
         for k, v in self.vertex2joint.items():
@@ -849,11 +865,11 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 40001
-        g1 = graph(lxd = 80, seed=seed, heat_rot=0) 
+        seed = 4
+        g1 = graph(lxd = 40, seed=seed) 
 
         g1.show_data_struct()
-        g1.plot_grain_distribution()
+       # g1.plot_grain_distribution()
     
     if args.mode == 'instance':
         

@@ -773,19 +773,20 @@ class graph_trajectory(graph):
        # ax.legend(['overall', 'event'])        
         plt.savefig('seed'+str(self.seed)+'_layer_err.png', dpi=400, bbox_inches='tight')
 
-    def misorientation(self, z_sam):
+    def misorientation(self, z_sam, compare=False):
         
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
         
         misangles = 45 - np.absolute(180/pi*self.theta_z[1:] - 45)
         
-        self.volume('truth')
-        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'b')
+        if compare:
+            self.volume('truth')
+            ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'b', label='PF')
         self.volume('graph')
-        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'r')
+        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'r', label='GNN')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel(r'$\Delta \theta$')
-        ax.legend(['PF', 'GNN'], fontsize=15)  
+        ax.legend(fontsize=15)  
         
         plt.savefig('seed'+str(self.seed)+'_lmisorien.png', dpi=400, bbox_inches='tight')
 

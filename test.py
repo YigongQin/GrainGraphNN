@@ -408,11 +408,12 @@ if __name__=='__main__':
            # traj.frames = frame_all + 1
             
             traj.event_acc(grain_acc_list)
-            traj.misorientation([i[0] for i in grain_acc_list])
+            
             
             if args.compare:
                 
                 traj.qoi(mode='graph', compare=True)
+                traj.misorientation([i[0] for i in grain_acc_list], compare=True)
                 
                 traj.layer_err(layer_err_list)
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
@@ -424,7 +425,7 @@ if __name__=='__main__':
             else:
                 
                 traj.qoi(mode='graph', compare=False)
-                
+                traj.misorientation([i[0] for i in grain_acc_list], compare=False)
                 
                 traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)
                 traj.y = traj.x

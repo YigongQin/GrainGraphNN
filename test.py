@@ -409,7 +409,7 @@ if __name__=='__main__':
             
             if args.compare:
                 
-                traj.qoi(mode='graph', compare=True)
+                traj.qoi(mode='graph', time = traj.frames-1, compare=True)
                 
                 traj.layer_err(layer_err_list)
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
@@ -420,7 +420,7 @@ if __name__=='__main__':
             
             else:
                 
-                traj.qoi(mode='graph', compare=False)
+                traj.qoi(mode='graph', time = traj.frames-1, compare=False)
                 
                 
                 traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)

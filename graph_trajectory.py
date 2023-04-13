@@ -53,20 +53,32 @@ class graph_trajectory(graph):
         
         self.area_traj = []
         
-    def volume(self, mode, time=-1):
+    def volume(self, mode):
+        
+        self.volume_traj = []
+        
+       # if time == -1:
+       #     time = self.frames - 1
         
         s = self.imagesize[0]
         self.deltaH = (self.final_height-self.ini_height)/self.mesh_size/(self.frames-1)
         
+        
         if mode == 'truth':
             
-            height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
             
-            self.grain_volume = self.totalV_frames[:,time].copy()
-            scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(height/self.mesh_size+1)
-          #  print(scale_surface)
-            self.grain_volume = self.grain_volume/scale_surface
-            self.grain_volume = self.grain_volume*self.mesh_size**3
+            for time in range(0, self.frames, self.span):
+            
+                height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
+                
+                self.grain_volume = self.totalV_frames[:,time].copy()
+                scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(height/self.mesh_size+1)
+              #  print(scale_surface)
+                self.grain_volume = self.grain_volume/scale_surface
+                self.grain_volume += self.extraV_frames[:,time]
+              #  self.grain_volume = self.grain_volume*self.mesh_size**3
+                
+                self.volume_traj.append(self.grain_volume.copy())
             
             return
 
@@ -79,28 +91,30 @@ class graph_trajectory(graph):
         
         if mode == 'graph':
             
-            self.grain_volume = self.extraV.copy()
+            self.grain_volume = 0*self.extraV_traj[0]
             self.deltaH = self.deltaH*self.span
 
-            assert len(self.area_traj) == 1 + (self.frames)//self.span
-
-        for area_counts in self.area_traj[1:-1]:
-            for grain, area in area_counts.items():
-                self.grain_volume[grain-1] += self.deltaH*area
-        
-        for grain, area in self.area_traj[-1].items():
-            self.grain_volume[grain-1] += self.deltaH*area/2
+           # assert len(self.area_traj) == 1 + time//self.span
         for grain, area in self.area_traj[0].items():
-            self.grain_volume[grain-1] += (1+self.ini_height/self.mesh_size+self.deltaH/2)*area              
-            
-        self.grain_volume = self.grain_volume*self.mesh_size**3
+             self.grain_volume[grain-1] += (1+self.ini_height/self.mesh_size)*area   
+        self.volume_traj.append(self.grain_volume.copy() + self.extraV_traj[0])     
+             
+        for layer, area_counts in enumerate(self.area_traj[1:]):
+
+                
+            for grain, area in self.area_traj[layer].items():
+                self.grain_volume[grain-1] += self.deltaH*area/2
+         
+
+            for grain, area in area_counts.items():
+                self.grain_volume[grain-1] += self.deltaH*area/2
+         
+            self.volume_traj.append(self.grain_volume.copy()+ self.extraV_traj[layer+1])        
         
+    def qoi(self, mode='layer', compare=False):
         
-        
-    def qoi(self, mode='layer', time = -1, compare=False):
-        
-        self.volume(mode, time)
-        grain_size = np.cbrt(3*self.grain_volume/(4*pi))
+        self.volume(mode)
+        grain_size = np.cbrt(3*self.volume_traj[-1]/(4*pi))*self.mesh_size
         self.d_mu = np.mean(grain_size)
         self.d_std = np.std(grain_size)    
         
@@ -117,8 +131,8 @@ class graph_trajectory(graph):
         ax.set_ylabel(r'$P$')     
         KS = 0 
         if compare:
-            self.volume('truth', time)
-            grain_size_t = np.cbrt(3*self.grain_volume/(4*pi))
+            self.volume('truth')
+            grain_size_t = np.cbrt(3*self.volume_traj[-1]/(4*pi))*self.mesh_size
             d_mu_t = np.mean(grain_size_t)
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)
@@ -753,20 +767,24 @@ class graph_trajectory(graph):
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
         z_sam = [i[0] for i in events]
         ax.plot(z_sam, [i[1] for i in events], 'b')
+      #  ax.plot(z_sam, [i[2] for i in events], 'r')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel('MR')
-       # ax.legend(['truth', 'GNN', 'GNN TP'])        
+       # ax.legend(['overall', 'event'])        
         plt.savefig('seed'+str(self.seed)+'_layer_err.png', dpi=400, bbox_inches='tight')
 
-    def misorientation(self, events):
+    def misorientation(self, z_sam):
         
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        z_sam = [i[0] for i in events]
-        ax.plot(z_sam, [np.sum(i[1]) for i in events], 'r')
-        if len(events[0])>2:
-            ax.plot(z_sam, [np.sum(i[2]) for i in events], 'b')
+        
+        misangles = 45 - np.absolute(180/pi*self.theta_z[1:] - 45)
+        
+        self.volume('truth')
+        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'b')
+        self.volume('graph')
+        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'r')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
-        ax.set_ylabel('# grain eliminations')
+        ax.set_ylabel(r'$\Delta \theta$')
         ax.legend(['PF', 'GNN'], fontsize=15)  
         
         plt.savefig('seed'+str(self.seed)+'_lmisorien.png', dpi=400, bbox_inches='tight')
@@ -911,11 +929,12 @@ class graph_trajectory(graph):
         ''' qoi '''      
         s = (self.patch_size/self.mesh_size)+1
         area_counts = {}
+        area_sum = np.sum(X_g[:,0]*mask_g)/(self.lxd/self.patch_size)**2
         for idx, area in enumerate(X_g[:,0]):
             if mask_g[idx]>0:
-                area_counts[idx+1] = area*s**2
+                area_counts[idx+1] = area*s**2/area_sum
         
-        self.extraV = mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*s**3
+        self.extraV_traj.append(mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*s**3)
         self.area_traj.append(area_counts)
                 
        

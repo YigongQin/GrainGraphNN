@@ -56,14 +56,14 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/9domain/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
-    parser.add_argument("--seed", type=str, default='10020')
+    parser.add_argument("--seed", type=str, default='')
     parser.add_argument("--save_fig", type=int, default=0)
-    parser.add_argument("--domain_factor", type=int, default=1)   
+    parser.add_argument("--domain_factor", type=int, default=3)   
     parser.add_argument("--size_factor", type=int, default=1)
 
     
@@ -240,6 +240,7 @@ if __name__=='__main__':
             data['mask']['joint'] = 1 + 0*data['mask']['joint']
 
            # X_p = data.x_dict['joint'][:,:2].detach().numpy()
+            traj.extraV_traj = []
             traj.GNN_update(0, data.x_dict, data['mask'], True, data.edge_index_dict, args.compare)
             if args.plot:
                 traj.show_data_struct()
@@ -254,12 +255,13 @@ if __name__=='__main__':
             
             grain_event_list = []
             edge_event_list = []  
-            grain_acc_list = []
+            grain_acc_list = [(traj.ini_height, 0, 0, 0)]
             traj.plot_polygons()
             alpha_field_list = [traj.alpha_field.T.copy()]
             
             layer_err_list = [(traj.ini_height, traj.error_layer)]
             traj.area_traj = traj.area_traj[:1]
+            
             if len(traj.grain_events)==0:
                 traj.grain_events = [set()]*traj.frames
             
@@ -406,10 +408,11 @@ if __name__=='__main__':
            # traj.frames = frame_all + 1
             
             traj.event_acc(grain_acc_list)
+            traj.misorientation([i[0] for i in grain_acc_list])
             
             if args.compare:
                 
-                traj.qoi(mode='graph', time = traj.frames-1, compare=True)
+                traj.qoi(mode='graph', compare=True)
                 
                 traj.layer_err(layer_err_list)
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
@@ -420,7 +423,7 @@ if __name__=='__main__':
             
             else:
                 
-                traj.qoi(mode='graph', time = traj.frames-1, compare=False)
+                traj.qoi(mode='graph', compare=False)
                 
                 
                 traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)

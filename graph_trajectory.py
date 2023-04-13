@@ -99,13 +99,16 @@ class graph_trajectory(graph):
         self.volume(mode)
         grain_size = np.cbrt(3*self.grain_volume/(4*pi))
         self.d_mu = np.mean(grain_size)
-        self.d_std = np.std(grain_size)      
-        bins = np.arange(10+1)
+        self.d_std = np.std(grain_size)    
         
-        dis, _ = np.histogram(grain_size , bins, density=True)
-
+        step = 0.5 if self.num_regions>1000 else 1
+ 
+        bins = np.arange(0, 10, step)
+        
+        dis, bin_edge = np.histogram(grain_size , bins, density=True)
+        bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
         fig, ax = plt.subplots(1,1,figsize=(5,5))
-        ax.plot(dis, 'r--', label='GNN')
+        ax.plot(bin_edge, dis*np.diff(bin_edge)[0], 'r--', label='GNN')
         ax.set_xlim(0, 10)
         ax.set_xlabel(r'$d\ (\mu m)$')
         ax.set_ylabel(r'$P$')     
@@ -116,11 +119,12 @@ class graph_trajectory(graph):
             d_mu_t = np.mean(grain_size_t)
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)
-            dis_t, _ =  np.histogram(grain_size_t, bins, density=True)
+            dis_t, bin_edge =  np.histogram(grain_size_t, bins, density=True)
+            bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
             KS = stats.ks_2samp(grain_size, grain_size_t)[0]
             KS = round(KS, 3)
             print('KS stats', KS)
-            ax.plot(dis_t, 'b', label='PF')
+            ax.plot(bin_edge, dis_t*np.diff(bin_edge)[0], 'b', label='PF')
 
         ax.legend(fontsize=15)  
         
@@ -1135,7 +1139,7 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, noise = 0, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
             cur_grain, counts = np.unique(traj.alpha_field, return_counts=True)
             traj.area_counts = dict(zip(cur_grain, counts))
             traj.area_traj.append(traj.area_counts)            

@@ -143,7 +143,7 @@ class graph_trajectory(graph):
             print('KS stats', KS)
             ax.plot(bin_edge, dis_t*np.diff(bin_edge)[0], 'b', label='PF')
 
-        ax.legend(fontsize=15)  
+        ax.legend(fontsize=20)  
         
         plt.savefig('seed'+str(self.seed)+'_size_dis' + '_KS' + str(KS) +'.png', dpi=400, bbox_inches='tight')
 
@@ -759,7 +759,7 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [i[3] for i in events], 'r--')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel('# grain eliminations')
-        ax.legend(['PF', 'GNN', 'GNN TP'], fontsize=15)        
+        ax.legend(['PF', 'GNN', 'GNN TP'], fontsize=20)        
         plt.savefig('seed'+str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
 
     def layer_err(self, events):
@@ -786,7 +786,7 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'r', label='GNN')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel(r'$\Delta \theta$')
-        ax.legend(fontsize=15)  
+        ax.legend(fontsize=20)  
         
         plt.savefig('seed'+str(self.seed)+'_lmisorien.png', dpi=400, bbox_inches='tight')
 

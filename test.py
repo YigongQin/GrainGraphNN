@@ -56,14 +56,14 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/9domain/')
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
-    parser.add_argument("--seed", type=str, default='')
+    parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
-    parser.add_argument("--domain_factor", type=int, default=3)   
+    parser.add_argument("--domain_factor", type=int, default=1)   
     parser.add_argument("--size_factor", type=int, default=1)
 
     

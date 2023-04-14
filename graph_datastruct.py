@@ -272,8 +272,8 @@ class graph:
 
     def layer_grain_distribution(self):
         
-        grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2*self.ini_height
-        grain_size = np.cbrt(6*grain_area/pi)
+        grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2#*self.ini_height
+        grain_size = np.sqrt(4*grain_area/pi)
        
         mu = np.mean(grain_size)
         std = np.std(grain_size)
@@ -865,7 +865,7 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 4
+        seed = 5
         g1 = graph(lxd = 40, seed=seed) 
 
         g1.show_data_struct()

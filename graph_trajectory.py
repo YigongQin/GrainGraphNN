@@ -66,16 +66,21 @@ class graph_trajectory(graph):
         
         if mode == 'truth':
             
+            area0 = self.totalV_frames[:,0]/np.sum(self.totalV_frames[:,0])*s**2
             
-            for time in range(0, self.frames, self.span):
+            underlying_grain_volume = 4/3/np.sqrt(pi)*area0**1.5
+            self.volume_traj.append(underlying_grain_volume.copy())
+            for time in range(self.span, self.frames, self.span):
             
                 height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
                 
-                self.grain_volume = self.totalV_frames[:,time]- self.extraV_frames[:,time]
-                scale_surface = np.sum(self.grain_volume)/s**2/(height/self.mesh_size+1)
-              #  print(scale_surface)
+                self.grain_volume = self.totalV_frames[:,time] - self.extraV_frames[:,time]
+                scale_surface = np.sum(self.grain_volume)\
+                                /s**2/(height/self.mesh_size+1)
+               # print(scale_surface)
                 self.grain_volume = self.grain_volume/scale_surface
-                self.grain_volume += self.extraV_frames[:,time]
+               # print(self.grain_volume)
+                self.grain_volume += underlying_grain_volume + self.extraV_frames[:,time] - area0*(self.ini_height/self.mesh_size+1)
               #  self.grain_volume = self.grain_volume*self.mesh_size**3
                 
                 self.volume_traj.append(self.grain_volume.copy())
@@ -96,8 +101,9 @@ class graph_trajectory(graph):
 
            # assert len(self.area_traj) == 1 + time//self.span
         for grain, area in self.area_traj[0].items():
-             self.grain_volume[grain-1] += (1+self.ini_height/self.mesh_size)*area   
-        self.volume_traj.append(self.grain_volume.copy() + self.extraV_traj[0])     
+             self.grain_volume[grain-1] += 4/3/np.sqrt(pi)*area**1.5 
+             
+        self.volume_traj.append(self.grain_volume.copy())     
              
         for layer, area_counts in enumerate(self.area_traj[1:]):
 

@@ -71,8 +71,8 @@ class graph_trajectory(graph):
             
                 height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
                 
-                self.grain_volume = self.totalV_frames[:,time].copy()
-                scale_surface = np.sum(self.totalV_frames[:,time] - self.extraV_frames[:,time])/s**2/(height/self.mesh_size+1)
+                self.grain_volume = self.totalV_frames[:,time]- self.extraV_frames[:,time]
+                scale_surface = np.sum(self.grain_volume)/s**2/(height/self.mesh_size+1)
               #  print(scale_surface)
                 self.grain_volume = self.grain_volume/scale_surface
                 self.grain_volume += self.extraV_frames[:,time]

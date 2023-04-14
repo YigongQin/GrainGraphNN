@@ -273,7 +273,7 @@ class graph:
     def layer_grain_distribution(self):
         
         grain_area = np.array(list(self.area_counts.values()))*self.mesh_size**2*self.ini_height
-        grain_size = np.cbrt(3*grain_area/4/pi)
+        grain_size = np.cbrt(6*grain_area/pi)
        
         mu = np.mean(grain_size)
         std = np.std(grain_size)
@@ -289,7 +289,7 @@ class graph:
         bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
         fig, ax = plt.subplots(1,1,figsize=(5,5))
         ax.plot(bin_edge, dis*np.diff(bin_edge)[0], 'b', label='GNN')
-        ax.set_xlim(0, 5)
+        ax.set_xlim(0, 10)
         ax.set_xlabel(r'$d\ (\mu m)$')
         ax.set_ylabel(r'$P$')  
       #  ax.legend(fontsize=15)  

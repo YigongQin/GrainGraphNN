@@ -114,25 +114,25 @@ class graph_trajectory(graph):
     def qoi(self, mode='layer', compare=False):
         
         self.volume(mode)
-        grain_size = np.cbrt(3*self.volume_traj[-1]/(4*pi))*self.mesh_size
+        grain_size = np.cbrt(6*self.volume_traj[-1]/pi)*self.mesh_size
         self.d_mu = np.mean(grain_size)
         self.d_std = np.std(grain_size)    
         
-        step = 0.5 if self.num_regions>1000 else 1
+        step = 1 if self.num_regions>400 else 2
  
-        bins = np.arange(0, 10, step)
+        bins = np.arange(0, 20, step)
         
         dis, bin_edge = np.histogram(grain_size , bins, density=True)
         bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
         fig, ax = plt.subplots(1,1,figsize=(5,5))
         ax.plot(bin_edge, dis*np.diff(bin_edge)[0], 'r--', label='GNN')
-        ax.set_xlim(0, 10)
+        ax.set_xlim(0, 20)
         ax.set_xlabel(r'$d\ (\mu m)$')
         ax.set_ylabel(r'$P$')     
         KS = 0 
         if compare:
             self.volume('truth')
-            grain_size_t = np.cbrt(3*self.volume_traj[-1]/(4*pi))*self.mesh_size
+            grain_size_t = np.cbrt(6*self.volume_traj[-1]/pi)*self.mesh_size
             d_mu_t = np.mean(grain_size_t)
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
             print('average grain size , err', err_d)

@@ -789,7 +789,9 @@ class graph_trajectory(graph):
             self.volume('truth')
             ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'b', label='PF')
         self.volume('graph')
-        ax.plot(z_sam, [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj], 'r', label='GNN')
+        mis = [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj]
+        #print(mis)
+        ax.plot(z_sam, mis, 'r', label='GNN')
         ax.set_xlabel(r'$z_i\ (\mu m)$')
         ax.set_ylabel(r'$\Delta \theta$')
         ax.legend(fontsize=20)  

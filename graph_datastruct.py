@@ -193,11 +193,13 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
         
 class graph:
     def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, \
-                 grains: int = 100, heat_rot: float = -1):
+                 adjust_grain_size = False, adjust_grain_orien = False):
         self.mesh_size = 0.08
         self.patch_size = 40
-        self.estimate_grains = grains
-        self.ini_grain_size = self.patch_size/np.sqrt(self.estimate_grains)
+
+        self.ini_grain_size = 4
+        if adjust_grain_size:
+            self.ini_grain_size = 2 + (seed%10)/5*3
         self.ini_height, self.final_height = 2, 50
         
         self.lxd = lxd
@@ -260,9 +262,10 @@ class graph:
             self.theta_x = np.zeros(1 + self.num_regions)
             self.theta_z = np.zeros(1 + self.num_regions)
             self.theta_x[1:] = np.arctan2(uy, ux)%(pi/2)
-            if heat_rot>-0.5:
+            
+            if adjust_grain_orien:
                 low, up = 0, pi/2
-                mean, sd = heat_rot, 0.4
+                mean, sd = 0+pi/36*(seed%10), 0.4
                 gen = truncnorm((low - mean) / sd, (up - mean) / sd, loc=mean, scale=sd)
                 self.theta_z[1:] = gen.rvs(self.num_regions)
             else:
@@ -283,13 +286,13 @@ class graph:
         self.ini_grain_dis = grain_size
 
     def plot_grain_distribution(self):
-        bins = np.arange(0,6,0.5)
+        bins = np.arange(0,20,1)
         
         dis, bin_edge = np.histogram(self.ini_grain_dis, bins=bins, density=True)
         bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
         fig, ax = plt.subplots(1,1,figsize=(5,5))
         ax.plot(bin_edge, dis*np.diff(bin_edge)[0], 'b', label='GNN')
-        ax.set_xlim(0, 10)
+        ax.set_xlim(0, 20)
         ax.set_xlabel(r'$d\ (\mu m)$')
         ax.set_ylabel(r'$P$')  
       #  ax.legend(fontsize=15)  
@@ -865,10 +868,10 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 5
+        seed = 0
         g1 = graph(lxd = 40, seed=seed) 
 
-        g1.show_data_struct()
+       # g1.show_data_struct()
        # g1.plot_grain_distribution()
     
     if args.mode == 'instance':

@@ -1008,8 +1008,11 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int, default = 0)
     parser.add_argument("--G", type=float, default = 2)
     parser.add_argument("--R", type=float, default = 0.4)
-    parser.add_argument("--grains", type=int, default = 100)
-    parser.add_argument("--heat_rot", type=float, default = -1)
+    parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
+    parser.set_defaults(adjust_grain_size=False)    
+    parser.add_argument("--orien", dest='adjust_grain_orien', action='store_true')
+    parser.set_defaults(adjust_grain_orien=False)
+
 
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
@@ -1143,7 +1146,9 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, grains=args.grains, heat_rot=args.heat_rot)
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, \
+                                    adjust_grain_size = args.adjust_grain_size, \
+                                    adjust_grain_orien = args.adjust_grain_orien)
             traj.match_graph = False
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
             hg0 = traj.states[0]

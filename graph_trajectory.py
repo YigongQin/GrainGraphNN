@@ -33,10 +33,11 @@ class graph_trajectory(graph):
                  seed: int = 1, 
                  noise: float = 0.01, 
                  frames: int = 1,
-                 grains: int = 100,
-                 heat_rot:float = -1,
+                 adjust_grain_size = False,
+                 adjust_grain_orien = False,
                  physical_params = {}):   
-        super().__init__(lxd = lxd, seed = seed, noise = noise, grains = grains, heat_rot=heat_rot)
+        super().__init__(lxd = lxd, seed = seed, noise = noise, \
+                         adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition

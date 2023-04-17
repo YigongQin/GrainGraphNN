@@ -235,7 +235,7 @@ if __name__=='__main__':
             
             
             ''' intialization '''
-            assert np.all(data['mask']['grain'][:,0].detach().numpy()>0)
+            #assert np.all(data['mask']['grain'][:,0].detach().numpy()>0)
 
             data['mask']['joint'] = 1 + 0*data['mask']['joint']
 
@@ -416,8 +416,8 @@ if __name__=='__main__':
                 traj.misorientation([i[0] for i in grain_acc_list], compare=True)
                 
                 traj.layer_err(layer_err_list)
-                np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
-                
+               # np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
+               # np.savetxt('event' + str(grain_seed) + '.txt', grain_acc_list) 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
                 if args.plot3D:
                     Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)

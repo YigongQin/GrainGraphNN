@@ -149,6 +149,8 @@ class graph_trajectory(graph):
             KS = round(KS, 3)
             print('KS stats', KS)
             ax.plot(bin_edge, dis_t*np.diff(bin_edge)[0], 'b', label='PF')
+            
+           # np.savetxt('dis'+str(self.seed)+'.txt', np.vstack([bin_edge, dis*np.diff(bin_edge)[0], dis_t*np.diff(bin_edge)[0]]).T)
 
         ax.legend(fontsize=20)  
         

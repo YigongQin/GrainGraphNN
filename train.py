@@ -280,10 +280,12 @@ if __name__=='__main__':
 
     
     train_list = data_list[:num_train]
+    test_list = data_list[num_train:]  
+    
     if args.use_sample !='all':
         train_list = train_list[:int(args.use_sample)]
-    
-    test_list = data_list[num_train:]       
+        num_train = len(train_list)
+         
        
     
     if args.model_type== 'regressor':

@@ -46,7 +46,7 @@ def regressor(model_id):
 
 
 
-    param_dict.update({'window':3, 'out_win':1, 'weight_decay':0, 'layers':1, \
+    param_dict.update({'window':1, 'out_win':1, 'weight_decay':0, 'layers':1, \
                        'kernel_size':(3,), 'epoch':50, 'bias':True, 'model_list':[0]})
 
 

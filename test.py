@@ -416,7 +416,7 @@ if __name__=='__main__':
                 traj.misorientation([i[0] for i in grain_acc_list], compare=True)
                 
                 traj.layer_err(layer_err_list)
-               # np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
+                np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
                # np.savetxt('event' + str(grain_seed) + '.txt', grain_acc_list) 
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
                 if args.plot3D:

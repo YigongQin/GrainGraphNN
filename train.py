@@ -7,7 +7,6 @@ Created on Fri Sep 30 15:35:27 2022
 """
 import argparse, time, dill, random, os
 import numpy as np
-from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
@@ -18,7 +17,7 @@ from models import GrainNN_classifier, GrainNN_regressor
 from parameters import regressor, classifier, classifier_transfered
 from graph_trajectory import graph_trajectory
 from metrics import feature_metric, edge_error_metric
-from QoI import data_analysis
+
 
 def criterion(data, pred, mask, edge_dict):
    # print(torch.log(pred['edge_event']))

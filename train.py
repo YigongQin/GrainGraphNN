@@ -203,12 +203,15 @@ if __name__=='__main__':
 
     
     parser = argparse.ArgumentParser("Train the model.")
-    parser.add_argument("--model_id", type=int, default=0)
+
+    parser.add_argument("--dataset", type=str, default='train')
     parser.add_argument("--device", type=str, default='cpu')
+    parser.add_argument("--use_sample", type=str, default='all')
+    
     parser.add_argument("--model_dir", type=str, default='./model/')
+    parser.add_argument("--model_id", type=int, default=0)
     parser.add_argument("--prefix", type=str, default='')
     parser.add_argument("--model_type", type=str, default='regressor')
-    parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--seed", type=int, default=35)
     parser.add_argument("--train_ratio", type=float, default=0.95)
@@ -227,15 +230,13 @@ if __name__=='__main__':
     parser.set_defaults(transfer=True)
     
 
-
-
-    
     args = parser.parse_args()
     
 
     model_id = args.model_id
     device = args.device
-    
+    if args.dataset != 'train':
+        args.prefix = args.dataset + args.prefix
     
     seed = args.seed
     random.seed(seed)
@@ -266,7 +267,7 @@ if __name__=='__main__':
     
     data_list = []
 
-    with open('dataset_train.pkl', 'rb') as inp:  
+    with open('dataset_'+args.dataset+'.pkl', 'rb') as inp:  
         try:
             data_list = dill.load(inp)
         except:

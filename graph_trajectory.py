@@ -142,7 +142,7 @@ class graph_trajectory(graph):
             grain_size_t = np.cbrt(6*self.volume_traj[-1]/pi)*self.mesh_size
             d_mu_t = np.mean(grain_size_t)
             err_d = np.absolute(d_mu_t - self.d_mu)/d_mu_t
-            print('average grain size , err', err_d)
+            print('average grain size , err', d_mu_t, err_d)
             dis_t, bin_edge =  np.histogram(grain_size_t, bins, density=True)
             bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
             KS = stats.ks_2samp(grain_size, grain_size_t)[0]
@@ -385,10 +385,10 @@ class graph_trajectory(graph):
           #  if self.error_layer>0.08:
           #      self.save_frame[frame] = False
 
-            if frame%24==0:    
+           # if frame%24==0:    
             #if self.show == True:
-                self.save = 'data_seed'+str(self.seed)+'_frame'+str(frame)+'.png'
-                self.show_data_struct()   
+           #     self.save = 'data_seed'+str(self.seed)+'_frame'+str(frame)+'.png'
+            #    self.show_data_struct()   
                 
             print('====================================')  
             print('\n') 

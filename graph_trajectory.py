@@ -157,7 +157,7 @@ class graph_trajectory(graph):
         plt.savefig('seed'+str(self.seed)+'_size_dis' + '_KS' + str(KS) +'.png', dpi=400, bbox_inches='tight')
 
 
-    def load_trajectory(self, rawdat_dir: str = './'):
+    def load_pde_data(self, rawdat_dir: str = './'):
        
         
         self.data_file = (glob.glob(rawdat_dir + '/*seed'+str(self.seed)+'_*.h5'))[0]
@@ -198,7 +198,10 @@ class graph_trajectory(graph):
         self.active_max = self.active_args[2,:,:]
         self.active_args = self.active_args[3:,:,:]
         
-
+        
+    def load_trajectory(self, rawdat_dir: str = './'):
+        self.load_pde_data(rawdat_dir)
+        
         prev_joint = {k:[0,0,100] for k, v in self.joint2vertex.items()}
         prev_grain = set(np.arange(self.num_regions)+1)
         

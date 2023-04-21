@@ -191,8 +191,9 @@ class graph_trajectory(graph):
      
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
+        nodes_data = len(self.active_args)//(self.num_vertex_features*data_frames)
         self.active_args = self.active_args.\
-            reshape((self.num_vertex_features, 5*len(self.vertices), data_frames ), order='F')
+            reshape((self.num_vertex_features, nodes_data, data_frames ), order='F')
         self.active_coors = self.active_args[:2,:,:]
         self.active_max = self.active_args[2,:,:]
         self.active_args = self.active_args[3:,:,:]

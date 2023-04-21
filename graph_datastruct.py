@@ -230,23 +230,13 @@ class graph:
         
         if randInit:
             np.random.seed(seed)
+
+            self.random_voronoi()
+            self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
+            self.alpha_pde = self.alpha_field.copy()
+            self.update(init=True)
             
-            try:
-            
-                self.random_voronoi()
-                self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-                self.alpha_pde = self.alpha_field.copy()
-                self.update(init=True)
-            
-            except:
-                self.noise = 0
-                self.edges = [] 
-                self.vertex2joint = defaultdict(set)
-                self.random_voronoi()
-                self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
-                self.alpha_pde = self.alpha_field.copy()
-                self.update(init=True)            
-            
+ 
             self.num_regions = len(self.regions)
             self.num_vertices = len(self.vertices)
             self.num_edges = len(self.edges)
@@ -320,7 +310,7 @@ class graph:
         vor = Voronoi(mirrored_seeds)     
     
        # regions = []
-        reordered_regions = set()
+        reordered_regions = []
        # vertices = []
         vert_map = {}
         vert_count = 0
@@ -373,7 +363,7 @@ class graph:
                         reordered_region.append(vert_map[point])
                 
                 if tuple(sorted(reordered_region)) not in reordered_regions:
-                    reordered_regions.add(tuple(sorted(reordered_region)))
+                    reordered_regions.append(tuple(sorted(reordered_region)))
 
                 else:
                     continue
@@ -390,36 +380,45 @@ class graph:
                     edge_count += 1
                     """                    
         
-        ''' deal with quadraples '''            
-        
-        """
-        ''' deal with quadraples '''            
-        self.quadraples = []
-        reordered_regions = dict({v:k for k, v in reordered_regions.items()})
+        ''' deal with quadruples '''            
+          
+        self.quadruples = {}
+
         for k, v in self.vertex2joint.copy().items():
             if len(v)>3:
+                
                 grains = list(v)
-                print(k,grains)
+               # print('quadruple', k, grains)
                 num_vertices = len(self.vertex2joint)
-                v.remove(grains[0])
-
-                self.vertex2joint[num_vertices] = v.copy()
-                v.add(grains[0])
-                self.vertices[num_vertices] = self.vertices[k]
+                
+            
                 first = grains[0]
-                n1 = reordered_regions[first]
-                for test_grains in grains[3:4]:
-                   # print(n1, test_grains, reordered_regions[test_grains])
-                    if len(set(n1).intersection(set(reordered_regions[test_grains])))==1:
+                v.remove(first)
+                self.vertex2joint[num_vertices] = v.copy()
+                v.add(first)
+                
+                self.vertices[num_vertices] = self.vertices[k]
+
+                
+                n1 = reordered_regions[first-1]
+               # print(grains)
+                for test_grains in grains[1:]:
+
+                    if len(set(n1).intersection(set(reordered_regions[test_grains-1])))==1:
                         remove_grain = test_grains
-                      #  print(remove_grain)
+
                         break
-                remove_grain = 55
+
                 v.remove(remove_grain)
+
+                self.edges.append([k, num_vertices])
+                self.edges.append([num_vertices, k])
                 self.vertex2joint[k] = v.copy()
-                print(self.vertex2joint[150], self.vertex2joint[229])
-        """
-        
+                v.remove(first)
+                v = list(v)
+                
+                self.quadruples.update({v[0]:num_vertices, v[1]:k})     
+                
         for k, v in self.vertex2joint.items():
             if len(v)!=3:
                 print(k, v)
@@ -531,6 +530,8 @@ class graph:
         
         for k, v in self.joint2vertex.items():
             for region in set(k):
+                if init and region in self.quadruples and v==self.quadruples[region]:
+                    continue
                 self.regions[region].append(v)
                 
                 self.region_coors[region].append(self.vertices[v])
@@ -868,8 +869,8 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 0
-        g1 = graph(lxd = 40, seed=seed) 
+        seed = 20000
+        g1 = graph(lxd = 80, seed=seed, adjust_grain_size=True) 
 
        # g1.show_data_struct()
        # g1.plot_grain_distribution()

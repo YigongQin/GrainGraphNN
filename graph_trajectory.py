@@ -1150,8 +1150,8 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, \
-                                    adjust_grain_size = args.adjust_grain_size, \
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, 
+                                    adjust_grain_size = args.adjust_grain_size, 
                                     adjust_grain_orien = args.adjust_grain_orien)
             traj.match_graph = False
             traj.load_trajectory(rawdat_dir = args.rawdat_dir)
@@ -1193,7 +1193,9 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R})
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R},
+                                    adjust_grain_size = args.adjust_grain_size,
+                                    adjust_grain_orien = args.adjust_grain_orien)
             cur_grain, counts = np.unique(traj.alpha_field, return_counts=True)
             traj.area_counts = dict(zip(cur_grain, counts))
             traj.area_traj.append(traj.area_counts)            

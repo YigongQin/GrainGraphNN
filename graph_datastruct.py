@@ -411,13 +411,11 @@ class graph:
 
                 v.remove(remove_grain)
 
-                self.edges.append([k, num_vertices])
-                self.edges.append([num_vertices, k])
                 self.vertex2joint[k] = v.copy()
                 v.remove(first)
                 v = list(v)
                 
-                self.quadruples.update({v[0]:num_vertices, v[1]:k})     
+                self.quadruples.update({v[0]:(k,num_vertices), v[1]:(k,num_vertices)})     
                 
         for k, v in self.vertex2joint.items():
             if len(v)!=3:
@@ -530,8 +528,7 @@ class graph:
         
         for k, v in self.joint2vertex.items():
             for region in set(k):
-                if init and region in self.quadruples and v==self.quadruples[region]:
-                    continue
+
                 self.regions[region].append(v)
                 
                 self.region_coors[region].append(self.vertices[v])
@@ -545,11 +542,6 @@ class graph:
             moved_region = []
 
             vert_in_region = self.regions[region]
-  
-            
-            grain_edge = set()
-
-
                 
             
             for i in range(1, len(vert_in_region)):
@@ -583,19 +575,35 @@ class graph:
             cnt += len(vert_in_region) 
 
             
-            for i in range(len(sorted_vert)):
-                cur = sorted_vert[i]
-                nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
+            if init:
                 
-                grain_edge.add((cur, nxt))
+                grain_edge = []
+                save_edge = True
                 
-                if init:
-                    self.edges.append([cur, nxt])
-                    edge_count += 1
+                for i in range(len(sorted_vert)):
+                    cur = sorted_vert[i]
+                    nxt = sorted_vert[i+1] if i<len(sorted_vert)-1 else sorted_vert[0]
                     
-            self.region_edge[region] = grain_edge
-           # self.edges.update(tent_edge)
-              #  self.edges.add((link[1],link[0]))
+                    if region in self.quadruples:
+                        if cur in self.quadruples[region] or nxt in self.quadruples[region]:
+                            if not linked_edge_by_junction(self.vertex2joint[cur], self.vertex2joint[nxt]):
+                                save_edge = False
+                           
+                    grain_edge.append([cur, nxt])
+                
+                if save_edge:
+                    self.edges.extend(grain_edge)
+                else:
+                   # print('before',grain_edge)
+                    v1, v2 = self.quadruples[region]
+                    for e in grain_edge:
+                        if e[0] == v1: e[0] = v2
+                        elif e[0] == v2: e[0] = v1   
+                        if e[1] == v1: e[1] = v2
+                        elif e[1] == v2: e[1] = v1 
+                   # print('after', grain_edge)
+                    self.edges.extend(grain_edge)
+
       #  print('num vertices of grains', cnt)
         print('num edges, junctions', len([i for i in self.edges if i[0]>-1 ]), len(self.joint2vertex))        
         # form edge             
@@ -869,8 +877,8 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 20000
-        g1 = graph(lxd = 80, seed=seed, adjust_grain_size=True) 
+        seed = 4
+        g1 = graph(lxd = 40, seed=seed) 
 
        # g1.show_data_struct()
        # g1.plot_grain_distribution()

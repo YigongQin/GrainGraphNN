@@ -962,7 +962,7 @@ def rotate_two_points(x_p1_p, x_p2_p):
     return x_p1, x_p2
 
 
-
+'''
 def periodic_move(p, pc):
     x,  y  = p
     xc, yc = pc
@@ -971,11 +971,14 @@ def periodic_move(p, pc):
     rel_y = y - yc
     a = x -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
     b = y -1*(rel_y>0.5) + 1*(rel_y<-0.5) 
-    
-    
-    assert -0.5<a - xc<0.5
-    assert -0.5<b - yc<0.5
+
     return torch.tensor([a, b])
+
+'''
+def periodic_move(p, pc):
+    rel_x = p - pc
+
+    return p -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
 
 
 """

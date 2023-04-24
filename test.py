@@ -317,7 +317,7 @@ if __name__=='__main__':
                 
 
                 data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
-                pairs = pairs.detach().numpy()
+               # pairs = pairs.detach().numpy()
                 
 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())               

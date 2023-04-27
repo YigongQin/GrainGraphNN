@@ -165,7 +165,7 @@ class grain_visual:
         print('dx in plance ', dx,' between two planes',  dx_frame)
         
         
-        top_z = int(np.round((50-self.base_width)/dx_frame)) + 1
+        top_z = int(np.round((traj.final_height-traj.ini_height)/dx_frame)) + 1
 
         
         self.alpha_pde_frames = self.alpha_pde_frames[:, :, :top_z]     

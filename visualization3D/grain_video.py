@@ -20,7 +20,8 @@ parser.add_argument('--clip', dest='clip', action='store_true')
 parser.set_defaults(clip=False)
 parser.add_argument('--cbar', dest='cbar', action='store_true')
 parser.set_defaults(cbar=False)
-parser.add_argument("--surface", type=float, default = 50)    
+parser.add_argument("--start", type=float, default = 0) 
+parser.add_argument("--end", type=float, default = 6)    
 args = parser.parse_args()
     
 if args.sys == 'ls6':
@@ -48,7 +49,7 @@ colorPalette = GetSettingsProxy('ColorPalette')
 # Properties modified on colorPalette
 colorPalette.Text = [0.0, 0.0, 0.0]
 
-for frame in range(0,38):
+for frame in range(args.start, args.end):
 
     if args.clip:
         

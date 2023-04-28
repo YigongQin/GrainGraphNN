@@ -14,16 +14,17 @@ parser.add_argument("--sys", type=str, default = 'ls6')
 parser.add_argument("--data_in", type=str, default = 'seed10000')
 parser.add_argument("--data_dir", type=str, default = '/work/07428/ygqin/ls6/testGR/')
 parser.add_argument("--save_name", type=str, default = '')
+parser.add_argument("--resolution_mag", type=int, default = 1)
 
 parser.add_argument('--clip', dest='clip', action='store_true')
 parser.set_defaults(clip=False)
 parser.add_argument('--cbar', dest='cbar', action='store_true')
 parser.set_defaults(cbar=False)
-parser.add_argument("--surface", type=int, default = 50)    
+parser.add_argument("--surface", type=float, default = 50)    
 args = parser.parse_args()
     
 if args.sys == 'ls6':
-    directoryOut = '/scratch/07428/ygqin/graph/GrainGraphNN/visualization3D/'
+    directoryOut = '/work/07428/ygqin/ls6/GrainGraphNN/visualization3D/'
 if args.sys == 'mac':
     directoryOut = '/Users/yigongqin/Documents/Research/ML/Grain/GrainGraphNN/visualization3D/'
    # args.data_dir = directoryOut
@@ -155,6 +156,7 @@ else:
 layout1 = GetLayout()
 
 # layout/tab size in pixels
+#resolution = 1024*args.resolution_mag
 layout1.SetSize(1024, 1024)
 
 # current camera placement for renderView1
@@ -166,5 +168,7 @@ renderView1.CameraParallelScale = 17.25150434777653
 renderView1.ResetCamera()
 
 # save screenshot
-SaveScreenshot(directoryOut+imageFilesOut+'.png', renderView1, ImageResolution=[1024, 1024])
+resolution = 1024*args.resolution_mag
+print('resolution', resolution)
+SaveScreenshot(directoryOut+imageFilesOut+'.png', renderView1, ImageResolution=[resolution, resolution])
 

@@ -1,4 +1,4 @@
-# GrainNN2: A dynamic heterogeneous graph neural network for large-scale 3D grain microstructure evolution.
+# GrainGNN: A dynamic heterogeneous graph neural network for large-scale 3D grain microstructure evolution.
 
 ## Build
 use the local CUDA version
@@ -22,7 +22,7 @@ pip3 install -r requirements.txt
 ## Usage
 training
 ```
-python3 grainNN2.py --model_type=regressor --model_id=0 --device=cuda
+python3 train.py --model_type=regressor --model_id=0 --device=cuda
 ```
 
 testing

@@ -227,8 +227,6 @@ class HeteroPGC(torch.nn.Module):
 
 
     def _set_parameters(self):
-        for key in self.W_i:
-            glorot(self.W_i[key])
         for key in self.b_i:
             glorot(self.b_i[key])
 
@@ -244,11 +242,12 @@ class HeteroPGC(torch.nn.Module):
     
     def _calculate_hidden_state(self, x_dict, edge_index_dict, edge_attr, h_dict, c_dict):
   
-       # h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
-        conv_i = self.conv_i(x_dict, edge_index_dict, edge_attr_dict = edge_attr)
+        h_dict = {node_type: torch.cat([X, h_dict[node_type]], dim=1) for node_type, X in x_dict.items()}
+        conv_i = self.conv_i(h_dict, edge_index_dict, edge_attr_dict = edge_attr)
         i_dict = {node_type: conv_i[node_type] for node_type, I in x_dict.items()}
         i_dict = {node_type: I + self.b_i[node_type] for node_type, I in i_dict.items()}
-     
+        i_dict = {node_type: torch.relu(I) for node_type, I in i_dict.items()}
+        
         return i_dict
 
 

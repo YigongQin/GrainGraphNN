@@ -624,10 +624,11 @@ class GrainNN_classifier(torch.nn.Module):
                         Nq.append(Nq1[1])
                     else: 
                         raise KeyError
+                   # print(p1, p2, Nq)
                             
             L2 = torch.cat(L2)
             Nq = torch.tensor(Nq)
-           # print(Nq)
+           # print(grain, Np, Nq)
            # print('grain', grain, 'eliminate edges', L2)
            # print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
             assert len(Nq)==len(Np) or len(Np)==2, (grain, Np, Nq)
@@ -658,17 +659,17 @@ class GrainNN_classifier(torch.nn.Module):
                     L1 = L1[L1!=E_index]
         
         
-        ''' ensure there is no two-side grain '''
-        
-        grains, counts = torch.unique(E_pq[1,:], return_counts=True)
-        
-        remain_twoside = grains[counts<=2]
-        
-        for fg in remain_twoside:
-            print('find remaining two-side grains', fg)
-            edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
-            E_pp = edge_index_dict['joint', 'connect', 'joint']
-            E_pq = edge_index_dict['joint', 'pull', 'grain']   
+            ''' ensure there is no two-side grain '''
+            
+            grains, counts = torch.unique(E_pq[1,:], return_counts=True)
+            
+            remain_twoside = grains[counts<=2]
+            
+            for fg in remain_twoside:
+                print('find remaining two-side grains', fg)
+                edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.delete_grain_index(fg, E_pp, E_pq, mask)   
+                E_pp = edge_index_dict['joint', 'connect', 'joint']
+                E_pq = edge_index_dict['joint', 'pull', 'grain']   
                   
                     
         """
@@ -803,7 +804,7 @@ class GrainNN_classifier(torch.nn.Module):
             # find two expanding grains and two shrinking grains
             expand_q1 = p1_qn[(1-sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)] # new neighbor for p2
             expand_q2 = p2_qn[(1-sum(p2_qn==i for i in p1_qn)).nonzero(as_tuple=True)] # new neighbor for p1
-         #   print(p1_qn, p2_qn)
+           # print(p1_qn, p2_qn)
             shrink_q1, shrink_q2 = p1_qn[(sum(p1_qn==i for i in p2_qn)).nonzero(as_tuple=True)]
             
 

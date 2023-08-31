@@ -585,7 +585,6 @@ class GrainNN_classifier(torch.nn.Module):
         prob = torch.sigmoid(y_dict['edge_event'])
         L1 = ((prob>self.threshold)&(src<dst)).nonzero().view(-1)
         
-      
         
         """
         Grain elimination
@@ -595,7 +594,7 @@ class GrainNN_classifier(torch.nn.Module):
         unexpected_elim = []
         
         for grain in y_dict['grain_event']:
-   
+
            # print(grain)         
    
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
@@ -614,7 +613,7 @@ class GrainNN_classifier(torch.nn.Module):
                     p1, p2 = p2, p1
                 E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
                 if len(E_index)>0:
-                  #  print(p1, p2)
+                    # print(p1, p2)
                     L2.append(E_index)
                     Nq1 = E_pq[1][((E_pq[0]==p1)&(E_pq[1]!=grain)).nonzero().view(-1)]
                     Nq2 = E_pq[1][((E_pq[0]==p2)&(E_pq[1]!=grain)).nonzero().view(-1)]
@@ -624,14 +623,17 @@ class GrainNN_classifier(torch.nn.Module):
                         Nq.append(Nq1[1])
                     else: 
                         raise KeyError
-                   # print(p1, p2, Nq)
+                   # print(p1, p2, Nq[-1])
                             
             L2 = torch.cat(L2)
             Nq = torch.tensor(Nq)
-           # print(grain, Np, Nq)
+
            # print('grain', grain, 'eliminate edges', L2)
            # print('grain', int(grain), ', junction neighbors', Np, 'grain neighbors', Nq)
-            assert len(Nq)==len(Np) or len(Np)==2, (grain, Np, Nq)
+            assert len(Nq)==len(Np) #or len(Np)==2, (grain, Np, Nq)
+            
+            if len(torch.unique(Nq)) != len(Nq):
+                continue
             
             sorted_prob, indices = torch.sort(y_dict['grain'][Nq, 0])
             L2 = L2[indices[:-2]]
@@ -676,7 +678,7 @@ class GrainNN_classifier(torch.nn.Module):
         Neigbor switching
         """
 
-        
+        # print('neigbor switching')
         sorted_prob, indices= torch.sort(prob[L1], dim=0, descending=True)
         L1 = L1[indices]
 
@@ -786,7 +788,7 @@ class GrainNN_classifier(torch.nn.Module):
         for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
 
-            #print(E_pp.T[elimed_arg])
+           # print(E_pp.T[elimed_arg])
            # print(p1, p2)
             
             # grain neighbors

@@ -19,6 +19,7 @@ from math import pi
 from collections import Counter
 from scipy.interpolate import griddata
 from scipy import stats
+import math
 
 def relative_angle(p1, p2):
     
@@ -849,6 +850,13 @@ class graph_trajectory(graph):
         grain_state[:, 6] = np.sin(self.theta_x[1:])
         grain_state[:, 7] = np.cos(self.theta_z[1:])
         grain_state[:, 8] = np.sin(self.theta_z[1:])
+        
+        # for no flux BC, the first grain is always the boundary grain
+        if self.BC == 'noflux':
+            grain_state[0, 0:2] = 0.5
+            grain_state[0, 3:5] = 0
+            grain_state[0, 5:9] = math.sqrt(2)/2
+            
         
         
         for joint, coor in self.vertices.items():

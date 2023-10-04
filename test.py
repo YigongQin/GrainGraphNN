@@ -65,6 +65,7 @@ if __name__=='__main__':
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--domain_factor", type=int, default=1)   
     parser.add_argument("--size_factor", type=int, default=1)
+    parser.add_argument("--boundary", type=str, default='periodic')
 
     
     parser.add_argument("--plot", dest='plot', action='store_true')
@@ -304,7 +305,18 @@ if __name__=='__main__':
                 if data.x_dict['grain'][0, 2] > train_frames/(train_frames + 1):
                     data.x_dict['grain'][:, 2] = train_frames/(train_frames + 1)         
                     data.x_dict['joint'][:, 2] = train_frames/(train_frames + 1)
-
+                
+                    
+                ''' for no flux boundary condition, prevent nodes exceeding boundary and reset the grain 0'''
+                
+                if args.boundary == 'noflux':
+                    data.x_dict['grain'][0, :2] = 0.5
+                    data.x_dict['grain'][0, 3:5] = 0
+                    data.x_dict['grain'][0, -1] = 0
+                    
+                    data.x_dict['joint'][:, 2] = torch.clamp(data.x_dict['joint'][:, 2], min=-1, max=1)
+                
+                
                 """
                 <3> predict events and update features and connectivity
                     a. E_pp, E_pq

@@ -770,7 +770,7 @@ class graph_trajectory(graph):
         ax.plot(z_sam, [i[1] for i in events], 'b')
         ax.plot(z_sam, [i[2] for i in events], 'r')
         ax.plot(z_sam, [i[3] for i in events], 'r--')
-        ax.set_xlabel(r'$z_i\ (\mu m)$')
+        ax.set_xlabel(r'$z_l\ (\mu m)$')
         ax.set_ylabel('# grain eliminations')
         ax.legend(['PF', 'GNN', 'GNN TP'], fontsize=20)        
         plt.savefig('seed'+str(self.seed)+'_event_acc.png', dpi=400, bbox_inches='tight')
@@ -781,7 +781,7 @@ class graph_trajectory(graph):
         z_sam = [i[0] for i in events]
         ax.plot(z_sam, [i[1] for i in events], 'b')
       #  ax.plot(z_sam, [i[2] for i in events], 'r')
-        ax.set_xlabel(r'$z_i\ (\mu m)$')
+        ax.set_xlabel(r'$z_l\ (\mu m)$')
         ax.set_ylabel('MR')
        # ax.legend(['overall', 'event'])        
         plt.savefig('seed'+str(self.seed)+'_layer_err.png', dpi=400, bbox_inches='tight')
@@ -798,8 +798,8 @@ class graph_trajectory(graph):
         self.volume('graph')
         mis = [ np.sum(misangles*i)/np.sum(i) for i in self.volume_traj]
         #print(mis)
-        ax.plot(z_sam, mis, 'r', label='GNN')
-        ax.set_xlabel(r'$z_i\ (\mu m)$')
+        ax.plot(z_sam, mis, 'r--', label='GNN')
+        ax.set_xlabel(r'$z_l\ (\mu m)$')
         ax.set_ylabel(r'$\Delta \theta$')
         ax.legend(fontsize=20)  
         

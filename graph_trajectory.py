@@ -34,10 +34,11 @@ class graph_trajectory(graph):
                  seed: int = 1, 
                  noise: float = 0.01, 
                  frames: int = 1,
+                 BC: str = 'periodic',
                  adjust_grain_size = False,
                  adjust_grain_orien = False,
                  physical_params = {}):   
-        super().__init__(lxd = lxd, seed = seed, noise = noise, \
+        super().__init__(lxd = lxd, seed = seed, noise = noise, BC = BC,\
                          adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())

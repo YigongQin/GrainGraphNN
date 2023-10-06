@@ -185,11 +185,18 @@ class graph_trajectory(graph):
         self.alpha_pde_frames = np.asarray(f['cross_sec'])
         self.alpha_pde_frames = self.alpha_pde_frames.reshape((fnx, fny, data_frames),order='F')[1:-1,1:-1,:]        
         
-        self.extraV_frames = np.asarray(f['extra_area'])
-        self.extraV_frames = self.extraV_frames.reshape((self.num_regions, data_frames), order='F')        
-        self.totalV_frames = np.asarray(f['total_area'])
-        self.totalV_frames = self.totalV_frames.reshape((self.num_regions, data_frames), order='F')   
-     
+        if self.BC == 'noflux':
+            self.extraV_frames = np.zeros((self.num_regions, data_frames))
+            self.totalV_frames = np.zeros((self.num_regions, data_frames))
+            self.extraV_frames[1:,:] = np.asarray(f['extra_area']).reshape((self.num_regions-1, data_frames), order='F')  
+            self.totalV_frames[1:,:] = np.asarray(f['total_area']).reshape((self.num_regions-1, data_frames), order='F')
+        else:
+            
+            self.extraV_frames = np.asarray(f['extra_area'])
+            self.extraV_frames = self.extraV_frames.reshape((self.num_regions, data_frames), order='F')        
+            self.totalV_frames = np.asarray(f['total_area'])
+            self.totalV_frames = self.totalV_frames.reshape((self.num_regions, data_frames), order='F')   
+         
         self.num_vertex_features = 8  ## first 2 are x,y coordinates, next 5 are possible phase
         self.active_args = np.asarray(f['node_region'])
         nodes_data = len(self.active_args)//(self.num_vertex_features*data_frames)

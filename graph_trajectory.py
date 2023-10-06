@@ -1030,6 +1030,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int, default = 0)
     parser.add_argument("--G", type=float, default = 2)
     parser.add_argument("--R", type=float, default = 0.4)
+    parser.add_argument("--boundary", type=str, default = 'periodic')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
     parser.set_defaults(adjust_grain_size=False)    
     parser.add_argument("--orien", dest='adjust_grain_orien', action='store_true')
@@ -1168,7 +1169,7 @@ if __name__ == '__main__':
             
             test_samples = []
             
-            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, 
+            traj = graph_trajectory(lxd=args.lxd, seed = seed, frames = args.frame, BC = args.boundary,
                                     adjust_grain_size = args.adjust_grain_size, 
                                     adjust_grain_orien = args.adjust_grain_orien)
             traj.match_graph = False

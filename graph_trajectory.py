@@ -220,6 +220,8 @@ class graph_trajectory(graph):
             self.area_traj.append(self.area_counts)
            # self.area_counts = {i:self.area_counts[i] if i in self.area_counts else 0 for i in range(1, self.num_regions+1)}
             cur_grain = set(cur_grain)
+            if self.BC == 'noflux':
+                cur_grain.add(1)
 
             eliminated_grains = prev_grain - cur_grain
 
@@ -251,7 +253,9 @@ class graph_trajectory(graph):
                 
                 if args not in cur_joint or max_neighbor<cur_joint[args][2]:    
                     cur_joint[args] = [xp, yp, max_neighbor]
-
+            
+            if self.BC == 'noflux':
+                self.find_boundary_vertex(self.alpha_pde, cur_joint)
             
             """
             deal with quadruples 
@@ -368,7 +372,7 @@ class graph_trajectory(graph):
             print('number of junctions %d'%len(cur_joint))
             assert len(cur_grain)>0, self.seed
 
-            if len(cur_joint)!=2*len(cur_grain) or len(miss_case)>0:
+            if self.BC == 'periodic' and (len(cur_joint)!=2*len(cur_grain) or len(miss_case)>0):
                 print(colored('junction find failed', 'red'))
                # print(len(cur_joint), len(cur_grain))
               #  self.grain_events.append(set())
@@ -724,7 +728,10 @@ class graph_trajectory(graph):
             if joint in cur_joint:
                 vert = self.joint2vertex[joint]
                 coors = cur_joint[joint]
-                self.vertices[vert] = periodic_move(coors, old_vertices[vert])
+                if self.BC == 'periodic':
+                    self.vertices[vert] = periodic_move(coors, old_vertices[vert])
+                else: 
+                    self.vertices[vert] = coors
       
             else:
                 match = False
@@ -733,6 +740,9 @@ class graph_trajectory(graph):
                 print(colored('disappeared joint detected: ', 'red'), joint, self.joint2vertex[joint])
                 ''' cannot resolve, give up the vertex'''
                 todelete.append(joint)
+        
+        
+        
         for joint in todelete:
                 del self.joint2vertex[joint]
                # del self.vertices[vert]

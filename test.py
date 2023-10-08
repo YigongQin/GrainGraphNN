@@ -45,9 +45,19 @@ def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     return domain_offset
 
 
-
-
-
+def move_to_boundary(joint_coor, E_qp):
+    
+    boundary_joint = E_qp[1, (E_qp[0]==0).nonzero().view(-1)] 
+    for p in boundary_joint:
+        dist = torch.tensor([joint_coor[p, 0], 1 - joint_coor[p, 0], joint_coor[p, 1], 1 - joint_coor[p, 1]])
+        if dist.argmin()==0:
+            joint_coor[p, 0] = 0
+        elif dist.argmin()==1:
+            joint_coor[p, 0] = 1
+        elif dist.argmin()==2:
+            joint_coor[p, 1] = 0
+        elif dist.argmin()==3:
+            joint_coor[p, 1] = 1
 
 if __name__=='__main__':
     
@@ -274,8 +284,7 @@ if __name__=='__main__':
             
             data.to(device)
             
-            for frame in range(span, traj.frames, span):
-                
+            for frame in range(span, traj.frames, span):                
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
                 height = traj.ini_height + frame/(traj.frames - 1)*(traj.final_height-traj.ini_height) 
@@ -285,9 +294,22 @@ if __name__=='__main__':
                     a. Rmodel: dx_p, ds & v
                     b. Cmodel: p(i,j), dx for p(i,j)>threshold
                 """            
-
-                pred = Rmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-                pred_c = Cmodel(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
+                edge_index = data.edge_index_dict.copy()
+                edge_feature = data.edge_attr_dict.copy()
+                if args.boundary == 'noflux':
+                    for edge_type, index in data.edge_index_dict.items():
+                        
+                        src, dst = edge_type[0], edge_type[-1]
+                        if src == 'grain':
+        
+                            edge_index[edge_type] = index[:,(index[0]>0).nonzero().view(-1)] 
+                            edge_feature[edge_type] = data.edge_attr_dict[edge_type][(index[0]>0).nonzero().view(-1)] 
+                        if dst == 'grain':
+                            edge_index[edge_type] = index[:,(index[1]>0).nonzero().view(-1)] 
+                            edge_feature[edge_type] = data.edge_attr_dict[edge_type][(index[1]>0).nonzero().view(-1)] 
+                        
+                pred = Rmodel(data.x_dict, edge_index, edge_feature )
+                pred_c = Cmodel(data.x_dict, edge_index, edge_feature )
                 pred.update(pred_c)
 
                 
@@ -307,15 +329,7 @@ if __name__=='__main__':
                     data.x_dict['joint'][:, 2] = train_frames/(train_frames + 1)
                 
                     
-                ''' for no flux boundary condition, prevent nodes exceeding boundary and reset the grain 0'''
-                
-                if args.boundary == 'noflux':
-                    data.x_dict['grain'][0, :2] = 0.5
-                    data.x_dict['grain'][0, 3:5] = 0
-                    data.x_dict['grain'][0, -1] = 0
-                    
-                    data.x_dict['joint'][:, 2] = torch.clamp(data.x_dict['joint'][:, 2], min=-1, max=1)
-                
+
                 
                 """
                 <3> predict events and update features and connectivity
@@ -326,6 +340,8 @@ if __name__=='__main__':
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
+                if args.boundary == 'noflux': # the grain 0 here is boundary grain
+                    pred['grain_event'] = pred['grain_event'][pred['grain_event']!=0]
                 
 
                 data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
@@ -344,7 +360,18 @@ if __name__=='__main__':
                 """
                 <4> evaluate
                 """
+
+                ''' for no flux boundary condition, prevent nodes exceeding boundary and reset the grain 0'''
                 
+                if args.boundary == 'noflux':
+                    data.x_dict['grain'][0, :2] = 0.5
+                    data.x_dict['grain'][0, 3:5] = 0
+                    data.x_dict['grain'][0, -1] = 0
+                    
+                    move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'])
+                    data.x_dict['joint'][:,:2]= torch.clamp(data.x_dict['joint'][:,:2], min=0,max=1)
+                    assert torch.all(data.x_dict['joint'][:,:2]>-1e-6) and torch.all(data.x_dict['joint'][:,:2]<1+1e-6)
+                    
                # print(data['nxt'])
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))

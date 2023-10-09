@@ -215,7 +215,7 @@ class graph:
         self.region_coors = defaultdict(list)
         self.region_edge = defaultdict(set)
         self.region_center = defaultdict(list)
-        self.region_bound = defaultdict(list)
+
         self.quadruples = {}
         self.corner_grains = [0, 0, 0, 0]
        # self.region_coors = [] ## region corner coordinates
@@ -619,7 +619,7 @@ class graph:
         self.region_coors.clear()
         self.region_center.clear()
         self.region_edge.clear()
-        self.region_bound.clear()
+        region_bound = defaultdict(list)
         
         for k, v in self.joint2vertex.items():
             for region in set(k):
@@ -644,7 +644,7 @@ class graph:
                     verts[i] = periodic_move(verts[i], verts[i-1]) 
             if self.BC == 'noflux' and region>1:
                 verts_array = np.array(verts)
-                self.region_bound[region] = [np.min(verts_array[:,0]), np.max(verts_array[:,0]),
+                region_bound[region] = [np.min(verts_array[:,0]), np.max(verts_array[:,0]),
                                              np.min(verts_array[:,1]), np.max(verts_array[:,1])]
                 
             inbound = [True, True]
@@ -729,8 +729,8 @@ class graph:
 
        # self.compute_error_layer()
         if self.BC == 'noflux':
-            remain_keys = np.array(list(self.region_bound.keys()))
-            grain_bound = np.array(list(self.region_bound.values()))
+            remain_keys = np.array(list(region_bound.keys()))
+            grain_bound = np.array(list(region_bound.values()))
 
             self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]

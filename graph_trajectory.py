@@ -341,7 +341,7 @@ class graph_trajectory(graph):
 
 
             
-            if len(cur_joint)<2*len(cur_grain):
+            if self.BC == 'periodic' and len(cur_joint)<2*len(cur_grain):
                 total_missing, candidates, miss_case  = check_connectivity(cur_joint)
                 for arg, coor in del_joints:
                     cur_joint[arg] = coor
@@ -353,7 +353,7 @@ class graph_trajectory(graph):
                # miss_quadruple(quadraples, total_missing)
             
                 
-            if len(cur_joint)>2*len(cur_grain):
+            if self.BC == 'periodic' and len(cur_joint)>2*len(cur_grain):
                 total_missing, candidates, miss_case  = check_connectivity(cur_joint)
              #   print(miss_case)
                 for key in miss_case.keys():

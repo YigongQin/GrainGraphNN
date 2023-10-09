@@ -444,6 +444,7 @@ class graph:
         
         for region in vor.regions:
             flag = True
+            indomain_count = 0
             for index in region:
                 if index == -1:
                     flag = False
@@ -454,9 +455,10 @@ class graph:
                     if x<=-eps or y<=-eps or x>=1.+eps or y>=1.+eps:
                         flag = False
                         break
-
+                    if x>eps and x<1-eps and y>eps and y<1-eps:
+                        indomain_count += 1
                            
-            if region != [] and flag:
+            if region != [] and flag and indomain_count>0:
 
                 reordered_region = []
                 
@@ -500,9 +502,10 @@ class graph:
 
 
 
-       # for k, v in self.vertex2joint.copy().items():
-          #  if len(v)<3:
-           #     print(k, self.vertices[k], v)
+        for k, v in self.vertex2joint.copy().items():
+            if len(v)<3:
+                del self.vertex2joint[k]
+               # print(k, self.vertices[k], v)
                 
                 
 
@@ -723,8 +726,7 @@ class graph:
                 print((v,n))
                # raise ValueError((v,n))
 
-        if init:  
-            self.plot_polygons()
+
        # self.compute_error_layer()
         if self.BC == 'noflux':
             remain_keys = np.array(list(self.region_bound.keys()))
@@ -736,7 +738,10 @@ class graph:
             self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (1-np.absolute(grain_bound[:,3])<eps)][0]  
            # print(self.corner_grains)
             
-    
+        if init:  
+            self.plot_polygons()
+            
+            
     def find_boundary_vertex(self, alpha, cur_joint):
         
         m, n = alpha.shape
@@ -1000,7 +1005,7 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 10002
+        seed = 10000
         g1 = graph(lxd = 40, seed = seed, BC = 'noflux') 
 
        # g1.show_data_struct()

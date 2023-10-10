@@ -569,7 +569,7 @@ class GrainNN_classifier(torch.nn.Module):
         return y_dict
 
 
-    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask):            
+    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask, grains_to_nucleate):            
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']

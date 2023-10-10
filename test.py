@@ -74,9 +74,8 @@ if __name__=='__main__':
     parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--domain_factor", type=int, default=1)   
-    parser.add_argument("--size_factor", type=int, default=1)
     parser.add_argument("--boundary", type=str, default='periodic')
-
+    parser.add_argument("--nucleation_density", type=float, default=0)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -343,8 +342,8 @@ if __name__=='__main__':
                 if args.boundary == 'noflux': # the grain 0 here is boundary grain
                     pred['grain_event'] = pred['grain_event'][pred['grain_event']!=0]
                 
-
-                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'])
+                grains_to_nucleate = []
+                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], grains_to_nucleate)
                # pairs = pairs.detach().numpy()
                 
 

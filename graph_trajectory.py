@@ -30,7 +30,8 @@ def relative_angle(p1, p2):
 
 class graph_trajectory(graph):
     def __init__(self, 
-                 lxd: float = 40, 
+                 lxd: float = 40,
+                 randInit: bool = True,
                  seed: int = 1, 
                  noise: float = 0.01, 
                  frames: int = 1,
@@ -38,7 +39,7 @@ class graph_trajectory(graph):
                  adjust_grain_size = False,
                  adjust_grain_orien = False,
                  physical_params = {}):   
-        super().__init__(lxd = lxd, seed = seed, noise = noise, BC = BC,\
+        super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, BC = BC,\
                          adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien)
         
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())

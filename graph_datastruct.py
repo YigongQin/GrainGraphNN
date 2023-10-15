@@ -192,7 +192,7 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
 
         
 class graph:
-    def __init__(self, lxd: float = 40, seed: int = 1, noise: float = 0.01, BC: str = 'periodic',\
+    def __init__(self, lxd: float = 40, randInit: bool = True, seed: int = 1, noise: float = 0.01, BC: str = 'periodic',\
                  adjust_grain_size = False, adjust_grain_orien = False):
         self.mesh_size = 0.08
         self.patch_size = 40
@@ -228,8 +228,7 @@ class graph:
         
         self.raise_err = True
         self.save = None
-        
-        randInit = True
+
         
         if randInit:
             np.random.seed(seed)
@@ -268,7 +267,7 @@ class graph:
             else:
                 self.theta_z[1:] = np.arctan2(np.sqrt(ux**2+uy**2), uz)%(pi/2)
 
-        self.layer_grain_distribution()    
+            self.layer_grain_distribution()    
 
     def layer_grain_distribution(self):
         
@@ -745,17 +744,18 @@ class graph:
     def find_boundary_vertex(self, alpha, cur_joint):
         
         m, n = alpha.shape
+        s = int(np.round(self.patch_size/self.mesh_size))+1
         for i in range(m-1):
             if alpha[i, 0] != alpha[i+1, 0]:
-                cur_joint.update({tuple(sorted([1, alpha[i, 0], alpha[i+1, 0]])): [0, i/m, 3]})
+                cur_joint.update({tuple(sorted([1, alpha[i, 0], alpha[i+1, 0]])): [0, i/s, 3]})
             if alpha[i, -1] != alpha[i+1, -1]:
-                cur_joint.update({tuple(sorted([1, alpha[i, -1], alpha[i+1, -1]])): [1, i/m, 3]}) 
+                cur_joint.update({tuple(sorted([1, alpha[i, -1], alpha[i+1, -1]])): [1, i/s, 3]}) 
                 
         for i in range(n-1):
             if alpha[0, i] != alpha[0, i+1]:
-                cur_joint.update({tuple(sorted([1, alpha[0, i], alpha[0, i+1]])): [i/n, 0, 3]})
+                cur_joint.update({tuple(sorted([1, alpha[0, i], alpha[0, i+1]])): [i/s, 0, 3]})
             if alpha[-1, i] != alpha[-1, i+1]:
-                cur_joint.update({tuple(sorted([1, alpha[-1, i], alpha[-1, i+1]])): [i/n, 1, 3]})                 
+                cur_joint.update({tuple(sorted([1, alpha[-1, i], alpha[-1, i+1]])): [i/s, 1, 3]})                 
                 
         
         return

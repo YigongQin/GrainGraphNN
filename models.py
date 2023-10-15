@@ -569,7 +569,7 @@ class GrainNN_classifier(torch.nn.Module):
         return y_dict
 
 
-    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask, grains_to_nucleate):            
+    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask, nucleation_prob):            
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -713,14 +713,70 @@ class GrainNN_classifier(torch.nn.Module):
        # assert torch.all(counts>2)
        # print(switching_list)
         
-        edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.cleanup(E_pp, E_pq)
-        
-        edge_index_dict['grain', 'push', 'joint'] = torch.flip(edge_index_dict['joint', 'pull', 'grain'], dims=[0])
-      
-        
+        E_pp = edge_index_dict['joint', 'connect', 'joint']
+        E_pq = edge_index_dict['joint', 'pull', 'grain']        
+        """
+        Grain elimination
+        """        
+        if nucleation_prob>1e-6:
+            rand_numbers = torch.rand(x_dict['joint'].size(dim=0))
+            nucleation_sites = ((rand_numbers<nucleation_prob)&(mask['joint'][0]>0)).nonzero().view(-1)
+            num_grains, num_junctions = mask['grain'].size(dim=0), mask['joint'].size(dim=0)
+            
+            for junction in nucleation_sites:
+                print('==============nucleation sites', int(junction), ', and grains' , int(num_grains),  '==============')
+                x_dict['joint'] = torch.cat((x_dict['joint'], x_dict['joint'][junction].view(1,-1), x_dict['joint'][junction].view(1,-1)), dim = 0)
+                mask['joint'] = torch.cat((mask['joint'], torch.tensor([1, 1]).view(-1,1)))
+                mask['grain'] = torch.cat((mask['grain'], torch.tensor([1]).view(-1,1))) 
+                
+                site_x, site_y, site_z, delta_z = x_dict['joint'][junction, 0], x_dict['joint'][junction, 1], \
+                                  x_dict['joint'][junction, 2], x_dict['joint'][junction, -1]
+                theta_x, theta_z = torch.tensor([0,0]) #torch.rand(2)*torch.pi/2
+                new_grain = torch.tensor([site_x, site_y, site_z, 0.01, 0, torch.cos(theta_x), torch.sin(theta_x), \
+                                          torch.cos(theta_z), torch.sin(theta_z), 0.01, delta_z])
+                    
+                x_dict['grain'] = torch.cat((x_dict['grain'], new_grain.view(1,-1)), dim = 0)
+                
+                """ the change of edges """
+                
+                new_j1, new_j2 = num_junctions, num_junctions +1
+                
+                
+                j_nb0, j_nb1, j_nb2 = E_pp[1, (E_pp[0]==junction).nonzero().view(-1)]
+                grain_neigbrs = E_pq[1, (E_pq[0]==junction).nonzero().view(-1)]
+                grain_neigrs_ordered= torch.tensor([0,0,0])
+                for gn in grain_neigbrs:
+                    if len(((E_pq[0]==j_nb0)&(E_pq[1]==gn)).nonzero().view(-1))==0: grain_neigrs_ordered[0] = gn
+                    if len(((E_pq[0]==j_nb1)&(E_pq[1]==gn)).nonzero().view(-1))==0: grain_neigrs_ordered[1] = gn
+                    if len(((E_pq[0]==j_nb2)&(E_pq[1]==gn)).nonzero().view(-1))==0: grain_neigrs_ordered[2] = gn
+                    
+                gr0, gr1, gr2 = grain_neigrs_ordered
+                assert gr0!=gr1 and gr1!=gr2 and gr0!=gr2
+                
+                E_pq[:, (E_pq[0]==junction).nonzero().view(-1)] = -1
+              #  E_pp[:, (E_pp[0]==junction).nonzero().view(-1)] = -1
+                
+                E_pp[1][ ((E_pp[0]==j_nb1)&(E_pp[1]==junction)).nonzero().view(-1) ] = new_j1
+                E_pp[1][ ((E_pp[0]==j_nb2)&(E_pp[1]==junction)).nonzero().view(-1) ] = new_j2
+                
+                E_pp[0][ ((E_pp[0]==junction)&(E_pp[1]==j_nb1)).nonzero().view(-1) ] = new_j1
+                E_pp[0][ ((E_pp[0]==junction)&(E_pp[1]==j_nb2)).nonzero().view(-1) ] = new_j2
+                
+                E_pp = torch.cat((E_pp, torch.tensor([[junction, junction, new_j1, new_j1, new_j2, new_j2], 
+                                                      [new_j1, new_j2, junction, new_j2, junction, new_j1]])), dim = 1)
+                E_pq = torch.cat((E_pq, torch.tensor([[junction, new_j1, new_j2, new_j1, new_j2, junction, new_j2, junction, new_j1], 
+                                                      [num_grains, num_grains, num_grains, gr0, gr0, gr1, gr1, gr2, gr2]])), dim = 1)
+                
+                num_grains += 1
+                num_junctions += 2
         
                 
-        return edge_index_dict, switching_list
+        edge_index_dict['joint', 'connect', 'joint'], edge_index_dict['joint', 'pull', 'grain'] = self.cleanup(E_pp, E_pq)
+        edge_index_dict['grain', 'push', 'joint'] = torch.flip(edge_index_dict['joint', 'pull', 'grain'], dims=[0])
+        
+        print(edge_index_dict['joint', 'connect', 'joint'].size(), edge_index_dict['joint', 'pull', 'grain'].size())
+        
+        return x_dict, edge_index_dict, switching_list
 
 
     def cleanup(self, E_pp, E_pq):

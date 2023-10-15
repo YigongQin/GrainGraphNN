@@ -75,7 +75,7 @@ if __name__=='__main__':
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--domain_factor", type=int, default=1)   
     parser.add_argument("--boundary", type=str, default='periodic')
-    parser.add_argument("--nucleation_density", type=float, default=0)
+    parser.add_argument("--nucleation_density", type=float, default=0.00)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -94,7 +94,16 @@ if __name__=='__main__':
     device = args.device
     
 
-    
+    seed = int(args.seed)
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    print('torch seed', seed)   
 
     print('==========  GrainNN specification  =========')
     print('3D grain microstructure evolution')
@@ -262,6 +271,7 @@ if __name__=='__main__':
             if args.stop_frame>0:
                 traj.frames = args.stop_frame
             traj.final_height = traj.ini_height + (traj.frames -1)/train_frames*(traj.final_height-traj.ini_height)
+            delta_z = (traj.final_height-traj.ini_height)/(traj.frames - 1)
             
             grain_event_list = []
             edge_event_list = []  
@@ -286,7 +296,7 @@ if __name__=='__main__':
             for frame in range(span, traj.frames, span):                
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
-                height = traj.ini_height + frame/(traj.frames - 1)*(traj.final_height-traj.ini_height) 
+                height = traj.ini_height + frame*delta_z
                 
                 """
                 <1> combine predictions from regressor and classifier
@@ -342,10 +352,14 @@ if __name__=='__main__':
                 if args.boundary == 'noflux': # the grain 0 here is boundary grain
                     pred['grain_event'] = pred['grain_event'][pred['grain_event']!=0]
                 
-                grains_to_nucleate = []
-                data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], grains_to_nucleate)
+                nucleation_prob = args.nucleation_density*traj.lxd*traj.lxd*delta_z/data['mask']['joint'].sum()
+                print('nucleation probability for each junction: ', nucleation_prob)
+                data.x_dict, data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], nucleation_prob)
                # pairs = pairs.detach().numpy()
-                
+                if data.x_dict['grain'].size(dim=0) > traj.num_regions:
+                    add_angles = torch.arccos(data.x_dict['grain'][traj.num_regions:, 5]).detach().numpy()
+                    traj.theta_z = np.concatenate([traj.theta_z, add_angles])
+                    traj.num_regions = data.x_dict['grain'].size(dim=0)
 
                 grain_event_list.extend(pred['grain_event'].detach().numpy())               
                 

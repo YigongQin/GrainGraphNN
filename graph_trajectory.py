@@ -27,7 +27,61 @@ def relative_angle(p1, p2):
     
     return np.arctan2(p2[1]-p1[1], p2[0]-p1[0])
 
+def check_connectivity(cur_joint):
+   # jj_link = 0
+   
+    candidates = set()
+    miss_case = defaultdict(int)
+    total_missing = 0
+    for k1 in cur_joint.keys():
+        num_link = 0
+        for k2 in cur_joint.keys(): 
+            if k1!=k2 and len( set(k1).intersection(set(k2)) ) == 2:
+                num_link += 1
+    #            jj_link += 1
+              #  print(jj_link, k1, k2)
+        if num_link !=3:
 
+            candidates.update(set(k1))
+            miss_case.update({k1:3-num_link})
+            total_missing += abs(3-num_link)
+         #   print('find missing junction link', k1, 3-num_link)
+    return total_missing, candidates, miss_case   
+
+def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates):
+
+    for q, coor in quadraples.items():
+        if set(q).issubset(candidates):
+
+            possible = list(itertools.combinations(list(q), 3))
+            for c in miss_case.keys():
+                if c in possible:
+                    possible.remove(c)
+
+            miss_case_sum = 0
+
+            for i, j in miss_case.items():
+                if j<0:
+                    return
+                if len(set(i).intersection(set(q)))>=2:
+                    miss_case_sum += j
+                 #   max_case = max(max_case, j)                 
+                
+            print('using quadraples',q,' to find missing links', miss_case_sum)        
+            max_case = 1 if miss_case_sum<4 else 2
+            for ans in list(itertools.combinations(possible, max_case)):
+                print('try ans', ans)
+                for a in ans:
+                    cur_joint[a] = coor
+                cur, _, case_new = check_connectivity(cur_joint)
+                if miss_case_sum>0 and cur == total_missing - miss_case_sum and len(case_new)<=len(miss_case):
+                    print('fixed!')
+                    total_missing = cur
+                    break
+                else:
+                    for a in ans:
+                            del cur_joint[a]
+                            
 class graph_trajectory(graph):
     def __init__(self, 
                  lxd: float = 40,
@@ -256,7 +310,7 @@ class graph_trajectory(graph):
                     cur_joint[args] = [xp, yp, max_neighbor]
             
             if self.BC == 'noflux':
-                self.find_boundary_vertex(self.alpha_pde, cur_joint)
+                self.find_boundary_vertex(self.alpha_pde.T, cur_joint)
             
             """
             deal with quadruples 
@@ -279,64 +333,11 @@ class graph_trajectory(graph):
                         
             print('quadruples', len(quadraples))
             
-            def check_connectivity(cur_joint):
-               # jj_link = 0
-               
-                candidates = set()
-                miss_case = defaultdict(int)
-                total_missing = 0
-                for k1 in cur_joint.keys():
-                    num_link = 0
-                    for k2 in cur_joint.keys(): 
-                        if k1!=k2 and len( set(k1).intersection(set(k2)) ) == 2:
-                            num_link += 1
-                #            jj_link += 1
-                          #  print(jj_link, k1, k2)
-                    if num_link !=3:
 
-                        candidates.update(set(k1))
-                        miss_case.update({k1:3-num_link})
-                        total_missing += abs(3-num_link)
-                     #   print('find missing junction link', k1, 3-num_link)
-                return total_missing, candidates, miss_case   
-
-            def miss_quadruple(quadraples, total_missing):
-
-                for q, coor in quadraples.items():
-                    if set(q).issubset(candidates):
-
-                        possible = list(itertools.combinations(list(q), 3))
-                        for c in miss_case.keys():
-                            if c in possible:
-                                possible.remove(c)
-    
-                        miss_case_sum = 0
-
-                        for i, j in miss_case.items():
-                            if j<0:
-                                return
-                            if len(set(i).intersection(set(q)))>=2:
-                                miss_case_sum += j
-                             #   max_case = max(max_case, j)                 
-                            
-                        print('using quadraples',q,' to find missing links', miss_case_sum)        
-                        max_case = 1 if miss_case_sum<4 else 2
-                        for ans in list(itertools.combinations(possible, max_case)):
-                            print('try ans', ans)
-                            for a in ans:
-                                cur_joint[a] = coor
-                            cur, _, case_new = check_connectivity(cur_joint)
-                            if miss_case_sum>0 and cur == total_missing - miss_case_sum and len(case_new)<=len(miss_case):
-                                print('fixed!')
-                                total_missing = cur
-                                break
-                            else:
-                                for a in ans:
-                                        del cur_joint[a]
             
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             print('total missing edges, ', total_missing)
-            miss_quadruple(quadraples, total_missing)
+            use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates)
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             
 
@@ -351,7 +352,7 @@ class graph_trajectory(graph):
                         del cur_joint[arg]
                     else:
                         print('add', arg)
-               # miss_quadruple(quadraples, total_missing)
+               
             
                 
             if self.BC == 'periodic' and len(cur_joint)>2*len(cur_grain):
@@ -857,7 +858,11 @@ class graph_trajectory(graph):
         if frame>0:
             grain_state[:, 4] = self.extraV_frames[:, frame]/s**3
         
-        
+        if hasattr(self, 'manifold_normal'):
+            self.theta_x[1:] = (self.theta_x[1:] - np.array(self.manifold_normal['x']))%(pi/2) 
+            self.theta_z[1:] = (self.theta_z[1:] - np.array(self.manifold_normal['z']))%(pi/2) 
+            
+            
         grain_state[:, 5] = np.cos(self.theta_x[1:])
         grain_state[:, 6] = np.sin(self.theta_x[1:])
         grain_state[:, 7] = np.cos(self.theta_z[1:])

@@ -196,6 +196,7 @@ class graph:
                  adjust_grain_size = False, adjust_grain_orien = False):
         self.mesh_size = 0.08
         self.patch_size = 40
+        self.patch_grid_size = int(round(self.patch_size/self.mesh_size))
 
         self.ini_grain_size = 4
         if adjust_grain_size:
@@ -719,22 +720,28 @@ class graph:
                     print('in', self.vertex2joint[dst])
                                        
                # self.edge_len.append(periodic_dist_(self.vertices[src], self.vertices[dst]))   
-       # print('edge vertices', len(self.vertex_neighbor))    
+       # print('edge vertices', len(self.vertex_neighbor))  
+        self.abnormal_points = []
         for v, n in self.vertex_neighbor.items():
             if len(n)!=3:
-                print((v,n))
+                print((v,n), self.vertices[v])
+                self.abnormal_points.append(self.vertices[v])
                # raise ValueError((v,n))
 
 
        # self.compute_error_layer()
         if self.BC == 'noflux':
+            
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
-
+            max_y = 1
+            if hasattr(self, 'lyd'):
+                max_y = self.lyd/self.lxd
+                
             self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]
-            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (1-np.absolute(grain_bound[:,3])<eps)][0]  
-            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (1-np.absolute(grain_bound[:,3])<eps)][0]  
+            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (max_y-np.absolute(grain_bound[:,3])<eps)][0]  
+            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (max_y-np.absolute(grain_bound[:,3])<eps)][0]  
            # print(self.corner_grains)
             
         if init:  
@@ -744,18 +751,18 @@ class graph:
     def find_boundary_vertex(self, alpha, cur_joint):
         
         m, n = alpha.shape
-        s = int(np.round(self.patch_size/self.mesh_size))+1
+        s = self.imagesize[0]
         for i in range(m-1):
             if alpha[i, 0] != alpha[i+1, 0]:
-                cur_joint.update({tuple(sorted([1, alpha[i, 0], alpha[i+1, 0]])): [0, i/s, 3]})
+                cur_joint.update({tuple(sorted([1, alpha[i, 0], alpha[i+1, 0]])): [i/s, 0,  3]})
             if alpha[i, -1] != alpha[i+1, -1]:
-                cur_joint.update({tuple(sorted([1, alpha[i, -1], alpha[i+1, -1]])): [1, i/s, 3]}) 
+                cur_joint.update({tuple(sorted([1, alpha[i, -1], alpha[i+1, -1]])): [i/s, n/s, 3]}) 
                 
         for i in range(n-1):
             if alpha[0, i] != alpha[0, i+1]:
-                cur_joint.update({tuple(sorted([1, alpha[0, i], alpha[0, i+1]])): [i/s, 0, 3]})
+                cur_joint.update({tuple(sorted([1, alpha[0, i], alpha[0, i+1]])): [0, i/s, 3]})
             if alpha[-1, i] != alpha[-1, i+1]:
-                cur_joint.update({tuple(sorted([1, alpha[-1, i], alpha[-1, i+1]])): [i/s, 1, 3]})                 
+                cur_joint.update({tuple(sorted([1, alpha[-1, i], alpha[-1, i+1]])): [m/s, i/s, 3]})                 
                 
         
         return

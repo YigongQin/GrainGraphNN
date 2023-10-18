@@ -28,7 +28,7 @@ class graph_trajectory_geometric(graph_trajectory):
                  physical_params = {},
                  meltpool: str = 'cylinder',
                  geometry_descriptors = {}):   
-        super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, BC = BC,\
+        super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, frames = frames, BC = BC,\
                          adjust_grain_size  = adjust_grain_size , 
                          adjust_grain_orien = adjust_grain_orien,
                          physical_params = {})
@@ -38,6 +38,7 @@ class graph_trajectory_geometric(graph_trajectory):
         self.PF2Grain = defaultdict(int)
         self.Grain2PF = defaultdict(int)
         self.manifold_normal = {'x':[0], 'z':[0]} # assume no-flux boundary condition, the first grain is always boundary
+        self.max_y = 1
     
     def load_pde_data(self, rawdat_dir: str = './'):
        
@@ -80,6 +81,8 @@ class graph_trajectory_geometric(graph_trajectory):
         if self.meltpool == 'cylinder':
             self.geodesic_y = np.asarray(f['geodesic_y_coors'])
             self.geodesic_y /= self.lxd
+            
+            
             self.ny_geod = len(self.geodesic_y)            
            # print(len(self.manifold),4*nx*ny_geod  )
             assert len(self.manifold) == 4*self.nx*self.ny_geod        
@@ -95,6 +98,7 @@ class graph_trajectory_geometric(graph_trajectory):
             self.euclidean_alpha_pde = griddata(points, self.alpha_pde.flatten(), (xs, ys), method = 'nearest')
             num_grains_manifold = len(np.unique(self.euclidean_alpha_pde))
             print('num grains, average size (um): ', num_grains_manifold, np.sqrt(4*geodesic_length*self.lxd**2/num_grains_manifold/pi))
+            self.max_y = self.euclidean_alpha_pde.shape[1]/self.euclidean_alpha_pde.shape[0]
             
         pfs = np.unique(self.alpha_pde)
         
@@ -204,10 +208,13 @@ class graph_trajectory_geometric(graph_trajectory):
                     if index not in quadraples or max_occur<quadraples[index][2]:    
                         quadraples[index] = [i/s, j/s, max_occur]
                         
+        self.find_boundary_vertex(self.euclidean_alpha_pde, cur_joint) 
+        
+               
         print('number of quadruples', quadraples)
         
-  
-        del_joints = []
+
+        del_joints = {}
         for q, coors in quadraples.items():
             q_list = list(q)
           #  print(q_list)
@@ -216,17 +223,14 @@ class graph_trajectory_geometric(graph_trajectory):
 
                 if arg in cur_joint:
 
-                    del_joints.append([arg, cur_joint[arg]])
+                    del_joints.update({arg:cur_joint[arg]})
                     del cur_joint[arg]
-
+   
         total_missing, candidates, miss_case  = check_connectivity(cur_joint)
-        print('total missing edges, ', total_missing)
-        use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates)
-        
-        
-        
-        
-        self.find_boundary_vertex(self.euclidean_alpha_pde, cur_joint)
+        use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates, del_joints)
+        total_missing, candidates, miss_case  = check_connectivity(cur_joint)
+        print('total missing edges, ', total_missing, miss_case)
+                    
         vert_cnt = 0
         for k, v in cur_joint.items():
             self.vertices[vert_cnt] = v[:2]
@@ -235,7 +239,7 @@ class graph_trajectory_geometric(graph_trajectory):
             
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.update(init=True)        
-       # self.cur_joint = cur_joint
+ 
        
     def form_states_tensor(self):
 

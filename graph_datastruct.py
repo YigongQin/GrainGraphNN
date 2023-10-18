@@ -735,13 +735,13 @@ class graph:
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
             max_y = 1
-            if hasattr(self, 'lyd'):
-                max_y = self.lyd/self.lxd
+            if hasattr(self, 'max_y'):
+                max_y = self.max_y
                 
-            self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]  
-            self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (np.absolute(grain_bound[:,2])<eps)][0]
-            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<eps) & (max_y-np.absolute(grain_bound[:,3])<eps)][0]  
-            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<eps) & (max_y-np.absolute(grain_bound[:,3])<eps)][0]  
+            self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]  
+            self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]
+            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (max_y-np.absolute(grain_bound[:,3])<1e-6)][0]  
+            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (max_y-np.absolute(grain_bound[:,3])<1e-6)][0]  
            # print(self.corner_grains)
             
         if init:  

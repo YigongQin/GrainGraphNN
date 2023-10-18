@@ -48,10 +48,10 @@ def check_connectivity(cur_joint):
          #   print('find missing junction link', k1, 3-num_link)
     return total_missing, candidates, miss_case   
 
-def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates):
+def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates, del_joints):
 
     for q, coor in quadraples.items():
-        if set(q).issubset(candidates):
+     #   if set(q).issubset(candidates):
 
             possible = list(itertools.combinations(list(q), 3))
             for c in miss_case.keys():
@@ -72,7 +72,10 @@ def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, ca
             for ans in list(itertools.combinations(possible, max_case)):
                 print('try ans', ans)
                 for a in ans:
-                    cur_joint[a] = coor
+                    if a in del_joints:
+                        cur_joint[a] = del_joints[a]
+                    else:
+                        cur_joint[a] = coor
                 cur, _, case_new = check_connectivity(cur_joint)
                 if miss_case_sum>0 and cur == total_missing - miss_case_sum and len(case_new)<=len(miss_case):
                     print('fixed!')
@@ -319,7 +322,7 @@ class graph_trajectory(graph):
 
             
             ## delete undetermined junctions from quadruples, add right ones later
-            del_joints = []
+            del_joints = {}
             for q, coors in quadraples.items():
                 q_list = list(q)
               #  print(q_list)
@@ -328,7 +331,7 @@ class graph_trajectory(graph):
 
                     if arg not in prev_joint and arg in cur_joint:
 
-                        del_joints.append([arg, cur_joint[arg]])
+                        del_joints.update({arg:cur_joint[arg]})
                         del cur_joint[arg]
                         
             print('quadruples', len(quadraples))
@@ -337,7 +340,7 @@ class graph_trajectory(graph):
             
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             print('total missing edges, ', total_missing)
-            use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates)
+            use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates, del_joints)
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             
 
@@ -345,7 +348,7 @@ class graph_trajectory(graph):
             
             if self.BC == 'periodic' and len(cur_joint)<2*len(cur_grain):
                 total_missing, candidates, miss_case  = check_connectivity(cur_joint)
-                for arg, coor in del_joints:
+                for arg, coor in del_joints.items():
                     cur_joint[arg] = coor
                     total_new, candidates, miss_case  = check_connectivity(cur_joint)
                     if total_missing<=total_new:

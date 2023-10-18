@@ -15,6 +15,7 @@ from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN_regressor, GrainNN_classifier
 from parameters import regressor, classifier_transfered
 from graph_trajectory import graph_trajectory
+from graph_trajectory_geometric import graph_trajectory_geometric
 from metrics import feature_metric, edge_error_metric
 
 from visualization3D.pv_3Dview import grain_visual
@@ -45,19 +46,19 @@ def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     return domain_offset
 
 
-def move_to_boundary(joint_coor, E_qp):
+def move_to_boundary(joint_coor, E_qp, boundary_max):
     
     boundary_joint = E_qp[1, (E_qp[0]==0).nonzero().view(-1)] 
     for p in boundary_joint:
-        dist = torch.tensor([joint_coor[p, 0], 1 - joint_coor[p, 0], joint_coor[p, 1], 1 - joint_coor[p, 1]])
+        dist = torch.tensor([joint_coor[p, 0], boundary_max[0] - joint_coor[p, 0], joint_coor[p, 1], boundary_max[1] - joint_coor[p, 1]])
         if dist.argmin()==0:
             joint_coor[p, 0] = 0
         elif dist.argmin()==1:
-            joint_coor[p, 0] = 1
+            joint_coor[p, 0] = boundary_max[0]
         elif dist.argmin()==2:
             joint_coor[p, 1] = 0
         elif dist.argmin()==3:
-            joint_coor[p, 1] = 1
+            joint_coor[p, 1] = boundary_max[1]
 
 if __name__=='__main__':
     
@@ -379,11 +380,18 @@ if __name__=='__main__':
                 if args.boundary == 'noflux':
                     data.x_dict['grain'][0, :2] = 0.5
                     data.x_dict['grain'][0, 3:5] = 0
-                    data.x_dict['grain'][0, -1] = 0
+                    data.x_dict['grain'][0, -1] = 0   
+                    data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + domain_offset)/args.domain_factor
                     
-                    move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'])
-                    data.x_dict['joint'][:,:2]= torch.clamp(data.x_dict['joint'][:,:2], min=0,max=1)
+                    max_y = 1
+                    if hasattr(traj, 'max_y'):
+                        max_y = traj.max_y
+                    move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'], [1, max_y])
+                    data.x_dict['joint'][:,0]= torch.clamp(data.x_dict['joint'][:,0], min=0, max=1)
+                    data.x_dict['joint'][:,1]= torch.clamp(data.x_dict['joint'][:,1], min=0, max=max_y)
+                    
                     assert torch.all(data.x_dict['joint'][:,:2]>-1e-6) and torch.all(data.x_dict['joint'][:,:2]<1+1e-6)
+                    data.x_dict['joint'][:,:2] = data.x_dict['joint'][:,:2]*args.domain_factor - domain_offset
                     
                # print(data['nxt'])
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])

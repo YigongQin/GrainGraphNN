@@ -12,10 +12,10 @@ def user_defined_config():
     
     config['meltpool'] = 'line'                               # line or cylinder
 
-    config['boundary'] = 'noflux'                           # periodic or noflux
+    config['boundary'] = 'noflux'                             # periodic or noflux
       
     config['geometry'] = {'lxd':40,                           # [um] length of domain 
-                          'yx_asp_ratio':1,                   # lyd/lxd, must be <=1, assume lxd>=lyd is the longer dimension
+                          'yx_asp_ratio':1,                   # lyd/lxd, must be <=1, assume lxd(>=lyd) is the longer dimension
                           'zx_asp_ratio':1.2,                 # lzd/lxd
                           'r0':1,                             # [um] radius for cylindrical meltpool
                           'z0':2,                             # [um] for line z0 is initial height of the interface 

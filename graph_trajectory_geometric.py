@@ -298,11 +298,8 @@ if __name__ == '__main__':
         # traj.show_data_struct()
 
     if args.mode == 'generate':   
-
         
-        traj = graph_trajectory_geometric(lxd=args.lxd, seed = args.seed, frames = args.frame, BC = args.boundary,
-                                          adjust_grain_size = args.adjust_grain_size,
-                                          adjust_grain_orien = args.adjust_grain_orien)
+        traj = graph_trajectory_geometric(user_defined_config())
  
     traj.form_states_tensor()
     

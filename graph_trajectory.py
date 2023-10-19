@@ -95,10 +95,17 @@ class graph_trajectory(graph):
                  BC: str = 'periodic',
                  adjust_grain_size = False,
                  adjust_grain_orien = False,
-                 physical_params = {}):   
+                 physical_params = {},
+                 user_defined_config = None):   
         super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, BC = BC,\
-                         adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien)
+                         adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien,
+                         user_defined_config=user_defined_config)
         
+        if user_defined_config:
+            self.physical_params = user_defined_config['physical_parameters']
+        else:
+            self.physical_params = physical_params
+            
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition
         self.load_frames = self.frames
@@ -109,7 +116,7 @@ class graph_trajectory(graph):
         
         self.show = False
         self.states = []
-        self.physical_params = physical_params
+        
         self.save_frame = [True]*self.frames
         
         self.area_traj = []
@@ -1204,8 +1211,8 @@ if __name__ == '__main__':
             hg0.append_history([])
             test_samples.append(hg0)
             
-            G = str(int(10*traj.physical_params['G']))
-            R = str(int(10*traj.physical_params['R']))
+            G = str(round(traj.physical_params['G'],3))
+            R = str(round(traj.physical_params['R'],3))
 
 
             with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
@@ -1250,8 +1257,8 @@ if __name__ == '__main__':
             hg0.append_history([])
             test_samples.append(hg0)
             
-            G = str(int(10*traj.physical_params['G']))
-            R = str(int(10*traj.physical_params['R']))
+            G = str(round(traj.physical_params['G'],3))
+            R = str(round(traj.physical_params['R'],3))
 
 
             with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\

@@ -27,7 +27,7 @@ from math import pi
 from collections import defaultdict
 import math
 import argparse
-
+from user_generate import user_defined_config
 
 def angle_norm(angular):
 
@@ -193,20 +193,42 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
         
 class graph:
     def __init__(self, lxd: float = 40, randInit: bool = True, seed: int = 1, noise: float = 0.01, BC: str = 'periodic',\
-                 adjust_grain_size = False, adjust_grain_orien = False):
-        self.mesh_size = 0.08
-        self.patch_size = 40
-        self.patch_grid_size = int(round(self.patch_size/self.mesh_size))
-
-        self.ini_grain_size = 4
-        if adjust_grain_size:
-            self.ini_grain_size = 2 + (seed%10)/5*3
-        self.ini_height, self.final_height = 2, 50
+                 adjust_grain_size = False, adjust_grain_orien = False,
+                 user_defined_config = None):
         
-        self.lxd = lxd
-        self.seed = seed
-        s = int(lxd/self.mesh_size)+1
-        self.imagesize = (s, s)
+        if user_defined_config:
+            self.BC = user_defined_config['boundary']
+            
+            self.lxd = user_defined_config['geometry']['lxd']
+            self.lyd = self.lxd*user_defined_config['geometry']['yx_asp_ratio']
+            self.lzd = self.lxd*user_defined_config['geometry']['zx_asp_ratio']
+            self.ini_height  = user_defined_config['geometry']['z0']
+            self.final_height = self.ini_height + self.lxd 
+            
+            self.mesh_size = user_defined_config['initial_parameters']['mesh_size']          
+            self.ini_grain_size = user_defined_config['initial_parameters']['grain_size_mean'] 
+            self.seed = user_defined_config['initial_parameters']['seed'] 
+            self.noise = user_defined_config['initial_parameters']['noise_level']       
+            
+        else:      
+            self.BC = BC
+            
+            self.lxd = lxd
+            self.lyd = self.lxd
+            self.ini_height, self.final_height = 2, 50
+            
+            self.mesh_size = 0.08           
+            self.ini_grain_size = 4
+            self.seed = seed
+            self.noise = noise
+            
+            
+        if adjust_grain_size:
+            self.ini_grain_size = 2 + (seed%10)/5*3        
+            
+        self.patch_size = 40    
+        self.patch_grid_size = int(round(self.patch_size/self.mesh_size))
+        self.imagesize = (int(self.lxd/self.mesh_size)+1, int(self.lyd/self.mesh_size)+1)
         self.vertices = defaultdict(list) ## vertices coordinates
         self.vertex2joint = defaultdict(set) ## (vertex index, x coordiante, y coordinate)  -> (region1, region2, region3)
         self.vertex_neighbor = defaultdict(set)
@@ -220,9 +242,9 @@ class graph:
         self.quadruples = {}
         self.corner_grains = [0, 0, 0, 0]
        # self.region_coors = [] ## region corner coordinates
-        self.density = self.ini_grain_size/lxd
-        self.noise = noise/lxd/(lxd/self.patch_size)
-        self.BC = BC
+        self.density = self.ini_grain_size/self.lxd
+        self.noise = self.noise/self.lxd/(self.lxd/self.patch_size)
+        
         self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
       #  self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
@@ -1012,8 +1034,10 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 10000
+        seed = 1
         g1 = graph(lxd = 40, seed = seed, BC = 'noflux') 
+        
+        g1 = graph(user_defined_config=user_defined_config())
 
        # g1.show_data_struct()
 

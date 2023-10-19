@@ -21,3 +21,4 @@ fig, ax = plt.subplots(1, 1, figsize=(20, 20), gridspec_kw={'width_ratios': [1],
 ax.imshow(g1.theta_z[g1.alpha_field]/pi*180, origin='lower', cmap='coolwarm', vmin=0, vmax=90)
 ax.set_xticks([])
 ax.set_yticks([])
+

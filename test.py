@@ -287,7 +287,7 @@ if __name__=='__main__':
                 traj.grain_events = [set()]*traj.frames
             
             start_time = time.time()
-            
+            domain_offset = 0 
             if args.domain_factor>1:
                 domain_offset = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
             

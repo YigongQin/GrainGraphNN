@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from math import pi
 from TemperatureProfile3DAnalytic import ThermalProfile
+from user_generate import user_defined_config
 
 class graph_trajectory_geometric(graph_trajectory):
     def __init__(self, 
@@ -270,91 +271,72 @@ if __name__ == '__main__':
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
     parser.add_argument("--seed", type=int, default = 11)
-    parser.add_argument("--G", type=float, default = 2)
-    parser.add_argument("--R", type=float, default = 0.4)
+
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
     parser.set_defaults(adjust_grain_size=False)    
     parser.add_argument("--orien", dest='adjust_grain_orien', action='store_true')
     parser.set_defaults(adjust_grain_orien=False)
 
-
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
     parser.add_argument("--lxd", type=int, default = 80)
-    parser.add_argument("--regenerate", type=bool, default = True)
     parser.add_argument("--save_traj", type=bool, default = True)
 
     
     args = parser.parse_args()
 
-
-    if args.mode == 'test':   
-        if not os.path.exists(args.save_dir):
-            os.makedirs(args.save_dir) 
+    if args.mode == 'test':                   
+        traj = graph_trajectory_geometric(lxd=args.lxd, randInit = False, seed = args.seed, frames = args.frame, BC = args.boundary,
+                                          adjust_grain_size = args.adjust_grain_size, 
+                                          adjust_grain_orien = args.adjust_grain_orien)
         
-    # creating testing dataset
-        for seed in [args.seed]:
-            
-            test_samples = []
-            
-            traj = graph_trajectory_geometric(lxd=args.lxd, randInit = False, seed = seed, frames = args.frame, BC = args.boundary,
-                                    adjust_grain_size = args.adjust_grain_size, 
-                                    adjust_grain_orien = args.adjust_grain_orien)
-            
-            traj.load_pde_data(rawdat_dir = args.rawdat_dir)
-            traj.createGraph()
-            traj.form_states_tensor()
-
-            hg0 = traj.states[0]
-
-            with open('GR_train_grid.pkl', 'rb') as inp:  
-                try:
-                    GR_grid = dill.load(inp)
-                except:
-                    raise EOFError
-            
-            G_ = (traj.physical_params['G'] - GR_grid['G_min'])/(GR_grid['G_max'] - GR_grid['G_min'])
-            R_ = (traj.physical_params['R'] - GR_grid['R_min'])/(GR_grid['R_max'] - GR_grid['R_min'])
-            hg0.span = griddata(np.array([GR_grid['G'], GR_grid['R']]).T, np.array(GR_grid['span']), (G_, R_), method='nearest')
-            
-           # hg0.span = args.span
-            hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
-            hg0.append_history([])
-            test_samples.append(hg0)
-            
-            G = str(int(10*traj.physical_params['G']))
-            R = str(int(10*traj.physical_params['R']))
-
-
-            with open(args.save_dir + 'seed' + str(seed) + '_G' + G + '_R' + R +\
-                      '_span' + str(hg0.span) + '.pkl', 'wb') as outp:
-                dill.dump(test_samples, outp)
-                
-            if args.save_traj:
-                    with open(args.save_dir + 'traj' + str(seed) + '.pkl', 'wb') as outp:
-                        dill.dump(traj, outp) 
-                        
-           # traj.show_manifold_plane()
-#            traj.show_data_struct()
+        traj.load_pde_data(rawdat_dir = args.rawdat_dir)
+        traj.createGraph()
+                            
+        # traj.show_manifold_plane()
+        # traj.show_data_struct()
 
     if args.mode == 'generate':   
-        if not os.path.exists(args.save_dir):
-            os.makedirs(args.save_dir) 
+
         
-    # creating testing dataset
-        for seed in [args.seed]:
-            
-            test_samples = []
-            
-            traj = graph_trajectory_geometric(lxd=args.lxd, seed = seed, frames = args.frame, physical_params = {'G':args.G, 'R':args.R},
-                                    adjust_grain_size = args.adjust_grain_size,
-                                    adjust_grain_orien = args.adjust_grain_orien)
+        traj = graph_trajectory_geometric(lxd=args.lxd, seed = args.seed, frames = args.frame, BC = args.boundary,
+                                          adjust_grain_size = args.adjust_grain_size,
+                                          adjust_grain_orien = args.adjust_grain_orien)
  
+    traj.form_states_tensor()
+    
+    test_samples = []
+    hg0 = traj.states[0]
+    
+    with open('GR_train_grid.pkl', 'rb') as inp:  
+        try:
+            GR_grid = dill.load(inp)
+        except:
+            raise EOFError
+    
+    G_ = (traj.physical_params['G'] - GR_grid['G_min'])/(GR_grid['G_max'] - GR_grid['G_min'])
+    R_ = (traj.physical_params['R'] - GR_grid['R_min'])/(GR_grid['R_max'] - GR_grid['R_min'])
+    hg0.span = griddata(np.array([GR_grid['G'], GR_grid['R']]).T, np.array(GR_grid['span']), (G_, R_), method='nearest')
+    
+    hg0.form_gradient(prev = None, nxt = None, event_list = None, elim_list = None)
+    hg0.append_history([])
+    test_samples.append(hg0)
+    
+    G = str(round(traj.physical_params['G'],3))
+    R = str(round(traj.physical_params['R'],3))
+    
+    
+    with open(args.save_dir + 'seed' + str(args.seed) + '_G' + G + '_R' + R +\
+              '_span' + str(hg0.span) + '.pkl', 'wb') as outp:
+        dill.dump(test_samples, outp)
 
-
-
-
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir) 
+            
+    if args.save_traj:
+            with open(args.save_dir + 'traj' + str(args.seed) + '.pkl', 'wb') as outp:
+                dill.dump(traj, outp) 
 
 
         

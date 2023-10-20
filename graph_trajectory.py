@@ -99,7 +99,7 @@ class graph_trajectory(graph):
                  user_defined_config = None):   
         super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, BC = BC,\
                          adjust_grain_size  = adjust_grain_size , adjust_grain_orien = adjust_grain_orien,
-                         user_defined_config=user_defined_config)
+                         user_defined_config = user_defined_config)
         
         if user_defined_config:
             self.physical_params = user_defined_config['physical_parameters']

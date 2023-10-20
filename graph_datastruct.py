@@ -34,9 +34,9 @@ def angle_norm(angular):
     return - ( 2*(angular + pi/2)/(pi/2) - 1 )
 
 eps = 1e-12
-def in_bound(x, y):
+def in_bound(x, y, max_y=1):
     
-    if x>=-eps and x<=1+eps and y>=-eps and y<=1+eps:
+    if x>=-eps and x<=1+eps and y>=-eps and y<=max_y+eps:
         return True
     else:
         return False
@@ -115,7 +115,7 @@ def counterclock(point, center):
     # but if two vectors have the same angle then the shorter distance should come first.
     return angle, lenvector
 
-def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
+def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
     # Assemble a hexagonal lattice
     rows, cols = int(1/dx)+1, int(1/dx)
     print('cols and rows of grains: ', cols, rows)
@@ -133,14 +133,14 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
             x += randNoise[count,0]
             y += randNoise[count,1]
             
-            if in_bound(x, y):
+            if in_bound(x, y, max_y):
               in_points.append([x,y])
               points.append([x,y])
               if BC == 'noflux':
                   points.append([-x,y])
                   points.append([x,-y])
                   points.append([2-x,y])
-                  points.append([x,2-y])
+                  points.append([x,2*max_y-y])
               if BC == 'periodic':
                   points.append([x+1,y])
                   points.append([x-1,y])
@@ -154,7 +154,7 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic'):
     return points, in_points
 
 
-def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
+def random_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
     # Assemble a hexagonal lattice
     rows, cols = int(1/dx), int(1/dx)
     print('cols and rows of grains: ', cols, rows)
@@ -168,14 +168,14 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic'):
             x = randNoise[count,0]
             y = randNoise[count,1]
             
-            if in_bound(x, y):
+            if in_bound(x, y, max_y):
               in_points.append([x,y])
               points.append([x,y])
               if BC == 'noflux':
                   points.append([-x,y])
                   points.append([x,-y])
                   points.append([2-x,y])
-                  points.append([x,2-y])
+                  points.append([x,2*max_y-y])
               if BC == 'periodic':
                   points.append([x+1,y])
                   points.append([x-1,y])
@@ -245,7 +245,7 @@ class graph:
         self.density = self.ini_grain_size/self.lxd
         self.noise = self.noise/self.lxd/(self.lxd/self.patch_size)
         
-        self.alpha_field = np.zeros((self.imagesize[0], self.imagesize[1]), dtype=int)
+        self.alpha_field = np.zeros((self.imagesize[1], self.imagesize[0]), dtype=int)  # use Image convention [ny, nx]
       #  self.alpha_field_dummy = np.zeros((2*self.imagesize[0], 2*self.imagesize[1]), dtype=int)
         self.error_layer = 0
         
@@ -455,7 +455,8 @@ class graph:
         Output: self.vertices, self.vertex2joint
         
         """
-        mirrored_seeds, seeds = hexagonal_lattice(dx=self.density, noise = self.noise, BC = self.BC)
+        max_y = self.lyd/self.lxd 
+        mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC, max_y = max_y)
         vor = Voronoi(mirrored_seeds)     
     
         vert_map = {}
@@ -464,6 +465,7 @@ class graph:
         alpha = 1
        # edges = []
         
+       
         for region in vor.regions:
             flag = True
             indomain_count = 0
@@ -474,10 +476,10 @@ class graph:
                 else:
                     x = vor.vertices[index, 0]
                     y = vor.vertices[index, 1]
-                    if x<=-eps or y<=-eps or x>=1.+eps or y>=1.+eps:
+                    if x<=-eps or y<=-eps or x>=1.+eps or max_y>=1.+eps:
                         flag = False
                         break
-                    if x>eps and x<1-eps and y>eps and y<1-eps:
+                    if x>eps and x<1-eps and y>eps and y<max_y-eps:
                         indomain_count += 1
                            
             if region != [] and flag and indomain_count>0:
@@ -487,15 +489,15 @@ class graph:
                 for index in region:
                     x, y = vor.vertices[index][0], vor.vertices[index][1]
                     
-                    if (abs(x)<eps or abs(1-x)<eps) and (abs(y)<eps or abs(1-y)<eps):
+                    if (abs(x)<eps or abs(1-x)<eps) and (abs(y)<eps or abs(max_y-y)<eps):
                         
                         if abs(x)<eps and abs(y)<eps:
                             self.corner_grains[0] = alpha + 1
                         if abs(1-x)<eps and abs(y)<eps:
                             self.corner_grains[1] = alpha + 1
-                        if abs(x)<eps and abs(1-y)<eps:
+                        if abs(x)<eps and abs(1-max_y)<eps:
                             self.corner_grains[2] = alpha + 1
-                        if abs(1-x)<eps and abs(1-y)<eps:
+                        if abs(1-x)<eps and abs(1-max_y)<eps:
                             self.corner_grains[3] = alpha + 1
                         
                         continue
@@ -538,10 +540,12 @@ class graph:
         Output: alpha_field, just index
 
         """
-        
-        
         s = self.imagesize[0]
-        image = Image.new("RGB", (2*s, 2*s))       
+        
+        if self.BC == 'noflux':
+            image = Image.new("RGB", (self.imagesize[0], self.imagesize[1])) 
+        if self.BC == 'periodic':           
+            image = Image.new("RGB", (2*s, 2*s))       
         draw = ImageDraw.Draw(image)
           
         # Add polygons 
@@ -564,19 +568,20 @@ class graph:
                 draw.polygon(p, fill=orientation) 
 
         img = np.array(image, dtype=int)
-
         img = img[:,:,0]*255*255 + img[:,:,1]*255 + img[:,:,2]
 
-        img = np.stack([img[:s,:s] ,img[s:,:s] ,img[:s,s:] ,img[s:,s:] ])
 
-       # self.para_pixel(img, s)
-        self.alpha_field = np.max(img, axis=0)    
+        if self.BC == 'periodic':
+            img = np.stack([img[:s,:s] ,img[s:,:s] ,img[:s,s:] ,img[s:,s:] ])    
+            self.alpha_field = np.max(img, axis=0)    
         
-        patch = np.meshgrid(np.arange(0,s), np.arange(0,s))
-        patch = 2*patch[0]//s + 2*(2*patch[1]//s)
+
         
         if self.BC == 'noflux':
-            self.alpha_field  = self.alpha_field + np.array(self.corner_grains)[patch]*(self.alpha_field==0)
+            patch = np.meshgrid(np.arange(0, self.imagesize[0]), np.arange(0, self.imagesize[1]))
+            patch = 2*patch[0]//self.imagesize[0] + 2*(2*patch[1]//self.imagesize[1])
+  
+            self.alpha_field  = img + np.array(self.corner_grains)[patch]*(img==0)
 
         if self.raise_err:
             assert np.all(self.alpha_field>0), self.seed
@@ -756,9 +761,7 @@ class graph:
             
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
-            max_y = 1
-            if hasattr(self, 'max_y'):
-                max_y = self.max_y
+            max_y = self.lyd/self.lxd
                 
             self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]
@@ -772,6 +775,10 @@ class graph:
             
     def find_boundary_vertex(self, alpha, cur_joint):
         
+        """
+        alpha shape is [nx, ny] here
+        
+        """
         m, n = alpha.shape
         s = self.imagesize[0]
         for i in range(m-1):
@@ -1034,12 +1041,12 @@ if __name__ == '__main__':
         
     if args.mode == 'check':
 
-        seed = 1
+        seed = 10020
         g1 = graph(lxd = 40, seed = seed, BC = 'noflux') 
         
-        g1 = graph(user_defined_config=user_defined_config())
+       # g1 = graph(user_defined_config=user_defined_config())
 
-       # g1.show_data_struct()
+        g1.show_data_struct()
 
        # g1.plot_grain_distribution()
     

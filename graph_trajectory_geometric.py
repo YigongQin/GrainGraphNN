@@ -26,16 +26,17 @@ class graph_trajectory_geometric(graph_trajectory):
                  BC: str = 'periodic',
                  adjust_grain_size = False,
                  adjust_grain_orien = False,
-                 physical_params = {},
-                 meltpool: str = 'cylinder',
-                 geometry_descriptors = {}):   
+                 user_defined_config = None):   
         super().__init__(lxd = lxd, randInit = randInit, seed = seed, noise = noise, frames = frames, BC = BC,\
                          adjust_grain_size  = adjust_grain_size , 
                          adjust_grain_orien = adjust_grain_orien,
-                         physical_params = {})
-        self.meltpool = meltpool
-        self.geometry_descriptors = geometry_descriptors
-        self.geometry_descriptors = {'z0':1, 'r0':18}
+                         user_defined_config = user_defined_config)
+            
+        self.meltpool = 'cylinder'
+        if user_defined_config:
+            self.geometry = user_defined_config['geometry']
+        else:            
+            self.geometry = {'z0':1, 'r0':18}
         self.PF2Grain = defaultdict(int)
         self.Grain2PF = defaultdict(int)
         self.manifold_normal = {'x':[0], 'z':[0]} # assume no-flux boundary condition, the first grain is always boundary
@@ -97,9 +98,16 @@ class graph_trajectory_geometric(graph_trajectory):
             points = np.stack([xs0.flatten(), ys0.flatten()]).T
     
             self.euclidean_alpha_pde = griddata(points, self.alpha_pde.flatten(), (xs, ys), method = 'nearest')
-            num_grains_manifold = len(np.unique(self.euclidean_alpha_pde))
-            print('num grains, average size (um): ', num_grains_manifold, np.sqrt(4*geodesic_length*self.lxd**2/num_grains_manifold/pi))
+           # num_grains_manifold = len(np.unique(self.euclidean_alpha_pde))
+           # print('num grains, average size (um): ', num_grains_manifold, np.sqrt(4*geodesic_length*self.lxd**2/num_grains_manifold/pi))
             self.max_y = self.euclidean_alpha_pde.shape[1]/self.euclidean_alpha_pde.shape[0]
+
+                  
+            
+            
+            
+                
+
             
         pfs = np.unique(self.alpha_pde)
         
@@ -121,6 +129,10 @@ class graph_trajectory_geometric(graph_trajectory):
         self.theta_z[2:] = angles[PF_on_manifold%num_theta + num_theta]
         
         
+        cur_grain, counts = np.unique(self.euclidean_alpha_pde, return_counts=True)
+        self.area_counts = dict(zip(cur_grain, counts))
+        self.layer_grain_distribution()
+            
     def show_manifold_plane(self):
         
 
@@ -134,7 +146,7 @@ class graph_trajectory_geometric(graph_trajectory):
         
         y = self.y*self.lxd
 
-        z  = self.geometry_descriptors['z0'] + self.lzd - np.sqrt(self.geometry_descriptors['r0']**2 - (y-self.lyd/2)**2)
+        z  = self.geometry['z0'] + self.lzd - np.sqrt(self.geometry['r0']**2 - (y-self.lyd/2)**2)
         y = y[z<self.lzd]
         z = z[z<self.lzd]
 
@@ -208,8 +220,9 @@ class graph_trajectory_geometric(graph_trajectory):
                     index = tuple(sorted(list(occur.keys())))
                     if index not in quadraples or max_occur<quadraples[index][2]:    
                         quadraples[index] = [i/s, j/s, max_occur]
-                        
-        self.find_boundary_vertex(self.euclidean_alpha_pde, cur_joint) 
+        
+        if self.BC == 'noflux':
+            self.find_boundary_vertex(self.euclidean_alpha_pde, cur_joint) 
         
                
         print('number of quadruples', quadraples)
@@ -240,24 +253,32 @@ class graph_trajectory_geometric(graph_trajectory):
             
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.update(init=True)        
- 
+        
        
     def form_states_tensor(self):
 
+        if self.BC == 'noflux':        
+            assert len(self.area_counts) + 1 == self.num_regions
         
-        cur_grain, counts = np.unique(self.euclidean_alpha_pde, return_counts=True)
-        self.area_counts = dict(zip(cur_grain, counts))
-            
+        
         self.num_vertices = len(self.joint2vertex)
         
         
         # find normals
+        if hasattr(self, 'euclidean_alpha_pde'):
+            offset = self.geodesic_y[0]
+        else:
+            offset = np.arccos( self.geometry['z0']/self.geometry['r0'] )*self.geometry['r0']/self.lxd
         if self.meltpool == 'cylinder':
-            for region, center in self.region_center.items():
-       
-                geodesic_y = (center[1] + self.geodesic_y[0])*self.lxd 
-                manifold_normal_z = -geodesic_y/self.geometry_descriptors['r0']
-
+            for region in range(1, self.num_regions+1):
+                if self.BC == 'noflux' and region == 1:
+                    continue
+                
+                if region in self.region_center:
+                    geodesic_y = (self.region_center[region][1] + offset)*self.lxd 
+                    manifold_normal_z = -geodesic_y/self.geometry['r0']
+                else:
+                    manifold_normal_z = 0
                 self.manifold_normal['x'].append(0)
                 self.manifold_normal['z'].append(manifold_normal_z)
         
@@ -267,10 +288,10 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser("Generate trajectory for irregular grid data")
-    parser.add_argument("--mode", type=str, default = 'test')
+    parser.add_argument("--mode", type=str, default = 'generate')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 11)
+    parser.add_argument("--seed", type=int, default = 1)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
@@ -294,13 +315,15 @@ if __name__ == '__main__':
         traj.load_pde_data(rawdat_dir = args.rawdat_dir)
         traj.createGraph()
                             
-        # traj.show_manifold_plane()
+       # traj.show_manifold_plane()
         # traj.show_data_struct()
 
     if args.mode == 'generate':   
         
-        traj = graph_trajectory_geometric(user_defined_config())
- 
+        traj = graph_trajectory_geometric(randInit = True, user_defined_config = user_defined_config())
+        #traj.show_manifold_plane()
+        traj.show_data_struct()
+        
     traj.form_states_tensor()
     
     test_samples = []

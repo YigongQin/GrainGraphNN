@@ -22,7 +22,7 @@ class graph_trajectory_geometric(graph_trajectory):
                  randInit: bool = False,
                  seed: int = 1, 
                  noise: float = 0.01, 
-                 frames: int = 1,
+                 frames: int = 121,
                  BC: str = 'periodic',
                  adjust_grain_size = False,
                  adjust_grain_orien = False,
@@ -132,7 +132,9 @@ class graph_trajectory_geometric(graph_trajectory):
         cur_grain, counts = np.unique(self.euclidean_alpha_pde, return_counts=True)
         self.area_counts = dict(zip(cur_grain, counts))
         self.layer_grain_distribution()
-            
+        
+        self.imagesize = (int(self.lxd/self.mesh_size)+1, int(self.lxd* geodesic_length/self.mesh_size)+1)
+        
     def show_manifold_plane(self):
         
 
@@ -314,14 +316,15 @@ if __name__ == '__main__':
         
         traj.load_pde_data(rawdat_dir = args.rawdat_dir)
         traj.createGraph()
+        traj.alpha_field = traj.alpha_field.T
+        
                             
        # traj.show_manifold_plane()
-        # traj.show_data_struct()
+
 
     if args.mode == 'generate':   
         
         traj = graph_trajectory_geometric(randInit = True, user_defined_config = user_defined_config())
-        #traj.show_manifold_plane()
         traj.show_data_struct()
         
     traj.form_states_tensor()

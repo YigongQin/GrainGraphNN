@@ -383,9 +383,7 @@ if __name__=='__main__':
                     data.x_dict['grain'][0, -1] = 0   
                     data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + domain_offset)/args.domain_factor
                     
-                    max_y = 1
-                    if hasattr(traj, 'max_y'):
-                        max_y = traj.max_y
+                    max_y = traj.lyd/traj.lxd
                     move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'], [1, max_y])
                     data.x_dict['joint'][:,0]= torch.clamp(data.x_dict['joint'][:,0], min=0, max=1)
                     data.x_dict['joint'][:,1]= torch.clamp(data.x_dict['joint'][:,1], min=0, max=max_y)

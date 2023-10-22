@@ -299,7 +299,7 @@ class graph:
        
         mu = np.mean(grain_size)
         std = np.std(grain_size)
-        print('initial size distribution', mu, std)
+        print('initial grain size mean', mu, ', standard deviation', std)
         print('max and min', np.max(grain_size), np.min(grain_size))
         
         self.ini_grain_dis = grain_size

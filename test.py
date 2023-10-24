@@ -8,6 +8,7 @@ Created on Sun Jan 15 21:22:44 2023
 
 import argparse, time, dill, random, os, glob
 import numpy as np
+import h5py
 import torch
 from torch_geometric.loader import DataLoader
 from torch.nn.parallel import DistributedDataParallel
@@ -19,9 +20,10 @@ from graph_trajectory_geometric import graph_trajectory_geometric
 from metrics import feature_metric, edge_error_metric
 
 from visualization3D.pv_3Dview import grain_visual
-
-
-
+import meshio
+from scipy.interpolate import griddata
+from tvtk.api import tvtk, write_data
+from math import pi
 
 def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     
@@ -72,8 +74,10 @@ if __name__=='__main__':
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
+    parser.add_argument("--interp_frames", type=int, default=5)
     parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
+    parser.add_argument("--reconst_mesh_size", type=float, default=0.08)
     parser.add_argument("--domain_factor", type=int, default=1)   
     parser.add_argument("--boundary", type=str, default='periodic')
     parser.add_argument("--nucleation_density", type=float, default=0.00)
@@ -93,7 +97,7 @@ if __name__=='__main__':
     args = parser.parse_args()
     
     device = args.device
-    
+
 
     seed = int(args.seed)
     random.seed(seed)
@@ -252,7 +256,16 @@ if __name__=='__main__':
             traj.span = span
             traj.raise_err = False
             
-            
+
+    
+            imagesize = (0, 0)
+            if args.reconstruct:  
+                if hasattr(traj, 'max_y'):
+                    imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.max_y*traj.lxd/args.reconst_mesh_size)+1)
+                elif hasattr(traj, 'lyd'):                        
+                    imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.lyd/args.reconst_mesh_size)+1)
+                else:
+                    imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.lxd/args.reconst_mesh_size)+1)
             
             ''' intialization '''
             #assert np.all(data['mask']['grain'][:,0].detach().numpy()>0)
@@ -261,7 +274,9 @@ if __name__=='__main__':
 
            # X_p = data.x_dict['joint'][:,:2].detach().numpy()
             traj.extraV_traj = []
-            traj.GNN_update(0, data.x_dict, data['mask'], True, data.edge_index_dict, args.compare)
+            X = {k:v.clone() for k, v in data.x_dict.items()}
+            prev_X, prev_mask, prev_edge_index_dict = {k:v.clone() for k, v in X.items()}, {k:v.clone() for k, v in data['mask'].items()}, {k:v.clone() for k, v in data.edge_index_dict.items()}
+            traj.GNN_update(0, X, data['mask'], True, data.edge_index_dict, args.compare)
             if args.plot:
                 traj.show_data_struct()
                 
@@ -277,7 +292,7 @@ if __name__=='__main__':
             grain_event_list = []
             edge_event_list = []  
             grain_acc_list = [(traj.ini_height, 0, 0, 0)]
-            traj.plot_polygons()
+            traj.plot_polygons(imagesize)
             alpha_field_list = [traj.alpha_field.T.copy()]
             
             layer_err_list = [(traj.ini_height, traj.error_layer)]
@@ -328,8 +343,13 @@ if __name__=='__main__':
                      a. x_p, s, v
                      b. z
                 """
-                
-                Rmodel.update(data.x_dict, pred)
+                if hasattr(traj, 'geometry'):
+                    curvature = frame*delta_z/traj.geometry['r0']
+                else:
+                    curvature = 0
+                geometry_scaling = {'joint':torch.tensor([1, 1 - curvature]), 
+                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1])}
+                Rmodel.update(data.x_dict, pred, geometry_scaling)
                 data.x_dict['grain'][:, 2] += span/(train_frames + 1)
                 data.x_dict['joint'][:, 2] += span/(train_frames + 1)
 
@@ -384,6 +404,8 @@ if __name__=='__main__':
                     data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + domain_offset)/args.domain_factor
                     
                     max_y = traj.lyd/traj.lxd
+                    if hasattr(traj, 'max_y'):
+                        max_y = traj.max_y
                     move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'], [1, max_y])
                     data.x_dict['joint'][:,0]= torch.clamp(data.x_dict['joint'][:,0], min=0, max=1)
                     data.x_dict['joint'][:,1]= torch.clamp(data.x_dict['joint'][:,1], min=0, max=max_y)
@@ -399,7 +421,8 @@ if __name__=='__main__':
                     
                     X['joint'][:,:2] =  (X['joint'][:,:2] + domain_offset)/args.domain_factor
                     
- 
+
+                
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict, args.compare)
                 
              
@@ -414,7 +437,29 @@ if __name__=='__main__':
                 
                 
                 if args.reconstruct:
-                    traj.plot_polygons()
+                    if args.interp_frames>0 and args.boundary == 'noflux':
+                        for interp_frame in range(args.interp_frames):                            
+                            cur_coeff = (1 + interp_frame)/(1 + args.interp_frames)
+                            pre_coeff = 1 - cur_coeff
+                            mean_X = {k:v.clone() for k, v in X.items()}
+                            mean_X['joint'][:,:2] = cur_coeff*X['joint'][:,:2] + pre_coeff*prev_X['joint'][:,:2] 
+                            
+                            if cur_coeff>0.5:
+                                move_to_boundary(mean_X['joint'], data.edge_index_dict['grain', 'push', 'joint'], [1, max_y])
+                            else:
+                                move_to_boundary(mean_X['joint'], prev_edge_index_dict['grain', 'push', 'joint'], [1, max_y])
+                            
+                            mean_X['joint'][:,0]= torch.clamp(mean_X['joint'][:,0], min=0, max=1)
+                            mean_X['joint'][:,1]= torch.clamp(mean_X['joint'][:,1], min=0, max=max_y)
+                            
+                            if cur_coeff>0.5:
+                                
+                                traj.GNN_update(frame, mean_X, data['mask'], topo, data.edge_index_dict, args.compare)
+                            else:
+                                traj.GNN_update(frame, mean_X, prev_mask, topo, prev_edge_index_dict, args.compare)
+                            traj.plot_polygons(imagesize)
+                            alpha_field_list.append(traj.alpha_field.T.copy())
+                    traj.plot_polygons(imagesize)
                     alpha_field_list.append(traj.alpha_field.T.copy())
                 
                 if args.compare:
@@ -458,7 +503,7 @@ if __name__=='__main__':
             
                     data.edge_attr_dict[edge_type] = rel_loc
  
-
+                prev_X, prev_mask, prev_edge_index_dict = {k:v.clone() for k, v in X.items()}, {k:v.clone() for k, v in data['mask'].items()}, {k:v.clone() for k, v in data.edge_index_dict.items()}
                 
             end_time = time.time()
             print('inference time for seed %d'%grain_seed, end_time - start_time)            
@@ -467,7 +512,84 @@ if __name__=='__main__':
             
             traj.event_acc(grain_acc_list)
             
-            
+            if args.reconstruct:
+                
+                
+                if hasattr(traj, 'meltpool') and traj.meltpool == 'cylinder':
+
+                    nx, ny, nt = alpha_field_list[0].shape[0], alpha_field_list[0].shape[1],  len(alpha_field_list)
+                    x = np.linspace(0, (nx-1)*traj.mesh_size, num = nx, endpoint=True)
+                    y = np.linspace(0, (ny-1)*traj.mesh_size, num = ny, endpoint=True) 
+                    z = np.linspace(0, (nt-1)*delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
+                    xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
+                    cartesian_theta = (yy + traj.cylindrical_y_offset())/traj.geometry['r0']
+                   # print(cartesian_z[:,:,0], cartesian_z[:,:,-1])
+                    cartesian_z = traj.lzd + traj.geometry['z0'] - (traj.geometry['r0'] - zz)*np.cos(cartesian_theta)
+                    cartesian_y = traj.lyd/2 + (traj.geometry['r0'] - zz)*np.sin(cartesian_theta) 
+                   # print(cartesian_z[:,:,0], cartesian_z[:,:,-1])
+                    xx, yy, zz = xx.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
+                    alpha_field_save = np.stack(alpha_field_list, axis=-1)
+                    alpha_field_save = alpha_field_save.flatten(order='F')
+
+
+                    alpha_field_save = alpha_field_save[zz<traj.lzd]
+                    xx = xx[zz<traj.lzd]
+                    yy = yy[zz<traj.lzd]
+                    zz = zz[zz<traj.lzd]
+
+        
+                    points = np.stack([xx,yy,zz], axis=0).T
+                    cells = [("vertex", [[i] for i in range(len(xx))] )]
+                    mesh = meshio.Mesh(points, cells, point_data={"alpha":traj.theta_z[alpha_field_save]/pi*180})
+                    mesh.write("foo.vtk")
+    
+
+                    """
+                    interp_mesh = 0.1
+                    xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)
+                    yi = np.linspace(0, traj.lyd, num = int(traj.lyd/interp_mesh)+1, endpoint=True)
+                    zi = np.linspace(0, traj.lzd, num = int(traj.lzd/interp_mesh)+1, endpoint=True)  
+                    xxi, yyi, zzi = np.meshgrid(xi, yi, zi, indexing='ij')
+                    print(points.shape, )
+                    alpha_i = griddata(points, alpha_field_save, (xxi, yyi, zzi), method='nearest')
+
+
+                    dist = np.sqrt( (yyi-traj.lyd/2)**2 + (zzi-traj.lzd-traj.geometry['z0'])**2 ) - traj.geometry['r0']
+                    alpha_i = traj.theta_z[alpha_i]/pi*180
+                    
+                    alpha_i[dist>0] = np.nan
+                   
+                                        
+                    grid = tvtk.ImageData(spacing=(interp_mesh, interp_mesh, interp_mesh), origin=(0, 0, 0), 
+                           dimensions=alpha_i.shape)
+        
+                    grid.point_data.scalars = alpha_i.ravel(order='F')
+                    grid.point_data.scalars.name = 'theta_z'
+                    rawdat_dir = ''
+                    dataname = rawdat_dir + 'seed'+str(seed) + '.vtk'
+                   #rawdat_dir + 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
+                   #+'_R'+str('%2.2f'%self.physical_params['R'])+'.vtk'
+                    write_data(grid, dataname)
+                   
+                    """
+                
+               # alpha_field_save = alpha_field_save.flatten(order='F')
+                
+                if hasattr(traj, 'geometry'):
+                    z0 = traj.geometry['z0']
+                    r0 = traj.geometry['r0']
+                else:
+                    z0 = traj.ini_height
+                    r0 = 0
+                """
+                hf = h5py.File('alpha_layer_seed'+str(seed)+'_nx'+str(alpha_field_list[0].shape[0])+
+                               '_ny'+str(alpha_field_list[0].shape[1])+'_nt'+str(len(alpha_field_list))+
+                               '_z'+str(z0)+'_r'+str(r0)+'.h5', 'w')
+                hf.create_dataset('alpha_layer', data=alpha_field_save)
+                hf.create_dataset('dx', data=traj.mesh_size)
+                hf.create_dataset('dz', data=traj.span*delta_z)
+                hf.close()
+                """
             if args.compare:
                 
                 traj.qoi(mode='graph', compare=True)
@@ -493,6 +615,7 @@ if __name__=='__main__':
                 if args.plot3D:
                     Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
             
+
 '''
                     
 #  edge_event_truth = set.union(*traj.edge_events[:frame+1])

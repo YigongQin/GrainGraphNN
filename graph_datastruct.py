@@ -203,7 +203,7 @@ class graph:
             self.lyd = self.lxd*user_defined_config['geometry']['yx_asp_ratio']
             self.lzd = self.lxd*user_defined_config['geometry']['zx_asp_ratio']
             self.ini_height  = user_defined_config['geometry']['z0']
-            self.final_height = self.ini_height + self.lxd 
+            self.final_height = self.ini_height + self.lzd 
             
             self.mesh_size = user_defined_config['initial_parameters']['mesh_size']          
             self.ini_grain_size = user_defined_config['initial_parameters']['grain_size_mean'] 
@@ -535,16 +535,18 @@ class graph:
                 
 
         
-    def plot_polygons(self):
+    def plot_polygons(self, imagesize = None):
         """
         Input: region_coors
         Output: alpha_field, just index
 
         """
-        s = self.imagesize[0]
+        if not imagesize:
+            imagesize = self.imagesize
+        s = imagesize[0]
         
         if self.BC == 'noflux':
-            image = Image.new("RGB", (self.imagesize[0], self.imagesize[1])) 
+            image = Image.new("RGB", (imagesize[0], imagesize[1])) 
         if self.BC == 'periodic':           
             image = Image.new("RGB", (2*s, 2*s))       
         draw = ImageDraw.Draw(image)
@@ -579,8 +581,8 @@ class graph:
 
         
         if self.BC == 'noflux':
-            patch = np.meshgrid(np.arange(0, self.imagesize[0]), np.arange(0, self.imagesize[1]))
-            patch = 2*patch[0]//self.imagesize[0] + 2*(2*patch[1]//self.imagesize[1])
+            patch = np.meshgrid(np.arange(0, imagesize[0]), np.arange(0, imagesize[1]))
+            patch = 2*patch[0]//imagesize[0] + 2*(2*patch[1]//imagesize[1])
   
             self.alpha_field  = img + np.array(self.corner_grains)[patch]*(img==0)
 

@@ -40,7 +40,7 @@ class graph_trajectory_geometric(graph_trajectory):
         self.PF2Grain = defaultdict(int)
         self.Grain2PF = defaultdict(int)
         self.manifold_normal = {'x':[0], 'z':[0]} # assume no-flux boundary condition, the first grain is always boundary
-        self.max_y = 1
+        self.max_y = self.lyd/self.lxd
     
     def load_pde_data(self, rawdat_dir: str = './'):
        
@@ -259,7 +259,7 @@ class graph_trajectory_geometric(graph_trajectory):
         if hasattr(self, 'euclidean_alpha_pde'):
             offset = self.geodesic_y[0]
         else:
-            offset = np.arccos( self.geometry['z0']/self.geometry['r0'] )*self.geometry['r0']
+            offset = - np.arccos( self.geometry['z0']/self.geometry['r0'] )*self.geometry['r0']
                 
         return offset
         
@@ -293,10 +293,10 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser("Generate trajectory for irregular grid data")
-    parser.add_argument("--mode", type=str, default = 'test')
+    parser.add_argument("--mode", type=str, default = 'generate')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 11)
+    parser.add_argument("--seed", type=int, default = 2)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
@@ -328,7 +328,7 @@ if __name__ == '__main__':
     if args.mode == 'generate':   
         
         traj = graph_trajectory_geometric(randInit = True, user_defined_config = user_defined_config())
-        traj.show_data_struct()
+       # traj.show_data_struct()
         
     traj.form_states_tensor()
     

@@ -61,8 +61,7 @@ class graph_trajectory_geometric(graph_trajectory):
         
         assert len(self.x) == self.imagesize[0]
         assert int(self.lxd) == int(round(self.x[-1]))
-        
-        self.x /= self.lxd; self.y /= self.lxd; self.z /= self.lxd
+
         self.nx, self.ny = len(self.x), len(self.y)
 
 
@@ -82,7 +81,6 @@ class graph_trajectory_geometric(graph_trajectory):
         
         if self.meltpool == 'cylinder':
             self.geodesic_y = np.asarray(f['geodesic_y_coors'])
-            self.geodesic_y /= self.lxd
             
             
             self.ny_geod = len(self.geodesic_y)            
@@ -91,7 +89,7 @@ class graph_trajectory_geometric(graph_trajectory):
             self.manifold = self.manifold.reshape((4, self.ny_geod, self.nx),order='F')       
             self.alpha_pde = self.manifold[-1,:,:].T
             geodesic_length = np.max(self.geodesic_y) - np.min(self.geodesic_y)
-            N = int( geodesic_length*self.lxd/self.mesh_size )
+            N = int( geodesic_length/self.mesh_size )
             
             xs0, ys0 = np.meshgrid(self.x, self.geodesic_y, indexing='ij')
             xs, ys = np.meshgrid(self.x, np.linspace(np.min(self.geodesic_y), np.max(self.geodesic_y), N, endpoint=True), indexing='ij')
@@ -133,7 +131,7 @@ class graph_trajectory_geometric(graph_trajectory):
         self.area_counts = dict(zip(cur_grain, counts))
         self.layer_grain_distribution()
         
-        self.imagesize = (int(self.lxd/self.mesh_size)+1, int(self.lxd* geodesic_length/self.mesh_size)+1)
+        self.imagesize = (int(self.lxd/self.mesh_size)+1, int(geodesic_length/self.mesh_size)+1)
         
     def show_manifold_plane(self):
         
@@ -146,7 +144,7 @@ class graph_trajectory_geometric(graph_trajectory):
         ax[0].plot([0, 0], [0, self.lzd], 'k')
         ax[0].plot([self.lyd, self.lyd], [0, self.lzd], 'k')
         
-        y = self.y*self.lxd
+        y = self.y
 
         z  = self.geometry['z0'] + self.lzd - np.sqrt(self.geometry['r0']**2 - (y-self.lyd/2)**2)
         y = y[z<self.lzd]
@@ -256,7 +254,15 @@ class graph_trajectory_geometric(graph_trajectory):
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.update(init=True)        
         
-       
+    def cylindrical_y_offset(self):         
+        
+        if hasattr(self, 'euclidean_alpha_pde'):
+            offset = self.geodesic_y[0]
+        else:
+            offset = np.arccos( self.geometry['z0']/self.geometry['r0'] )*self.geometry['r0']
+                
+        return offset
+        
     def form_states_tensor(self):
 
         if self.BC == 'noflux':        
@@ -267,17 +273,14 @@ class graph_trajectory_geometric(graph_trajectory):
         
         
         # find normals
-        if hasattr(self, 'euclidean_alpha_pde'):
-            offset = self.geodesic_y[0]
-        else:
-            offset = np.arccos( self.geometry['z0']/self.geometry['r0'] )*self.geometry['r0']/self.lxd
+
         if self.meltpool == 'cylinder':
             for region in range(1, self.num_regions+1):
                 if self.BC == 'noflux' and region == 1:
                     continue
                 
                 if region in self.region_center:
-                    geodesic_y = (self.region_center[region][1] + offset)*self.lxd 
+                    geodesic_y = self.region_center[region][1]*self.lxd + self.cylindrical_y_offset()
                     manifold_normal_z = -geodesic_y/self.geometry['r0']
                 else:
                     manifold_normal_z = 0
@@ -290,10 +293,10 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser("Generate trajectory for irregular grid data")
-    parser.add_argument("--mode", type=str, default = 'generate')
+    parser.add_argument("--mode", type=str, default = 'test')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 1)
+    parser.add_argument("--seed", type=int, default = 11)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
@@ -319,7 +322,7 @@ if __name__ == '__main__':
         traj.alpha_field = traj.alpha_field.T
         
                             
-       # traj.show_manifold_plane()
+        traj.show_manifold_plane()
 
 
     if args.mode == 'generate':   

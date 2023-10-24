@@ -456,6 +456,7 @@ class graph:
         
         """
         max_y = self.lyd/self.lxd 
+        self.max_y = max_y
         mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC, max_y = max_y)
         vor = Voronoi(mirrored_seeds)     
     
@@ -561,7 +562,7 @@ class graph:
 
             #poly = np.asarray(poly*pic_size[0], dtype=int) 
             for i in range(len(poly)):
-                coor = np.asarray(np.array(poly[i])*s, dtype=int)
+                coor = np.asarray(np.round(np.array(poly[i])*s), dtype=int)
                 p.append(tuple(coor))
           #  print(p)
             if len(p)>1:
@@ -761,8 +762,9 @@ class graph:
             
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
-            max_y = self.lyd/self.lxd
-                
+            max_y = 1
+            if hasattr(self, 'max_y'):
+                max_y = self.max_y
             self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]
             self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (max_y-np.absolute(grain_bound[:,3])<1e-6)][0]  

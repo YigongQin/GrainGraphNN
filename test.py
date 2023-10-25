@@ -74,7 +74,7 @@ if __name__=='__main__':
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
     parser.add_argument("--stop_frame", type=int, default='0')
-    parser.add_argument("--interp_frames", type=int, default=5)
+    parser.add_argument("--interp_frames", type=int, default=0)
     parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--reconst_mesh_size", type=float, default=0.08)
@@ -262,10 +262,11 @@ if __name__=='__main__':
             if args.reconstruct:  
                 if hasattr(traj, 'max_y'):
                     imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.max_y*traj.lxd/args.reconst_mesh_size)+1)
-                elif hasattr(traj, 'lyd'):                        
+                elif hasattr(traj, 'lyd'):
                     imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.lyd/args.reconst_mesh_size)+1)
-                else:
+                else:                        
                     imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.lxd/args.reconst_mesh_size)+1)
+            
             
             ''' intialization '''
             #assert np.all(data['mask']['grain'][:,0].detach().numpy()>0)
@@ -518,8 +519,8 @@ if __name__=='__main__':
                 if hasattr(traj, 'meltpool') and traj.meltpool == 'cylinder':
 
                     nx, ny, nt = alpha_field_list[0].shape[0], alpha_field_list[0].shape[1],  len(alpha_field_list)
-                    x = np.linspace(0, (nx-1)*traj.mesh_size, num = nx, endpoint=True)
-                    y = np.linspace(0, (ny-1)*traj.mesh_size, num = ny, endpoint=True) 
+                    x = np.linspace(0, (nx-1)*args.reconst_mesh_size, num = nx, endpoint=True)
+                    y = np.linspace(0, (ny-1)*args.reconst_mesh_size, num = ny, endpoint=True) 
                     z = np.linspace(0, (nt-1)*delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
                     xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
                     cartesian_theta = (yy + traj.cylindrical_y_offset())/traj.geometry['r0']
@@ -541,9 +542,20 @@ if __name__=='__main__':
                     points = np.stack([xx,yy,zz], axis=0).T
                     cells = [("vertex", [[i] for i in range(len(xx))] )]
                     mesh = meshio.Mesh(points, cells, point_data={"alpha":traj.theta_z[alpha_field_save]/pi*180})
-                    mesh.write("foo.vtk")
+                    mesh.write("unstructured_seed"+str(seed)+".vtk")
     
 
+                    """ interpolate to an image """
+                    
+                    interp_mesh = 0.1
+                    xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)
+                    yi = np.linspace(0, traj.lyd, num = int(traj.lyd/interp_mesh)+1, endpoint=True)
+                    zi = np.array([traj.lzd])
+                    xxi, yyi, zzi = np.meshgrid(xi, yi, zi, indexing='ij')
+                    print(points.shape, )
+                    alpha_i = griddata(points, alpha_field_save, (xxi, yyi, zzi), method='nearest')                    
+                    
+                    
                     """
                     interp_mesh = 0.1
                     xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)

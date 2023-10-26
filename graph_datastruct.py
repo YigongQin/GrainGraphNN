@@ -564,7 +564,10 @@ class graph:
 
             #poly = np.asarray(poly*pic_size[0], dtype=int) 
             for i in range(len(poly)):
-                coor = np.asarray(np.round(np.array(poly[i])*s), dtype=int)
+                if self.BC == 'noflux':
+                    coor = np.asarray(np.round(np.array(poly[i])*s), dtype=int)
+                if self.BC == 'periodic':
+                    coor = np.asarray(np.array(poly[i])*s, dtype=int)
                 p.append(tuple(coor))
           #  print(p)
             if len(p)>1:

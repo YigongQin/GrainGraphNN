@@ -720,20 +720,21 @@ class GrainNN_classifier(torch.nn.Module):
         """        
         if nucleation_prob>1e-6:
             rand_numbers = torch.rand(x_dict['joint'].size(dim=0))
-            nucleation_sites = ((rand_numbers<nucleation_prob)&(mask['joint'][0]>0)).nonzero().view(-1)
+            nucleation_sites = ((rand_numbers<nucleation_prob)&(mask['joint'][:,0]>0)).nonzero().view(-1)
             num_grains, num_junctions = mask['grain'].size(dim=0), mask['joint'].size(dim=0)
             
             for junction in nucleation_sites:
                 print('==============nucleation sites', int(junction), ', and grains' , int(num_grains),  '==============')
-                x_dict['joint'] = torch.cat((x_dict['joint'], x_dict['joint'][junction].view(1,-1), x_dict['joint'][junction].view(1,-1)), dim = 0)
+                
                 mask['joint'] = torch.cat((mask['joint'], torch.tensor([1, 1]).view(-1,1)))
                 mask['grain'] = torch.cat((mask['grain'], torch.tensor([1]).view(-1,1))) 
                 
-                site_x, site_y, site_z, delta_z = x_dict['joint'][junction, 0], x_dict['joint'][junction, 1], \
-                                  x_dict['joint'][junction, 2], x_dict['joint'][junction, -1]
-                theta_x, theta_z = torch.tensor([0,0]) #torch.rand(2)*torch.pi/2
-                new_grain = torch.tensor([site_x, site_y, site_z, 0.01, 0, torch.cos(theta_x), torch.sin(theta_x), \
-                                          torch.cos(theta_z), torch.sin(theta_z), 0.01, delta_z])
+                (site_x, site_y, site_z), delta_z = x_dict['joint'][junction, :3], x_dict['joint'][junction, -1]
+                theta_x, theta_z = torch.rand(2)*torch.pi/2 #torch.tensor([0.001,0.001]) #
+                intro_grain_area = 0.004
+                intro_pq_edge_len = torch.sqrt(intro_grain_area*4/3/torch.sqrt(torch.tensor(3)))
+                new_grain = torch.tensor([site_x, site_y, site_z, intro_grain_area, 0, torch.cos(theta_x), torch.sin(theta_x), \
+                                          torch.cos(theta_z), torch.sin(theta_z), intro_grain_area, delta_z])
                     
                 x_dict['grain'] = torch.cat((x_dict['grain'], new_grain.view(1,-1)), dim = 0)
                 
@@ -752,6 +753,23 @@ class GrainNN_classifier(torch.nn.Module):
                     
                 gr0, gr1, gr2 = grain_neigrs_ordered
                 assert gr0!=gr1 and gr1!=gr2 and gr0!=gr2
+
+                center_coor = x_dict['joint'][junction, :2].clone()
+           
+                new_joint_vec1, new_joint_vec2 = x_dict['joint'][junction].clone(), x_dict['joint'][junction].clone()
+            
+
+                x_dict['joint'][junction,:2] = center_coor + periodic_norm(x_dict['joint'][j_nb0,:2], center_coor)*intro_pq_edge_len
+                new_joint_vec1[:2] = center_coor + periodic_norm(x_dict['joint'][j_nb1,:2], center_coor)*intro_pq_edge_len
+                new_joint_vec2[:2] = center_coor + periodic_norm(x_dict['joint'][j_nb2,:2], center_coor)*intro_pq_edge_len
+
+                x_dict['joint'][junction,-2:] = 0
+                new_joint_vec1[-2:] = 0 
+                new_joint_vec2[-2:] = 0
+                
+               # print(x_dict['joint'][junction,:2], new_joint_vec1[:2], new_joint_vec2[:2])
+                x_dict['joint'] = torch.cat((x_dict['joint'], new_joint_vec1.view(1,-1), new_joint_vec2.view(1,-1)), dim = 0)
+
                 
                 E_pq[:, (E_pq[0]==junction).nonzero().view(-1)] = -1
               #  E_pp[:, (E_pp[0]==junction).nonzero().view(-1)] = -1
@@ -1038,6 +1056,13 @@ def periodic_move(p, pc):
     rel_x = p - pc
 
     return p -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
+
+def periodic_norm(p, pc):
+    
+    rel_x = p - pc
+    rel_x = rel_x -1*(rel_x>0.5) + 1*(rel_x<-0.5) 
+    
+    return F.normalize(rel_x, p=2.0, dim=0, eps=1e-6)
 
 
 """

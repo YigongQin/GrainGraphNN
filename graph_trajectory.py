@@ -988,7 +988,6 @@ class graph_trajectory(graph):
         self.extraV_traj.append(mask_g*X_g[:,1]/self.states[0].targets_scaling['grain']*s**3)
         self.area_traj.append(area_counts)
                 
-       
         
         if topo:
             
@@ -1036,8 +1035,10 @@ class graph_trajectory(graph):
         
         self.update()
 
-
-        
+        self.vertex_area = defaultdict(float)
+        for region, vertices in self.regions.items():
+            for vert in vertices:
+                self.vertex_area[vert] += area_counts[region]/len(vertices)*self.mesh_size**2
 
 
 if __name__ == '__main__':

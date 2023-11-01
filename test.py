@@ -25,6 +25,26 @@ from scipy.interpolate import griddata
 from tvtk.api import tvtk, write_data
 from math import pi
 
+"""
+def nucleation_prob_constGR(physical_params, z_min, z_max):
+
+    surface_undercooling = physical_params['R']/physical_params['mu']
+    
+    DT_min = physical_params['G']*()
+    DT_max = DT_min + physical_params['G']
+    
+    
+    DT = torch.linspace()
+    
+    DT_undim = (DT - physical_params['DT_mean'])/torch.sqrt(2)
+    
+    
+    
+    nucl_prob = lambda x: physical_params['Nmax']/torch.sqrt(torch.pi)/ph*torch.special.erf(x)
+
+    return 
+"""
+
 def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     
     '''scale edge len'''
@@ -246,6 +266,10 @@ if __name__=='__main__':
             
             grain_seed = traj.physical_params['seed']
             print('load trajectory for seed ', grain_seed)
+            
+            if args.nucleation_density>1e-12:
+                traj.physical_params.update({'Nmax':args.nucleation_density, 'DT_mean':2, 'DT_std':0.5, 'mu':0.217})
+            
             
             ''' determine span '''
             

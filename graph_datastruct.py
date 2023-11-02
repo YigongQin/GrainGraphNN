@@ -34,9 +34,9 @@ def angle_norm(angular):
     return - ( 2*(angular + pi/2)/(pi/2) - 1 )
 
 eps = 1e-12
-def in_bound(x, y, max_y=1):
+def in_bound(x, y, max_y=1, cone_ratio = 0):
     
-    if x>=-eps and x<=1+eps and y>=-eps and y<=max_y+eps:
+    if x>=-eps and x<=1+eps and y>=-eps + cone_ratio*(1-x) and y<=max_y - cone_ratio*(1-x) +eps:
         return True
     else:
         return False
@@ -115,7 +115,7 @@ def counterclock(point, center):
     # but if two vectors have the same angle then the shorter distance should come first.
     return angle, lenvector
 
-def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
+def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1, cone_ratio = 0):
     # Assemble a hexagonal lattice
     rows, cols = int(1/dx)+1, int(1/dx)
     print('cols and rows of grains: ', cols, rows)
@@ -133,14 +133,20 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
             x += randNoise[count,0]
             y += randNoise[count,1]
             
-            if in_bound(x, y, max_y):
+            if in_bound(x, y, max_y, cone_ratio):
               in_points.append([x,y])
               points.append([x,y])
               if BC == 'noflux':
                   points.append([-x,y])
-                  points.append([x,-y])
                   points.append([2-x,y])
-                  points.append([x,2*max_y-y])
+                  # mirror against CRx + y - CR = 0 
+                  
+                  points.append([-( 2*cone_ratio*y + (cone_ratio**2-1)*x -2*cone_ratio**2 )/(1+cone_ratio**2),
+                                 -( (1-cone_ratio**2)*y +2*cone_ratio*x -2*cone_ratio )/(1+cone_ratio**2)])    
+                  
+                  #  mirror against CRx - y +max_y - CR = 0
+                  points.append([-( -2*cone_ratio*y + (cone_ratio**2-1)*x +2*cone_ratio*(max_y - cone_ratio))/(1+cone_ratio**2),
+                                 -( (1-cone_ratio**2)*y -2*cone_ratio*x -2*cone_ratio*(max_y - cone_ratio) )/(1+cone_ratio**2) ])
               if BC == 'periodic':
                   points.append([x+1,y])
                   points.append([x-1,y])
@@ -154,7 +160,7 @@ def hexagonal_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
     return points, in_points
 
 
-def random_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
+def random_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1, cone_ratio = 0):
     # Assemble a hexagonal lattice
     rows, cols = int(1/dx), int(1/dx)
     print('cols and rows of grains: ', cols, rows)
@@ -168,14 +174,20 @@ def random_lattice(dx=0.05, noise=0.0001, BC='periodic', max_y = 1):
             x = randNoise[count,0]
             y = randNoise[count,1]
             
-            if in_bound(x, y, max_y):
+            if in_bound(x, y, max_y, cone_ratio):
               in_points.append([x,y])
               points.append([x,y])
               if BC == 'noflux':
                   points.append([-x,y])
-                  points.append([x,-y])
                   points.append([2-x,y])
-                  points.append([x,2*max_y-y])
+                  # mirror against CRx + y - CR = 0 
+                  
+                  points.append([-( 2*cone_ratio*y + (cone_ratio**2-1)*x -2*cone_ratio**2 )/(1+cone_ratio**2),
+                                 -( (1-cone_ratio**2)*y +2*cone_ratio*x -2*cone_ratio )/(1+cone_ratio**2)])    
+                  
+                  #  mirror against CRx - y +max_y - CR = 0
+                  points.append([-( -2*cone_ratio*y + (cone_ratio**2-1)*x +2*cone_ratio*(max_y - cone_ratio))/(1+cone_ratio**2),
+                                 -( (1-cone_ratio**2)*y -2*cone_ratio*x -2*(max_y - cone_ratio) )/(1+cone_ratio**2) ])
               if BC == 'periodic':
                   points.append([x+1,y])
                   points.append([x-1,y])
@@ -202,8 +214,9 @@ class graph:
             self.lxd = user_defined_config['geometry']['lxd']
             self.lyd = self.lxd*user_defined_config['geometry']['yx_asp_ratio']
             self.lzd = self.lxd*user_defined_config['geometry']['zx_asp_ratio']
-            self.ini_height  = user_defined_config['geometry']['z0']
+            self.ini_height = user_defined_config['geometry']['z0']
             self.final_height = self.ini_height + self.lzd 
+            self.cone_ratio = user_defined_config['geometry']['cone_ratio']
             
             self.mesh_size = user_defined_config['initial_parameters']['mesh_size']          
             self.ini_grain_size = user_defined_config['initial_parameters']['grain_size_mean'] 
@@ -216,6 +229,7 @@ class graph:
             self.lxd = lxd
             self.lyd = self.lxd
             self.ini_height, self.final_height = 2, 50
+            self.cone_ratio = 0
             
             self.mesh_size = 0.08           
             self.ini_grain_size = 4
@@ -457,7 +471,8 @@ class graph:
         """
         max_y = self.lyd/self.lxd 
         self.max_y = max_y
-        mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC, max_y = max_y)
+        cone_ratio = self.cone_ratio
+        mirrored_seeds, seeds = random_lattice(dx=self.density, noise = self.noise, BC = self.BC, max_y = max_y, cone_ratio=cone_ratio)
         vor = Voronoi(mirrored_seeds)     
     
         vert_map = {}
@@ -477,10 +492,10 @@ class graph:
                 else:
                     x = vor.vertices[index, 0]
                     y = vor.vertices[index, 1]
-                    if x<=-eps or y<=-eps or x>=1.+eps or max_y>=1.+eps:
+                    if x<=-eps or y<=cone_ratio*(1-x)-eps or x>=1.+eps or y>=max_y-cone_ratio*(1-x)+eps:
                         flag = False
                         break
-                    if x>eps and x<1-eps and y>eps and y<max_y-eps:
+                    if x>eps and x<1-eps and y>eps + cone_ratio*(1-x) and y<max_y-cone_ratio*(1-x)-eps:
                         indomain_count += 1
                            
             if region != [] and flag and indomain_count>0:
@@ -490,15 +505,15 @@ class graph:
                 for index in region:
                     x, y = vor.vertices[index][0], vor.vertices[index][1]
                     
-                    if (abs(x)<eps or abs(1-x)<eps) and (abs(y)<eps or abs(max_y-y)<eps):
+                    if (abs(x)<eps or abs(1-x)<eps) and (abs(y- cone_ratio)<eps or abs(max_y-cone_ratio-y)<eps):
                         
-                        if abs(x)<eps and abs(y)<eps:
+                        if abs(x)<eps and abs(y - cone_ratio)<eps:
                             self.corner_grains[0] = alpha + 1
                         if abs(1-x)<eps and abs(y)<eps:
                             self.corner_grains[1] = alpha + 1
-                        if abs(x)<eps and abs(1-max_y)<eps:
+                        if abs(x)<eps and abs(max_y - cone_ratio - y)<eps:
                             self.corner_grains[2] = alpha + 1
-                        if abs(1-x)<eps and abs(1-max_y)<eps:
+                        if abs(1-x)<eps and abs(max_y - y)<eps:
                             self.corner_grains[3] = alpha + 1
                         
                         continue
@@ -768,12 +783,13 @@ class graph:
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
             max_y = 1
+            cone_ratio = self.cone_ratio
             if hasattr(self, 'max_y'):
                 max_y = self.max_y
-            self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]  
+            self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2] - cone_ratio)<1e-6)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]
-            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (max_y-np.absolute(grain_bound[:,3])<1e-6)][0]  
-            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (max_y-np.absolute(grain_bound[:,3])<1e-6)][0]  
+            self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(max_y-cone_ratio-grain_bound[:,3])<1e-6)][0]  
+            self.corner_grains[3] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(max_y-grain_bound[:,3])<1e-6)][0]  
            # print(self.corner_grains)
             
         if init:  
@@ -1049,9 +1065,9 @@ if __name__ == '__main__':
     if args.mode == 'check':
 
         seed = 10020
-        g1 = graph(lxd = 40, seed = seed, BC = 'noflux') 
+       # g1 = graph(lxd = 40, seed = seed, BC = 'noflux') 
         
-       # g1 = graph(user_defined_config=user_defined_config())
+        g1 = graph(user_defined_config=user_defined_config())
 
         g1.show_data_struct()
 

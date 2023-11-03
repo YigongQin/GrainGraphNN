@@ -783,9 +783,12 @@ class graph:
             remain_keys = np.array(list(region_bound.keys()))
             grain_bound = np.array(list(region_bound.values()))
             max_y = 1
-            cone_ratio = self.cone_ratio
+            cone_ratio = 0
+            
             if hasattr(self, 'max_y'):
                 max_y = self.max_y
+            if hasattr(self, 'cone_ratio'):
+                cone_ratio = self.cone_ratio
             self.corner_grains[0] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(grain_bound[:,2] - cone_ratio)<1e-6)][0]  
             self.corner_grains[1] = remain_keys[(np.absolute(1-grain_bound[:,1])<1e-6) & (np.absolute(grain_bound[:,2])<1e-6)][0]
             self.corner_grains[2] = remain_keys[(np.absolute(grain_bound[:,0])<1e-6) & (np.absolute(max_y-cone_ratio-grain_bound[:,3])<1e-6)][0]  

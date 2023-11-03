@@ -93,14 +93,15 @@ if __name__=='__main__':
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--stop_frame", type=int, default='0')
+    parser.add_argument("--growth_height", type=float, default='-1')
     parser.add_argument("--interp_frames", type=int, default=0)
     parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--reconst_mesh_size", type=float, default=0.08)
-    parser.add_argument("--domain_factor", type=int, default=1)   
+    parser.add_argument("--domain_factor", type=float, default=1)   
     parser.add_argument("--boundary", type=str, default='periodic')
     parser.add_argument("--nucleation_density", type=float, default=0.00)
+    parser.add_argument("--moving_speed", type=float, default=2)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -195,10 +196,12 @@ if __name__=='__main__':
     Cmodel.load_state_dict(torch.load(args.model_dir + 'classifier' + str(args.classifier_id)+'.pt', map_location=args.device))
     Cmodel.eval() 
     
+    """ these parameters are determined from training process"""
     Rmodel.threshold = 1e-4 # from P-R plot
     Cmodel.threshold = 0.6  # from P-R plot
     
     train_frames = 120
+    train_delta_z = 0.4
     
     if device=='cuda':
         print('use %d GPUs'%torch.cuda.device_count())
@@ -309,10 +312,10 @@ if __name__=='__main__':
                 traj.save = 'seed' + str(grain_seed) + '_z' + str(0) + '.png'
                 traj.show_data_struct()
             
-            if args.stop_frame>0:
-                traj.frames = args.stop_frame
-            traj.final_height = traj.ini_height + (traj.frames -1)/train_frames*(traj.final_height-traj.ini_height)
-            delta_z = (traj.final_height-traj.ini_height)/(traj.frames - 1)
+            if args.growth_height>0:
+                traj.final_height = traj.ini_height + args.growth_height
+            traj.frames = int( (traj.final_height - traj.ini_height)/train_delta_z ) + 1
+            
             
             grain_event_list = []
             edge_event_list = []  
@@ -337,7 +340,7 @@ if __name__=='__main__':
             for frame in range(span, traj.frames, span):                
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
-                height = traj.ini_height + frame*delta_z
+                height = traj.ini_height + frame*train_delta_z
                 
                 """
                 <1> combine predictions from regressor and classifier
@@ -369,11 +372,12 @@ if __name__=='__main__':
                      b. z
                 """
                 if hasattr(traj, 'geometry'):
-                    curvature = frame*delta_z/traj.geometry['r0']
+                    curvature = frame*train_delta_z/traj.geometry['r0']
                 else:
                     curvature = 0
                 geometry_scaling = {'joint':torch.tensor([1, 1 - curvature]), 
-                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1])}
+                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1]),}
+                                    #'melt_far':0.2+span*0.005+0.1, 'melt_near':0.2+span*0.005}
                 Rmodel.update(data.x_dict, pred, geometry_scaling)
                 data.x_dict['grain'][:, 2] += span/(train_frames + 1)
                 data.x_dict['joint'][:, 2] += span/(train_frames + 1)
@@ -398,7 +402,7 @@ if __name__=='__main__':
                 if args.boundary == 'noflux': # the grain 0 here is boundary grain
                     pred['grain_event'] = pred['grain_event'][pred['grain_event']!=0]
                 
-                nucleation_prob = args.nucleation_density*traj.lxd*traj.lxd*delta_z/data['mask']['joint'].sum()
+                nucleation_prob = args.nucleation_density*traj.lxd*traj.lxd*train_delta_z/data['mask']['joint'].sum()
                 print('nucleation probability for each junction: ', nucleation_prob)
                 data.x_dict, data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], nucleation_prob)
                # pairs = pairs.detach().numpy()
@@ -428,7 +432,9 @@ if __name__=='__main__':
                     data.x_dict['grain'][0, -1] = 0   
                     data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + domain_offset)/args.domain_factor
                     
-                    max_y = traj.lyd/traj.lxd
+                    max_y = 1
+                    if hasattr(traj, 'lyd'):
+                        max_y = traj.lyd/traj.lxd
                     if hasattr(traj, 'max_y'):
                         max_y = traj.max_y
                     move_to_boundary(data.x_dict['joint'], data.edge_index_dict['grain', 'push', 'joint'], [1, max_y])
@@ -545,7 +551,7 @@ if __name__=='__main__':
                     nx, ny, nt = alpha_field_list[0].shape[0], alpha_field_list[0].shape[1],  len(alpha_field_list)
                     x = np.linspace(0, (nx-1)*args.reconst_mesh_size, num = nx, endpoint=True)
                     y = np.linspace(0, (ny-1)*args.reconst_mesh_size, num = ny, endpoint=True) 
-                    z = np.linspace(0, (nt-1)*delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
+                    z = np.linspace(0, (nt-1)*train_delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
                     xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
                     cartesian_theta = (yy + traj.cylindrical_y_offset())/traj.geometry['r0']
                    # print(cartesian_z[:,:,0], cartesian_z[:,:,-1])

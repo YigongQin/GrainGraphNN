@@ -97,9 +97,7 @@ if __name__=='__main__':
     parser.add_argument("--interp_frames", type=int, default=0)
     parser.add_argument("--seed", type=str, default='10020')
     parser.add_argument("--save_fig", type=int, default=0)
-    parser.add_argument("--reconst_mesh_size", type=float, default=0.08)
-    parser.add_argument("--domain_factor", type=float, default=1)   
-    parser.add_argument("--boundary", type=str, default='periodic')
+    parser.add_argument("--reconst_mesh_size", type=float, default=0.08) 
     parser.add_argument("--nucleation_density", type=float, default=0.00)
     parser.add_argument("--moving_speed", type=float, default=2)
     
@@ -331,6 +329,7 @@ if __name__=='__main__':
             
             start_time = time.time()
             domain_offset = 0 
+            args.domain_factor = traj.lxd/traj.patch_size
             if args.domain_factor>1:
                 domain_offset = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
             
@@ -349,7 +348,7 @@ if __name__=='__main__':
                 """            
                 edge_index = data.edge_index_dict.copy()
                 edge_feature = data.edge_attr_dict.copy()
-                if args.boundary == 'noflux':
+                if traj.BC == 'noflux':
                     for edge_type, index in data.edge_index_dict.items():
                         
                         src, dst = edge_type[0], edge_type[-1]
@@ -399,7 +398,7 @@ if __name__=='__main__':
                 pred['grain_event'] = ((data['mask']['grain'][:,0]>0)&(pred['grain_area']<Rmodel.threshold)).nonzero().view(-1)
                 
                 pred['grain_event'] = pred['grain_event'][torch.argsort(pred['grain_area'][pred['grain_event']])]
-                if args.boundary == 'noflux': # the grain 0 here is boundary grain
+                if traj.BC == 'noflux': # the grain 0 here is boundary grain
                     pred['grain_event'] = pred['grain_event'][pred['grain_event']!=0]
                 
                 nucleation_prob = args.nucleation_density*traj.lxd*traj.lxd*train_delta_z/data['mask']['joint'].sum()
@@ -426,7 +425,7 @@ if __name__=='__main__':
 
                 ''' for no flux boundary condition, prevent nodes exceeding boundary and reset the grain 0'''
                 
-                if args.boundary == 'noflux':
+                if traj.BC == 'noflux':
                     data.x_dict['grain'][0, :2] = 0.5
                     data.x_dict['grain'][0, 3:5] = 0
                     data.x_dict['grain'][0, -1] = 0   
@@ -468,7 +467,7 @@ if __name__=='__main__':
                 
                 
                 if args.reconstruct:
-                    if args.interp_frames>0 and args.boundary == 'noflux':
+                    if args.interp_frames>0 and traj.BC == 'noflux':
                         for interp_frame in range(args.interp_frames):                            
                             cur_coeff = (1 + interp_frame)/(1 + args.interp_frames)
                             pre_coeff = 1 - cur_coeff

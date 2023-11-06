@@ -969,7 +969,8 @@ class graph_trajectory(graph):
         mask_g = mask['grain'][:,0].detach().numpy()
         
         if compare:
-            self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
+            if hasattr(self, 'alpha_pde_frames'):
+                self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
         
         self.vertices.clear()
         for i, coor in enumerate(X_j):

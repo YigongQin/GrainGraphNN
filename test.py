@@ -89,17 +89,16 @@ if __name__=='__main__':
 
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--model_dir", type=str, default='./model/')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--growth_height", type=float, default='-1')
-    parser.add_argument("--interp_frames", type=int, default=0)
+    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
     parser.add_argument("--seed", type=str, default='10020')
+    parser.add_argument("--growth_height", type=float, default='-1')
+    parser.add_argument("--interp_frames", type=int, default=0)    
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--reconst_mesh_size", type=float, default=0.08) 
     parser.add_argument("--nucleation_density", type=float, default=0.00)
-    parser.add_argument("--moving_speed", type=float, default=2)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -267,7 +266,7 @@ if __name__=='__main__':
             
             grain_seed = traj.physical_params['seed']
             print('load trajectory for seed ', grain_seed)
-            
+                        
             if args.nucleation_density>1e-12:
                 traj.physical_params.update({'Nmax':args.nucleation_density, 'DT_mean':2, 'DT_std':0.5, 'mu':0.217})
             
@@ -327,15 +326,26 @@ if __name__=='__main__':
             if len(traj.grain_events)==0:
                 traj.grain_events = [set()]*traj.frames
             
-            start_time = time.time()
-            domain_offset = 0 
-            args.domain_factor = traj.lxd/traj.patch_size
-            if args.domain_factor>1:
-                domain_offset = scale_feature_patchs(args.domain_factor, data.x_dict, data.edge_attr_dict)
+            
+            geometry_scaling = {'domain_offset':0, 'domain_factor':traj.lxd/traj.patch_size}
+            if geometry_scaling['domain_factor']>1:
+                geometry_scaling['domain_offset'] = scale_feature_patchs(geometry_scaling['domain_factor'], data.x_dict, data.edge_attr_dict)
             
             
+            if 'V' in traj.physical_params and traj.physical_params['V']>0:
+                geometry_scaling['melt_pool_angle'] = np.arcsin(traj.physical_params['R']/traj.physical_params['V'])
+                gap = span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+                slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+                print('sliding window size: ', slope_window_size)
+                geometry_scaling.update({'melt_far': slope_window_size})
+                geometry_scaling.update({'melt_near':slope_window_size + gap})   
+                traj.frames = int(  ) + 1
+                
+                
             data.to(device)
             
+            
+            start_time = time.time()
             for frame in range(span, traj.frames, span):                
                 
                 print('******* prediction progress %1.2f/1.0 ********'%(frame/(traj.frames - 1)))
@@ -374,9 +384,9 @@ if __name__=='__main__':
                     curvature = frame*train_delta_z/traj.geometry['r0']
                 else:
                     curvature = 0
-                geometry_scaling = {'joint':torch.tensor([1, 1 - curvature]), 
-                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1]),}
-                                    #'melt_far':0.2+span*0.005+0.1, 'melt_near':0.2+span*0.005}
+                geometry_scaling.update( {'joint':torch.tensor([1, 1 - curvature]), 
+                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1]),})
+                  
                 Rmodel.update(data.x_dict, pred, geometry_scaling)
                 data.x_dict['grain'][:, 2] += span/(train_frames + 1)
                 data.x_dict['joint'][:, 2] += span/(train_frames + 1)
@@ -429,7 +439,7 @@ if __name__=='__main__':
                     data.x_dict['grain'][0, :2] = 0.5
                     data.x_dict['grain'][0, 3:5] = 0
                     data.x_dict['grain'][0, -1] = 0   
-                    data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + domain_offset)/args.domain_factor
+                    data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
                     
                     max_y = 1
                     if hasattr(traj, 'lyd'):
@@ -441,15 +451,15 @@ if __name__=='__main__':
                     data.x_dict['joint'][:,1]= torch.clamp(data.x_dict['joint'][:,1], min=0, max=max_y)
                     
                     assert torch.all(data.x_dict['joint'][:,:2]>-1e-6) and torch.all(data.x_dict['joint'][:,:2]<1+1e-6)
-                    data.x_dict['joint'][:,:2] = data.x_dict['joint'][:,:2]*args.domain_factor - domain_offset
+                    data.x_dict['joint'][:,:2] = data.x_dict['joint'][:,:2]*geometry_scaling['domain_factor'] - geometry_scaling['domain_offset']
                     
                # print(data['nxt'])
                # pp_err, pq_err = edge_error_metric(data.edge_index_dict, data['nxt'])
               #  print('connectivity error of the graph: pp edge %f, pq edge %f'%(pp_err, pq_err))
                 X = {k:v.clone() for k, v in data.x_dict.items()}
-                if args.domain_factor>1:
+                if geometry_scaling['domain_factor']>1:
                     
-                    X['joint'][:,:2] =  (X['joint'][:,:2] + domain_offset)/args.domain_factor
+                    X['joint'][:,:2] =  (X['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
                     
 
                 
@@ -512,10 +522,15 @@ if __name__=='__main__':
                     a. x_q
                     b. edge, edge_attr
                 """
+                
+                if 'V' in traj.physical_params:
+                    geometry_scaling['melt_far']  += span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+                    geometry_scaling['melt_near'] += span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+  
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
-                    if args.domain_factor>1:
-                        data.x_dict['grain'][grain-1, :2] = (data.x_dict['grain'][grain-1, :2]*args.domain_factor)%1
+                    if geometry_scaling['domain_factor']>1:
+                        data.x_dict['grain'][grain-1, :2] = (data.x_dict['grain'][grain-1, :2]*geometry_scaling['domain_factor'])%1
 
 
                 data.edge_attr_dict = {}
@@ -560,12 +575,17 @@ if __name__=='__main__':
                     xx, yy, zz = xx.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
                     alpha_field_save = np.stack(alpha_field_list, axis=-1)
                     alpha_field_save = alpha_field_save.flatten(order='F')
-
-
-                    alpha_field_save = alpha_field_save[zz<traj.lzd]
-                    xx = xx[zz<traj.lzd]
-                    yy = yy[zz<traj.lzd]
-                    zz = zz[zz<traj.lzd]
+                    
+                    top_cut = traj.lzd
+                    if traj.physical_params['V']>0:
+                        melt_pool_angle = np.arcsin(traj.physical_params['R']/traj.physical_params['V'])
+                        xx, zz = xx*np.cos(melt_pool_angle) + zz*np.sin(melt_pool_angle), - xx*np.sin(melt_pool_angle) + zz*np.cos(melt_pool_angle)    
+                        top_cut = traj.geometry['z0']*np.cos(melt_pool_angle)
+                        
+                    alpha_field_save = alpha_field_save[zz<top_cut]
+                    xx = xx[zz<top_cut]
+                    yy = yy[zz<top_cut]
+                    zz = zz[zz<top_cut]
 
         
                     points = np.stack([xx,yy,zz], axis=0).T
@@ -575,7 +595,7 @@ if __name__=='__main__':
     
 
                     """ interpolate to an image """
-                    
+                    """
                     interp_mesh = 0.1
                     xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)
                     yi = np.linspace(0, traj.lyd, num = int(traj.lyd/interp_mesh)+1, endpoint=True)
@@ -583,7 +603,7 @@ if __name__=='__main__':
                     xxi, yyi, zzi = np.meshgrid(xi, yi, zi, indexing='ij')
                     print(points.shape, )
                     alpha_i = griddata(points, alpha_field_save, (xxi, yyi, zzi), method='nearest')                    
-                    
+                    """
                     
                     """
                     interp_mesh = 0.1

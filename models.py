@@ -473,13 +473,34 @@ class GrainNN_regressor(nn.Module):
     def update(self, x_dict, y_dict, geometry_scaling):
         
         # features
-        x_dict['joint'][:, :2]  += y_dict['joint']/self.scaling['joint']/geometry_scaling['joint']  # junction movement -> (x,y)
-        x_dict['grain'][:, 3]   += y_dict['grain'][:, 0]/self.scaling['grain']/geometry_scaling['area']   # grain area change -> s
+        junction_change = y_dict['joint']/geometry_scaling['joint'] 
+        grain_change = y_dict['grain'][:, 0]/geometry_scaling['area']
+        
+        global_x_joint = (x_dict['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
+        if 'melt_far' in geometry_scaling: 
+            print(geometry_scaling['melt_near'], geometry_scaling['melt_far'])
+        """
+        if 'melt_far' in geometry_scaling:           
+            
+            near_melt_dist = (global_x_joint[:, 0] - geometry_scaling['melt_far'])/(geometry_scaling['melt_near'] - geometry_scaling['melt_far']) 
+            near_melt_dist = torch.min(torch.tensor(1), near_melt_dist)
+            near_melt_dist = torch.max(torch.tensor(0), near_melt_dist)
+            junction_change[:,0] *= near_melt_dist
+            print(near_melt_dist)
+
+            near_melt_dist = (x_dict['grain'][:, 0] - geometry_scaling['melt_far'])/(geometry_scaling['melt_near'] - geometry_scaling['melt_far']) 
+            near_melt_dist = torch.min(torch.tensor(1), near_melt_dist)
+            near_melt_dist = torch.max(torch.tensor(0), near_melt_dist)
+            grain_change *= near_melt_dist            
+        """
+        
+        x_dict['joint'][:, :2]  += junction_change/self.scaling['joint'] # junction movement -> (x,y)
+        x_dict['grain'][:, 3]   += grain_change/self.scaling['grain']  # grain area change -> s
         x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]/geometry_scaling['volume']   # extra volume v
         
         # gradients
-        x_dict['joint'][:, 6:8] =  y_dict['joint']/geometry_scaling['joint']  # dx, dy
-        x_dict['grain'][:, -1]  =  y_dict['grain'][:, 0]/geometry_scaling['area']  # ds
+        x_dict['joint'][:, 6:8] = junction_change  # dx, dy
+        x_dict['grain'][:, -1]  = grain_change     # ds
         
        # return x_dict
 

@@ -333,13 +333,13 @@ if __name__=='__main__':
             
             
             if 'V' in traj.physical_params and traj.physical_params['V']>0:
-                geometry_scaling['melt_pool_angle'] = np.arcsin(traj.physical_params['R']/traj.physical_params['V'])
-                gap = span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
-                slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+                
+                geometry_scaling.update({ 'gap':span*train_delta_z/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
+                slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd
                 print('sliding window size: ', slope_window_size)
                 geometry_scaling.update({'melt_far': slope_window_size})
-                geometry_scaling.update({'melt_near':slope_window_size + gap})   
-                traj.frames = int(  ) + 1
+                geometry_scaling.update({'melt_near':slope_window_size + geometry_scaling['gap']})   
+                traj.frames = int( np.ceil( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
                 
                 
             data.to(device)
@@ -524,8 +524,8 @@ if __name__=='__main__':
                 """
                 
                 if 'V' in traj.physical_params:
-                    geometry_scaling['melt_far']  += span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
-                    geometry_scaling['melt_near'] += span*train_delta_z/np.tan(geometry_scaling['melt_pool_angle'])/traj.lxd
+                    geometry_scaling['melt_far']  += geometry_scaling['gap']
+                    geometry_scaling['melt_near'] += geometry_scaling['gap']
   
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)
@@ -578,7 +578,7 @@ if __name__=='__main__':
                     
                     top_cut = traj.lzd
                     if traj.physical_params['V']>0:
-                        melt_pool_angle = np.arcsin(traj.physical_params['R']/traj.physical_params['V'])
+                        melt_pool_angle = traj.geometry['melt_pool_angle']
                         xx, zz = xx*np.cos(melt_pool_angle) + zz*np.sin(melt_pool_angle), - xx*np.sin(melt_pool_angle) + zz*np.cos(melt_pool_angle)    
                         top_cut = traj.geometry['z0']*np.cos(melt_pool_angle)
                         

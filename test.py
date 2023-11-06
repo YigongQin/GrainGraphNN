@@ -45,7 +45,7 @@ def nucleation_prob_constGR(physical_params, z_min, z_max):
     return 
 """
 
-def scale_feature_patchs(factor, x_dict, edge_attr_dict):
+def scale_feature_patchs(factor, x_dict, edge_attr_dict, boundary):
     
     '''scale edge len'''
     for edge_type in edge_attr_dict:
@@ -60,12 +60,18 @@ def scale_feature_patchs(factor, x_dict, edge_attr_dict):
     x_dict['joint'][:,:2] *= factor
     
     domain_offset = torch.floor(x_dict['joint'][:,:2])
-    
-    x_dict['grain'][:,:2] = x_dict['grain'][:,:2]%1
     x_dict['joint'][:,:2] = x_dict['joint'][:,:2] - domain_offset
     
-
-    return domain_offset
+    if boundary == 'periodic':
+        grain_coor_offset = x_dict['grain'][:,:2] - x_dict['grain'][:,:2]%1
+        
+     
+    if boundary == 'noflux':
+        grain_coor_offset = torch.floor(x_dict['grain'][:,:2])
+    
+    x_dict['grain'][:,:2] = x_dict['grain'][:,:2] - grain_coor_offset
+    
+    return domain_offset, grain_coor_offset
 
 
 def move_to_boundary(joint_coor, E_qp, boundary_max):
@@ -329,7 +335,7 @@ if __name__=='__main__':
             
             geometry_scaling = {'domain_offset':0, 'domain_factor':traj.lxd/traj.patch_size}
             if geometry_scaling['domain_factor']>1:
-                geometry_scaling['domain_offset'] = scale_feature_patchs(geometry_scaling['domain_factor'], data.x_dict, data.edge_attr_dict)
+                geometry_scaling['domain_offset'], geometry_scaling['grain_coor_offset'] = scale_feature_patchs(geometry_scaling['domain_factor'], data.x_dict, data.edge_attr_dict, traj.BC)
             
             
             if 'V' in traj.physical_params and traj.physical_params['V']>0:
@@ -337,8 +343,9 @@ if __name__=='__main__':
                 geometry_scaling.update({ 'gap':span*train_delta_z/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
                 slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd
                 print('sliding window size: ', slope_window_size)
-                geometry_scaling.update({'melt_far': slope_window_size})
-                geometry_scaling.update({'melt_near':slope_window_size + geometry_scaling['gap']})   
+                geometry_scaling.update({'melt_left': 0})
+                geometry_scaling.update({'melt_right': slope_window_size})
+                geometry_scaling.update({'melt_extra':slope_window_size + geometry_scaling['gap']})   
                 traj.frames = int( np.ceil( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
                 
                 
@@ -524,8 +531,9 @@ if __name__=='__main__':
                 """
                 
                 if 'V' in traj.physical_params:
-                    geometry_scaling['melt_far']  += geometry_scaling['gap']
-                    geometry_scaling['melt_near'] += geometry_scaling['gap']
+                    geometry_scaling['melt_left']  += geometry_scaling['gap']
+                    geometry_scaling['melt_right'] += geometry_scaling['gap']
+                    geometry_scaling['melt_extra'] += geometry_scaling['gap']
   
                 for grain, coor in traj.region_center.items():
                     data.x_dict['grain'][grain-1, :2] = torch.FloatTensor(coor)

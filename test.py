@@ -334,7 +334,7 @@ if __name__=='__main__':
                 geometry_scaling.update({'melt_right': slope_window_size})
                 geometry_scaling.update({'melt_extra':slope_window_size + geometry_scaling['gap']})   
                 geometry_scaling.update({'melt_window_length':int(np.round(traj.lxd/args.reconst_mesh_size*slope_window_size))}) 
-                traj.frames = int( np.ceil( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
+                traj.frames = int( np.floor( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
                 
                 
             grain_event_list = []
@@ -607,15 +607,15 @@ if __name__=='__main__':
                     if traj.meltpool == 'moving': 
                         
                         melt_pool_angle = traj.geometry['melt_pool_angle']
-                        
-                        cartesian_z = traj.lzd + traj.geometry['z0'] - traj.geometry['r0']*np.cos(cartesian_theta)
-                        cartesian_y = traj.lyd/2 + traj.geometry['r0']*np.sin(cartesian_theta) 
+                        radius = traj.geometry['z0'] + (traj.geometry['r0'] - traj.geometry['z0'])*xx/x[-1] 
+                        cartesian_z = radius*(1-np.cos(cartesian_theta))
+                        cartesian_y = traj.lyd/2 + radius*np.sin(cartesian_theta) 
                         cartesian_z += zz
-                        cartesian_x = xx + zz/np.sin(melt_pool_angle)                        
+                        cartesian_x = xx + zz/np.tan(melt_pool_angle)                        
                         
                         
                         cartesian_x, cartesian_z = cartesian_x*np.cos(melt_pool_angle) + cartesian_z*np.sin(melt_pool_angle), - cartesian_x*np.sin(melt_pool_angle) + cartesian_z*np.cos(melt_pool_angle)    
-                        top_cut = traj.geometry['z0']*np.cos(melt_pool_angle)
+                        top_cut = 0
 
                     xx, yy, zz = cartesian_x.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
                     alpha_field_save = np.stack(alpha_field_list, axis=-1)

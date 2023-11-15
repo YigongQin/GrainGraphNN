@@ -536,7 +536,7 @@ if __name__=='__main__':
                     if args.plot:
                         traj.show_data_struct()
                         
-                    if args.save_fig>1: # and frame%((traj.frames - 1)//(args.save_fig-1))==0:
+                    if args.save_fig>1 and frame%((traj.frames - 1)//(args.save_fig-1))==0:
                         p_err = sum([i[1] for i in layer_err_list])/len(layer_err_list)
                         p_err = int(np.round(p_err*100))
                         traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'

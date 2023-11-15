@@ -319,12 +319,34 @@ if __name__=='__main__':
                 traj.final_height = traj.ini_height + args.growth_height
             traj.frames = int( (traj.final_height - traj.ini_height)/train_delta_z ) + 1
             
+
+            geometry_scaling = {'domain_offset':0, 'domain_factor':traj.lxd/traj.patch_size}
+            if geometry_scaling['domain_factor']>1:
+                geometry_scaling['domain_offset'], geometry_scaling['grain_coor_offset'] = scale_feature_patchs(geometry_scaling['domain_factor'], data.x_dict, data.edge_attr_dict, traj.BC)
             
+            
+            if hasattr(traj, 'meltpool') and traj.meltpool == 'moving':
+                
+                geometry_scaling.update({ 'gap':span*train_delta_z/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
+                slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd
+                print('sliding window size: ', slope_window_size)
+                geometry_scaling.update({'melt_left': 0})
+                geometry_scaling.update({'melt_right': slope_window_size})
+                geometry_scaling.update({'melt_extra':slope_window_size + geometry_scaling['gap']})   
+                geometry_scaling.update({'melt_window_length':int(np.round(traj.lxd/args.reconst_mesh_size*slope_window_size))}) 
+                traj.frames = int( np.ceil( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
+                
+                
             grain_event_list = []
             edge_event_list = []  
             grain_acc_list = [(traj.ini_height, 0, 0, 0)]
             traj.plot_polygons(imagesize)
-            alpha_field_list = [traj.alpha_field.T.copy()]
+                           
+            if 'melt_left' not in geometry_scaling:                                
+                alpha_field_list = [traj.alpha_field.T.copy()]
+            else:
+                left_bound = int(np.round(traj.lxd/args.reconst_mesh_size*geometry_scaling['melt_left']))
+                alpha_field_list = [traj.alpha_field.T.copy()[left_bound:left_bound+geometry_scaling['melt_window_length'],:]]
             
             layer_err_list = [(traj.ini_height, traj.error_layer)]
             traj.area_traj = traj.area_traj[:1]
@@ -333,21 +355,7 @@ if __name__=='__main__':
                 traj.grain_events = [set()]*traj.frames
             
             
-            geometry_scaling = {'domain_offset':0, 'domain_factor':traj.lxd/traj.patch_size}
-            if geometry_scaling['domain_factor']>1:
-                geometry_scaling['domain_offset'], geometry_scaling['grain_coor_offset'] = scale_feature_patchs(geometry_scaling['domain_factor'], data.x_dict, data.edge_attr_dict, traj.BC)
-            
-            
-            if 'V' in traj.physical_params and traj.physical_params['V']>0:
-                
-                geometry_scaling.update({ 'gap':span*train_delta_z/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
-                slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd
-                print('sliding window size: ', slope_window_size)
-                geometry_scaling.update({'melt_left': 0})
-                geometry_scaling.update({'melt_right': slope_window_size})
-                geometry_scaling.update({'melt_extra':slope_window_size + geometry_scaling['gap']})   
-                traj.frames = int( np.ceil( (1 - slope_window_size)/geometry_scaling['gap'] ) )*span + 1
-                
+
                 
             data.to(device)
             
@@ -387,13 +395,14 @@ if __name__=='__main__':
                      a. x_p, s, v
                      b. z
                 """
+                curvature = 0
                 if hasattr(traj, 'geometry'):
-                    curvature = frame*train_delta_z/traj.geometry['r0']
-                else:
-                    curvature = 0
-                geometry_scaling.update( {'joint':torch.tensor([1, 1 - curvature]), 
-                                    'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1]),})
-                  
+                    if not (hasattr(traj, 'meltpool') and traj.meltpool == 'moving'):
+                        curvature = frame*train_delta_z/traj.geometry['r0']
+                    geometry_scaling.update({'r0':traj.geometry['r0'], 'z0':traj.geometry['z0']})  
+               # geometry_scaling.update( {'joint':torch.tensor([1, 1 - curvature]), 
+               #                     'area':torch.tensor([1 - curvature]), 'volume':torch.tensor([1]),})
+                
                 Rmodel.update(data.x_dict, pred, geometry_scaling)
                 data.x_dict['grain'][:, 2] += span/(train_frames + 1)
                 data.x_dict['joint'][:, 2] += span/(train_frames + 1)
@@ -420,7 +429,7 @@ if __name__=='__main__':
                 
                 nucleation_prob = args.nucleation_density*traj.lxd*traj.lxd*train_delta_z/data['mask']['joint'].sum()
                 print('nucleation probability for each junction: ', nucleation_prob)
-                data.x_dict, data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], nucleation_prob)
+                data.x_dict, data.edge_index_dict, pairs = Cmodel.update(data.x_dict, data.edge_index_dict, data.edge_attr_dict, pred, data['mask'], geometry_scaling, nucleation_prob)
                # pairs = pairs.detach().numpy()
                 if data.x_dict['grain'].size(dim=0) > traj.num_regions:
                     add_angles = torch.arccos(data.x_dict['grain'][traj.num_regions:, 5]).detach().numpy()
@@ -505,10 +514,20 @@ if __name__=='__main__':
                             else:
                                 traj.GNN_update(frame, mean_X, prev_mask, topo, prev_edge_index_dict, args.compare)
                             traj.plot_polygons(imagesize)
-                            alpha_field_list.append(traj.alpha_field.T.copy())
+                            
+                            if 'melt_left' not in geometry_scaling:                                
+                                alpha_field_list.append(traj.alpha_field.T.copy())
+                            else:
+                                left_bound = int(np.round(traj.lxd/args.reconst_mesh_size*(geometry_scaling['melt_left']+geometry_scaling['gap']*cur_coeff)))
+                                alpha_field_list.append(traj.alpha_field.T.copy()[left_bound:left_bound+geometry_scaling['melt_window_length'],:])
+                                
                     traj.plot_polygons(imagesize)
-                    alpha_field_list.append(traj.alpha_field.T.copy())
-                
+                    if 'melt_left' not in geometry_scaling:                                
+                        alpha_field_list.append(traj.alpha_field.T.copy())
+                    else:
+                        left_bound = int(np.round(traj.lxd/args.reconst_mesh_size*(geometry_scaling['melt_left']+geometry_scaling['gap'])))
+                        alpha_field_list.append(traj.alpha_field.T.copy()[left_bound:left_bound+geometry_scaling['melt_window_length'],:])
+                        
                 if args.compare:
                     ''' quantify the image error '''
 
@@ -517,7 +536,7 @@ if __name__=='__main__':
                     if args.plot:
                         traj.show_data_struct()
                         
-                    if args.save_fig>1 and frame%((traj.frames - 1)//(args.save_fig-1))==0:
+                    if args.save_fig>1: # and frame%((traj.frames - 1)//(args.save_fig-1))==0:
                         p_err = sum([i[1] for i in layer_err_list])/len(layer_err_list)
                         p_err = int(np.round(p_err*100))
                         traj.save = 'seed' + str(grain_seed) + '_z' + str(height) + '_err' + str(p_err)+'_elimp'+str(right_pred_q)+'_t' + str(len(grain_event_truth)) + '.png'
@@ -530,7 +549,7 @@ if __name__=='__main__':
                     b. edge, edge_attr
                 """
                 
-                if 'V' in traj.physical_params:
+                if hasattr(traj, 'meltpool') and traj.meltpool == 'moving':
                     geometry_scaling['melt_left']  += geometry_scaling['gap']
                     geometry_scaling['melt_right'] += geometry_scaling['gap']
                     geometry_scaling['melt_extra'] += geometry_scaling['gap']
@@ -568,7 +587,7 @@ if __name__=='__main__':
             if args.reconstruct:
                 
                 
-                if hasattr(traj, 'meltpool') and traj.meltpool == 'cylinder':
+                if hasattr(traj, 'meltpool'):
 
                     nx, ny, nt = alpha_field_list[0].shape[0], alpha_field_list[0].shape[1],  len(alpha_field_list)
                     x = np.linspace(0, (nx-1)*args.reconst_mesh_size, num = nx, endpoint=True)
@@ -576,19 +595,31 @@ if __name__=='__main__':
                     z = np.linspace(0, (nt-1)*train_delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
                     xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
                     cartesian_theta = (yy + traj.cylindrical_y_offset())/traj.geometry['r0']
-                   # print(cartesian_z[:,:,0], cartesian_z[:,:,-1])
-                    cartesian_z = traj.lzd + traj.geometry['z0'] - (traj.geometry['r0'] - zz)*np.cos(cartesian_theta)
-                    cartesian_y = traj.lyd/2 + (traj.geometry['r0'] - zz)*np.sin(cartesian_theta) 
-                   # print(cartesian_z[:,:,0], cartesian_z[:,:,-1])
-                    xx, yy, zz = xx.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
+                    
+                    if traj.meltpool == 'cylinder':
+
+                        cartesian_z = traj.lzd + traj.geometry['z0'] - (traj.geometry['r0'] - zz)*np.cos(cartesian_theta)
+                        cartesian_y = traj.lyd/2 + (traj.geometry['r0'] - zz)*np.sin(cartesian_theta) 
+                        cartesian_x = xx
+                        top_cut = traj.lzd
+
+
+                    if traj.meltpool == 'moving': 
+                        
+                        melt_pool_angle = traj.geometry['melt_pool_angle']
+                        
+                        cartesian_z = traj.lzd + traj.geometry['z0'] - traj.geometry['r0']*np.cos(cartesian_theta)
+                        cartesian_y = traj.lyd/2 + traj.geometry['r0']*np.sin(cartesian_theta) 
+                        cartesian_z += zz
+                        cartesian_x = xx + zz/np.sin(melt_pool_angle)                        
+                        
+                        
+                        cartesian_x, cartesian_z = cartesian_x*np.cos(melt_pool_angle) + cartesian_z*np.sin(melt_pool_angle), - cartesian_x*np.sin(melt_pool_angle) + cartesian_z*np.cos(melt_pool_angle)    
+                        top_cut = traj.geometry['z0']*np.cos(melt_pool_angle)
+
+                    xx, yy, zz = cartesian_x.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
                     alpha_field_save = np.stack(alpha_field_list, axis=-1)
                     alpha_field_save = alpha_field_save.flatten(order='F')
-                    
-                    top_cut = traj.lzd
-                    if traj.physical_params['V']>0:
-                        melt_pool_angle = traj.geometry['melt_pool_angle']
-                        xx, zz = xx*np.cos(melt_pool_angle) + zz*np.sin(melt_pool_angle), - xx*np.sin(melt_pool_angle) + zz*np.cos(melt_pool_angle)    
-                        top_cut = traj.geometry['z0']*np.cos(melt_pool_angle)
                         
                     alpha_field_save = alpha_field_save[zz<top_cut]
                     xx = xx[zz<top_cut]

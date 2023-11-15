@@ -473,30 +473,43 @@ class GrainNN_regressor(nn.Module):
     def update(self, x_dict, y_dict, geometry_scaling):
         
         # features
-        junction_change = y_dict['joint']/geometry_scaling['joint'] 
-        grain_change = y_dict['grain'][:, 0]/geometry_scaling['area']
-        
-        global_x_joint = (x_dict['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
-        if 'melt_far' in geometry_scaling: 
-            print(geometry_scaling['melt_near'], geometry_scaling['melt_far'])
-        """
-        if 'melt_far' in geometry_scaling:           
-            
-            near_melt_dist = (global_x_joint[:, 0] - geometry_scaling['melt_far'])/(geometry_scaling['melt_near'] - geometry_scaling['melt_far']) 
-            near_melt_dist = torch.min(torch.tensor(1), near_melt_dist)
-            near_melt_dist = torch.max(torch.tensor(0), near_melt_dist)
-            junction_change[:,0] *= near_melt_dist
-            print(near_melt_dist)
+        junction_change = y_dict['joint'] 
+        grain_change = y_dict['grain'][:, 0]
+        volume_change = y_dict['grain'][:, 1]
 
-            near_melt_dist = (x_dict['grain'][:, 0] - geometry_scaling['melt_far'])/(geometry_scaling['melt_near'] - geometry_scaling['melt_far']) 
-            near_melt_dist = torch.min(torch.tensor(1), near_melt_dist)
-            near_melt_dist = torch.max(torch.tensor(0), near_melt_dist)
-            grain_change *= near_melt_dist            
-        """
+        if 'melt_left' in geometry_scaling:           
+            print(geometry_scaling['melt_left'], geometry_scaling['melt_right'], geometry_scaling['melt_extra'])
+            
+            global_x_joint = (x_dict['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
+            global_x_grain = (x_dict['grain'][:,:2] + geometry_scaling['grain_coor_offset'])/geometry_scaling['domain_factor']
+            
+            active_junctions = self.active_window(global_x_joint[:, 0], geometry_scaling)           
+            junction_change *= active_junctions.view(-1,1)
+            curvature = geometry_scaling['z0'] + (geometry_scaling['r0']-geometry_scaling['z0'])* \
+                        (global_x_joint[:, 0] - geometry_scaling['melt_left'])/(geometry_scaling['melt_right'] - geometry_scaling['melt_left'])
+            junction_change[:,1] *= geometry_scaling['r0']/curvature
+            
+            active_grains = self.active_window(global_x_grain[:, 0], geometry_scaling)
+            grain_change *= active_grains
+            volume_change *= active_grains
+            curvature = geometry_scaling['z0'] + (geometry_scaling['r0']-geometry_scaling['z0'])* \
+                        (global_x_grain[:, 0] - geometry_scaling['melt_left'])/(geometry_scaling['melt_right'] - geometry_scaling['melt_left'])
+            grain_change *= geometry_scaling['r0']/curvature            
+            
+            
+            geometry_scaling['active_grains'] = (active_grains>0.9999).nonzero().view(-1) 
+            geometry_scaling['active_joints'] = (active_junctions>0.9999).nonzero().view(-1)  
+            
+        else:
+
+            geometry_scaling['active_grains'] = (grain_change>-10).nonzero().view(-1) 
+            geometry_scaling['active_joints'] = (junction_change[:,0]>-10).nonzero().view(-1) 
+            
+           # print(near_melt_dist)
         
         x_dict['joint'][:, :2]  += junction_change/self.scaling['joint'] # junction movement -> (x,y)
         x_dict['grain'][:, 3]   += grain_change/self.scaling['grain']  # grain area change -> s
-        x_dict['grain'][:, 4]   =  y_dict['grain'][:, 1]/geometry_scaling['volume']   # extra volume v
+        x_dict['grain'][:, 4]   =  volume_change   # extra volume v
         
         # gradients
         x_dict['joint'][:, 6:8] = junction_change  # dx, dy
@@ -504,6 +517,14 @@ class GrainNN_regressor(nn.Module):
         
        # return x_dict
 
+    def active_window(self, x_coors, geometry_scaling):
+
+        near_melt_dist = (x_coors - geometry_scaling['melt_extra'])/(geometry_scaling['melt_right'] - geometry_scaling['melt_extra']) 
+        near_melt_dist = torch.min(torch.tensor(1), near_melt_dist)
+        near_melt_dist = torch.max(torch.tensor(0), near_melt_dist)
+        near_melt_dist[x_coors < geometry_scaling['melt_left']] = 0
+            
+        return near_melt_dist
 
 class GrainNN_classifier(torch.nn.Module):
 
@@ -590,7 +611,7 @@ class GrainNN_classifier(torch.nn.Module):
         return y_dict
 
 
-    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask, nucleation_prob):            
+    def update(self, x_dict, edge_index_dict, edge_attr, y_dict, mask, geometry_scaling, nucleation_prob):            
             
 
         E_pp = edge_index_dict['joint', 'connect', 'joint']
@@ -616,10 +637,15 @@ class GrainNN_classifier(torch.nn.Module):
         
         for grain in y_dict['grain_event']:
 
-           # print(grain)         
+           # print(grain)        
+            if grain not in geometry_scaling['active_grains']: continue
    
             Np = E_pq[0][(E_pq[1]==grain).nonzero().view(-1)]
-            
+            all_in_bound = True
+            for p in Np:
+                if p not in geometry_scaling['active_joints']: 
+                    all_in_bound = False
+            if not all_in_bound: continue
             
             if len(Np)==0:
                 continue
@@ -630,6 +656,7 @@ class GrainNN_classifier(torch.nn.Module):
 
            # print(pairs)
             for p1, p2 in pairs:
+                
                 if p1>p2:
                     p1, p2 = p2, p1
                 E_index = ((E_pp[0]==p1)&(E_pp[1]==p2)).nonzero().view(-1)
@@ -660,7 +687,7 @@ class GrainNN_classifier(torch.nn.Module):
             L2 = L2[indices[:-2]]
 
             
-            force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, elim_grain=grain) #x_dict['grain'][grain,:2])
+            force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L2, elim_grain=grain, active_junctions=geometry_scaling['active_joints']) #x_dict['grain'][grain,:2])
             unexpected_elim.extend(force_elim)
                              
             
@@ -710,7 +737,7 @@ class GrainNN_classifier(torch.nn.Module):
        # print('edge switching index', L1)
        # print(E_pp.T[L1])
 
-        force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, elim_grain=None)
+        force_elim = self.switching_edge_index(E_pp, E_pq, x_dict, y_dict, L1, elim_grain=None, active_junctions=geometry_scaling['active_joints'])
         #    assert len(force_elim)==0
         
         switching_list = E_pp.T[L1]
@@ -871,7 +898,7 @@ class GrainNN_classifier(torch.nn.Module):
         return E_pp, E_pq
     
 
-    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, elim_grain):
+    def switching_edge_index(self, E_pp, E_pq, x_dict, y_dict, elimed_arg, elim_grain, active_junctions):
 
         force_elim = []
         pairs = torch.unique(E_pp.T[elimed_arg].view(-1))
@@ -882,7 +909,7 @@ class GrainNN_classifier(torch.nn.Module):
         
         for index in range(len(elimed_arg)):
             p1, p2 = E_pp.T[elimed_arg][index]
-
+            if p1 not in active_junctions or p2 not in active_junctions: continue
            # print(E_pp.T[elimed_arg])
            # print(p1, p2)
             

@@ -32,15 +32,24 @@ class graph_trajectory_geometric(graph_trajectory):
                          adjust_grain_orien = adjust_grain_orien,
                          user_defined_config = user_defined_config)
             
-        self.meltpool = 'cylinder'
+
         if user_defined_config:
+            self.meltpool = user_defined_config['meltpool']
             self.geometry = user_defined_config['geometry']
-        else:            
+        else:   
+            self.meltpool = 'cylinder'
             self.geometry = {'z0':1, 'r0':18}
+        
+        if 'V' in self.physical_params:
+            self.geometry['melt_pool_angle'] = np.arcsin(self.physical_params['R']/self.physical_params['V'])
+        
         self.PF2Grain = defaultdict(int)
         self.Grain2PF = defaultdict(int)
         self.manifold_normal = {'x':[0], 'z':[0]} # assume no-flux boundary condition, the first grain is always boundary
         self.max_y = self.lyd/self.lxd
+    
+        
+    
     
     def load_pde_data(self, rawdat_dir: str = './'):
        
@@ -79,7 +88,7 @@ class graph_trajectory_geometric(graph_trajectory):
     
         self.manifold = np.asarray(f['manifold'])
         
-        if self.meltpool == 'cylinder':
+        if self.meltpool == 'cylinder' or self.meltpool == 'moving':
             self.geodesic_y = np.asarray(f['geodesic_y_coors'])
             
             
@@ -274,7 +283,7 @@ class graph_trajectory_geometric(graph_trajectory):
         
         # find normals
 
-        if self.meltpool == 'cylinder':
+        if self.meltpool == 'cylinder' or self.meltpool == 'moving':
             for region in range(1, self.num_regions+1):
                 if self.BC == 'noflux' and region == 1:
                     continue
@@ -296,7 +305,7 @@ if __name__ == '__main__':
     parser.add_argument("--mode", type=str, default = 'generate')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 2)
+    parser.add_argument("--seed", type=int, default = 5)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')

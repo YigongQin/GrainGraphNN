@@ -17,9 +17,10 @@ import itertools
 from graph_datastruct import graph, GrainHeterograph, periodic_move,linked_edge_by_junction, periodic_dist_
 from math import pi
 from collections import Counter
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, interp1d
 from scipy import stats
 import math
+from TemperatureProfile3DAnalytic import ThermalProfile
 
 def relative_angle(p1, p2):
     
@@ -120,6 +121,33 @@ class graph_trajectory(graph):
         self.save_frame = [True]*self.frames
         
         self.area_traj = []
+
+    def GR_seq_from_time(self, seed, freq, delta_z, counts):
+        
+        np.random.seed(seed)
+        t_end = 1.5*(self.final_height - self.ini_height)/self.physical_params['R']
+        t = np.linspace(0, t_end, 101)
+        G_rand, R_rand = ThermalProfile.RandGR(t, t_end, freq)
+       # G_rand = 0*G_rand + self.physical_params['G']
+       # R_rand = 0*R_rand + self.physical_params['R']
+       # print(G_rand, R_rand)
+        # G, R as a function of z
+        z_sam = np.zeros(len(R_rand))
+        z_sam[1:] = 0.5*np.cumsum(R_rand[1:]+R_rand[:-1])*(t[1]-t[0])
+        
+        # interpolate to inference locations
+        sampling_points = int(np.round((self.final_height - self.ini_height)/delta_z))
+        z_equalspace = delta_z*np.arange(0.5, sampling_points)
+        
+       # print(z_equalspace)
+        G_interp = interp1d(z_sam, G_rand)
+        R_interp = interp1d(z_sam, R_rand)
+        
+        self.G_list = G_interp(z_equalspace)
+        self.R_list = R_interp(z_equalspace)
+        
+        assert len(self.G_list) == counts
+        assert len(self.R_list) == counts
         
     def volume(self, mode):
         

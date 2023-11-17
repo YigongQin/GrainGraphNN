@@ -105,6 +105,9 @@ if __name__=='__main__':
     parser.add_argument("--save_fig", type=int, default=0)
     parser.add_argument("--reconst_mesh_size", type=float, default=0.08) 
     parser.add_argument("--nucleation_density", type=float, default=0.00)
+
+    parser.add_argument("--temporal", dest='temporal', action='store_true')
+    parser.set_defaults(temporal=False)
     
     parser.add_argument("--plot", dest='plot', action='store_true')
     parser.set_defaults(plot=False)
@@ -354,8 +357,9 @@ if __name__=='__main__':
             if len(traj.grain_events)==0:
                 traj.grain_events = [set()]*traj.frames
             
+            if args.temporal:
+                traj.GR_seq_from_time(seed, 2**(seed%10), train_delta_z*span, (traj.frames -1)//span )
             
-
                 
             data.to(device)
             
@@ -384,7 +388,12 @@ if __name__=='__main__':
                         if dst == 'grain':
                             edge_index[edge_type] = index[:,(index[1]>0).nonzero().view(-1)] 
                             edge_feature[edge_type] = data.edge_attr_dict[edge_type][(index[1]>0).nonzero().view(-1)] 
-                        
+                
+                if args.temporal:
+                    data.x_dict['joint'][:,3] = 1 - traj.G_list[frame//span-1]/10
+                    data.x_dict['joint'][:,4] = traj.R_list[frame//span-1]/2
+                
+                
                 pred = Rmodel(data.x_dict, edge_index, edge_feature )
                 pred_c = Cmodel(data.x_dict, edge_index, edge_feature )
                 pred.update(pred_c)

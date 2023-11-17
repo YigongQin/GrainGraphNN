@@ -7,13 +7,40 @@ Created on Tue Sep 26 17:11:06 2023
 """
 
 import numpy as np
-
+from math import pi
 
 class ThermalProfile:
-    def __init__(self, domainSize, thermal):
+    def __init__(self, domainSize, thermal, seed):
         self.lx, self.ly, self.lz = domainSize
         self.G, self.R, self.U = thermal
+        self.seed = seed
 
+    @staticmethod
+    def RandGR(t, t_end, t_sampling_freq):
+        
+        G_freq = np.arange(1,t_sampling_freq+1)/t_end*pi/2
+        G_coeff = np.random.rand(len(G_freq))
+        G_phase = np.random.rand(len(G_freq))*2*pi
+        print(G_freq, G_coeff, G_phase)
+
+        R_freq = np.arange(1,t_sampling_freq+1)/t_end*pi/2
+        R_coeff = np.random.rand(len(R_freq))
+        R_phase = np.random.rand(len(R_freq))*2*pi
+
+        G, R = np.zeros(len(t)), np.zeros(len(t))
+
+        for i in range(t_sampling_freq):
+           # print(G_coeff, G_freq[i], z, G_phase)
+            G += G_coeff[i]*np.cos(G_freq[i]*t+G_phase[i])
+            R += R_coeff[i]*np.sin(R_freq[i]*t+R_phase[i])
+
+       # G = np.mean(np.expand_dims(G_coeff, axis=-1)*np.cos(np.outer(G_freq, z) + np.expand_dims(G_phase, axis=-1)) , axis=0)
+       # R = np.mean(np.expand_dims(R_coeff, axis=-1)*np.sin(np.outer(R_freq, z) + np.expand_dims(R_phase, axis=-1)) , axis=0)    
+        
+        G = 0.5 + 9.5*(G-np.min(G))/(np.max(G)-np.min(G))
+        R = 0.2 + 1.8*(R-np.min(R))/(np.max(R)-np.min(R))
+        
+        return G, R
 
     def pointwiseTempConstGR(self, profile, x, y, z, t, z0=0, r0=0):
         
@@ -37,47 +64,29 @@ class ThermalProfile:
             return self.sphereProfile(x, y, z, z0, r0, [self.lx, self.ly, self.lz])
 
   
-    @staticmethod
-    def lineProfile(x, y, z, z0):
-        
+
+    def lineProfile(self, x, y, z, z0):        
 
         return z0 - z
     
     
     """ y-z cross-section """
-    @staticmethod
-    def cylinderProfile(x, y, z, z0, r0, centerline):
+    def cylinderProfile(self, x, y, z, z0, r0, centerline):
         
         yc, zc = centerline
         dist = np.sqrt((y - yc)**2 + (z - z0 - zc)**2)
 
         return dist - r0
     
-    @staticmethod
-    def sphereProfile(x, y, z, z0, r0, center):
+    
+    def sphereProfile(self, x, y, z, z0, r0, center):
         
         xc, yc, zc = center
         dist = np.sqrt((x - xc)**2 + (y - yc)**2 + (z + z0 - zc)**2)
   
         return dist - r0
 
-    """
-    def coors_plane_to_manifold(self, profile, x, y, z0, r0, centerline):
-        
-        if profile == 'cylinder':
-            
-            yc, zc = centerline
-            
-            y_3d = 
-            
-            
-            z_3d = z0 + zc - np.sqrt(r0**2 - (y_3d - yc)**2)
-                       
-            normal_z = np.arctan2(y_3d - yc, z_3d - z0 - zc)                        
-        
-            return [x, y_3d, z_3d], [0, 0, normal_z]
-    """
-        
+
 
 
 

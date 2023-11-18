@@ -125,8 +125,9 @@ class graph_trajectory(graph):
     def GR_seq_from_time(self, seed, freq, delta_z, counts):
         
         np.random.seed(seed)
-        t_end = 1.5*(self.final_height - self.ini_height)/self.physical_params['R']
-        t = np.linspace(0, t_end, 101)
+        self.physical_params['minR'] = 0.2
+        t_end = (self.final_height - self.ini_height)/self.physical_params['minR']
+        t = np.linspace(0, t_end, 501)
         G_rand, R_rand = ThermalProfile.RandGR(t, t_end, freq)
        # G_rand = 0*G_rand + self.physical_params['G']
        # R_rand = 0*R_rand + self.physical_params['R']

@@ -490,8 +490,10 @@ if __name__=='__main__':
                 
                 traj.GNN_update(frame, X, data['mask'], topo, data.edge_index_dict, args.compare)
                 
-             
-                grain_event_truth = set.union(*traj.grain_events[:frame+1])
+                if hasattr(traj, 'train_test_frame_ratio'):
+                    grain_event_truth = set.union(*traj.grain_events[:frame//traj.train_test_frame_ratio+1])
+                else:
+                    grain_event_truth = set.union(*traj.grain_events[:frame+1])
                 grain_event_truth = set([i-1 for i in grain_event_truth])
 
                 right_pred_q = len(set(grain_event_list).intersection(grain_event_truth))

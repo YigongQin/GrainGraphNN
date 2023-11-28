@@ -109,6 +109,7 @@ class graph_trajectory(graph):
             
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.frames = frames # note that frames include the initial condition
+        self.train_test_frame_ratio = 120//(frames-1)
         self.load_frames = self.frames
         self.match_graph = True
 
@@ -168,9 +169,13 @@ class graph_trajectory(graph):
             underlying_grain_volume = 4/3/np.sqrt(pi)*area0**1.5
             self.volume_traj.append(underlying_grain_volume.copy())
             for time in range(self.span, self.frames, self.span):
-            
-                height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
+
                 
+                height = self.ini_height + time/(self.frames-1)*(self.final_height-self.ini_height)
+
+                if hasattr(self, 'train_test_frame_ratio'):
+                    time = time//self.train_test_frame_ratio
+                    
                 self.grain_volume = self.totalV_frames[:,time] - self.extraV_frames[:,time]
                 scale_surface = np.sum(self.grain_volume)\
                                 /s**2/(height/self.mesh_size+1)
@@ -999,6 +1004,8 @@ class graph_trajectory(graph):
         
         if compare:
             if hasattr(self, 'alpha_pde_frames'):
+                if hasattr(self, 'train_test_frame_ratio'):
+                    frame = frame//self.train_test_frame_ratio
                 self.alpha_pde = self.alpha_pde_frames[:,:,frame].T
         
         self.vertices.clear()
@@ -1075,7 +1082,7 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser("Generate heterograph trajectory")
-    parser.add_argument("--mode", type=str, default = 'check')
+    parser.add_argument("--mode", type=str, default = 'test')
     parser.add_argument("--rawdat_dir", type=str, default = './')
     parser.add_argument("--save_dir", type=str, default = './')
     parser.add_argument("--seed", type=int, default = 0)

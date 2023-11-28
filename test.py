@@ -281,10 +281,13 @@ if __name__=='__main__':
             
             
             ''' determine span '''
+            if args.temporal:
+                span = 6
+            else:
+                st_idx = datasets[case].find('span') + 4
+                end_idx = datasets[case].find('.')
+                span = int(datasets[case][st_idx:-4])
             
-            st_idx = datasets[case].find('span') + 4
-            end_idx = datasets[case].find('.')
-            span = int(datasets[case][st_idx:-4])
             print('expected span', span)
             traj.span = span
             traj.raise_err = False

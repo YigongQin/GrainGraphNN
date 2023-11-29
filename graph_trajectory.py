@@ -151,6 +151,25 @@ class graph_trajectory(graph):
         assert len(self.G_list) == counts
         assert len(self.R_list) == counts
         
+        fig, ax = plt.subplots(1,1,figsize=(5,5))
+        ax.plot(z_equalspace, self.G_list,  label='G', color='r')
+
+        ax.tick_params(axis='y', labelcolor='r')
+        ax.set_xlim(0, 50)
+        ax.set_xlabel(r'$z\ (\mu m)$')
+        
+        ax.set_ylabel(r'$G (K/\mu m)$', color='r')  
+        ax.legend(fontsize=20)  
+        
+        ax2 = ax.twinx()
+        ax2.plot(z_equalspace, self.R_list, label='R', color='b')
+        ax2.set_ylabel(r'$R (m/s)$', color='b')  
+        #ax2.legend(fontsize=20)  
+        ax2.tick_params(axis='y', labelcolor='b')
+        
+        plt.savefig('seed'+str(self.seed)+'_GR' +'.png', dpi=400, bbox_inches='tight')
+        
+        
     def volume(self, mode):
         
         self.volume_traj = []

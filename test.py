@@ -333,7 +333,7 @@ if __name__=='__main__':
             
             if hasattr(traj, 'meltpool') and traj.meltpool == 'moving':
                 
-                geometry_scaling.update({ 'gap':span*train_delta_z/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
+                geometry_scaling.update({ 'gap':span*train_delta_z*np.cos(traj.geometry['melt_pool_angle'])**2/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd })# distance the window travelled
                 slope_window_size = (traj.geometry['r0'] - traj.geometry['z0'])/np.tan(traj.geometry['melt_pool_angle'])/traj.lxd
                 print('sliding window size: ', slope_window_size)
                 geometry_scaling.update({'melt_left': 0})

@@ -64,7 +64,7 @@ class graph_trajectory_geometric(graph_trajectory):
         R = float(re.search('Rmax(\d+\.\d+)', self.data_file).group(1))
         U = G*R
         
-        self.therm = ThermalProfile([self.lxd, self.lyd, self.lzd], [G, R, U])
+        self.therm = ThermalProfile([self.lxd, self.lyd, self.lzd], [G, R, U], self.seed)
         self.physical_params = {'G':G, 'R':R, 'U':U}
         
         
@@ -132,8 +132,8 @@ class graph_trajectory_geometric(graph_trajectory):
         self.theta_x = np.zeros(1 + self.num_regions)
         self.theta_z = np.zeros(1 + self.num_regions)
         
-        self.theta_x[2:] = angles[PF_on_manifold%num_theta]
-        self.theta_z[2:] = angles[PF_on_manifold%num_theta + num_theta]
+        self.theta_x[2:] = angles[PF_on_manifold%num_theta + 1]
+        self.theta_z[2:] = angles[PF_on_manifold%num_theta + 1 + num_theta]
         
         
         cur_grain, counts = np.unique(self.euclidean_alpha_pde, return_counts=True)
@@ -302,10 +302,10 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser("Generate trajectory for irregular grid data")
-    parser.add_argument("--mode", type=str, default = 'generate')
+    parser.add_argument("--mode", type=str, default = 'test')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 5)
+    parser.add_argument("--seed", type=int, default = 49)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
@@ -315,7 +315,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--lxd", type=int, default = 80)
+    parser.add_argument("--lxd", type=int, default = 60)
     parser.add_argument("--save_traj", type=bool, default = True)
 
     
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     if args.mode == 'generate':   
         
         traj = graph_trajectory_geometric(randInit = True, user_defined_config = user_defined_config())
-       # traj.show_data_struct()
+        traj.show_data_struct()
         
     traj.form_states_tensor()
     

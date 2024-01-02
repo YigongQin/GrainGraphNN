@@ -478,7 +478,7 @@ if __name__=='__main__':
                     data.x_dict['joint'][:,0]= torch.clamp(data.x_dict['joint'][:,0], min=0, max=1)
                     data.x_dict['joint'][:,1]= torch.clamp(data.x_dict['joint'][:,1], min=0, max=max_y)
                     
-                    assert torch.all(data.x_dict['joint'][:,:2]>-1e-6) and torch.all(data.x_dict['joint'][:,:2]<1+1e-6)
+                    assert torch.all(data.x_dict['joint'][:,:2]>-1e-6) and torch.all(data.x_dict['joint'][:,0]<1+1e-6) and torch.all(data.x_dict['joint'][:,1]<max_y+1e-6)
                     data.x_dict['joint'][:,:2] = data.x_dict['joint'][:,:2]*geometry_scaling['domain_factor'] - geometry_scaling['domain_offset']
                     
                # print(data['nxt'])
@@ -504,6 +504,7 @@ if __name__=='__main__':
                 
                 print('true grain events: ', sorted(list(grain_event_truth))) 
                 print('grain events hit rate: %d/%d'%(right_pred_q, len(grain_event_truth)) ) 
+                print('toal/true/false positives of grain events: %d/%d/%d' % ( len(grain_event_list), right_pred_q, len(grain_event_list)-right_pred_q ) )
                 
                 
                 if args.reconstruct:

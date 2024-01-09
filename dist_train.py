@@ -73,7 +73,7 @@ def criterion(data, pred, mask, edge_dict):
         
             return classifier(z, y.float()) #+ 100*regress_part
 
-def dist_train(rank, world_size, model, train_list, test_list):
+def dist_train(rank, world_size, model, train_list, test_list, hp):
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12345'
     dist.init_process_group('nccl', rank=rank, world_size=world_size)
@@ -90,11 +90,11 @@ def dist_train(rank, world_size, model, train_list, test_list):
     train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
     test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)    
     
-    train(model, train_loader, test_loader, rank)
+    train(model, train_loader, test_loader, rank, hp)
     
     
 
-def train(model, train_loader, test_loader, rank):
+def train(model, train_loader, test_loader, rank, hp):
     
   #  if device=='cuda':
   #      print('use %d GPUs'%torch.cuda.device_count())
@@ -382,6 +382,8 @@ if __name__=='__main__':
 
 
     for data in dummy_loader: 
+        data.to(device)
+        model.to(device)
         pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
 
     print('\n')
@@ -390,7 +392,7 @@ if __name__=='__main__':
         
     start = time.time()
     world_size = torch.cuda.device_count()
-    mp.spawn(dist_train, args=(world_size, model, train_list, test_list), nprocs=world_size, join=True)
+    mp.spawn(dist_train, args=(world_size, model, train_list, test_list, hp), nprocs=world_size, join=True)
   #  model = train(model, train_loader, test_loader)
     
    # x = train.x

@@ -353,7 +353,7 @@ if __name__=='__main__':
         
     
 
-    dummy_loader = DataLoader(train_tensor[0], batch_size=hp.batch_size, shuffle=True)
+    dummy_loader = DataLoader(DynamicHeteroGraphTemporalSignal(train_list[:128]), batch_size=hp.batch_size, shuffle=True)
   #  test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
     train_loss_list=[]
     test_loss_list=[]

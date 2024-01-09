@@ -117,47 +117,7 @@ def train(model, train_loader, test_loader, rank):
   #  torch.autograd.set_detect_anomaly(True)
     metric = feature_metric(args.model_type, args.model_id)
 
-    train_loss, count = 0, 0
 
-    for data in train_loader:  
-        train.x = data.x_dict
-        train.edge = data.edge_index_dict
-        train.y = data.y_dict
-        count += 1 #data.batch
-        data.to(device)
-        pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-        train_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict)) 
-    train_loss/=count
-    
-    dist.barrier()
-
-    if rank == 0:
-        test_loss, count = 0, 0
-      #  test_acc_dict = defaultdict(float)
-        with torch.no_grad():
-            for data in test_loader:      
-                count += 1
-                data.to(device)
-                pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
-                test_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict))  
-                
-                metric.record(data.y_dict, pred, data['mask'], 0)
-       # if args.model_type=='regressor':
-       #     regress_acc(data.y_dict, pred, data['mask'], test_acc_dict, 0)
-       # print(test_acc_dict)
-        test_loss/=count
-    
-        print('Epoch:{}, Train loss:{:.6f}, valid loss:{:.6f}'.format(0, float(train_loss), float(test_loss)))
-        train_loss_list.append(float(train_loss))
-        test_loss_list.append(float(test_loss))  
-      #  train0, test0 = train_loss_list[0], test_loss_list[0]
-        
-        
-        metric.epoch_summary()
-    
-        print('\n')
-        pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print('total number of trained parameters ', pytorch_total_params)
     
    
     for epoch in range(1, hp.epoch+1):
@@ -393,8 +353,8 @@ if __name__=='__main__':
         
     
 
-   # train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
-   # test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
+    test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
     train_loss_list=[]
     test_loss_list=[]
     test_auc_list = []
@@ -419,7 +379,15 @@ if __name__=='__main__':
             model = GrainNN_classifier(hp, pretrained_model)
         else:
             model = GrainNN_classifier(hp)
-    
+
+
+    data = train_loader[0]
+    pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
+
+    print('\n')
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('total number of trained parameters ', pytorch_total_params)
+        
     start = time.time()
     world_size = torch.cuda.device_count()
     mp.spawn(dist_train, args=(world_size, model, train_list, test_list), nprocs=world_size, join=True)

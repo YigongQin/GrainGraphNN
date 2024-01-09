@@ -73,7 +73,7 @@ def criterion(data, pred, mask, edge_dict):
         
             return classifier(z, y.float()) #+ 100*regress_part
 
-def dist_train(rank, world_size, model, train_list, test_list, hp, args):
+def dist_train(rank, world_size, model, train_list, test_list, hp, args, train_loss_list, test_loss_list):
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12345'
     dist.init_process_group('nccl', rank=rank, world_size=world_size)
@@ -90,11 +90,11 @@ def dist_train(rank, world_size, model, train_list, test_list, hp, args):
     train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
     test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)    
     
-    model = train(model, train_loader, test_loader, rank, hp, args)
+    model = train(model, train_loader, test_loader, rank, hp, args, train_loss_list, test_loss_list)
     
     
 
-def train(model, train_loader, test_loader, rank, hp, args):
+def train(model, train_loader, test_loader, rank, hp, args, train_loss_list, test_loss_list):
     
   #  if device=='cuda':
   #      print('use %d GPUs'%torch.cuda.device_count())
@@ -128,7 +128,7 @@ def train(model, train_loader, test_loader, rank, hp, args):
         model.train()
         train_loss, count = 0, 0
         for data in train_loader:   
-            data.to(device)
+            data.to(rank)
             count += 1
             
             pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
@@ -154,7 +154,7 @@ def train(model, train_loader, test_loader, rank, hp, args):
                 for data in test_loader:  
                 
                     count += 1
-                    data.to(device)
+                    data.to(rank)
                     pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
                     test_loss += float(criterion(data.y_dict, pred, data['mask'], data.edge_index_dict)) 
                     metric.record(data.y_dict, pred, data['mask'], epoch)
@@ -392,7 +392,7 @@ if __name__=='__main__':
         
     start = time.time()
     world_size = torch.cuda.device_count()
-    mp.spawn(dist_train, args=(world_size, model, train_list, test_list, hp, args), nprocs=world_size, join=True)
+    mp.spawn(dist_train, args=(world_size, model, train_list, test_list, hp, args, train_loss_list, test_loss_list), nprocs=world_size, join=True)
   #  model = train(model, train_loader, test_loader)
     
    # x = train.x

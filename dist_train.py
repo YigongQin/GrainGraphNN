@@ -353,8 +353,8 @@ if __name__=='__main__':
         
     
 
-    train_loader = DataLoader(train_tensor, batch_size=hp.batch_size, shuffle=True)
-    test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
+    dummy_loader = DataLoader(train_tensor[0], batch_size=hp.batch_size, shuffle=True)
+  #  test_loader = DataLoader(test_tensor, batch_size=64, shuffle=False)
     train_loss_list=[]
     test_loss_list=[]
     test_auc_list = []
@@ -381,8 +381,8 @@ if __name__=='__main__':
             model = GrainNN_classifier(hp)
 
 
-    data = train_loader[0]
-    pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
+    for data in dummy_loader: 
+        pred = model(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
 
     print('\n')
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

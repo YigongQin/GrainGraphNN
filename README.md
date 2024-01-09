@@ -25,6 +25,11 @@ training
 python3 train.py --model_type=regressor --model_id=0 --device=cuda
 ```
 
+multi-GPU training
+```
+python3 dist_train.py --model_type=regressor --model_id=0 --device=cuda
+```
+
 testing
 
 ```

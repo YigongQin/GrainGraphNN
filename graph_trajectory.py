@@ -265,9 +265,9 @@ class graph_trajectory(graph):
             print('average grain size , err', d_mu_t, err_d)
             dis_t, bin_edge =  np.histogram(grain_size_t, bins, density=True)
             bin_edge = 0.5*(bin_edge[:-1] + bin_edge[1:])
-            KS = stats.ks_2samp(grain_size, grain_size_t)[0]
+            KS, p_value = stats.ks_2samp(grain_size, grain_size_t)
             KS = round(KS, 3)
-            print('KS stats', KS)
+            print('KS stats', KS, 'p value', p_value)
             ax.plot(bin_edge, dis_t*np.diff(bin_edge)[0], 'b', label='PF')
             
            # np.savetxt('dis'+str(self.seed)+'.txt', np.vstack([bin_edge, dis*np.diff(bin_edge)[0], dis_t*np.diff(bin_edge)[0]]).T)
@@ -877,7 +877,7 @@ class graph_trajectory(graph):
         #print(mis)
         ax.plot(z_sam, mis, 'r--', label='GNN')
         ax.set_xlabel(r'$z_l\ (\mu m)$')
-        ax.set_ylabel(r'$\Delta \theta$')
+        ax.set_ylabel(r'$\Delta \theta (^{\circ})$')
         ax.legend(fontsize=20)  
         
         plt.savefig('seed'+str(self.seed)+'_lmisorien.png', dpi=400, bbox_inches='tight')

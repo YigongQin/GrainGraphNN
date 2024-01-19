@@ -463,13 +463,15 @@ if __name__=='__main__':
 
                 ''' for no flux boundary condition, prevent nodes exceeding boundary and reset the grain 0'''
                 
+                max_y = 1
+                
                 if traj.BC == 'noflux':
                     data.x_dict['grain'][0, :2] = 0.5
                     data.x_dict['grain'][0, 3:5] = 0
                     data.x_dict['grain'][0, -1] = 0   
                     data.x_dict['joint'][:,:2] = (data.x_dict['joint'][:,:2] + geometry_scaling['domain_offset'])/geometry_scaling['domain_factor']
                     
-                    max_y = 1
+                    
                     if hasattr(traj, 'lyd'):
                         max_y = traj.lyd/traj.lxd
                     if hasattr(traj, 'max_y'):
@@ -508,7 +510,7 @@ if __name__=='__main__':
                 
                 
                 if args.reconstruct:
-                    if args.interp_frames>0 and traj.BC == 'noflux':
+                    if args.interp_frames>0:
                         for interp_frame in range(args.interp_frames):                            
                             cur_coeff = (1 + interp_frame)/(1 + args.interp_frames)
                             pre_coeff = 1 - cur_coeff
@@ -713,22 +715,22 @@ if __name__=='__main__':
                 traj.layer_err(layer_err_list)
                 np.savetxt('seed' + str(grain_seed) + '.txt', layer_err_list)
                # np.savetxt('event' + str(grain_seed) + '.txt', grain_acc_list) 
-                Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
-                if args.plot3D:
-                    Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+               # Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
+
             
             else:
                 
                 traj.qoi(mode='graph', compare=False)
-                traj.misorientation([i[0] for i in grain_acc_list], compare=False)
+               # traj.misorientation([i[0] for i in grain_acc_list], compare=False)
                 
                 traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)
                 traj.y = traj.x
                 traj.z = np.arange(-traj.mesh_size, traj.final_height+2*traj.mesh_size, traj.mesh_size)
                 
+                
+            if args.plot3D:
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 
-                if args.plot3D:
-                    Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span, alpha_field_list=alpha_field_list)
+                Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span//(args.interp_frames+1), alpha_field_list=alpha_field_list, subsample=args.reconst_mesh_size/0.08)
             
 
 '''

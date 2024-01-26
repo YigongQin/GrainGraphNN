@@ -15,6 +15,7 @@ from collections import defaultdict
 from math import pi
 from TemperatureProfile3DAnalytic import ThermalProfile
 from user_generate import user_defined_config
+from copy import deepcopy
 
 class graph_trajectory_geometric(graph_trajectory):
     def __init__(self, 
@@ -38,7 +39,7 @@ class graph_trajectory_geometric(graph_trajectory):
             self.geometry = user_defined_config['geometry']
         else:   
             self.meltpool = 'cylinder'
-            self.geometry = {'z0':1, 'r0':18}
+            self.geometry = {'z0':6, 'r0':30}
         
         if 'V' in self.physical_params:
             self.geometry['melt_pool_angle'] = np.arcsin(self.physical_params['R']/self.physical_params['V'])
@@ -80,6 +81,10 @@ class graph_trajectory_geometric(graph_trajectory):
         
         volume = np.asarray(f['volume'])        
         grainToPF = np.asarray(f['grainToPF'])
+        
+        print('total number of choices of orientations: ', num_theta)
+        print('total number of phase fields: ', len(grainToPF))
+        
         PF_on_manifold = []
         
         for grain, pf in enumerate(grainToPF):
@@ -129,8 +134,11 @@ class graph_trajectory_geometric(graph_trajectory):
         
         
         PF_on_manifold = np.asarray(PF_on_manifold)
+        print('number of phase fields on SLI: ', len(PF_on_manifold))
+        
         self.theta_x = np.zeros(1 + self.num_regions)
         self.theta_z = np.zeros(1 + self.num_regions)
+        
         
         self.theta_x[2:] = angles[PF_on_manifold%num_theta + 1]
         self.theta_z[2:] = angles[PF_on_manifold%num_theta + 1 + num_theta]
@@ -145,7 +153,7 @@ class graph_trajectory_geometric(graph_trajectory):
     def show_manifold_plane(self):
         
 
-        fig, ax = plt.subplots(1, 4, figsize=(20, 5), gridspec_kw={'width_ratios': [1, 1, 1, 1.1], 'height_ratios': [1]})
+        fig, ax = plt.subplots(1, 5, figsize=(25, 5), gridspec_kw={'width_ratios': [1, 1, 1, 1.1, 1.1], 'height_ratios': [1]})
 
 
         ax[0].plot([0, self.lyd], [0, 0], 'k')
@@ -192,24 +200,28 @@ class graph_trajectory_geometric(graph_trajectory):
         ax[3].axis('off')        
         
         
+        ax[4].imshow(self.theta_z[self.alpha_field.T]/pi*180, origin='lower', cmap='coolwarm', vmin=0, vmax=90)
+
+        ax[4].set_xticks([])
+        ax[4].set_yticks([])  
         
         self.save_fig = 'manifold_2.png'
         
         if self.save_fig:
             plt.savefig(self.save_fig, dpi=400)
             
-    def createGraph(self):
+    def createGraph(self, image):
         
         cur_joint = defaultdict(list)
-        s = self.imagesize[0]
+        s = image.shape[0]
         quadraples = defaultdict(list)
-        for j in range(1, self.euclidean_alpha_pde.shape[1] -1):
-            for i in range(1, self.euclidean_alpha_pde.shape[0] -1):
+        for j in range(1, image.shape[1] -1):
+            for i in range(1, image.shape[0] -1):
                 occur = {}
                 for dj in [-1, 0, 1]:
                     for di in [-1, 0, 1]:
                         if di**2 + dj**2<=1:
-                            pixel = self.euclidean_alpha_pde[i+di, j+dj]
+                            pixel = image[i+di, j+dj]
                             if pixel in occur:
                                 occur[pixel]+=1
                             else:
@@ -231,7 +243,7 @@ class graph_trajectory_geometric(graph_trajectory):
                         quadraples[index] = [i/s, j/s, max_occur]
         
         if self.BC == 'noflux':
-            self.find_boundary_vertex(self.euclidean_alpha_pde, cur_joint) 
+            self.find_boundary_vertex(image, cur_joint) 
         
                
         print('number of quadruples', quadraples)
@@ -248,12 +260,17 @@ class graph_trajectory_geometric(graph_trajectory):
 
                     del_joints.update({arg:cur_joint[arg]})
                     del cur_joint[arg]
-   
+        
+       # self.remove_one_two_side_grain(cur_joint)
+    
         total_missing, candidates, miss_case  = check_connectivity(cur_joint)
         use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates, del_joints)
         total_missing, candidates, miss_case  = check_connectivity(cur_joint)
         print('total missing edges, ', total_missing, miss_case)
-                    
+         
+
+        
+       # del cur_joint[(371, 381, 385)]
         vert_cnt = 0
         for k, v in cur_joint.items():
             self.vertices[vert_cnt] = v[:2]
@@ -262,6 +279,42 @@ class graph_trajectory_geometric(graph_trajectory):
             
         self.joint2vertex = dict((tuple(sorted(v)), k) for k, v in self.vertex2joint.items())
         self.update(init=True)        
+
+
+    def remove_one_two_side_grain(self, cur_joint):
+        remove_list = []
+        grain_occur = defaultdict(int)
+        for k, v in cur_joint.items():
+            for grain in k:
+                grain_occur[grain] += 1
+
+        for k, v in grain_occur.items():
+            if v<= 2:
+                remove_list.append(k)
+        replace = []
+        for r in remove_list:
+            for k, v in cur_joint.copy().items():
+                if r in set(k):
+                    neigh = set(k)
+                    neigh.remove(r)
+                    replace.append(list(neigh)[0])
+                    break
+                
+        for i, r in enumerate(remove_list):    
+            print(r, replace[i])
+            for k, v in cur_joint.copy().items():
+                if r in set(k):
+                    if replace[i] in set(k):
+                        del cur_joint[k]
+                        print(k)
+                    else:
+                        neigh = list(set(k))
+                        ind = neigh.index(r)
+                        neigh[ind] = replace[i]
+                        cur_joint[tuple(sorted(neigh))] = cur_joint[k]
+                        print(k, '->', tuple(sorted(neigh)))
+                    
+        print('remove one two side grain', remove_list)
         
     def cylindrical_y_offset(self):         
         
@@ -305,7 +358,7 @@ if __name__ == '__main__':
     parser.add_argument("--mode", type=str, default = 'test')
     parser.add_argument("--rawdat_dir", type=str, default = './cylinder/')
     parser.add_argument("--save_dir", type=str, default = './cylinder/')
-    parser.add_argument("--seed", type=int, default = 49)
+    parser.add_argument("--seed", type=int, default = 48)
 
     parser.add_argument("--boundary", type=str, default = 'noflux')
     parser.add_argument("--size", dest='adjust_grain_size', action='store_true')
@@ -327,10 +380,20 @@ if __name__ == '__main__':
                                           adjust_grain_orien = args.adjust_grain_orien)
         
         traj.load_pde_data(rawdat_dir = args.rawdat_dir)
-        traj.createGraph()
-        traj.alpha_field = traj.alpha_field.T
         
-                            
+        
+        traj_copy = deepcopy(traj)
+       # traj_copy2 = deepcopy(traj)
+        
+      #  traj_copy2.createGraph(traj_copy2.euclidean_alpha_pde)
+        
+        traj_copy.createGraph(traj_copy.euclidean_alpha_pde)
+        
+      
+        traj.createGraph(traj_copy.alpha_field.T[:,:-1])
+       # traj.createGraph(traj.euclidean_alpha_pde)
+        
+        traj.alpha_field = traj.alpha_field.T                 
         traj.show_manifold_plane()
 
 

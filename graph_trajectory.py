@@ -921,15 +921,17 @@ class graph_trajectory(graph):
         if frame>0:
             grain_state[:, 4] = self.extraV_frames[:, frame]/s**3
         
+        theta_x = self.theta_x[1:]
+        theta_z = self.theta_z[1:]
         if hasattr(self, 'manifold_normal'):
-            self.theta_x[1:] = (self.theta_x[1:] - np.array(self.manifold_normal['x']))%(pi/2) 
-            self.theta_z[1:] = (self.theta_z[1:] - np.array(self.manifold_normal['z']))%(pi/2) 
+            theta_x = (self.theta_x[1:] - np.array(self.manifold_normal['x']))%(pi/2) 
+            theta_z = (self.theta_z[1:] - np.array(self.manifold_normal['z']))%(pi/2) 
             
             
-        grain_state[:, 5] = np.cos(self.theta_x[1:])
-        grain_state[:, 6] = np.sin(self.theta_x[1:])
-        grain_state[:, 7] = np.cos(self.theta_z[1:])
-        grain_state[:, 8] = np.sin(self.theta_z[1:])
+        grain_state[:, 5] = np.cos(theta_x)
+        grain_state[:, 6] = np.sin(theta_x)
+        grain_state[:, 7] = np.cos(theta_z)
+        grain_state[:, 8] = np.sin(theta_z)
         
         # for no flux BC, the first grain is always the boundary grain
         if self.BC == 'noflux':
@@ -955,7 +957,7 @@ class graph_trajectory(graph):
             for grain in grains:
                 gj_edge.append([grain-1, joint])
                 gj_len.append(periodic_dist_(self.vertices[joint], self.region_center[grain]))
-        
+
         jg_edge = [[joint, grain] for grain, joint in gj_edge]
         jj_edge = [[src, dst] for src, dst in self.edges if src>-1 and dst>-1]
         

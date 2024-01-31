@@ -7,15 +7,20 @@ Created on Thu Oct 12 14:54:13 2023
 """
 
 from graph_trajectory import graph_trajectory, check_connectivity, use_quadruple_find_joint
+from graph_datastruct import newcmp
+import matplotlib.pyplot as plt
+
 import h5py, glob, re, argparse, os, dill
 import numpy as np
 from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
 from collections import defaultdict
 from math import pi
 from TemperatureProfile3DAnalytic import ThermalProfile
 from user_generate import user_defined_config
 from copy import deepcopy
+
+
+
 
 class graph_trajectory_geometric(graph_trajectory):
     def __init__(self, 
@@ -103,7 +108,8 @@ class graph_trajectory_geometric(graph_trajectory):
             self.manifold = self.manifold.reshape((4, self.ny_geod, self.nx),order='F')       
             self.alpha_pde = self.manifold[-1,:,:].T
             geodesic_length = np.max(self.geodesic_y) - np.min(self.geodesic_y)
-            N = int( geodesic_length/self.mesh_size )
+          #  self.lyd = geodesic_length
+            N = int(np.round(geodesic_length/self.mesh_size))+1
             
             xs0, ys0 = np.meshgrid(self.x, self.geodesic_y, indexing='ij')
             xs, ys = np.meshgrid(self.x, np.linspace(np.min(self.geodesic_y), np.max(self.geodesic_y), N, endpoint=True), indexing='ij')
@@ -140,22 +146,30 @@ class graph_trajectory_geometric(graph_trajectory):
         self.theta_z = np.zeros(1 + self.num_regions)
         
         
-        self.theta_x[2:] = angles[PF_on_manifold%num_theta + 1]
-        self.theta_z[2:] = angles[PF_on_manifold%num_theta + 1 + num_theta]
+        angle_on_manifold = np.zeros_like(PF_on_manifold, dtype=int)
+        for i, p in enumerate(PF_on_manifold):
+            if p<=num_theta:
+                angle_on_manifold[i] = p
+            else:
+                angle_on_manifold[i] = p%num_theta + 1
+        
+        self.theta_x[2:] = angles[angle_on_manifold]
+        self.theta_z[2:] = angles[angle_on_manifold + num_theta]
         
         
         cur_grain, counts = np.unique(self.euclidean_alpha_pde, return_counts=True)
+        self.euclidean_alpha_pde = self.euclidean_alpha_pde.T
         self.area_counts = dict(zip(cur_grain, counts))
         self.layer_grain_distribution()
         
-        self.imagesize = (int(self.lxd/self.mesh_size)+1, int(geodesic_length/self.mesh_size)+1)
+        self.imagesize = (int(np.round(self.lxd/self.mesh_size))+1, int(np.round(geodesic_length/self.mesh_size))+1)
         
-    def show_manifold_plane(self):
-        
+    def show_data_struct(self):
+       # graph_trajectory.show_data_struct(self)
+        print('plot manifold')
+        fig, ax = plt.subplots(1, 4, figsize=(20, 5), gridspec_kw={'width_ratios': [1, 1, 1, 1], 'height_ratios': [1]})
 
-        fig, ax = plt.subplots(1, 5, figsize=(25, 5), gridspec_kw={'width_ratios': [1, 1, 1, 1.1, 1.1], 'height_ratios': [1]})
-
-
+        """
         ax[0].plot([0, self.lyd], [0, 0], 'k')
         ax[0].plot([0, self.lyd], [self.lzd, self.lzd], 'k')
         ax[0].plot([0, 0], [0, self.lzd], 'k')
@@ -171,50 +185,52 @@ class graph_trajectory_geometric(graph_trajectory):
         ax[0].axis("equal")
         ax[0].axis('off')  
         
+        """
 
-        ax[1].imshow(self.theta_z[self.alpha_pde.T]/pi*180, origin='lower', cmap='coolwarm', vmin=0, vmax=90)
-        ax[1].set_xticks([])
-        ax[1].set_yticks([])    
-        
 
-        ax[2].imshow(self.theta_z[self.euclidean_alpha_pde.T]/pi*180, origin='lower', cmap='coolwarm', vmin=0, vmax=90)
-       # x, y = zip(*self.abnormal_points)
-       # x = [i*self.patch_grid_size for i in x]
-       # y = [i*self.patch_grid_size for i in y]
-       # ax[2].scatter(x, y)
-        ax[2].set_xticks([])
-        ax[2].set_yticks([])  
-        
-        
-        for region, coors in self.region_coors.items():
-            # print(region, coors)
+        for coors in self.region_coors.values():
             for i in range(len(coors)):
                 cur = coors[i]
                 nxt = coors[i+1] if i<len(coors)-1 else coors[0]
-                ax[3].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
+                ax[0].plot([cur[0],nxt[0]], [cur[1],nxt[1]], 'k')
                 
-       # x, y = zip(*self.region_center.values())     
+        x, y = zip(*self.region_center.values())     
     
       #  ax[0].scatter(list(x), list(y), c = 'k')
-        ax[3].axis("equal")
-        ax[3].axis('off')        
+        ax[0].axis("equal")
+        ax[0].axis('off')
+       # ax[0].set_title('(Q, V, E)=(%d, %d, %d)'%(Q, V, E))
+       # ax[0].set_title('Graph')
+        ax[0].set_frame_on(False)
         
+        ax[1].imshow(self.theta_z[self.alpha_field]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[1].set_xticks([])
+        ax[1].set_yticks([])
+      #  ax[1].set_title('GrainGNN') 
         
-        ax[4].imshow(self.theta_z[self.alpha_field.T]/pi*180, origin='lower', cmap='coolwarm', vmin=0, vmax=90)
+        ax[2].imshow(self.theta_z[self.euclidean_alpha_pde]/pi*180, origin='lower', cmap=newcmp, vmin=0, vmax=90)
+        ax[2].set_xticks([])
+        ax[2].set_yticks([])
+       # ax[2].set_title('Phase field')         
+        
+        ax[3].imshow(1*(self.alpha_field!=self.euclidean_alpha_pde),cmap='Reds',origin='lower')
+        ax[3].set_xticks([])
+        ax[3].set_yticks([])
+        p_err = int(np.round(self.error_layer*100))
 
-        ax[4].set_xticks([])
-        ax[4].set_yticks([])  
-        
-        self.save_fig = 'manifold_2.png'
-        
-        if self.save_fig:
-            plt.savefig(self.save_fig, dpi=400)
+            
+            
+        if self.save:
+            plt.savefig(self.save, dpi=400)
             
     def createGraph(self, image):
         
         cur_joint = defaultdict(list)
         s = image.shape[0]
         quadraples = defaultdict(list)
+        
+        
+        
         for j in range(1, image.shape[1] -1):
             for i in range(1, image.shape[0] -1):
                 occur = {}
@@ -387,14 +403,14 @@ if __name__ == '__main__':
         
       #  traj_copy2.createGraph(traj_copy2.euclidean_alpha_pde)
         
-        traj_copy.createGraph(traj_copy.euclidean_alpha_pde)
+        traj_copy.createGraph(traj_copy.euclidean_alpha_pde.T)
         
       
-        traj.createGraph(traj_copy.alpha_field.T[:,:-1])
+        traj.createGraph(traj_copy.alpha_field.T)
        # traj.createGraph(traj.euclidean_alpha_pde)
         
-        traj.alpha_field = traj.alpha_field.T                 
-        traj.show_manifold_plane()
+              
+        traj.show_data_struct()
 
 
     if args.mode == 'generate':   
@@ -403,7 +419,7 @@ if __name__ == '__main__':
         traj.show_data_struct()
         
     traj.form_states_tensor()
-    
+     
     test_samples = []
     hg0 = traj.states[0]
     
@@ -424,7 +440,7 @@ if __name__ == '__main__':
     G = str(round(traj.physical_params['G'],3))
     R = str(round(traj.physical_params['R'],3))
     
-    
+ 
     with open(args.save_dir + 'seed' + str(args.seed) + '_G' + G + '_R' + R +\
               '_span' + str(hg0.span) + '.pkl', 'wb') as outp:
         dill.dump(test_samples, outp)

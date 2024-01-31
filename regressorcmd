@@ -1,3 +1,0 @@
-for i in {0..23}; do echo "python3 grainNN2.py --model_id=${i} --model_type=classifier --regressor_id=14"; done > cmdfile
-#for i in {0..35}; do echo "python3 grainNN2.py --model_id=${i}"; done > cmdfile
-#for i in {0..26}; do echo "python3 grainNN2.py --model_id=${i} --model_type=classifier"; done > cmdfile

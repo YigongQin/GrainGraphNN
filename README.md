@@ -35,3 +35,17 @@ testing
 ```
 python3 test.py --seed=0
 ```
+
+## Cite
+
+If you are using the codes in this repository, please cite the following paper
+```
+@misc{qin2024graingnn,
+      title={GrainGNN: A dynamic graph neural network for predicting 3D grain microstructure}, 
+      author={Yigong Qin and Stephen DeWitt and Balasubramanian Radhakrishnan and George Biros},
+      year={2024},
+      eprint={2401.03661},
+      archivePrefix={arXiv},
+      primaryClass={cs.CE}
+}
+```

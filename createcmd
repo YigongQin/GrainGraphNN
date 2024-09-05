@@ -1,1 +1,0 @@
-for i in {0..379}; do echo "python3 graph_trajectory.py --mode=train --rawdat_dir=../LGR --train_dir=./quality/ --seed=${i}"; done > cmdfile

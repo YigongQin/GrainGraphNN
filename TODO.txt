@@ -1,6 +1,0 @@
-1. Fix initial grain distribution  
-2. scale ds for eliminated grains
-3. improve edge rotation
-4. edge attr necessary?
-5. z, change /frames to /(frames-1)
-6. grain-grain edge

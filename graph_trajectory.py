@@ -62,12 +62,13 @@ def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, ca
             miss_case_sum = 0
 
             for i, j in miss_case.items():
-                if j<0:
-                    return
+               # if j<0:
+               #     return
                 if len(set(i).intersection(set(q)))>=2:
                     miss_case_sum += j
                  #   max_case = max(max_case, j)                 
-                
+            if miss_case_sum == 0:
+                continue
             print('using quadraples',q,' to find missing links', miss_case_sum)        
             max_case = 1 if miss_case_sum<4 else 2
             for ans in list(itertools.combinations(possible, max_case)):
@@ -78,6 +79,8 @@ def use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, ca
                     else:
                         cur_joint[a] = coor
                 cur, _, case_new = check_connectivity(cur_joint)
+               # print(cur, total_missing, miss_case_sum)
+               # print(case_new)
                 if miss_case_sum>0 and cur == total_missing - miss_case_sum and len(case_new)<=len(miss_case):
                     print('fixed!')
                     total_missing = cur
@@ -400,6 +403,7 @@ class graph_trajectory(graph):
             
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             print('total missing edges, ', total_missing)
+           # print(miss_case)
             use_quadruple_find_joint(quadraples, total_missing, cur_joint, miss_case, candidates, del_joints)
             total_missing, candidates, miss_case  = check_connectivity(cur_joint)
             
@@ -1104,8 +1108,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("Generate heterograph trajectory")
     parser.add_argument("--mode", type=str, default = 'test')
-    parser.add_argument("--rawdat_dir", type=str, default = './')
-    parser.add_argument("--save_dir", type=str, default = './')
+    parser.add_argument("--rawdat_dir", type=str, default = './rawdat_PF/120_120/')
+    parser.add_argument("--save_dir", type=str, default = './graphs/120_120/')
     parser.add_argument("--seed", type=int, default = 0)
     parser.add_argument("--G", type=float, default = 2)
     parser.add_argument("--R", type=float, default = 0.4)
@@ -1118,7 +1122,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--frame", type=int, default = 121)
     parser.add_argument("--span", type=int, default = 6)
-    parser.add_argument("--lxd", type=int, default = 40)
+    parser.add_argument("--lxd", type=int, default = 120)
     parser.add_argument("--regenerate", type=bool, default = True)
     parser.add_argument("--save_traj", type=bool, default = True)
     parser.add_argument("--prev", type=int, default = 0)

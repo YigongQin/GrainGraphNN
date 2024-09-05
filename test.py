@@ -20,30 +20,12 @@ from graph_trajectory_geometric import graph_trajectory_geometric
 from metrics import feature_metric, edge_error_metric
 
 from visualization3D.pv_3Dview import grain_visual
-import meshio
+
 from scipy.interpolate import griddata
 from tvtk.api import tvtk, write_data
 from math import pi
 
-"""
-def nucleation_prob_constGR(physical_params, z_min, z_max):
 
-    surface_undercooling = physical_params['R']/physical_params['mu']
-    
-    DT_min = physical_params['G']*()
-    DT_max = DT_min + physical_params['G']
-    
-    
-    DT = torch.linspace()
-    
-    DT_undim = (DT - physical_params['DT_mean'])/torch.sqrt(2)
-    
-    
-    
-    nucl_prob = lambda x: physical_params['Nmax']/torch.sqrt(torch.pi)/ph*torch.special.erf(x)
-
-    return 
-"""
 
 def scale_feature_patchs(factor, x_dict, edge_attr_dict, boundary):
     
@@ -98,11 +80,11 @@ if __name__=='__main__':
     parser.add_argument("--regressor_id", type=int, default=0)
     parser.add_argument("--classifier_id", type=int, default=1)
     parser.add_argument("--use_sample", type=str, default='all')
-    parser.add_argument("--truth_dir", type=str, default='./debug_set/all/')
-    parser.add_argument("--seed", type=str, default='10020')
+    parser.add_argument("--truth_dir", type=str, default='./graphs/120_120/')
+    parser.add_argument("--seed", type=str, default='0')
     parser.add_argument("--growth_height", type=float, default='-1')
     parser.add_argument("--interp_frames", type=int, default=0)    
-    parser.add_argument("--save_fig", type=int, default=0)
+    parser.add_argument("--save_fig", type=int, default=2)
     parser.add_argument("--reconst_mesh_size", type=float, default=0.08) 
     parser.add_argument("--nucleation_density", type=float, default=0.00)
 
@@ -629,17 +611,7 @@ if __name__=='__main__':
                 Gv.graph_recon(traj, rawdat_dir=args.truth_dir, span=span//(args.interp_frames+1), alpha_field_list=alpha_field_list, subsample=args.reconst_mesh_size/0.08)
             
 
-'''
-                    
-#  edge_event_truth = set.union(*traj.edge_events[:frame+1])
-
-#  edge_event_list.extend([tuple(i) for i in pairs])
-#  right_pred_p = len(set(edge_event_list).intersection(edge_event_truth))                    
-
-#  print('edge events:', pairs)
-#  print('edge events hit rate: %d/%d'%(right_pred_p, len(edge_event_truth)//2) )                    
-                  
-
+'''              
     init_z = 2
     final_z = 50
     frame_all = 120

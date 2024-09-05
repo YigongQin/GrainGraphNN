@@ -297,7 +297,7 @@ if __name__=='__main__':
             imagesize = (0, 0)
             if args.reconstruct:  
                 if hasattr(traj, 'max_y'):
-                    imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.max_y*traj.lxd/args.reconst_mesh_size)+1)
+                    imagesize = (int(np.round(traj.lxd/args.reconst_mesh_size))+1, int(np.round(traj.max_y*traj.lxd/args.reconst_mesh_size))+1)
                 elif hasattr(traj, 'lyd'):
                     imagesize = (int(traj.lxd/args.reconst_mesh_size)+1, int(traj.lyd/args.reconst_mesh_size)+1)
                 else:                        
@@ -319,7 +319,7 @@ if __name__=='__main__':
                 
             if args.save_fig>0:
                 traj.save = 'seed' + str(grain_seed) + '_z' + str(0) + '.png'
-                traj.show_data_struct()
+                #traj.show_data_struct()
             
             if args.growth_height>0:
                 traj.final_height = traj.ini_height + args.growth_height
@@ -347,6 +347,7 @@ if __name__=='__main__':
             edge_event_list = []  
             grain_acc_list = [(traj.ini_height, 0, 0, 0)]
             traj.plot_polygons(imagesize)
+          #  traj.show_data_struct()
                            
             if 'melt_left' not in geometry_scaling:                                
                 alpha_field_list = [traj.alpha_field.T.copy()]
@@ -601,112 +602,7 @@ if __name__=='__main__':
             
             traj.event_acc(grain_acc_list)
             
-            if args.reconstruct:
-                
-                
-                if hasattr(traj, 'meltpool'):
 
-                    nx, ny, nt = alpha_field_list[0].shape[0], alpha_field_list[0].shape[1],  len(alpha_field_list)
-                    x = np.linspace(0, (nx-1)*args.reconst_mesh_size, num = nx, endpoint=True)
-                    y = np.linspace(0, (ny-1)*args.reconst_mesh_size, num = ny, endpoint=True) 
-                    z = np.linspace(0, (nt-1)*train_delta_z*span/(1+args.interp_frames), num = nt, endpoint=True)
-                    xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
-                    cartesian_theta = (yy + traj.cylindrical_y_offset())/traj.geometry['r0']
-                    
-                    if traj.meltpool == 'cylinder':
-
-                        cartesian_z = traj.lzd + traj.geometry['z0'] - (traj.geometry['r0'] - zz)*np.cos(cartesian_theta)
-                        cartesian_y = traj.lyd/2 + (traj.geometry['r0'] - zz)*np.sin(cartesian_theta) 
-                        cartesian_x = xx
-                        top_cut = traj.lzd
-
-
-                    if traj.meltpool == 'moving': 
-                        
-                        melt_pool_angle = traj.geometry['melt_pool_angle']
-                        radius = traj.geometry['z0'] + (traj.geometry['r0'] - traj.geometry['z0'])*xx/x[-1] 
-                        cartesian_z = radius*(1-np.cos(cartesian_theta))
-                        cartesian_y = traj.lyd/2 + radius*np.sin(cartesian_theta) 
-                        cartesian_z += zz
-                        cartesian_x = xx + zz/np.tan(melt_pool_angle)                        
-                        
-                        
-                        cartesian_x, cartesian_z = cartesian_x*np.cos(melt_pool_angle) + cartesian_z*np.sin(melt_pool_angle), - cartesian_x*np.sin(melt_pool_angle) + cartesian_z*np.cos(melt_pool_angle)    
-                        top_cut = 0
-
-                    xx, yy, zz = cartesian_x.flatten(order='F'), cartesian_y.flatten(order='F'), cartesian_z.flatten(order='F')
-                    alpha_field_save = np.stack(alpha_field_list, axis=-1)
-                    alpha_field_save = alpha_field_save.flatten(order='F')
-                        
-                    alpha_field_save = alpha_field_save[zz<top_cut]
-                    xx = xx[zz<top_cut]
-                    yy = yy[zz<top_cut]
-                    zz = zz[zz<top_cut]
-
-        
-                    points = np.stack([xx,yy,zz], axis=0).T
-                    cells = [("vertex", [[i] for i in range(len(xx))] )]
-                    mesh = meshio.Mesh(points, cells, point_data={"alpha":traj.theta_z[alpha_field_save]/pi*180})
-                    mesh.write("unstructured_seed"+str(seed)+".vtk")
-    
-
-                    """ interpolate to an image """
-                    """
-                    interp_mesh = 0.1
-                    xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)
-                    yi = np.linspace(0, traj.lyd, num = int(traj.lyd/interp_mesh)+1, endpoint=True)
-                    zi = np.array([traj.lzd])
-                    xxi, yyi, zzi = np.meshgrid(xi, yi, zi, indexing='ij')
-                    print(points.shape, )
-                    alpha_i = griddata(points, alpha_field_save, (xxi, yyi, zzi), method='nearest')                    
-                    """
-                    
-                    """
-                    interp_mesh = 0.1
-                    xi = np.linspace(0, traj.lxd, num = int(traj.lxd/interp_mesh)+1, endpoint=True)
-                    yi = np.linspace(0, traj.lyd, num = int(traj.lyd/interp_mesh)+1, endpoint=True)
-                    zi = np.linspace(0, traj.lzd, num = int(traj.lzd/interp_mesh)+1, endpoint=True)  
-                    xxi, yyi, zzi = np.meshgrid(xi, yi, zi, indexing='ij')
-                    print(points.shape, )
-                    alpha_i = griddata(points, alpha_field_save, (xxi, yyi, zzi), method='nearest')
-
-
-                    dist = np.sqrt( (yyi-traj.lyd/2)**2 + (zzi-traj.lzd-traj.geometry['z0'])**2 ) - traj.geometry['r0']
-                    alpha_i = traj.theta_z[alpha_i]/pi*180
-                    
-                    alpha_i[dist>0] = np.nan
-                   
-                                        
-                    grid = tvtk.ImageData(spacing=(interp_mesh, interp_mesh, interp_mesh), origin=(0, 0, 0), 
-                           dimensions=alpha_i.shape)
-        
-                    grid.point_data.scalars = alpha_i.ravel(order='F')
-                    grid.point_data.scalars.name = 'theta_z'
-                    rawdat_dir = ''
-                    dataname = rawdat_dir + 'seed'+str(seed) + '.vtk'
-                   #rawdat_dir + 'seed'+str(self.seed)+'_G'+str('%2.2f'%self.physical_params['G'])\
-                   #+'_R'+str('%2.2f'%self.physical_params['R'])+'.vtk'
-                    write_data(grid, dataname)
-                   
-                    """
-                
-               # alpha_field_save = alpha_field_save.flatten(order='F')
-                
-                if hasattr(traj, 'geometry'):
-                    z0 = traj.geometry['z0']
-                    r0 = traj.geometry['r0']
-                else:
-                    z0 = traj.ini_height
-                    r0 = 0
-                """
-                hf = h5py.File('alpha_layer_seed'+str(seed)+'_nx'+str(alpha_field_list[0].shape[0])+
-                               '_ny'+str(alpha_field_list[0].shape[1])+'_nt'+str(len(alpha_field_list))+
-                               '_z'+str(z0)+'_r'+str(r0)+'.h5', 'w')
-                hf.create_dataset('alpha_layer', data=alpha_field_save)
-                hf.create_dataset('dx', data=traj.mesh_size)
-                hf.create_dataset('dz', data=traj.span*delta_z)
-                hf.close()
-                """
             if args.compare:
                 
                 traj.qoi(mode='graph', compare=True)
@@ -722,11 +618,11 @@ if __name__=='__main__':
                 
                 traj.qoi(mode='graph', compare=False)
                # traj.misorientation([i[0] for i in grain_acc_list], compare=False)
-                
+                """
                 traj.x = np.arange(-traj.mesh_size, traj.lxd+2*traj.mesh_size, traj.mesh_size)
                 traj.y = traj.x
                 traj.z = np.arange(-traj.mesh_size, traj.final_height+2*traj.mesh_size, traj.mesh_size)
-                
+                """    
                 
             if args.plot3D:
                 Gv = grain_visual(seed=grain_seed, height=traj.final_height, lxd=traj.lxd) 

@@ -49,14 +49,14 @@ For the domain size (40um, 40um, 50um):
    # specify the seed number, domain size (--lxd), raw data folder, and the output folder for graphs
    python3 graph_trajectory.py --mode=test --rawdat_dir=./rawdat_PF/40_40/ --seed=10020 --lxd=40 --save_dir=./graphs/40_40/
    ```
-   After this step, you should get the files seed10020_G1.904_R0.558_span6.pkl and traj10020.pkl in graphs/40_40/. You can verify them with the files given in the repo.
+   After this step, you should get the files `seed10020_G1.904_R0.558_span6.pkl` and `traj10020.pkl` in graphs/40_40/. You can verify them with the files given in the repo.
 3. **Evolve the graph and get image results**
    
    ```sh
    # specify the folder of the graph data (--truth_dir) and seed number
    python3 test.py --truth_dir=./graphs/40_40/ --seed=10020
    ```
-   After this step, you should get the plots for quantities of interest (QoIs) and image comparison for the last layer of grain structure. Compare the generated images with the Fig.8 of the paper
+   After this step, you should get the plots for quantities of interest (QoIs) and image comparison for the last layer of grain structure. Compare the generated images with the `Fig.8` of the paper
 ![Alt text](figures/paper_fig8.png)
 
 Similarly for the domain of (120um, 120um, 50um):
@@ -65,7 +65,7 @@ gzip -d rawdat_PF/120_120/Epita_grains1043_nodes2086_frames120_lxd120.000008_G10
 python3 graph_trajectory.py --mode=test --rawdat_dir=./rawdat_PF/120_120/ --seed=0 --lxd=120 --save_dir=./graphs/120_120/
 python3 test.py --truth_dir=./graphs/120_120/ --seed=0
 ```
-Results correspond to Fig.11(a) of the paper
+Results correspond to `Fig.11(a)` of the paper
 ![Alt text](figures/paper_fig11.png)
 ### Numbers to check
 
@@ -77,26 +77,29 @@ Results correspond to Fig.11(a) of the paper
 ## Inference the models only
 The accuracy of the model under various thermal and grain configurations is discussed in the paper. If you are interested in the same material -- stainless steel 316L, and a similar range of thermal conditions, you can choose to run GrainGNN inference without having the high-fidelity data:
 ```sh
-# specify thermal parameters (G,R), domain size lxd, and a seed number
+# specify thermal parameters (`G,R`), domain size `lxd`, and a seed number
 python3 graph_trajectory.py --mode=generate --seed=1 --lxd=40 --save_dir=./graphs/40_40/ --G=10 --R=2
 python3 test.py --truth_dir=./graphs/40_40/ --seed=1 --no-compare
 ```
-Explore more arguments in graph_trajectory.py for more configuration, such as changing the grain size and orientation distributions with --size, --orien
+Explore more arguments in `graph_trajectory.py` for more configuration, such as changing the grain size and orientation distributions with `--size, --orien`
 
 ## Train models with the same phase field data (and extracted graphs) used in the paper
+The graph pairs used for training can be downloaded here: https://drive.google.com/file/d/19uNh7XwHWMhF4PGLFcD-VM5YvYXBpHV_/view?usp=sharing  
+Decompress the file and optionally change the training parameters in the `parameters.py`
 ```sh
+gzip dataset_train.pkl.gz
 python3 train.py --model_type=regressor --model_id=0 --device=cuda
 python3 train.py --model_type=classifier --model_id=1 --device=cuda
 ```
-Log files of the training process are provided in model/ folder. The training curves can be found in the paper.
+Log files of the training process are provided in `model/` folder. The training curves can be found in the paper.
 
 ## Create a new training dataset
-The size of the full phase field training data is very large. We are figuring out ways to share the raw phase field data.  
-To extract graph pairs from a PF .h5 file for training:
+The size of the full phase field training data is very large. We are figuring out ways to share the raw phase field data. Try generating new phase field data using codes here https://github.com/YigongQin/cuPF    
+To extract graph pairs from a PF `.h5` file for training:
  ```sh
  python3 graph_trajectory.py --mode=train --rawdat_dir=./rawdat_PF/40_40/ --seed=10020 --lxd=40 --save_dir=./graphs/40_40/
  ```
-Then use create_datasets.py to combine graphs extracted from different PF files.
+Then use `create_datasets.py` to combine graphs extracted from different PF files.
 
 
 

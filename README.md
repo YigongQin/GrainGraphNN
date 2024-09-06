@@ -36,29 +36,30 @@ pip3 install -r requirements.txt
 
 ## Reproduce paper results
 The trained models, including the regressor and classifier, are provided in the folder model/   
-In the paper, the trained models are validated by comparing the predicted 3D field data with the high-fidelity data. We choose a phase field (PF) solver as the method to generate high-fidelity data. The codes can be found here https://github.com/YigongQin/cuPF. Under the folder rawdat_PF/, we provide two compressed PF data. One is of domain size 40umX40umX50um, and the other is of domain size 120umX120umX50um. To compare the GrainGNN results and PF results, and reproduce the results reported in the paper, follow the steps below.
+In the paper, the trained models are validated by comparing the predicted 3D field data with the high-fidelity data. We choose a phase field (PF) solver as the method to generate high-fidelity data. The codes can be found here https://github.com/YigongQin/cuPF. Under the folder rawdat_PF/, we provide two compressed PF data. One is of domain size (40um, 40um, 50um), and the other is of domain size (120um, 120um, 50um). To compare the GrainGNN results and PF results, and reproduce the results reported in the paper, follow the steps below.
 
 ### Steps
-For the domain size of 40umX40umX50um:
+For the domain size (40um, 40um, 50um):
 1. **Decompress the phase field data to .h5 file**
    ```sh
    gzip -d rawdat_PF/40_40/Epita_grains118_nodes236_frames120_G1.904_Rmax0.558_seed10020_Mt36920_train0_test1_rank0.h5.gz
    ```
 2. **Extract phase field data and create the graph for t=0**
-   specify the seed number and domain size (--lxd)
    ```sh
+   # specify the seed number, domain size (--lxd), raw data folder, and the output folder for graphs
    python3 graph_trajectory.py --mode=test --rawdat_dir=./rawdat_PF/40_40/ --seed=10020 --lxd=40 --save_dir=./graphs/40_40/
    ```
    After this step, you should get the files seed10020_G1.904_R0.558_span6.pkl and traj10020.pkl in graphs/40_40/. You can verify them with the files given in the repo.
 3. **Evolve the graph and get image results**
-   specify the folder of graph data (--truth_dir) and seed number
+   
    ```sh
+   # specify the folder of the graph data (--truth_dir) and seed number
    python3 test.py --truth_dir=./graphs/40_40/ --seed=10020
    ```
    After this step, you should get the plots for quantities of interest (QoIs) and image comparison for the last layer of grain structure. Compare the generated images with the Fig.8 of the paper
 ![Alt text](figures/paper_fig8.png)
 
-Similarly for the domain of 120umX120umX50um:
+Similarly for the domain of (120um, 120um, 50um):
 ```sh
 gzip -d rawdat_PF/120_120/Epita_grains1043_nodes2086_frames120_lxd120.000008_G10.000_Rmax2.000_UC20.000_seed0_Mt10300_rank0.h5.gz
 python3 graph_trajectory.py --mode=test --rawdat_dir=./rawdat_PF/120_120/ --seed=0 --lxd=120 --save_dir=./graphs/120_120/
@@ -68,18 +69,36 @@ Results correspond to Fig.11(a) of the paper
 ![Alt text](figures/paper_fig11.png)
 ### Numbers to check
 
-
+| case | error of last layer | grain event accuracy |
+|----------|----------|----------|
+| /graphs/40_40/seed10020* | 0.11 | 72/75|
+| /graphs/120_120/seed0* | 0.18 | 644/704 |
 
 ## Inference the models only
 The accuracy of the model under various thermal and grain configurations is discussed in the paper. If you are interested in the same material -- stainless steel 316L, and a similar range of thermal conditions, you can choose to run GrainGNN inference without having the high-fidelity data:
-
-
-
-## Train your models with the same phase field data
-The full training dataset is large. We are figuring out ways to share the raw data and the extracted graphs. Examples of training commands once having the training dataset:
+```sh
+# specify thermal parameters (G,R), domain size lxd, and a seed number
+python3 graph_trajectory.py --mode=generate --seed=1 --lxd=40 --save_dir=./graphs/40_40/ --G=10 --R=2
+python3 test.py --truth_dir=./graphs/40_40/ --seed=1 --no-compare
 ```
+Explore more arguments in graph_trajectory.py for more configuration, such as changing the grain size and orientation distributions with --size, --orien
+
+## Train models with the same phase field data (and extracted graphs) used in the paper
+```sh
 python3 train.py --model_type=regressor --model_id=0 --device=cuda
 python3 train.py --model_type=classifier --model_id=1 --device=cuda
 ```
+Log files of the training process are provided in model/ folder. The training curves can be found in the paper.
+
+## Create a new training dataset
+The size of the full phase field training data is very large. We are figuring out ways to share the raw phase field data.  
+To extract graph pairs from a PF .h5 file for training:
+ ```sh
+ python3 graph_trajectory.py --mode=train --rawdat_dir=./rawdat_PF/40_40/ --seed=10020 --lxd=40 --save_dir=./graphs/40_40/
+ ```
+Then use create_datasets.py to combine graphs extracted from different PF files.
+
+
+
 
 

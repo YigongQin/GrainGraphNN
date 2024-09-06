@@ -133,7 +133,7 @@ if __name__=='__main__':
     
     
             
-    datasets = sorted(glob.glob(args.truth_dir + 'seed' + args.seed + '*.pkl'))
+    datasets = sorted(glob.glob(args.truth_dir + 'seed' + args.seed + '_G*.pkl'))
 
     test_list = []
     for case in datasets:
@@ -234,7 +234,7 @@ if __name__=='__main__':
     
     """      
 
-    traj_list = sorted(glob.glob(args.truth_dir + 'traj'+ args.seed + '*'))
+    traj_list = sorted(glob.glob(args.truth_dir + 'traj'+ args.seed + '.pkl'))
     
     test_loader = DataLoader(test_tensor, shuffle=False)
     

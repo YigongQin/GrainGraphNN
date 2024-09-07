@@ -35,8 +35,8 @@ pip3 install -r requirements.txt
 ```
 
 ## Reproduce paper results
-The trained models, including the regressor and classifier, are provided in the folder model/   
-In the paper, the trained models are validated by comparing the predicted 3D field data with the high-fidelity data. We choose a phase field (PF) solver as the method to generate high-fidelity data. The codes can be found here https://github.com/YigongQin/cuPF. Under the folder rawdat_PF/, we provide two compressed PF data. One is of domain size (40um, 40um, 50um), and the other is of domain size (120um, 120um, 50um). To compare the GrainGNN results and PF results, and reproduce the results reported in the paper, follow the steps below.
+The trained models, including the regressor and classifier, are provided in the folder `model/`   
+In the paper, the trained models are validated by comparing the predicted 3D field data with the high-fidelity data. We choose a `phase field (PF)` solver as the method to generate high-fidelity data. The codes can be found here https://github.com/YigongQin/cuPF. Under the folder `rawdat_PF/`, we provide two compressed PF data. One is of domain size (40um, 40um, 50um), and the other is of domain size (120um, 120um, 50um). To compare the GrainGNN results and PF results, and reproduce the results reported in the paper, follow the steps below.
 
 ### Steps
 For the domain size (40um, 40um, 50um):
@@ -46,10 +46,10 @@ For the domain size (40um, 40um, 50um):
    ```
 2. **Extract phase field data and create the graph for t=0**
    ```sh
-   # specify the seed number, domain size (--lxd), raw data folder, and the output folder for graphs
+   # specify the seed number, domain size with `--lxd`, raw data folder, and the output folder for graphs
    python3 graph_trajectory.py --mode=test --rawdat_dir=./rawdat_PF/40_40/ --seed=10020 --lxd=40 --save_dir=./graphs/40_40/
    ```
-   After this step, you should get the files `seed10020_G1.904_R0.558_span6.pkl` and `traj10020.pkl` in graphs/40_40/. You can verify them with the files given in the repo.
+   After this step, you should get the files `seed10020_G1.904_R0.558_span6.pkl` and `traj10020.pkl` in `graphs/40_40/`. You can verify them with the files given in the repo.
 3. **Evolve the graph and get image results**
    
    ```sh
@@ -75,7 +75,7 @@ Results correspond to `Fig.11(a)` of the paper
 | /graphs/120_120/seed0* | 0.18 | 644/704 |
 
 ## Inference the models only
-The accuracy of the model under various thermal and grain configurations is discussed in the paper. If you are interested in the same material -- stainless steel 316L, and a similar range of thermal conditions, you can choose to run GrainGNN inference without having the high-fidelity data:
+The accuracy of the model under various thermal and grain configurations is discussed in the paper. If you are interested in the same material -- `stainless steel 316L`, and a similar range of thermal conditions, you can choose to run GrainGNN inference without having the high-fidelity data:
 ```sh
 # specify thermal parameters (`G,R`), domain size `lxd`, and a seed number
 python3 graph_trajectory.py --mode=generate --seed=1 --lxd=40 --save_dir=./graphs/40_40/ --G=10 --R=2

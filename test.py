@@ -16,7 +16,6 @@ from data_loader import DynamicHeteroGraphTemporalSignal
 from models import GrainNN_regressor, GrainNN_classifier
 from parameters import regressor, classifier_transfered
 from graph_trajectory import graph_trajectory
-from graph_trajectory_geometric import graph_trajectory_geometric
 from metrics import feature_metric, edge_error_metric
 
 from visualization3D.pv_3Dview import grain_visual

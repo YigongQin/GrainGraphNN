@@ -16,22 +16,17 @@ If you are using the codes in this repository, please cite the paper
 ```
 
 ## Build
-use the local CUDA version
-
-CUDA 10
-```sh
-export TORCH=1.11.0+cu102
-export CUDA=cu102
-```
-CUDA 11
-```sh
-export TORCH=1.12.0+cu113
-export CUDA=cu113
-```
+Below shows the build process on TACC Frontera Machine. To build it on your machine, replace `cuda/12.2` with your local cuda version. Then choose the versions of pytorch and pyg accordingly. The supported versions can be found on pytorch/pyg installation pages.    
 
 ```sh
-pip3 install torch==${TORCH} --extra-index-url https://download.pytorch.org/whl/${CUDA}
-pip3 install -r requirements.txt
+conda create -n GNN python=3.12  
+conda activate GNN
+module load cuda/12.2  
+pip3 install torch  --index-url https://download.pytorch.org/whl/cu121  
+python3 -c "import torch; print(torch.__version__);print('cuda available: ', torch.cuda.is_available())"  
+pip3 install torch_geometric  
+pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.5.0+cu121.html  
+pip3 install -r requirements.txt  
 ```
 
 ## Reproduce paper results

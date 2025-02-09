@@ -16,18 +16,17 @@ If you are using the codes in this repository, please cite the paper
 ```
 
 ## Build
-Below shows the build process on TACC Frontera Machine. To build it on your machine, replace `cuda/12.2` with your local cuda version. Then choose the versions of pytorch and pyg accordingly. The supported versions can be found on pytorch/pyg installation pages.    
+GrainGNN runs on python environment with versions python=3.7 and torch=1.12. Note that gcc compiler may be required for building torch-cluster etc.
 
 ```sh
-conda create -n GNN python=3.12  
+conda create -n GNN python=3.7  
 conda activate GNN
-module load cuda/12.2  
-pip3 install torch  --index-url https://download.pytorch.org/whl/cu121  
-python3 -c "import torch; print(torch.__version__);print('cuda available: ', torch.cuda.is_available())"  
-pip3 install torch_geometric  
-pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.5.0+cu121.html  
-pip3 install -r requirements.txt  
+pip3 install torch==1.12.0+cu102 --extra-index-url https://download.pytorch.org/whl/cu102
+pip3 install torch-geometric==2.1.0 torch-cluster==1.6.0 torch-scatter==2.1.0 torch-sparse==0.6.15 -f https://data.pyg.org/whl/torch-1.12.0+cu102.html
+pip3 install -r requirements.txt   # other dependencies 
+conda install -c conda-forge mayavi   # visualization
 ```
+cu102 can be replaced by cpu or other CUDA versions depending on the platform
 
 ## Reproduce paper results
 The trained models, including the regressor and classifier, are provided in the folder `model/`   
